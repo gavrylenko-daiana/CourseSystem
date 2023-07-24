@@ -498,3 +498,4 @@ _NCrunch*
 *.vsidx
 *.dtbcache.v2
 *.futdcache.v2
+*.xml
