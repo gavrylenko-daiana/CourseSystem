@@ -496,3 +496,5 @@ _NCrunch*
 
 *.v2
 *.vsidx
+*.dtbcache.v2
+*.futdcache.v2
