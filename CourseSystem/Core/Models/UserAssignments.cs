@@ -8,7 +8,7 @@ namespace Core.Models
 {
     public class UserAssignments : BaseEntity
     {
-        public int AppUserId { get; set; }
+        public string AppUserId { get; set; }
         public virtual AppUser AppUser { get; set; }
         public int AssignmentId { get; set; }
         public virtual Assignment Assignment { get; set; }

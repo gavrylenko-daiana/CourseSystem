@@ -8,7 +8,7 @@ namespace Core.Models
 {
     public class UserGroups : BaseEntity
     {
-        public int AppUserId { get; set; }
+        public string AppUserId { get; set; }
         public virtual AppUser AppUser { get; set; }
         public int GroupId { get; set; }
         public virtual Group Group { get; set; }

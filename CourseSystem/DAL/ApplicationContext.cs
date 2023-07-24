@@ -1,4 +1,5 @@
 ﻿using Core.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DAL
 {
-    public class ApplicationContext : DbContext
+    public class ApplicationContext : IdentityDbContext<AppUser>
     {
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
@@ -19,7 +20,7 @@ namespace DAL
         //{
         //}
 
-        public DbSet<AppUser> AppUsers { get; set; }
+        //public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<AssignmentAnswer> AssignmentAnswers { get; set; }
         public DbSet<AssignmentFile> AssignmentFiles { get; set; }
