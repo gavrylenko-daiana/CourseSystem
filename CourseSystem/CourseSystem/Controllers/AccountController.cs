@@ -60,6 +60,7 @@ public class AccountController : Controller
             if (singInAttempt.Succeeded)
             {
                 // return RedirectToAction(); Authorize user
+                return RedirectToAction("Index", "Home");
             }
         }
 
@@ -172,5 +173,101 @@ public class AccountController : Controller
         }
 
         return RedirectToAction("Login", "Account");
+    }
+    
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        var forgotPasswordViewModel = new ForgotPasswordViewModel();
+
+        return View(forgotPasswordViewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword(
+        ForgotPasswordViewModel forgotPasswordBeforeEnteringViewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(forgotPasswordBeforeEnteringViewModel);
+        }
+
+        var user = await _userManager.FindByEmailAsync(forgotPasswordBeforeEnteringViewModel.Email);
+
+        if (user == null)
+        {
+            TempData["Error"] = "You wrote an incorrect email. Try again!";
+
+            return View(forgotPasswordBeforeEnteringViewModel);
+        }
+
+        // Email
+        var emailCode = await _emailService.SendCodeToUser(forgotPasswordBeforeEnteringViewModel.Email);
+
+        return RedirectToAction("CheckEmailCode",
+            new { code = emailCode, email = forgotPasswordBeforeEnteringViewModel.Email });
+    }
+
+    [HttpGet]
+    public IActionResult CheckEmailCode(int code, string email)
+    {
+        var forgotPasswordCodeViewModel = new ForgotPasswordViewModel()
+        {
+            Email = email,
+        };
+
+        TempData["Code"] = code;
+
+        return View(forgotPasswordCodeViewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CheckEmailCode(int code,
+        ForgotPasswordViewModel forgotPasswordCodeViewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(forgotPasswordCodeViewModel);
+        }
+
+        if (code == forgotPasswordCodeViewModel.EmailCode)
+        {
+            return RedirectToAction("ResetPassword", new { email = forgotPasswordCodeViewModel.Email });
+        }
+        else
+        {
+            TempData["Error"] = "Invalid code. Please try again.";
+
+            return RedirectToAction("Login", "Account");
+        }
+    }
+
+    [HttpGet]
+    public IActionResult ResetPassword(string email)
+    {
+        TempData["SuccessMessage"] = "Code is valid. You can reset your password.";
+
+        var resetPassword = new NewPasswordViewModel()
+        {
+            Email = email
+        };
+
+        return View(resetPassword);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(NewPasswordViewModel newPasswordViewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(newPasswordViewModel);
+        }
+
+        var user = await _userManager.FindByEmailAsync(newPasswordViewModel.Email);
+        user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, newPasswordViewModel.NewPassword);
+        await _userManager.UpdateAsync(user);
+        await _signInManager.SignOutAsync();
+
+        return RedirectToAction("Login");
     }
 }
