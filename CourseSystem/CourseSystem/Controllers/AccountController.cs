@@ -169,13 +169,20 @@ public class AccountController : Controller
         
         if (result.Succeeded)
         {
-            await _emailService.SendEmailAboutSuccessfulRegistration(user);
+            var callbackUrl = Url.Action(
+                "Detail",
+                "User",                
+                new { id = user.Id },
+                protocol: HttpContext.Request.Scheme);
+
+            await _emailService.SendEmailAboutSuccessfulRegistration(user, callbackUrl);
 
             var confirmEmailVM = new ConfirmEmailViewModel()
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = user.Role
+                Role = user.Role,
+                UserId = userId
             };
 
             return View(confirmEmailVM);

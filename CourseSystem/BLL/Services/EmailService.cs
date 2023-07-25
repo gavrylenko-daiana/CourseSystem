@@ -101,7 +101,7 @@ namespace BLL.Services
                     $"<p>User email: {newUser.Email}</p>" +
                     $"<p>User role: {userRole}</p>");
 
-                userData.AppendLine($"<h5>Confirm registration of {newUser.FirstName} {newUser.LastName}, follow the link: <a href='{callBackUrl}'>link</a></h5>");
+                userData.AppendLine($"<h4>Confirm registration of {newUser.FirstName} {newUser.LastName}, follow the link: <a href='{callBackUrl}'>link</a></h4>");
 
                 try
                 {
@@ -117,11 +117,14 @@ namespace BLL.Services
             }           
         }
 
-        public async Task SendEmailAboutSuccessfulRegistration(AppUser appUser)
+        public async Task SendEmailAboutSuccessfulRegistration(AppUser appUser, string linkToProfile)
         {
             if(appUser != null)
             {
                 var emailBody = new StringBuilder().AppendLine($"<h4>Dear {appUser.FirstName}, you have been successfully registered into system</h4>");
+                var buttonToUserProfileDetails = $"<form action=\"{linkToProfile}\">\r\n    <input type=\"submit\" style=\"color: red\" value=\"Your profile details\" />\r\n</form>";
+
+                emailBody.AppendLine(buttonToUserProfileDetails);
 
                 try
                 {

@@ -22,7 +22,7 @@ namespace DAL
         {
             var builder = new ConfigurationBuilder();
             builder.SetBasePath(Directory.GetCurrentDirectory());
-            builder.AddJsonFile("");
+            builder.AddJsonFile("C:\\Users\\Lenovo\\Desktop\\CourseManagementSystem\\CourseSystem\\CourseSystem\\appsettings.json");
             var config = builder.Build();
             string connectionString = config.GetConnectionString("DefaultConnection");
 

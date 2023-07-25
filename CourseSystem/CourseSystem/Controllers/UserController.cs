@@ -44,6 +44,7 @@ public class UserController : Controller
     }
 
     [HttpGet]
+    [Route("Detail/{id}")]
     public async Task<IActionResult> Detail(string id)
     {
         var user = await _userManager.FindByIdAsync(id);
