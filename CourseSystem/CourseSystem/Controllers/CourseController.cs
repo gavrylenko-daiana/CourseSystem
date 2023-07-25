@@ -62,4 +62,52 @@ public class CourseController : Controller
         }
     }
     
+    public async Task<ActionResult> Edit(int id)
+    {
+        try
+        {
+            var course = await _courseService.GetById(id);
+            if (course == null)
+            {
+                throw new Exception("Course not found");
+            }
+
+            var courseViewModel = new CourseViewModel
+            {
+                Name = course.Name
+            };
+
+            return View(courseViewModel);
+        }
+        catch (Exception e)
+        {
+            ViewData["EditingError"] = $"Failed to editing course. Error: {e.Message}";
+            return View("Error");
+        }
+    }
+    
+    [HttpPost]
+    public async Task<ActionResult> Edit(CourseViewModel courseViewModel)
+    {
+        try
+        {
+            var course = await _courseService.GetById(courseViewModel.Id);
+            if (course == null)
+            {
+                throw new Exception("Course not found");
+            }
+
+            course.Name = courseViewModel.Name;
+
+            await _courseService.Update(course);
+
+            return RedirectToAction("Index");
+        }
+        catch (Exception e)
+        {
+            ViewData["EditingError"] = $"Failed to editing course. Error: {e.Message}";
+            return View(courseViewModel);
+        }
+    }
+    
 }
