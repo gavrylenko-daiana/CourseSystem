@@ -33,14 +33,13 @@ public class RegisterViewModel
     [Display(Name = "* Role")]
     public AppUserRoles Role { get; set; }
     
-    [Required(ErrorMessage = "Date of birthday is required")]
-    [Display(Name = "* Date of birthday")]
+    [Required(ErrorMessage = "Date of Birthday is required")]
+    [Display(Name = "* Date of Birthday")]
     [DataType(DataType.Date)]
     public DateTime BirthDate { get; set; }
     
-    [Required(ErrorMessage = "University is required")]
-    [Display(Name = "* University")]
-    public string University { get; set; }
+    [Display(Name = "University")]
+    public string? University { get; set; }
     
     [Display(Name = "Telegram")]
     public string? Telegram { get; set; }

@@ -1,11 +1,10 @@
 ﻿using BLL.Interfaces;
 using Core.Enums;
 using Core.Models;
-using CourseSystem.Models;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
-namespace CourseSystem.Controllers
+namespace UI.Controllers
 {
     public class HomeController : Controller
     {
