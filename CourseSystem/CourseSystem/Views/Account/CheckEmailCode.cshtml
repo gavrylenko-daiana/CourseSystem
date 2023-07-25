@@ -1,0 +1,41 @@
+@using UI.ViewModels
+@model ForgotPasswordViewModel
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Check Code</title>
+</head>
+<body>
+<div class="container">
+    <div class="py-4">
+        <div class="col-md-6">
+            <h1>Enter the code came to your email</h1>
+            <div class="py-2">
+                @if (TempData["Error"] != null)
+                {
+                    <p class="text-danger">@TempData["Error"]</p>
+                }
+                <form method="post" asp-controller="Account" asp-action="CheckEmailCode">
+                    <input type="hidden" asp-for="Email" value="@Model.Email"/>
+                    <input type="hidden" name="code" value="@TempData["Code"]"/>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="EmailCode" class="control-label"></label>
+                        <input asp-for="EmailCode" name="emailCode" class="form-control" placeholder="Enter code" value=""/>
+                        <span asp-validation-for="EmailCode" class="text-danger" style="visibility: hidden;"></span>
+                    </div>
+                    <div class="py-2">
+                        <div class="form-group">
+                            <input class="btn btn-outline-primary" type="submit" value="Confirm"/>
+                            <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Login">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

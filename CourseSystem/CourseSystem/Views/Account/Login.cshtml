@@ -1,0 +1,51 @@
+@using UI.ViewModels
+@model LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+<div class="container">
+    <div class="py-4">
+        <div class="col-md-6">
+            <h1>@ViewData["Title"]</h1>
+            <div class="py-2">
+                @if (TempData["Error"] != null)
+                {
+                    <p class="text-danger">@TempData["Error"]</p>
+                }
+                <form asp-action="Login">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="EmailAddress" class="control-label"></label>
+                        <input asp-for="EmailAddress" class="form-control">
+                        <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Password" class="control-label"></label>
+                        <input asp-for="Password" class="form-control"/>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="py-2">
+                        <div class="form-group d-flex justify-content-between">
+                            <div>
+                                <input class="btn btn-outline-primary" type="submit" value="Login"/>
+                                <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Register">Register</a>
+                            </div>
+                            @* <a class="btn btn-outline-danger" asp-controller="Account" asp-action="ForgotPassword">Forgot password</a> *@
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,16 +1,28 @@
+using BLL.Interfaces;
+using BLL.Services;
+using Core.Models;
 using DAL;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
 {
     options.UseLazyLoadingProxies()
         .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+//For identity app User settings
+builder.Services.AddIdentity<AppUser, IdentityRole>().
+    AddDefaultTokenProviders().AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationContext>().AddSignInManager<SignInManager<AppUser>>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
