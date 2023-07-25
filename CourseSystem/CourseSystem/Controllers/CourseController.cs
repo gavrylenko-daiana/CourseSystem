@@ -110,4 +110,50 @@ public class CourseController : Controller
         }
     }
     
+    public async Task<ActionResult> Delete(int id)
+    {
+        try
+        {
+            var course = await _courseService.GetById(id);
+            if (course == null)
+            {
+                throw new Exception("Course not found");
+            }
+
+            CourseViewModel courseViewModel = new CourseViewModel
+            {
+                Id = course.Id,
+                Name = course.Name
+            };
+
+            return View(courseViewModel);
+        }
+        catch (Exception e)
+        {
+            ViewData["DeletingError"] = $"Failed to delete course. Error: {e.Message}";
+            return View("Error");
+        }
+    }
+    
+    [HttpPost, ActionName("Delete")]
+    public async Task<ActionResult> DeleteConfirmed(int id)
+    {
+        try
+        {
+            var course = await _courseService.GetById(id);
+            if (course == null)
+            {
+                throw new Exception("Course not found");
+            }
+
+            await _courseService.DeleteCourse(course.Id);
+
+            return RedirectToAction("Index");
+        }
+        catch (Exception e)
+        {
+            ViewData["DeletingError"] = $"Failed to delete course. Error: {e.Message}";
+            return View("Error");
+        }
+    }
 }
