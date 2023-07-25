@@ -4,6 +4,7 @@ using Core.Models;
 using DAL;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using UI;
 
 var builder = WebApplication.CreateBuilder(args);
 

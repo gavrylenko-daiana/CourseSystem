@@ -7,16 +7,26 @@ using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
+using Microsoft.AspNetCore.Identity;
+using Core.Models;
+using System.Net.Http;
+using System.Text;
 
 namespace BLL.Services
 {
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _config;
-        
-        public EmailService(IConfiguration config)
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+
+        public EmailService(IConfiguration config,
+            UserManager<AppUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
             _config = config;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
         
         public async Task SendEmailAsync(string toEmail, string subject, string message) 
@@ -55,36 +65,66 @@ namespace BLL.Services
         
         public async Task<int> SendCodeToUser(string email)
         {
-            if (string.IsNullOrWhiteSpace(email)) throw new ArgumentNullException(nameof(email));
+            if (string.IsNullOrWhiteSpace(email)) 
+                throw new ArgumentNullException(nameof(email));
         
             try
             {
-                Random rand = new Random();
-                int emailCode = rand.Next(1000, 9999);
-                string fromMail = "dayana01001@gmail.com";
-                string fromPassword = "oxizguygokwxgxgb";
+                int randomCode = new Random().Next(1000, 9999);
+                var emailBody = $"<html><body> Your code: {randomCode} </body></html>";
+                var emailSubject = "Verify code for update password.";
 
-                MailMessage message = new MailMessage();
-                message.From = new MailAddress(fromMail);
-                message.Subject = "Verify code for update password.";
-                message.To.Add(new MailAddress($"{email}"));
-                message.Body = $"<html><body> Your code: {emailCode} </body></html>";
-                message.IsBodyHtml = true;
+                await SendEmailAsync(email, emailSubject, emailBody);
 
-                // var smtpClient = new SmtpClient("smtp.gmail.com")
-                // {
-                //     Port = 587,
-                //     Credentials = new NetworkCredential(fromMail, fromPassword),
-                //     EnableSsl = true,
-                // };
-
-                // smtpClient.Send(message);
-
-                return emailCode;
+                return randomCode;
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task SendUserApproveToAdmin(AppUser newUser, string callBackUrl)
+        {
+            var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
+            var userRole = await _roleManager.FindByIdAsync(newUser.Id);
+
+            var userData = new StringBuilder()
+                .AppendLine($"<h4>User data overview</h4>" +
+                $"<hr/>" +
+                $"<p>User first name: {newUser.FirstName}</p>" +
+                $"<p>User last name: {newUser.LastName}</p>" +
+                $"<p>Date of birth: {newUser.BirthDate}</p>" +
+                $"<p>User email: {newUser.Email}</p>" +
+                $"<p>User role: {userRole.Name}</p>");
+
+            userData.AppendLine($"<h5>Confirm registration of {newUser.UserName}, follow the link: <a href='{callBackUrl}'>link</a></h5>");
+
+            try
+            {
+                foreach (var admin in allAdmins)
+                {
+                    await SendEmailAsync(admin.Email, "Confirm user account", userData.ToString());
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Fail to send email to {newUser.Email}");
+            }
+            
+        }
+
+        public async Task SendEmailAboutSuccessfulRegistration(AppUser appUser)
+        {
+            var emailBody = new StringBuilder().AppendLine($"<h4>Dear {appUser.UserName}, you have been successfully registered into system");
+
+            try
+            {
+                await SendEmailAsync(appUser.Email, "Successful registration", emailBody.ToString());
+            }
+            catch( Exception ex)
+            {
+                throw new Exception($"Fail to send email about successful registration to user {appUser.Email} ");
             }
         }
     }

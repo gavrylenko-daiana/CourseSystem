@@ -127,10 +127,10 @@ public class AccountController : Controller
                 new { userId = newUser.Id, code = code },
                 protocol: HttpContext.Request.Scheme);
 
-            await _emailService.SendEmailAsync(registerViewModel.EmailAddress, "Confirm your account",
-                $"<h4>Confirm registration, follow the link: <a href='{callbackUrl}'>link</a></h4>");
+            await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
-            TempData["Error"] = "To complete your registration, check your email and follow the link provided in the email";
+            TempData["Error"] = "Please, wait for registration confirmation from the admin";
+
             return View(registerViewModel);
         }
 
@@ -155,9 +155,15 @@ public class AccountController : Controller
         var result = await _userManager.ConfirmEmailAsync(user, code);
         
         if (result.Succeeded)
+        {
+            await _emailService.SendEmailAboutSuccessfulRegistration(user);
+
             return RedirectToAction("Index", "Home");
+        }
         else
+        {
             return View("Error");
+        }           
     }
 
     [HttpGet]
