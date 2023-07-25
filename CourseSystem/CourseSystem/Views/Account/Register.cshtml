@@ -10,7 +10,7 @@
 
 @{
     ViewData["Title"] = "Register";
-    var userAdmins = await UserManager.GetUsersInRoleAsync(UserRoles.Admin.ToString());
+    var userAdmins = await UserManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
 }
 <!DOCTYPE html>
 

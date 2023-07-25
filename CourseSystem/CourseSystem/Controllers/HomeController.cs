@@ -1,7 +1,8 @@
 ﻿using BLL.Interfaces;
 using Core.Enums;
 using Core.Models;
-﻿using System.Diagnostics;
+using System.Diagnostics;
+using CourseSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UI.Controllers
