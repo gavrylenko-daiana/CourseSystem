@@ -8,7 +8,7 @@ using Core.Models;
 
 namespace DAL.Repository
 {
-    internal class UnitOfWork : IDisposable
+    public class UnitOfWork : IDisposable
     {
         private ApplicationContext _context;
         private Repository<AppUser> _appUserRepository;
