@@ -13,4 +13,17 @@ public class CourseController : Controller
     {
         _courseService = courseService;
     }
+    
+    public async Task<ViewResult> Index()
+    {
+        // all courses in db (change on user.courses)
+        var courses = await _courseService.GetAll();
+        var courseViewModels = courses.Select(c => new CourseViewModel
+        {
+            Name = c.Name
+        }).ToList();
+
+        return View(courseViewModels);
+    }
+
 }

@@ -1,0 +1,13 @@
+@model List<UI.ViewModels.CourseViewModel>
+<table>
+    <tr>
+        <th>Name</th>
+    </tr>
+    @foreach (var course in Model)
+    {
+        <tr>
+            <td>@course.Name</td>
+        </tr>
+    }
+</table>
+<a href="@Url.Action("Create")">Create New Course</a>
