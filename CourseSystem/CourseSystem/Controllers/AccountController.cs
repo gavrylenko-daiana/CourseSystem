@@ -45,12 +45,13 @@ public class AccountController : Controller
             return View(loginViewModel);
         }
 
-        // if (!await _userManager.IsEmailConfirmedAsync(user))
-        // {
-        //     TempData["Error"] = "You have not confirmed your email";
-        //
-        //     return View(loginViewModel);
-        // }
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+        {
+            TempData["Error"] = "Admin hasn't verified your email yet";
+
+            return View(loginViewModel);
+        }
 
         var checkPassword = await _userManager.CheckPasswordAsync(user, loginViewModel.Password);
 
@@ -159,7 +160,14 @@ public class AccountController : Controller
         {
             await _emailService.SendEmailAboutSuccessfulRegistration(user);
 
-            return RedirectToAction("Index", "Home");
+            var confirmEmailVM = new ConfirmEmailViewModel()
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role
+            };
+
+            return View(confirmEmailVM);
         }
         else
         {

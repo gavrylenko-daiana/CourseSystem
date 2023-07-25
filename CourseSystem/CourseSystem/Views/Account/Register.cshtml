@@ -1,10 +1,16 @@
 @using UI.ViewModels
 @using Core.Enums
+@using Core.Models
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<AppUser> UserManager
+
 @model RegisterViewModel
 
 @{
     ViewData["Title"] = "Register";
+    var userAdmins = await UserManager.GetUsersInRoleAsync(UserRoles.Admin.ToString());
 }
 <!DOCTYPE html>
 
@@ -72,13 +78,22 @@
                     <div class="form-group">
                         <label asp-for="Role" class="control-label"></label>
                         <select asp-for="Role" class="form-control">
-                            @foreach (var priorityValue in Enum.GetValues(typeof(AppUserRoles)))
-                            {
-                                    if ((int)priorityValue != 0)
+                                @if (userAdmins.Count() != 0)
+                                {
+                                    @foreach (var priorityValue in Enum.GetValues(typeof(AppUserRoles)))
                                     {
-                                        <option value="@priorityValue">@priorityValue</option>
+                                        
+                                        if ((int)priorityValue != 0)
+                                        {
+                                            <option value="@priorityValue">@priorityValue</option>
+                                        }
                                     }
-                            }
+                                }
+                                else
+                                {
+                                    <option value="@AppUserRoles.Admin">@AppUserRoles.Admin</option>
+                                }
+
                         </select>
                         <span asp-validation-for="Role" class="text-danger"></span>
                     </div>
