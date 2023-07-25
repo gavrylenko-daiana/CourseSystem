@@ -1,3 +1,5 @@
+using BLL.Interfaces;
+using BLL.Services;
 using Core.Models;
 using DAL;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
 {

@@ -1,4 +1,6 @@
-﻿using CourseSystem.Models;
+﻿using BLL.Interfaces;
+using Castle.Core.Smtp;
+using CourseSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -28,5 +30,6 @@ namespace CourseSystem.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
     }
 }

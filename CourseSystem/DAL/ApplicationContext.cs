@@ -30,5 +30,29 @@ namespace DAL
         // public DbSet<UserAssignments> UserAssignments { get; set; }
         // public DbSet<UserCourses> UserCourses { get; set; }
         // public DbSet<UserGroups> UserGroups { get; set; }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<UserCourses>().HasKey(uc => new { uc.CourseId, uc.AppUserId });
+
+            builder.Entity<UserAssignments>().HasKey(ua => new { ua.AppUserId, ua.AssignmentId });
+
+            builder.Entity<UserGroups>().HasKey(ug => new { ug.AppUserId, ug.GroupId });
+
+            builder.Entity<EducationMaterial>()
+                .HasOne<Group>(em => em.Group)
+                .WithMany(g => g.EducationMaterials)
+                .HasForeignKey(em => em.GroupId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            //builder.Entity<UserAssignments>()
+            //    .HasMany<AssignmentAnswer>(ua => ua.AssignmentAnswers)
+            //    .WithOne(aa => aa.UserAssignment)
+            //    .HasForeignKey(aa => aa.UserAssignmentId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull);
+        }
+                .
     }
 }
+
