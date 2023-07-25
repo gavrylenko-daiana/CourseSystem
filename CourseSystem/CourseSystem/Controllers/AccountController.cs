@@ -1,6 +1,7 @@
 using BLL.Interfaces;
 using Core.Enums;
 using Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
@@ -39,17 +40,17 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            TempData["Error"] = "Entered incorrect username or email. Please try again.";
+            TempData["Error"] = "Entered incorrect email. Please try again.";
 
             return View(loginViewModel);
         }
 
-        if (!await _userManager.IsEmailConfirmedAsync(user))
-        {
-            TempData["Error"] = "You have not confirmed your email";
-
-            return View(loginViewModel);
-        }
+        // if (!await _userManager.IsEmailConfirmedAsync(user))
+        // {
+        //     TempData["Error"] = "You have not confirmed your email";
+        //
+        //     return View(loginViewModel);
+        // }
 
         var checkPassword = await _userManager.CheckPasswordAsync(user, loginViewModel.Password);
 
@@ -85,7 +86,7 @@ public class AccountController : Controller
 
         if (user != null)
         {
-            TempData["Error"] = "This username is already in use";
+            TempData["Error"] = "This email is already in use";
             return View(registerViewModel);
         }
 
@@ -120,14 +121,14 @@ public class AccountController : Controller
 
             if (!roleResult.Succeeded) return View("Error");
 
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            var callbackUrl = Url.Action(
-                "ConfirmEmail",
-                "Account",
-                new { userId = newUser.Id, code = code },
-                protocol: HttpContext.Request.Scheme);
-
-            await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
+            // var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            // var callbackUrl = Url.Action(
+            //     "ConfirmEmail",
+            //     "Account",
+            //     new { userId = newUser.Id, code = code },
+            //     protocol: HttpContext.Request.Scheme);
+            //
+            // await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
             TempData["Error"] = "Please, wait for registration confirmation from the admin";
 
@@ -212,6 +213,20 @@ public class AccountController : Controller
 
         return RedirectToAction("CheckEmailCode",
             new { code = emailCode, email = forgotPasswordBeforeEnteringViewModel.Email });
+    }
+
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> SendCodeUser()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        
+        if (user == null) return View("Error");
+        
+        var emailCode = await _emailService.SendCodeToUser(user.Email!);
+        
+        return RedirectToAction("CheckEmailCode",
+            new { code = emailCode, email = user.Email });
     }
 
     [HttpGet]

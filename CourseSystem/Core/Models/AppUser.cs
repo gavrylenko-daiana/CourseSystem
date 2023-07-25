@@ -15,7 +15,7 @@ namespace Core.Models
         // public string Email { get; set; }
         // public string Password { get; set; }
         public DateTime BirthDate { get; set; }
-        public string University { get; set; }
+        public string? University { get; set; }
         public string? Telegram { get; set; }
         public string? GitHub { get; set; }
         public AppUserRoles Role { get; set; }
