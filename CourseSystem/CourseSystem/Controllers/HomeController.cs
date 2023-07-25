@@ -1,10 +1,8 @@
-﻿using BLL.Interfaces;
-using Castle.Core.Smtp;
+﻿using System.Diagnostics;
 using CourseSystem.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
-namespace CourseSystem.Controllers
+namespace UI.Controllers
 {
     public class HomeController : Controller
     {

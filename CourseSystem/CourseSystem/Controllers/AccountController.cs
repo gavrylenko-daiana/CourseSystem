@@ -47,7 +47,7 @@ public class AccountController : Controller
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
             TempData["Error"] = "You have not confirmed your email";
-
+        
             return View(loginViewModel);
         }
 
@@ -126,7 +126,7 @@ public class AccountController : Controller
                 "Account",
                 new { userId = newUser.Id, code = code },
                 protocol: HttpContext.Request.Scheme);
-
+            
             await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
             TempData["Error"] = "Please, wait for registration confirmation from the admin";
