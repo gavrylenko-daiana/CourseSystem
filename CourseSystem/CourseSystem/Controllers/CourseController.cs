@@ -19,8 +19,6 @@ public class CourseController : Controller
     
     public async Task<ViewResult> Index()
     {
-        // all courses in db (change on user.courses)
-        var courses = await _courseService.GetAll();
         var currentUser = await _userManager.GetUserAsync(User);
 
         if (currentUser == null) return View("Error");
@@ -31,6 +29,7 @@ public class CourseController : Controller
         
         var courseViewModels = courses.Select(c => new CourseViewModel
         {
+            Id = c.Id,
             Name = c.Name
         }).ToList();
 
