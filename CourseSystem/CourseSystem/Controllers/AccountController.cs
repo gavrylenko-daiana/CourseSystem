@@ -1,6 +1,7 @@
 using BLL.Interfaces;
 using Core.Enums;
 using Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
@@ -212,6 +213,20 @@ public class AccountController : Controller
 
         return RedirectToAction("CheckEmailCode",
             new { code = emailCode, email = forgotPasswordBeforeEnteringViewModel.Email });
+    }
+
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> SendCodeUser()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        
+        if (user == null) return View("Error");
+        
+        var emailCode = await _emailService.SendCodeToUser(user.Email!);
+        
+        return RedirectToAction("CheckEmailCode",
+            new { code = emailCode, email = user.Email });
     }
 
     [HttpGet]
