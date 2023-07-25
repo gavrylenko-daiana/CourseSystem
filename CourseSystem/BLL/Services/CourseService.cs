@@ -9,7 +9,7 @@ public class CourseService : GenericService<Course>, ICourseService
 {
     private readonly UnitOfWork _unitOfWork;
     
-    protected CourseService(IRepository<Course> repository, UnitOfWork unitOfWork) : base(repository)
+    public CourseService(IRepository<Course> repository, UnitOfWork unitOfWork) : base(repository)
     {
         _unitOfWork = unitOfWork;
     }
