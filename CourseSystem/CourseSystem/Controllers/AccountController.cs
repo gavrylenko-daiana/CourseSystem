@@ -45,7 +45,6 @@ public class AccountController : Controller
             return View(loginViewModel);
         }
 
-
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
             TempData["Error"] = "Admin hasn't verified your email yet";
@@ -67,6 +66,7 @@ public class AccountController : Controller
         }
 
         TempData["Error"] = "Entered incorrect password. Please try again.";
+
         return View(loginViewModel);
     }
 
@@ -122,18 +122,29 @@ public class AccountController : Controller
 
             if (!roleResult.Succeeded) return View("Error");
 
-            // var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            // var callbackUrl = Url.Action(
-            //     "ConfirmEmail",
-            //     "Account",
-            //     new { userId = newUser.Id, code = code },
-            //     protocol: HttpContext.Request.Scheme);
-            //
-            // await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            var callbackUrl = Url.Action(
+                "ConfirmEmail",
+                "Account",
+                new { userId = newUser.Id, code = code },
+                protocol: HttpContext.Request.Scheme);
 
-            TempData["Error"] = "Please, wait for registration confirmation from the admin";
+            await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
-            return View(registerViewModel);
+            if (registerViewModel.Role != AppUserRoles.Admin)
+            {
+                TempData["Error"] = "Please, wait for registration confirmation from the admin";
+
+                return View(registerViewModel);
+            }
+            else
+            {
+                await _emailService.SendEmailAsync(registerViewModel.EmailAddress, "Confirm your account",
+                    $"Confirm registration, follow the link: <a href='{callbackUrl}'>link</a>");
+
+                TempData["Error"] = "To complete your ADMIN registration, check your email and follow the link provided in the email";
+                return View(registerViewModel);
+            }
         }
 
         return RedirectToAction("Login", "Account");

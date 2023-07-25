@@ -81,8 +81,7 @@
                                 @if (userAdmins.Count() != 0)
                                 {
                                     @foreach (var priorityValue in Enum.GetValues(typeof(AppUserRoles)))
-                                    {
-                                        
+                                    {                                       
                                         if ((int)priorityValue != 0)
                                         {
                                             <option value="@priorityValue">@priorityValue</option>
