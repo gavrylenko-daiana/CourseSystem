@@ -10,7 +10,7 @@
 
 @{
     ViewData["Title"] = "Register";
-    var userAdmins = await UserManager.GetUsersInRoleAsync(UserRoles.Admin.ToString());
+    var userAdmins = await UserManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
 }
 <!DOCTYPE html>
 
@@ -81,8 +81,7 @@
                                 @if (userAdmins.Count() != 0)
                                 {
                                     @foreach (var priorityValue in Enum.GetValues(typeof(AppUserRoles)))
-                                    {
-                                        
+                                    {                                       
                                         if ((int)priorityValue != 0)
                                         {
                                             <option value="@priorityValue">@priorityValue</option>

@@ -3,6 +3,7 @@ using Core.Enums;
 using Core.Models;
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using CourseSystem.Models;
 
 namespace UI.Controllers
 {
