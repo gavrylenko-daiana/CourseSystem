@@ -46,7 +46,7 @@ public class AccountController : Controller
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
-            TempData["Error"] = "You have not confirmed your email";
+            TempData["Error"] = "Admin hasn't verified your email yet";
 
             return View(loginViewModel);
         }
@@ -158,7 +158,14 @@ public class AccountController : Controller
         {
             await _emailService.SendEmailAboutSuccessfulRegistration(user);
 
-            return RedirectToAction("Index", "Home");
+            var confirmEmailVM = new ConfirmEmailViewModel()
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role
+            };
+
+            return View(confirmEmailVM);
         }
         else
         {

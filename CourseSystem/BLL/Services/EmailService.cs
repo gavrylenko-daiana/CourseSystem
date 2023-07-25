@@ -87,45 +87,51 @@ namespace BLL.Services
         public async Task SendUserApproveToAdmin(AppUser newUser, string callBackUrl)
         {
             var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
-            var userRole = await _roleManager.FindByIdAsync(newUser.Id);
 
-            var userData = new StringBuilder()
-                .AppendLine($"<h4>User data overview</h4>" +
-                $"<hr/>" +
-                $"<p>User first name: {newUser.FirstName}</p>" +
-                $"<p>User last name: {newUser.LastName}</p>" +
-                $"<p>Date of birth: {newUser.BirthDate}</p>" +
-                $"<p>User email: {newUser.Email}</p>" +
-                $"<p>User role: {userRole.Name}</p>");
-
-            userData.AppendLine($"<h5>Confirm registration of {newUser.UserName}, follow the link: <a href='{callBackUrl}'>link</a></h5>");
-
-            try
+            if(allAdmins.Count != 0)
             {
-                foreach (var admin in allAdmins)
+                var userRole = newUser.Role;
+
+                var userData = new StringBuilder()
+                    .AppendLine($"<h4>User data overview</h4>" +
+                    $"<hr/>" +
+                    $"<p>User first name: {newUser.FirstName}</p>" +
+                    $"<p>User last name: {newUser.LastName}</p>" +
+                    $"<p>Date of birth: {newUser.BirthDate.ToString("d")}</p>" +
+                    $"<p>User email: {newUser.Email}</p>" +
+                    $"<p>User role: {userRole}</p>");
+
+                userData.AppendLine($"<h5>Confirm registration of {newUser.FirstName} {newUser.LastName}, follow the link: <a href='{callBackUrl}'>link</a></h5>");
+
+                try
                 {
-                    await SendEmailAsync(admin.Email, "Confirm user account", userData.ToString());
+                    foreach (var admin in allAdmins)
+                    {
+                        await SendEmailAsync(admin.Email, "Confirm user account", userData.ToString());
+                    }
                 }
-            }
-            catch(Exception ex)
-            {
-                throw new Exception($"Fail to send email to {newUser.Email}");
-            }
-            
+                catch (Exception ex)
+                {
+                    throw new Exception($"Fail to send email to {newUser.Email}");
+                }
+            }           
         }
 
         public async Task SendEmailAboutSuccessfulRegistration(AppUser appUser)
         {
-            var emailBody = new StringBuilder().AppendLine($"<h4>Dear {appUser.UserName}, you have been successfully registered into system");
+            if(appUser != null)
+            {
+                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {appUser.FirstName}, you have been successfully registered into system</h4>");
 
-            try
-            {
-                await SendEmailAsync(appUser.Email, "Successful registration", emailBody.ToString());
-            }
-            catch( Exception ex)
-            {
-                throw new Exception($"Fail to send email about successful registration to user {appUser.Email} ");
-            }
+                try
+                {
+                    await SendEmailAsync(appUser.Email, "Successful registration", emailBody.ToString());
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Fail to send email about successful registration to user {appUser.Email} ");
+                }
+            }          
         }
     }
 }
