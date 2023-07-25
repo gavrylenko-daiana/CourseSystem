@@ -39,8 +39,8 @@ public class RegisterViewModel
     public DateTime BirthDate { get; set; }
     
     [Required(ErrorMessage = "University is required")]
-    [Display(Name = "* University")]
-    public string University { get; set; }
+    [Display(Name = "University")]
+    public string? University { get; set; }
     
     [Display(Name = "Telegram")]
     public string? Telegram { get; set; }
