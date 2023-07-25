@@ -1,0 +1,100 @@
+@using Core.Models
+@model AppUser
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4>User Profile</h4>
+                </div>
+                <div class="card-body">
+                    <div class="form-group py-2">
+                        <label asp-for="FirstName" class="control-label"></label>
+                        <input asp-for="FirstName" class="form-control" id="FirstName" value="@Model.FirstName" readonly>
+                    </div>
+                    <div class="form-group py-2">
+                        <label asp-for="LastName" class="control-label"></label>
+                        <input asp-for="LastName" class="form-control" id="LastName" value="@Model.LastName" readonly>
+                    </div>
+                    <div class="form-group py-2">
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email" class="form-control" id="Email" value="@Model.Email" readonly>
+                    </div>
+                    <div class="form-group py-2">
+                        <label asp-for="BirthDate" class="control-label"></label>
+                        <input asp-for="BirthDate" class="form-control" id="BirthDate" value="@Model.BirthDate.ToString("d")" readonly>
+                    </div>
+                    <div class="form-group py-2">
+                        <label asp-for="University" class="control-label"></label>
+                        <input asp-for="University" class="form-control" id="University" value="@Model.University" readonly>
+                    </div>
+                    <div class="form-group py-2">
+                        <label asp-for="Telegram" class="control-label"></label>
+                        <input asp-for="Telegram" class="form-control" id="Telegram" value="@Model.Telegram" readonly>
+                    </div>
+                    <div class="form-group py-2">
+                        <label asp-for="GitHub" class="control-label"></label>
+                        <input asp-for="GitHub" class="form-control" id="GitHub" value="@Model.GitHub" readonly>
+                    </div>
+                    <div class="form-group py-2">
+                        <label asp-for="Role" class="control-label"></label>
+                        <input asp-for="Role" class="form-control" id="Role" value="@Model.Role.ToString()" readonly>
+                    </div>
+                    @if (@Model.UserCourses.Any())
+                    {
+                        <div class="form-group py-2">
+
+                            <label asp-for="UserCourses">Your courses</label>
+                            <ul class="list-group">
+                                @foreach (var course in Model.UserCourses)
+                                {
+                                    <li class="list-group-item">@course.Course.Name</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    @if (@Model.UserGroups.Any())
+                    {
+                        <div class="form-group py-2">
+                            <label asp-for="UserGroups">Your groups</label>
+                            <ul class="list-group">
+                                @foreach (var group in Model.UserGroups)
+                                {
+                                    <li class="list-group-item">@group.Group.Name</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    @if (@Model.UserAssignments.Any())
+                    {
+                        <div class="form-group py-2">
+                            <label asp-for="UserAssignments">Your assignments</label>
+                            <ul class="list-group">
+                                @foreach (var assignments in Model.UserAssignments)
+                                {
+                                    <li class="list-group-item">@assignments.Assignment.Name</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    @* <div class="py-2"> *@
+                    @*     <a class="nav-link text-dark btn btn-outline-primary" asp-controller="User" asp-action="Edit">Edit</a> *@
+                    @* </div> *@
+                    @* <div class="py-2"> *@
+                    @*     <a class="nav-link text-dark btn btn-outline-danger" asp-controller="User" asp-action="Delete">Delete account</a> *@
+                    @* </div> *@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

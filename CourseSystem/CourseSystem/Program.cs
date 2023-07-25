@@ -22,6 +22,7 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 builder.Services.AddIdentity<AppUser, IdentityRole>().
     AddDefaultTokenProviders().AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationContext>().AddSignInManager<SignInManager<AppUser>>();
+builder.Services.AddScoped<UserManager<AppUser>>();
 
 var app = builder.Build();
 
@@ -37,7 +38,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
