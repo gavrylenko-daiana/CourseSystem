@@ -1,0 +1,15 @@
+@model UI.ViewModels.CourseViewModel
+@using (Html.BeginForm())
+{
+    <div>
+        @Html.LabelFor(model => model.Name)
+        @Html.TextBoxFor(model => model.Name)
+    </div>
+
+    @if (!string.IsNullOrEmpty(ViewData["CreatingError"] as string))
+    {
+        <span style="color: red;">@ViewData["CreatingError"]</span>
+    }
+    
+    <input type="submit" value="Create" />
+}

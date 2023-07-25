@@ -26,4 +26,30 @@ public class CourseController : Controller
         return View(courseViewModels);
     }
 
+    public ActionResult Create()
+    {
+        return View();
+    }
+    
+    [HttpPost]
+    public async Task<ActionResult> Create(CourseViewModel courseViewModel)
+    {
+        try
+        {
+            var course = new Course
+            {
+                Name = courseViewModel.Name
+            };
+
+            await _courseService.CreateCourse(course);
+
+            return RedirectToAction("Index");
+        }
+        catch (Exception e)
+        {
+            ViewData["CreatingError"] = $"Failed to create course. Error: {e.Message}";
+            return View(courseViewModel);
+        }
+    }
+    
 }
