@@ -1,11 +1,8 @@
 ﻿using BLL.Interfaces;
-using Castle.Core.Smtp;
 using Core.Enums;
 using Core.Models;
 using CourseSystem.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 
 namespace CourseSystem.Controllers

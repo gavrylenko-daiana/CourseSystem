@@ -44,12 +44,12 @@ public class AccountController : Controller
             return View(loginViewModel);
         }
 
-        if (!await _userManager.IsEmailConfirmedAsync(user))
-        {
-            TempData["Error"] = "Admin hasn't verified your email yet";
+        //if (!await _userManager.IsEmailConfirmedAsync(user))
+        //{
+        //    TempData["Error"] = "Admin hasn't verified your email yet";
 
-            return View(loginViewModel);
-        }
+        //    return View(loginViewModel);
+        //}
 
         var checkPassword = await _userManager.CheckPasswordAsync(user, loginViewModel.Password);
 
