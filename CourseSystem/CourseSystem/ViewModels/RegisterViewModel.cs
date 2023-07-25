@@ -38,7 +38,6 @@ public class RegisterViewModel
     [DataType(DataType.Date)]
     public DateTime BirthDate { get; set; }
     
-    [Required(ErrorMessage = "University is required")]
     [Display(Name = "University")]
     public string? University { get; set; }
     

@@ -191,6 +191,8 @@ public class UserController : Controller
 
         if (user == null) return View("Error");
         
+        //Приходит на почту админу, он должен подтвердить удаление аккаунта
+        
         await _signInManager.SignOutAsync();
 
         return RedirectToAction("Login", "Account");

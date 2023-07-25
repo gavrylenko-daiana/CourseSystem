@@ -22,15 +22,12 @@ public class EditUserViewModel
     [DataType(DataType.EmailAddress)]
     public string? Email { get; set; }
     
-    [Required(ErrorMessage = "University is required")]
     [Display(Name = "University")]
     public string? University { get; set; }
     
-    [Required(ErrorMessage = "Telegram is required")]
     [Display(Name = "Telegram")]
     public string? Telegram { get; set; }
     
-    [Required(ErrorMessage = "GitHub is required")]
     [Display(Name = "GitHub")]
     public string? GitHub { get; set; }
 }
