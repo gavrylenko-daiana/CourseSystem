@@ -15,12 +15,12 @@ namespace BLL.Services
         {
             _config = config;
         }
-        public async Task SendEmailAsync(string toEmail, string topic, string subject, string message) 
+        public async Task SendEmailAsync(string toEmail, string subject, string message) 
         {
             var adminSettings = GetAdminSettings();
             var emailMessage = new MimeMessage();
 
-            emailMessage.From.Add(new MailboxAddress(topic, adminSettings.Item1));
+            emailMessage.From.Add(new MailboxAddress("Course System", adminSettings.Item1));
             emailMessage.To.Add(new MailboxAddress("", toEmail));
             emailMessage.Subject = subject;
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)

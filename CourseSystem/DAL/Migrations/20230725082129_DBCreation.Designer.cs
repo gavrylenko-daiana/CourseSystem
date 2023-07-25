@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20230724192543_DBCreation")]
+    [Migration("20230725082129_DBCreation")]
     partial class DBCreation
     {
         /// <inheritdoc />
@@ -41,7 +41,6 @@ namespace DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -53,7 +52,6 @@ namespace DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GitHub")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
@@ -74,10 +72,6 @@ namespace DAL.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
@@ -94,7 +88,6 @@ namespace DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Telegram")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -172,12 +165,19 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserAssignmentAppUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("UserAssignmentAssignmentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserAssignmentId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserAssignmentId");
+                    b.HasIndex("UserAssignmentAppUserId", "UserAssignmentAssignmentId");
 
                     b.ToTable("AssignmentAnswers");
                 });
@@ -289,14 +289,7 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Core.Models.UserAssignments", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<string>("AppUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AssignmentId")
@@ -305,9 +298,10 @@ namespace DAL.Migrations
                     b.Property<int>("Grade")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
-                    b.HasIndex("AppUserId");
+                    b.HasKey("AppUserId", "AssignmentId");
 
                     b.HasIndex("AssignmentId");
 
@@ -316,46 +310,34 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Core.Models.UserCourses", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AppUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("CourseId", "AppUserId");
 
                     b.HasIndex("AppUserId");
-
-                    b.HasIndex("CourseId");
 
                     b.ToTable("UserCourses");
                 });
 
             modelBuilder.Entity("Core.Models.UserGroups", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<string>("AppUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
-                    b.HasIndex("AppUserId");
+                    b.HasKey("AppUserId", "GroupId");
 
                     b.HasIndex("GroupId");
 
@@ -510,7 +492,7 @@ namespace DAL.Migrations
                 {
                     b.HasOne("Core.Models.UserAssignments", "UserAssignment")
                         .WithMany("AssignmentAnswers")
-                        .HasForeignKey("UserAssignmentId")
+                        .HasForeignKey("UserAssignmentAppUserId", "UserAssignmentAssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

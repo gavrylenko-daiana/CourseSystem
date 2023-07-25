@@ -52,7 +52,6 @@ namespace DAL
             //    .HasForeignKey(aa => aa.UserAssignmentId)
             //    .OnDelete(DeleteBehavior.ClientSetNull);
         }
-                .
     }
 }
 

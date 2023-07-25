@@ -74,7 +74,10 @@
                         <select asp-for="Role" class="form-control">
                             @foreach (var priorityValue in Enum.GetValues(typeof(AppUserRoles)))
                             {
-                                <option value="@priorityValue">@priorityValue</option>
+                                    if ((int)priorityValue != 0)
+                                    {
+                                        <option value="@priorityValue">@priorityValue</option>
+                                    }
                             }
                         </select>
                         <span asp-validation-for="Role" class="text-danger"></span>

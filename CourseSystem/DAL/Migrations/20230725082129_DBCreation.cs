@@ -32,15 +32,14 @@ namespace DAL.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     University = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Telegram = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    GitHub = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Telegram = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    GitHub = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Role = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -203,14 +202,13 @@ namespace DAL.Migrations
                 name: "UserCourses",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CourseId = table.Column<int>(type: "int", nullable: false)
+                    CourseId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserCourses", x => x.Id);
+                    table.PrimaryKey("PK_UserCourses", x => new { x.CourseId, x.AppUserId });
                     table.ForeignKey(
                         name: "FK_UserCourses_AspNetUsers_AppUserId",
                         column: x => x.AppUserId,
@@ -280,14 +278,13 @@ namespace DAL.Migrations
                 name: "UserGroups",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    GroupId = table.Column<int>(type: "int", nullable: false)
+                    GroupId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserGroups", x => x.Id);
+                    table.PrimaryKey("PK_UserGroups", x => new { x.AppUserId, x.GroupId });
                     table.ForeignKey(
                         name: "FK_UserGroups_AspNetUsers_AppUserId",
                         column: x => x.AppUserId,
@@ -327,15 +324,14 @@ namespace DAL.Migrations
                 name: "UserAssignments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     AssignmentId = table.Column<int>(type: "int", nullable: false),
-                    Grade = table.Column<int>(type: "int", nullable: false)
+                    Grade = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserAssignments", x => x.Id);
+                    table.PrimaryKey("PK_UserAssignments", x => new { x.AppUserId, x.AssignmentId });
                     table.ForeignKey(
                         name: "FK_UserAssignments_AspNetUsers_AppUserId",
                         column: x => x.AppUserId,
@@ -358,16 +354,18 @@ namespace DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserAssignmentId = table.Column<int>(type: "int", nullable: false)
+                    UserAssignmentId = table.Column<int>(type: "int", nullable: false),
+                    UserAssignmentAppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserAssignmentAssignmentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AssignmentAnswers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AssignmentAnswers_UserAssignments_UserAssignmentId",
-                        column: x => x.UserAssignmentId,
+                        name: "FK_AssignmentAnswers_UserAssignments_UserAssignmentAppUserId_UserAssignmentAssignmentId",
+                        columns: x => new { x.UserAssignmentAppUserId, x.UserAssignmentAssignmentId },
                         principalTable: "UserAssignments",
-                        principalColumn: "Id",
+                        principalColumns: new[] { "AppUserId", "AssignmentId" },
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -411,9 +409,9 @@ namespace DAL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AssignmentAnswers_UserAssignmentId",
+                name: "IX_AssignmentAnswers_UserAssignmentAppUserId_UserAssignmentAssignmentId",
                 table: "AssignmentAnswers",
-                column: "UserAssignmentId");
+                columns: new[] { "UserAssignmentAppUserId", "UserAssignmentAssignmentId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AssignmentFiles_AssignmentId",
@@ -441,11 +439,6 @@ namespace DAL.Migrations
                 column: "CourseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserAssignments_AppUserId",
-                table: "UserAssignments",
-                column: "AppUserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserAssignments_AssignmentId",
                 table: "UserAssignments",
                 column: "AssignmentId");
@@ -453,16 +446,6 @@ namespace DAL.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserCourses_AppUserId",
                 table: "UserCourses",
-                column: "AppUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserCourses_CourseId",
-                table: "UserCourses",
-                column: "CourseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserGroups_AppUserId",
-                table: "UserGroups",
                 column: "AppUserId");
 
             migrationBuilder.CreateIndex(

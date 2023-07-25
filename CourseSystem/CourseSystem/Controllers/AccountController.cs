@@ -1,3 +1,4 @@
+using BLL.Interfaces;
 using Core.Enums;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
@@ -11,13 +12,15 @@ public class AccountController : Controller
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly IEmailService _emailService;
     
     public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager, IEmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -37,6 +40,14 @@ public class AccountController : Controller
         if (user == null)
         {
             TempData["Error"] = "Entered incorrect username or email. Please try again.";
+
+            return View(loginViewModel);
+        }
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+        {
+            TempData["Error"] = "You have not confirmed your email";
+
             return View(loginViewModel);
         }
 
@@ -60,6 +71,7 @@ public class AccountController : Controller
     public IActionResult Register()
     {
         var register = new RegisterViewModel();
+
         return View(register);
     }
 
@@ -106,16 +118,16 @@ public class AccountController : Controller
             var roleResult = await _userManager.AddToRoleAsync(newUser, registerViewModel.Role.ToString());
 
             if (!roleResult.Succeeded) return View("Error");
-            
-            // var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            // var callbackUrl = Url.Action(
-            //     "ConfirmEmail",
-            //     "Account",
-            //     new { userId = newUser.Id, code = code },
-            //     protocol: HttpContext.Request.Scheme);
 
-            // await _emailService.SendEmailAsync(registerViewModel.EmailAddress, "Confirm your account",
-            //     $"Confirm registration, follow the link: <a href='{callbackUrl}'>link</a>");
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            var callbackUrl = Url.Action(
+                "ConfirmEmail",
+                "Account",
+                new { userId = newUser.Id, code = code },
+                protocol: HttpContext.Request.Scheme);
+
+            await _emailService.SendEmailAsync(registerViewModel.EmailAddress, "Confirm your account",
+                $"<h4>Confirm registration, follow the link: <a href='{callbackUrl}'>link</a></h4>");
 
             TempData["Error"] = "To complete your registration, check your email and follow the link provided in the email";
             return View(registerViewModel);
