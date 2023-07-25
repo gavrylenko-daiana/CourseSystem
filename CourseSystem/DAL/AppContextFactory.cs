@@ -22,7 +22,7 @@ namespace DAL
         {
             var builder = new ConfigurationBuilder();
             builder.SetBasePath(Directory.GetCurrentDirectory());
-            builder.AddJsonFile("D:\\CsharpTraining\\CourseSystem\\CourseSystem\\appsettings.json");
+            builder.AddJsonFile("C:\\Users\\vlady\\OneDrive\\Desktop\\Учеба\\Курсы .Net\\CourseManagementSystem\\CourseSystem\\CourseSystem\\appsettings.json");
             var config = builder.Build();
             string connectionString = config.GetConnectionString("DefaultConnection");
 
