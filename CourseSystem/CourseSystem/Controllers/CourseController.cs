@@ -17,32 +17,37 @@ public class CourseController : Controller
         _userManager = userManager;
     }
     
-    public async Task<ViewResult> Index()
+    [HttpGet]
+    public async Task<IActionResult> Index()
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        // var currentUser = await _userManager.GetUserAsync(User);
+        //
+        // if (currentUser == null) return View("Error");
+        //
+        // var courses = await _courseService.GetByPredicate(course => 
+        //     course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
+        // );
+        //
+        // var courseViewModels = courses.Select(c => new CourseViewModel
+        // {
+        //     Id = c.Id,
+        //     Name = c.Name,
+        //     Groups = c.Groups,
+        //     EducationMaterials = c.EducationMaterials,
+        //     UserCourses = c.UserCourses
+        // }).ToList();
 
-        if (currentUser == null) return View("Error");
-        
-        var courses = await _courseService.GetByPredicate(course => 
-            course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
-        );
-        
-        var courseViewModels = courses.Select(c => new CourseViewModel
-        {
-            Id = c.Id,
-            Name = c.Name
-        }).ToList();
-
-        return View(courseViewModels);
+        return View();
     }
 
-    public ActionResult Create()
+    [HttpGet]
+    public async Task<IActionResult> Create()
     {
         return View();
     }
     
     [HttpPost]
-    public async Task<ActionResult> Create(CourseViewModel courseViewModel)
+    public async Task<IActionResult> Create(CourseViewModel courseViewModel)
     {
         try
         {
@@ -62,7 +67,8 @@ public class CourseController : Controller
         }
     }
     
-    public async Task<ActionResult> Edit(int id)
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
     {
         try
         {
@@ -87,7 +93,7 @@ public class CourseController : Controller
     }
     
     [HttpPost]
-    public async Task<ActionResult> Edit(CourseViewModel courseViewModel)
+    public async Task<IActionResult> Edit(CourseViewModel courseViewModel)
     {
         try
         {
@@ -110,7 +116,8 @@ public class CourseController : Controller
         }
     }
     
-    public async Task<ActionResult> Delete(int id)
+    [HttpGet]
+    public async Task<IActionResult> Delete(int id)
     {
         try
         {
@@ -136,7 +143,7 @@ public class CourseController : Controller
     }
     
     [HttpPost, ActionName("Delete")]
-    public async Task<ActionResult> DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
         try
         {
