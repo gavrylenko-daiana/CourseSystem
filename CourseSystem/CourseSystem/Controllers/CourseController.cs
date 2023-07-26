@@ -163,4 +163,25 @@ public class CourseController : Controller
             return View("Error");
         }
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var course = await _courseService.GetById(id);
+        if (course == null)
+        {
+            return NotFound();
+        }
+
+        var courseViewModel = new CourseViewModel
+        {
+            Id = course.Id,
+            Name = course.Name,
+            Groups = course.Groups,
+            EducationMaterials = course.EducationMaterials,
+            UserCourses = course.UserCourses
+        };
+
+        return View(courseViewModel);
+    }
 }
