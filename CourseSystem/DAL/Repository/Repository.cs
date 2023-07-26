@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DAL.Repository
 {
-    public class Repository<T> : IRepository<T> where T: class
+    public class Repository<T> : IRepository<T> where T: BaseEntity
     {
         private readonly ApplicationContext _context;
         private readonly DbSet<T> _dbSet;

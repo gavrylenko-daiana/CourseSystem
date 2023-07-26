@@ -6,12 +6,11 @@ using DAL.Repository;
 namespace BLL.Services;
 
 public class CourseService : GenericService<Course>, ICourseService
-{
-    private readonly UnitOfWork _unitOfWork;
-    
-    public CourseService(IRepository<Course> repository, UnitOfWork unitOfWork) : base(repository)
+{  
+    public CourseService(UnitOfWork unitOfWork) : base(unitOfWork)
     {
         _unitOfWork = unitOfWork;
+        _repository = unitOfWork.CourseRepository;
     }
 
     public async Task CreateCourse(Course course)

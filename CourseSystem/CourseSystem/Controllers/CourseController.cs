@@ -20,22 +20,22 @@ public class CourseController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        // var currentUser = await _userManager.GetUserAsync(User);
-        //
-        // if (currentUser == null) return View("Error");
-        //
-        // var courses = await _courseService.GetByPredicate(course => 
-        //     course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
-        // );
-        //
-        // var courseViewModels = courses.Select(c => new CourseViewModel
-        // {
-        //     Id = c.Id,
-        //     Name = c.Name,
-        //     Groups = c.Groups,
-        //     EducationMaterials = c.EducationMaterials,
-        //     UserCourses = c.UserCourses
-        // }).ToList();
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null) return View("Error");
+
+        var courses = await _courseService.GetByPredicate(course =>
+            course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
+        );
+
+        var courseViewModels = courses.Select(c => new CourseViewModel
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Groups = c.Groups,
+            EducationMaterials = c.EducationMaterials,
+            UserCourses = c.UserCourses
+        }).ToList();
 
         return View();
     }

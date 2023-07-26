@@ -11,7 +11,6 @@ namespace DAL.Repository
     public class UnitOfWork : IDisposable
     {
         private ApplicationContext _context;
-        private Repository<AppUser> _appUserRepository;
         private Repository<Assignment> _assignmentRepository;
         private Repository<AssignmentAnswer> _assignmentAnswerRepository;
         private Repository<AssignmentFile> _assignmentFileRepository;
@@ -22,28 +21,20 @@ namespace DAL.Repository
         private Repository<UserCourses> _userCoursesRepository;
         private Repository<UserGroups> _userGroupsRepository;
 
-        public Repository<AppUser> AppUserRepository
+        public UnitOfWork(ApplicationContext context)
         {
-            get
-            {
-
-                if (_appUserRepository == null)
-                {
-                    _appUserRepository = new Repository<AppUser>(_context);
-                }
-                return _appUserRepository;
-            }
+            _context = context;
         }
 
         public Repository<Assignment> AssignmentRepository
         {
             get
             {
-
                 if (_assignmentRepository == null)
                 {
                     _assignmentRepository = new Repository<Assignment>(_context);
                 }
+
                 return _assignmentRepository;
             }
         }
@@ -52,11 +43,11 @@ namespace DAL.Repository
         {
             get
             {
-
                 if (_assignmentAnswerRepository == null)
                 {
                     _assignmentAnswerRepository = new Repository<AssignmentAnswer>(_context);
                 }
+
                 return _assignmentAnswerRepository;
             }
         }
@@ -65,11 +56,11 @@ namespace DAL.Repository
         {
             get
             {
-
                 if (_assignmentFileRepository == null)
                 {
                     _assignmentFileRepository = new Repository<AssignmentFile>(_context);
                 }
+
                 return _assignmentFileRepository;
             }
         }
@@ -78,11 +69,11 @@ namespace DAL.Repository
         {
             get
             {
-
                 if (_courseRepository == null)
                 {
                     _courseRepository = new Repository<Course>(_context);
                 }
+
                 return _courseRepository;
             }
         }
@@ -91,11 +82,11 @@ namespace DAL.Repository
         {
             get
             {
-
                 if (_educationMaterialRepository == null)
                 {
                     _educationMaterialRepository = new Repository<EducationMaterial>(_context);
                 }
+
                 return _educationMaterialRepository;
             }
         }
@@ -104,11 +95,11 @@ namespace DAL.Repository
         {
             get
             {
-
                 if (_groupRepository == null)
                 {
                     _groupRepository = new Repository<Group>(_context);
                 }
+
                 return _groupRepository;
             }
         }
@@ -117,11 +108,11 @@ namespace DAL.Repository
         {
             get
             {
-
                 if (_userAssignmentsRepository == null)
                 {
                     _userAssignmentsRepository = new Repository<UserAssignments>(_context);
                 }
+
                 return _userAssignmentsRepository;
             }
         }
@@ -130,11 +121,11 @@ namespace DAL.Repository
         {
             get
             {
-
                 if (_userCoursesRepository == null)
                 {
                     _userCoursesRepository = new Repository<UserCourses>(_context);
                 }
+
                 return _userCoursesRepository;
             }
         }
@@ -143,18 +134,26 @@ namespace DAL.Repository
         {
             get
             {
-
                 if (_userGroupsRepository == null)
                 {
                     _userGroupsRepository = new Repository<UserGroups>(_context);
                 }
+
                 return _userGroupsRepository;
             }
         }
 
-        public async Task Save()
+        public async Task<int> Save()
         {
-            await _context.SaveChangesAsync();
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Fail to save changes to the database: {ex.Message}");
+            }
+            
         }
 
         private bool disposed = false;
@@ -168,6 +167,7 @@ namespace DAL.Repository
                     await _context.DisposeAsync();
                 }
             }
+
             this.disposed = true;
         }
 
