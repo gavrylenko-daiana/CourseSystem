@@ -172,7 +172,7 @@ namespace BLL.Services
                 var emailMessage = new MimeMessage();
 
                 //Message creation
-                emailMessage.From.Add(new MailboxAddress(_emailSettings.DisplayName, emailData.From ?? _emailSettings.From));
+                emailMessage.From.Add(new MailboxAddress(_emailSettings.DisplayName, _emailSettings.From));
 
                 foreach (string emailToAdress in emailData.To)
                     emailMessage.To.Add(MailboxAddress.Parse(emailToAdress));

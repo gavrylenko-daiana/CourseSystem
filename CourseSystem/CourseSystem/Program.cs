@@ -12,17 +12,19 @@ using UI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(nameof(EmailSettings)));
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<UnitOfWork>();
-
 builder.Services.AddDbContext<ApplicationContext>(options =>
 {
     options.UseLazyLoadingProxies()
         .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+//Email settings
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(nameof(EmailSettings)));
 
 //For identity app User settings
 builder.Services.AddIdentity<AppUser, IdentityRole>().
@@ -31,7 +33,6 @@ builder.Services.AddIdentity<AppUser, IdentityRole>().
 builder.Services.AddScoped<UserManager<AppUser>>();
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
