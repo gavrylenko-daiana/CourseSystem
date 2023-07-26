@@ -230,7 +230,7 @@ public class UserController : Controller
         var actionLink = Url.Action(
             "Delete",
             "Account",
-            new {userId =userId},
+            new { userId = userId},
             protocol: HttpContext.Request.Scheme);
 
         await _emailService.ConfirmUserDeletionByUser(user, actionLink);

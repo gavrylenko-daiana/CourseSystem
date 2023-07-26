@@ -227,10 +227,8 @@ namespace BLL.Services
             if (userForDelete != null)
             {
                 #region Email body creation
-                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {userForDelete.FirstName}, your deletion was successfully approved ин фвьшт</h4>");
-                var buttonToUserProfileDetails = $"<form action=\"{logOutLink}\">\r\n   " +
-                    $" <input type=\"submit\" style=\"color: red\" " +
-                    $"value=\"LogOut\" />\r\n</form>";
+                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {userForDelete.FirstName}, your deletion was successfully approved by admin</h4>");
+                var buttonToUserProfileDetails = $"<h4>Confirm your deletion, follow the link: <a href='{logOutLink}'>link</a></h4>";
 
                 emailBody.AppendLine(buttonToUserProfileDetails);
                 #endregion

@@ -232,6 +232,7 @@ public class AccountController : Controller
     }
 
     [HttpGet]
+    [Route("Delete/{userId}")]
     public async Task<IActionResult> Delete(string userId)
     {
         try
@@ -240,13 +241,13 @@ public class AccountController : Controller
 
             if (user != null)
                 await _signInManager.UserManager.DeleteAsync(user);
+
+            return View();
         }
         catch
         {
             return View("Error");
-        }
-
-        return RedirectToAction("Login", "Account");
+        }    
     }
 
     [HttpGet]
