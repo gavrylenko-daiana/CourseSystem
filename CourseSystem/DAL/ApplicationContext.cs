@@ -27,6 +27,7 @@ namespace DAL
         public DbSet<Course> Courses { get; set; }
         public DbSet<EducationMaterial> EducationMaterials { get; set; }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<UserActivity> UserActivities { get; set; }
         // public DbSet<UserAssignments> UserAssignments { get; set; }
         // public DbSet<UserCourses> UserCourses { get; set; }
         // public DbSet<UserGroups> UserGroups { get; set; }

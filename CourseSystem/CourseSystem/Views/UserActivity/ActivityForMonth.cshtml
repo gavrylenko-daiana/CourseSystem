@@ -1,0 +1,160 @@
+﻿@model List<UserActivity>
+@{
+    var Month = new List<string>()
+    {
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    };
+
+    var date = (DateTime)ViewData["DateTime"];
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User activity</title>
+    <style>
+        table, th, td {
+            border: 1px solid;
+        }
+        th{
+            width:14%;
+            text-align:left;
+        }
+        td{
+            height:20%;
+            text-align:start;
+        }
+        table{
+            width:100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card w-100 pb-0">
+                    <div class="card-header text-center">
+                        <h4>Activity in @Month[((DateTime)ViewData["DateTime"]).Month - 1]</h4>
+                        @{
+                            var dateTime = date.AddMonths(-1);
+                        }
+                        @Html.ActionLink(
+                            @Month[dateTime.Month - 1],
+                            "ActivityForMonth",
+                             new { dateTime },
+                             new { @class="link-secondary", @style="margin-right:35%" }
+                        )
+                        @{
+                            dateTime = date.AddMonths(1);
+                        }
+                        @Html.ActionLink(
+                            @Month[dateTime.Month - 1],
+                            "ActivityForMonth",
+                             new { dateTime },
+                             new { @class="link-secondary", @style="margin-left:35%" }
+                        )
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <tr>
+                                <th>Sun</th>
+                                <th>Mon</th>
+                                <th>Tue</th>
+                                <th>Wen</th>
+                                <th>Thu</th>
+                                <th>Fri</th>
+                                <th>Sat</th>
+                            </tr>
+                            <tr>
+                                @{
+                                    var thisDay = new DateTime(date.Year, date.Month, 1);
+                                    var lastDay = thisDay.AddMonths(1).AddDays(-1);
+                                    for (var i = 0; i < (int)thisDay.DayOfWeek; i++)
+                                    {
+                                        <th></th>
+                                    }
+                                    var targetMonth = date.Month;
+                                    while (thisDay.Month == targetMonth)
+                                    {
+                                        <th>
+                                            @Html.ActionLink(
+                                                        @thisDay.Day.ToString(),
+                                                        "ActivityForDay",
+                                                        new { thisDay },
+                                                        new { @class="link-secondary", @style="font-size:12px;" }
+                                                    )
+                                            @if(Model.Where(a => a.Created.Day == thisDay.Day).ToList().Count > 0)
+                                            {
+                                                var todayActivities = Model.Where(a => a.Created.Day == thisDay.Day).ToList();
+                                                <ul class="list-group">
+                                                @if(todayActivities.Count <= 5)
+                                                {
+                                                    foreach(var activity in todayActivities)
+                                                    {
+                                                        @Html.ActionLink(
+                                                            activity.Name, 
+                                                            "ActivityDetails", 
+                                                            new { activity.Id },
+                                                            new { @class="list-group-item", @style="font-size:12px;" }
+                                                        )
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    for(int i = 0; i < 5; i++)
+                                                    {
+                                                        @Html.ActionLink(
+                                                            todayActivities[i].Name,
+                                                            "ActivityDetails",
+                                                            new { todayActivities[i].Id },
+                                                            new { @class="list-group-item", @style="font-size:12px;" }
+                                                        )
+                                                    }
+
+                                                    @Html.ActionLink(
+                                                        $"And {todayActivities.Count - 4} more",
+                                                        "ActivityForDay",
+                                                        new { thisDay },
+                                                        new { @class="link-secondary", @style="font-size:12px;" }
+                                                    )
+                                                }
+                                                </ul>
+                                            }
+                                        </th>
+
+                                        if(thisDay.DayOfWeek == DayOfWeek.Saturday)
+                                        {
+                                            @:</tr>
+                                            @:<tr>
+                                        }
+
+                                        thisDay = thisDay.AddDays(1);
+                                    }
+                                    while(thisDay.DayOfWeek != DayOfWeek.Sunday)
+                                    {
+                                        <th></th>
+                                        thisDay = thisDay.AddDays(1);
+                                    }
+                                }
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

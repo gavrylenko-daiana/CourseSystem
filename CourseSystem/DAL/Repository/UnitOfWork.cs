@@ -21,6 +21,20 @@ namespace DAL.Repository
         private Repository<UserAssignments> _userAssignmentsRepository;
         private Repository<UserCourses> _userCoursesRepository;
         private Repository<UserGroups> _userGroupsRepository;
+        private Repository<UserActivity> _userActivityRepository;
+
+        public Repository<UserActivity> UserActivityRepository
+        {
+            get
+            {
+
+                if (_userActivityRepository == null)
+                {
+                    _userActivityRepository = new Repository<UserActivity>(_context);
+                }
+                return _userActivityRepository;
+            }
+        }
 
         public Repository<AppUser> AppUserRepository
         {
