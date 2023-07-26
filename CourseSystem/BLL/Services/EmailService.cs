@@ -213,5 +213,14 @@ namespace BLL.Services
                 return new Result<bool>(false, "Fail to send email");
             }
         }
+
+        public async Task<Result<bool>> SendAdminEmailConfirmation(string adminEmail, string callBackUrl) 
+        {
+            var emailData = new EmailData(new List<string> { adminEmail },
+                     "Confirm your account",
+                     $"Confirm registration, follow the link: <a href='{callBackUrl}'>link</a>");
+
+           return await SendEmailAsync(emailData);
+        }
     }
 }

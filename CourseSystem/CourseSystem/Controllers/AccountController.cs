@@ -24,6 +24,30 @@ public class AccountController : Controller
         _emailService = emailService;
     }
 
+    private async Task CreateAppUserRoles()
+    {
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Admin.ToString()))
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Admin.ToString()));
+
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Teacher.ToString()))
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Teacher.ToString()));
+
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Student.ToString()))
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
+    }
+
+    private async Task<string> CreateCallBackUrl(AppUser newUser)
+    {
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+        var callbackUrl = Url.Action(
+            "ConfirmEmail",
+            "Account",
+            new { userId = newUser.Id, code = code },
+            protocol: HttpContext.Request.Scheme);
+
+        return callbackUrl;
+    }
+
     [HttpGet]
     public IActionResult Login()
     {
@@ -44,11 +68,21 @@ public class AccountController : Controller
 
             return View(loginViewModel);
         }
+        var callbackUrl = await CreateCallBackUrl(user);
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
-            TempData["Error"] = "Admin hasn't verified your email yet";
-
+            if(await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
+            {
+                await _emailService.SendAdminEmailConfirmation(loginViewModel.EmailAddress, callbackUrl);
+                TempData["Error"] = "Your ADMIN account is not verified, we sent email for confirmation again";
+            }
+            else
+            {
+                await _emailService.SendUserApproveToAdmin(user, callbackUrl);
+                TempData["Error"] = "Admin hasn't verified your email yet, we sent email for confirmation again";
+            }
+            
             return View(loginViewModel);
         }
 
@@ -107,14 +141,7 @@ public class AccountController : Controller
 
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Admin.ToString()))
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Admin.ToString()));
-
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Teacher.ToString()))
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Teacher.ToString()));
-
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Student.ToString()))
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
+        await CreateAppUserRoles();
 
         if (newUserResponse.Succeeded)
         {
@@ -122,13 +149,7 @@ public class AccountController : Controller
 
             if (!roleResult.Succeeded) return View("Error");
 
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            var callbackUrl = Url.Action(
-                "ConfirmEmail",
-                "Account",
-                new { userId = newUser.Id, code = code },
-                protocol: HttpContext.Request.Scheme);
-
+            var callbackUrl = await CreateCallBackUrl(newUser);
             await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
             if (registerViewModel.Role != AppUserRoles.Admin)
@@ -139,11 +160,7 @@ public class AccountController : Controller
             }
             else
             {
-                var emailData = new EmailData(new List<string> { registerViewModel.EmailAddress },
-                     "Confirm your account",
-                     $"Confirm registration, follow the link: <a href='{callbackUrl}'>link</a>");
-
-                var emailSentResult = await _emailService.SendEmailAsync(emailData);
+                var emailSentResult = await _emailService.SendAdminEmailConfirmation(registerViewModel.EmailAddress, callbackUrl);
 
                 if (!emailSentResult.IsSuccessful)
                     TempData["Error"] = emailSentResult.Message;
