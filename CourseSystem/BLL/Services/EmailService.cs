@@ -15,15 +15,12 @@ namespace BLL.Services
     public class EmailService : IEmailService
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly EmailSettings _emailSettings;
 
         public EmailService(UserManager<AppUser> userManager,
-            RoleManager<IdentityRole> roleManager,
             IOptions<EmailSettings> settings)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _emailSettings = settings.Value;
         }
               
@@ -129,7 +126,6 @@ namespace BLL.Services
             {
                 var emailMessage = new MimeMessage();
 
-                //Message creation
                 emailMessage.From.Add(new MailboxAddress(_emailSettings.DisplayName, _emailSettings.From));
 
                 foreach (string emailToAdress in emailData.To)
@@ -181,9 +177,8 @@ namespace BLL.Services
            return await SendEmailAsync(emailData);
         }
 
-        public async Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl) //crete addition view about deleted user here will be link
+        public async Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl)
         {
-            //get all admins
             var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
 
             if(allAdmins.Count != 0)
