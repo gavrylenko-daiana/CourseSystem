@@ -180,5 +180,74 @@ namespace BLL.Services
 
            return await SendEmailAsync(emailData);
         }
+
+        public async Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl) //crete addition view about deleted user here will be link
+        {
+            //get all admins
+            var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
+
+            if(allAdmins.Count != 0)
+            {
+                #region Email body creation
+
+                var userData = new StringBuilder()
+                    .AppendLine($"<h4>User data overview</h4>" +
+                    $"<hr/>" +
+                    $"<p>User first name: {userForDelete.FirstName}</p>" +
+                    $"<p>User last name: {userForDelete.LastName}</p>" +
+                    $"<p>Date of birth: {userForDelete.BirthDate.ToString("d")}</p>" +
+                    $"<p>User email: {userForDelete.Email}</p>" +
+                    $"<p>User role: {userForDelete.Role}</p>");
+
+                userData.AppendLine($"<h4>Confirm deletion of {userForDelete.FirstName} {userForDelete.LastName}, follow the link: <a href='{callbackUrl}'>link</a></h4>");
+                #endregion
+                try
+                {
+                    var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
+                    var emailData = new EmailData(
+                        allAdminsEmails,
+                        "Confirm deletion of user account",
+                        userData.ToString());
+
+                    await SendEmailAsync(emailData);
+
+                    return new Result<bool>(true);
+                }
+                catch (Exception ex)
+                {
+                    return new Result<bool>(false, $"Fail to send email to {userForDelete.Email}");
+                }
+            }
+
+            return new Result<bool>(false, $"Fail to send email to {userForDelete.Email}");
+        }
+
+        public async Task ConfirmUserDeletionByUser(AppUser userForDelete, string logOutLink)
+        {
+            if (userForDelete != null)
+            {
+                #region Email body creation
+                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {userForDelete.FirstName}, your deletion was successfully approved ин фвьшт</h4>");
+                var buttonToUserProfileDetails = $"<form action=\"{logOutLink}\">\r\n   " +
+                    $" <input type=\"submit\" style=\"color: red\" " +
+                    $"value=\"LogOut\" />\r\n</form>";
+
+                emailBody.AppendLine(buttonToUserProfileDetails);
+                #endregion
+
+                var emailData = new EmailData(
+                    new List<string> { userForDelete.Email },
+                    "Successful deletion approve",
+                    emailBody.ToString());
+                try
+                {
+                    await SendEmailAsync(emailData);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Fail to send email about successful registration to user {userForDelete.Email} ");
+                }
+            }
+        }
     }
 }

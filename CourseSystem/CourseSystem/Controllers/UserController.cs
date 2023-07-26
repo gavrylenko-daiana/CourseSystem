@@ -1,3 +1,4 @@
+using BLL.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,11 +10,15 @@ public class UserController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly IEmailService _emailService;
 
-    public UserController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+    public UserController(UserManager<AppUser> userManager, 
+        SignInManager<AppUser> signInManager,
+        IEmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -191,11 +196,52 @@ public class UserController : Controller
         var user = await _userManager.GetUserAsync(User);
 
         if (user == null) return View("Error");
-        
-        //Приходит на почту админу, он должен подтвердить удаление аккаунта
-        
-        await _signInManager.SignOutAsync();
 
+        //Приходит на почту админу, он должен подтвердить удаление аккаунта
+        var callbackUrl = Url.Action(
+            "ConfirmUserDeletion",
+            "User",
+            new { userId = user.Id},
+            protocol: HttpContext.Request.Scheme);
+
+        var deletionSendingResult = await _emailService.ConfirmUserDeletionByAdmin(user, callbackUrl);
+
+        if(!deletionSendingResult.IsSuccessful)
+            TempData["Error"] = deletionSendingResult.Message;
+
+        TempData["Error"] = "Wait for confirmation of account deletion from the admin";
         return RedirectToAction("Login", "Account");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ConfirmUserDeletion(string userId)
+    {
+        if(userId == null)
+            return View("Error");
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return View("Error");
+        }
+
+        //send messege to user to delete his or her account
+        var actionLink = Url.Action(
+            "Delete",
+            "Account",
+            new {userId =userId},
+            protocol: HttpContext.Request.Scheme);
+
+        await _emailService.ConfirmUserDeletionByUser(user, actionLink);
+
+        var confirmDeleteVM = new ConfirmUserDeleteViewModel()
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Role = user.Role
+        };
+       
+        return View(confirmDeleteVM); //You succesfully confirmed user deletion
     }
 }

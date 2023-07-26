@@ -192,13 +192,13 @@ public class AccountController : Controller
         
         if (result.Succeeded)
         {
-            var callbackUrl = Url.Action(
+            var toUserProfileUrl = Url.Action(
                 "Detail",
                 "User",                
                 new { id = user.Id },
                 protocol: HttpContext.Request.Scheme);
 
-            await _emailService.SendEmailAboutSuccessfulRegistration(user, callbackUrl);
+            await _emailService.SendEmailAboutSuccessfulRegistration(user, toUserProfileUrl);
 
             var confirmEmailVM = new ConfirmEmailViewModel()
             {
@@ -221,7 +221,7 @@ public class AccountController : Controller
     {
         try
         {
-            await _signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync();           
         }
         catch
         {
@@ -230,7 +230,25 @@ public class AccountController : Controller
 
         return RedirectToAction("Login", "Account");
     }
-    
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(string userId)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user != null)
+                await _signInManager.UserManager.DeleteAsync(user);
+        }
+        catch
+        {
+            return View("Error");
+        }
+
+        return RedirectToAction("Login", "Account");
+    }
+
     [HttpGet]
     public IActionResult ForgotPassword()
     {
