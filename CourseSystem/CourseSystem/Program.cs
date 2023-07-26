@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using BLL.Services;
+using Core.Configuration;
 using Core.Models;
 using DAL;
 using DAL.Interfaces;
@@ -11,6 +12,7 @@ using UI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(nameof(EmailSettings)));
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

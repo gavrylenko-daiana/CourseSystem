@@ -139,8 +139,14 @@ public class AccountController : Controller
             }
             else
             {
-                await _emailService.SendEmailAsync(registerViewModel.EmailAddress, "Confirm your account",
-                    $"Confirm registration, follow the link: <a href='{callbackUrl}'>link</a>");
+                var emailData = new EmailData(new List<string> { registerViewModel.EmailAddress },
+                     "Confirm your account",
+                     $"Confirm registration, follow the link: <a href='{callbackUrl}'>link</a>");
+
+                var emailSentResult = await _emailService.SendEmailAsync(emailData);
+
+                if (!emailSentResult.IsSuccessful)
+                    TempData["Error"] = emailSentResult.Message;
 
                 TempData["Error"] = "To complete your ADMIN registration, check your email and follow the link provided in the email";
                 return View(registerViewModel);

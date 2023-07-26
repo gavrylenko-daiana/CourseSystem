@@ -11,70 +11,85 @@ using Microsoft.AspNetCore.Identity;
 using Core.Models;
 using System.Net.Http;
 using System.Text;
+using Microsoft.Extensions.Options;
+using Core.Configuration;
+using MailKit.Security;
+using System.Runtime;
 
 namespace BLL.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly IConfiguration _config;
+        //private readonly IConfiguration _config;
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly EmailSettings _emailSettings;
 
-        public EmailService(IConfiguration config,
-            UserManager<AppUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+        public EmailService(UserManager<AppUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IOptions<EmailSettings> settings)
         {
-            _config = config;
+            //_config = config;
             _userManager = userManager;
             _roleManager = roleManager;
+            _emailSettings = settings.Value;
         }
         
-        public async Task SendEmailAsync(string toEmail, string subject, string message) 
-        {
-            var adminSettings = GetAdminSettings();
-            var emailMessage = new MimeMessage();
+        //public async Task SendEmailAsync(string toEmail, string subject, string message) 
+        //{
+        //    //var adminSettings = GetAdminSettings();
+        //    var emailMessage = new MimeMessage();
 
-            emailMessage.From.Add(new MailboxAddress("Course System", adminSettings.Item1));
-            emailMessage.To.Add(new MailboxAddress("", toEmail));
-            emailMessage.Subject = subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-            {
-                Text = message
-            };
+        //    emailMessage.From.Add(new MailboxAddress(_emailSettings.DisplayName, adminSettings.Item1));
+        //    emailMessage.To.Add(new MailboxAddress("", toEmail));
+        //    emailMessage.Subject = subject;
+        //    emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+        //    {
+        //        Text = message
+        //    };
 
-            using (var client = new SmtpClient())
-            {
-                await client.ConnectAsync("smtp.gmail.com", 587, false);
-                await client.AuthenticateAsync(adminSettings.Item1, adminSettings.Item2); //ключ доступа от Гугл
-                await client.SendAsync(emailMessage);
+        //    using (var client = new SmtpClient())
+        //    {
+        //        await client.ConnectAsync("smtp.gmail.com", 587, false);
+        //        await client.AuthenticateAsync(adminSettings.Item1, adminSettings.Item2); //ключ доступа от Гугл
+        //        await client.SendAsync(emailMessage);
 
-                await client.DisconnectAsync(true);
-            }
-        }
+        //        await client.DisconnectAsync(true);
+        //    }
+        //}
 
-        private (string , string) GetAdminSettings() 
-        {
-            //метод для получение данных администрации
-            //сайта для рассылки аппрувов админам, студентам и учетилям
+        //private (string , string) GetAdminSettings() 
+        //{
+        //    //метод для получение данных администрации
+        //    //сайта для рассылки аппрувов админам, студентам и учетилям
             
-            var adminEmail = _config["AdminEmail"];
-            var adminAccessCode = _config["AdminAccessCode"];
+        //    var adminEmail = _config["AdminEmail"];
+        //    var adminAccessCode = _config["AdminAccessCode"];
 
-            return (adminEmail, adminAccessCode);
-        }
+        //    return (adminEmail, adminAccessCode);
+        //}
         
         public async Task<int> SendCodeToUser(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) 
                 throw new ArgumentNullException(nameof(email));
-        
+
+            int randomCode = new Random().Next(1000, 9999);
+
             try
             {
-                int randomCode = new Random().Next(1000, 9999);
-                var emailBody = $"<html><body> Your code: {randomCode} </body></html>";
-                var emailSubject = "Verify code for update password.";
+                var emailData = new EmailData(
+                    new List<string>() { email},
+                    "Verify code for update password.",
+                    $"<html><body> Your code: {randomCode} </body></html>"
+                    );
 
-                await SendEmailAsync(email, emailSubject, emailBody);
+                var result = await SendEmailAsync(emailData);
+
+                if(!result.IsSuccessful)
+                {
+                    return 0;
+                }
 
                 return randomCode;
             }
@@ -90,6 +105,7 @@ namespace BLL.Services
 
             if(allAdmins.Count != 0)
             {
+                #region Email body creation
                 var userRole = newUser.Role;
 
                 var userData = new StringBuilder()
@@ -102,13 +118,16 @@ namespace BLL.Services
                     $"<p>User role: {userRole}</p>");
 
                 userData.AppendLine($"<h4>Confirm registration of {newUser.FirstName} {newUser.LastName}, follow the link: <a href='{callBackUrl}'>link</a></h4>");
-
+                #endregion
                 try
                 {
-                    foreach (var admin in allAdmins)
-                    {
-                        await SendEmailAsync(admin.Email, "Confirm user account", userData.ToString());
-                    }
+                    var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
+                    var emailData = new EmailData(
+                        allAdminsEmails,
+                        "Confirm user account",
+                        userData.ToString());
+
+                    await SendEmailAsync(emailData);
                 }
                 catch (Exception ex)
                 {
@@ -121,20 +140,78 @@ namespace BLL.Services
         {
             if(appUser != null)
             {
+                #region Email body creation
                 var emailBody = new StringBuilder().AppendLine($"<h4>Dear {appUser.FirstName}, you have been successfully registered into system</h4>");
-                var buttonToUserProfileDetails = $"<form action=\"{linkToProfile}\">\r\n    <input type=\"submit\" style=\"color: red\" value=\"Your profile details\" />\r\n</form>";
+                var buttonToUserProfileDetails = $"<form action=\"{linkToProfile}\">\r\n   " +
+                    $" <input type=\"submit\" style=\"color: red\" " +
+                    $"value=\"Your profile details\" />\r\n</form>";
 
                 emailBody.AppendLine(buttonToUserProfileDetails);
+                #endregion
+
+                var emailData = new EmailData(
+                    new List<string> { appUser.Email},
+                    "Successful registration",
+                    emailBody.ToString());
 
                 try
                 {
-                    await SendEmailAsync(appUser.Email, "Successful registration", emailBody.ToString());
+                    await SendEmailAsync(emailData);
                 }
                 catch (Exception ex)
                 {
                     throw new Exception($"Fail to send email about successful registration to user {appUser.Email} ");
                 }
             }          
+        }
+
+        public async Task<Result<bool>> SendEmailAsync(EmailData emailData)
+        {
+            try
+            {
+                var emailMessage = new MimeMessage();
+
+                //Message creation
+                emailMessage.From.Add(new MailboxAddress(_emailSettings.DisplayName, emailData.From ?? _emailSettings.From));
+
+                foreach (string emailToAdress in emailData.To)
+                    emailMessage.To.Add(MailboxAddress.Parse(emailToAdress));
+
+                #region Content
+
+                emailMessage.Subject = emailData.Subject;
+                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+                {
+                    Text = emailData.Body
+                };
+                #endregion
+
+                #region Email sending
+
+                using (var client = new SmtpClient())
+                {
+                    if (_emailSettings.UseSSL)
+                    {
+                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.SslOnConnect);
+                    }
+                    else if (_emailSettings.UseStartTls)
+                    {
+                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.StartTls);
+                    }
+
+                    await client.AuthenticateAsync(_emailSettings.UserName, _emailSettings.Password); //ключ доступа от Гугл
+                    await client.SendAsync(emailMessage);
+
+                    await client.DisconnectAsync(true);
+                }
+                #endregion
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to send email");
+            }
         }
     }
 }
