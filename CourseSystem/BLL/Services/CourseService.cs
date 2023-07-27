@@ -2,18 +2,23 @@ using BLL.Interfaces;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
+using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Services;
 
 public class CourseService : GenericService<Course>, ICourseService
-{  
-    public CourseService(UnitOfWork unitOfWork) : base(unitOfWork)
+{
+    private readonly IUserCourseService _userCourseService;
+    
+    public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService) 
+        : base(unitOfWork)
     {
         _unitOfWork = unitOfWork;
         _repository = unitOfWork.CourseRepository;
+        _userCourseService = userCourseService;
     }
 
-    public async Task CreateCourse(Course course)
+    public async Task CreateCourse(Course course, AppUser currentUser)
     {
         try
         {
@@ -24,6 +29,15 @@ public class CourseService : GenericService<Course>, ICourseService
 
             await Add(course);
             await _unitOfWork.Save();
+            
+            var userCourse = new UserCourses()
+            {
+                Course = course,
+                CourseId = course.Id,
+                AppUser = currentUser,
+                AppUserId = currentUser.Id
+            };
+            await _userCourseService.CreateUserCourses(userCourse);
         }
         catch (Exception ex)
         {
