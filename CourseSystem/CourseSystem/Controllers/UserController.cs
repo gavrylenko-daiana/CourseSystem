@@ -1,4 +1,5 @@
 using BLL.Interfaces;
+using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,23 +29,9 @@ public class UserController : Controller
 
         if (currentUser == null) return View("Error");
 
-        var userViewModel = new AppUser()
-        {
-            Id = currentUser.Id,
-            UserName = currentUser.UserName,
-            FirstName = currentUser.FirstName,
-            LastName = currentUser.LastName,
-            Email = currentUser.Email,
-            BirthDate = currentUser.BirthDate,
-            University = currentUser.University!,
-            Telegram = currentUser.Telegram!,
-            GitHub = currentUser.GitHub!,
-            Role = currentUser.Role,
-            UserAssignments = currentUser.UserAssignments,
-            UserCourses = currentUser.UserCourses,
-            UserGroups = currentUser.UserGroups
-        };
-
+        var userViewModel = new AppUser();
+        currentUser.MapTo(userViewModel);
+      
         return View(userViewModel);
     }
 
@@ -61,25 +48,11 @@ public class UserController : Controller
             // edit path
             return RedirectToAction("Index", "Home");
         }
+        
+        var userViewModel = new AppUser();
+        user.MapTo(userViewModel);
 
-        var detailUser = new AppUser()
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email,
-            BirthDate = user.BirthDate,
-            University = user.University!,
-            Telegram = user.Telegram!,
-            GitHub = user.GitHub!,
-            Role = user.Role,
-            UserAssignments = user.UserAssignments,
-            UserCourses = user.UserCourses,
-            UserGroups = user.UserGroups
-        };
-
-        return View(detailUser);
+        return View(userViewModel);
     }
 
     [HttpGet]
@@ -91,17 +64,9 @@ public class UserController : Controller
         {
             return View("Error");
         }
-
-        var editUserViewModel = new EditUserViewModel()
-        {
-            Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            BirthDate = user.BirthDate,
-            University = user.University!,
-            Telegram = user.Telegram!,
-            GitHub = user.GitHub!
-        };
+        
+        var editUserViewModel = new EditUserViewModel();
+        user.MapTo(editUserViewModel);
 
         return View(editUserViewModel);
     }
@@ -175,7 +140,7 @@ public class UserController : Controller
         {
             return View("Error");
         }
-
+        
         user.UserName = editUserViewModel.FirstName + editUserViewModel.LastName;
         user.FirstName = editUserViewModel.FirstName;
         user.LastName = editUserViewModel.LastName;
@@ -197,7 +162,7 @@ public class UserController : Controller
 
         if (user == null) return View("Error");
 
-        //Приходит на почту админу, он должен подтвердить удаление аккаунта
+        //Comes to the e-mail Admin, he or she have to confirm the deletion of the account
         var callbackUrl = Url.Action(
             "ConfirmUserDeletion",
             "User",
@@ -234,13 +199,9 @@ public class UserController : Controller
             protocol: HttpContext.Request.Scheme);
 
         await _emailService.ConfirmUserDeletionByUser(user, actionLink);
-
-        var confirmDeleteVM = new ConfirmUserDeleteViewModel()
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Role = user.Role
-        };
+        
+        var confirmDeleteVM = new ConfirmUserDeleteViewModel();
+        user.MapTo(confirmDeleteVM);
 
         return View(confirmDeleteVM); //You succesfully confirmed user deletion
     }

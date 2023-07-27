@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using Core.Enums;
+using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -147,38 +148,53 @@ public class AccountController : Controller
         if (registerViewModel.Telegram != null) newUser.Telegram = registerViewModel.Telegram;
         if (registerViewModel.GitHub != null) newUser.GitHub = registerViewModel.GitHub;
 
-        var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
-
-        await CreateAppUserRoles();
-
-        if (newUserResponse.Succeeded)
+        try
         {
-            var roleResult = await _userManager.AddToRoleAsync(newUser, registerViewModel.Role.ToString());
+            var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
+            
+            await CreateAppUserRoles();
 
-            if (!roleResult.Succeeded) return View("Error");
-
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
-            await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
-
-            if (registerViewModel.Role != AppUserRoles.Admin)
+            if (newUserResponse.Succeeded)
             {
-                TempData["Error"] = "Please, wait for registration confirmation from the admin";
+                var roleResult = await _userManager.AddToRoleAsync(newUser, registerViewModel.Role.ToString());
 
-                return View(registerViewModel);
+                if (!roleResult.Succeeded) return View("Error");
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                var callbackUrl =
+                    CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
+                await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
+
+                if (registerViewModel.Role != AppUserRoles.Admin)
+                {
+                    TempData["Error"] = "Please, wait for registration confirmation from the admin";
+
+                    return View(registerViewModel);
+                }
+                else
+                {
+                    var emailSentResult =
+                        await _emailService.SendAdminEmailConfirmation(registerViewModel.EmailAddress, callbackUrl);
+
+                    if (!emailSentResult.IsSuccessful)
+                        TempData["Error"] = emailSentResult.Message;
+
+                    TempData["Error"] =
+                        "To complete your ADMIN registration, check your email and follow the link provided in the email";
+                    return View(registerViewModel);
+                }
             }
             else
             {
-                var emailSentResult = await _emailService.SendAdminEmailConfirmation(registerViewModel.EmailAddress, callbackUrl);
-
-                if (!emailSentResult.IsSuccessful)
-                    TempData["Error"] = emailSentResult.Message;
-
-                TempData["Error"] = "To complete your ADMIN registration, check your email and follow the link provided in the email";
-                return View(registerViewModel);
+                TempData["Error"] = "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)";
             }
         }
-
+        catch (Exception e)
+        {
+            TempData["Error"] = $"{e.Message}";
+            return View(registerViewModel);
+        }
+        
         return RedirectToAction("Login", "Account");
     }
 
@@ -205,13 +221,8 @@ public class AccountController : Controller
             var toUserProfileUrl = CreateCallBackUrl(token, "User", "Detail", new { id = user.Id });
             await _emailService.SendEmailAboutSuccessfulRegistration(user, toUserProfileUrl);
 
-            var confirmEmailVM = new ConfirmEmailViewModel()
-            {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Role = user.Role,
-                UserId = userId
-            };
+            var confirmEmailVM = new ConfirmEmailViewModel();
+            user.MapTo(confirmEmailVM);
 
             return View(confirmEmailVM);
         }
