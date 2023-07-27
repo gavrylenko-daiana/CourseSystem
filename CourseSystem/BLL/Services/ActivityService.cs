@@ -14,8 +14,10 @@ namespace BLL.Services
 {
     public class ActivityService : GenericService<UserActivity>, IActivityService
     {
-        public ActivityService(IRepository<UserActivity> repository) : base(repository)
+        public ActivityService(UnitOfWork unitOfWork) : base(unitOfWork)
         {
+            _unitOfWork = unitOfWork;
+            //_repository = 
         }
 
         public async Task AddAssignmentCreatedActivity(AppUser teacher, Assignment assignment)
