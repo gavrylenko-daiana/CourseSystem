@@ -23,7 +23,7 @@ public class CourseController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null) return View("Error");
+        if (currentUser == null) return RedirectToAction("Login", "Account");;
 
         var courses = await _courseService.GetByPredicate(course =>
             course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
