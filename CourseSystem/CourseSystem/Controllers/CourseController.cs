@@ -84,12 +84,7 @@ public class CourseController : Controller
                 throw new Exception("Course not found");
             }
 
-            var courseViewModel = new CourseViewModel
-            {
-                Name = course.Name
-            };
-
-            return View(courseViewModel);
+            return View(course);
         }
         catch (Exception e)
         {
@@ -99,26 +94,18 @@ public class CourseController : Controller
     }
     
     [HttpPost]
-    public async Task<IActionResult> Edit(CourseViewModel courseViewModel)
+    public async Task<IActionResult> Edit(Course newCourse)
     {
         try
         {
-            var course = await _courseService.GetById(courseViewModel.Id);
-            if (course == null)
-            {
-                throw new Exception("Course not found");
-            }
-
-            course.Name = courseViewModel.Name;
-
-            await _courseService.Update(course);
+            await _courseService.UpdateName(newCourse.Id, newCourse.Name);
 
             return RedirectToAction("Index");
         }
         catch (Exception e)
         {
             ViewData["EditingError"] = $"Failed to editing course. Error: {e.Message}";
-            return View(courseViewModel);
+            return View(newCourse);
         }
     }
     
