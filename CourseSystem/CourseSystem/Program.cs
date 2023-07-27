@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using BLL.Services;
+using Core.Configuration;
 using Core.Models;
 using DAL;
 using DAL.Interfaces;
@@ -22,6 +23,10 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseLazyLoadingProxies()
         .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+
+//Email settings
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(nameof(EmailSettings)));
 
 //For identity app User settings
 builder.Services.AddIdentity<AppUser, IdentityRole>().

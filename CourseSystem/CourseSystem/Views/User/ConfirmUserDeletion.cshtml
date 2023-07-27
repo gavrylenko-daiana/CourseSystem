@@ -1,0 +1,12 @@
+﻿@using Core.Enums
+@using UI.ViewModels
+
+@model ConfirmUserDeleteViewModel
+
+<div class="position-relative m-5 text-center bg-light">
+    <div class="col-md-5 p-lg-5 mx-auto my-5">
+        <h5 class="card-title">You have successfully confirmed user deletion</h5>
+        <p class="card-text">@Model.Role.ToString() (@Model.FirstName @Model.LastName) get the right to delete his account</p>
+        @*<a type="button" class="btn btn-outline-secondary" asp-controller="User" asp-action="Detail" asp-route-id="@Model.UserId">Go to profile</a>*@
+    </div>
+</div>
