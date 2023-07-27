@@ -4,6 +4,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 
 namespace UI.Controllers;
@@ -36,13 +37,18 @@ public class AccountController : Controller
             await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
     }
 
-    private async Task<string> CreateCallBackUrl(AppUser newUser)
+    private string CreateCallBackUrl(string code, string controllerName, string actionName, object routeValues)
     {
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+        if (controllerName.IsNullOrEmpty() || actionName.IsNullOrEmpty())
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+
+        if(routeValues == null)
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+
         var callbackUrl = Url.Action(
-            "ConfirmEmail",
-            "Account",
-            new { userId = newUser.Id, code = code },
+            actionName,
+            controllerName,
+            routeValues,
             protocol: HttpContext.Request.Scheme);
 
         return callbackUrl;
@@ -68,7 +74,9 @@ public class AccountController : Controller
 
             return View(loginViewModel);
         }
-        var callbackUrl = await CreateCallBackUrl(user);
+
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new {userId = user.Id, code = code});
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
@@ -149,7 +157,8 @@ public class AccountController : Controller
 
             if (!roleResult.Succeeded) return View("Error");
 
-            var callbackUrl = await CreateCallBackUrl(newUser);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
             await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
             if (registerViewModel.Role != AppUserRoles.Admin)
@@ -192,12 +201,8 @@ public class AccountController : Controller
         
         if (result.Succeeded)
         {
-            var toUserProfileUrl = Url.Action(
-                "Detail",
-                "User",                
-                new { id = user.Id },
-                protocol: HttpContext.Request.Scheme);
-
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var toUserProfileUrl = CreateCallBackUrl(token, "User", "Detail", new { id = user.Id });
             await _emailService.SendEmailAboutSuccessfulRegistration(user, toUserProfileUrl);
 
             var confirmEmailVM = new ConfirmEmailViewModel()
