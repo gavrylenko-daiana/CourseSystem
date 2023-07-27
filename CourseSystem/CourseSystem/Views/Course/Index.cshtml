@@ -1,3 +1,4 @@
+@using Core.Enums
 @model List<UI.ViewModels.CourseViewModel>
 
 <div class="container mt-4">
@@ -17,8 +18,11 @@
                         <div class="card-body">
                             <h5 class="card-title">@course.Name</h5>
                             <a href="@Url.Action("Details", new { id = course.Id })" class="btn btn-primary">Details</a>
-                            <a href="@Url.Action("Edit", new { id = course.Id })" class="btn btn-warning">Edit</a>
-                            <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-danger">Delete</a>
+                             @if (Model.Any(m => m.CurrentUser.Role == AppUserRoles.Admin))
+                             {
+                                 <a href="@Url.Action("Edit", new { id = course.Id })" class="btn btn-warning">Edit</a>
+                                 <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-danger">Delete</a>
+                             }
                         </div>
                     </div>
                 </div>
@@ -26,6 +30,9 @@
         }
     </div>
 </div>
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New Project</a>
-</p>
+ @if (Model.Any(m => m.CurrentUser.Role == AppUserRoles.Admin))
+ {
+     <p>
+         <a asp-action="Create" class="btn btn-primary">Create New Project</a>
+     </p>
+ }

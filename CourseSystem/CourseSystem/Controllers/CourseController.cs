@@ -33,6 +33,7 @@ public class CourseController : Controller
         {
             var courseViewModel = new CourseViewModel();
             c.MapTo(courseViewModel);
+            courseViewModel.CurrentUser = currentUser;
             return courseViewModel;
         }).ToList();
 
