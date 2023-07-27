@@ -187,6 +187,7 @@ public class AccountController : Controller
             else
             {
                 TempData["Error"] = "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)";
+                return View(registerViewModel);
             }
         }
         catch (Exception e)
