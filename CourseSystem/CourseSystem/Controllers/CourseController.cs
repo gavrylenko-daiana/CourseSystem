@@ -1,4 +1,5 @@
 using BLL.Interfaces;
+using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,16 +29,14 @@ public class CourseController : Controller
             course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
         );
 
-        var courseViewModels = courses.Select(c => new CourseViewModel
+        var courseViewModels = courses.Select(c =>
         {
-            Id = c.Id,
-            Name = c.Name,
-            Groups = c.Groups,
-            EducationMaterials = c.EducationMaterials,
-            UserCourses = c.UserCourses
+            var courseViewModel = new CourseViewModel();
+            c.MapTo(courseViewModel);
+            return courseViewModel;
         }).ToList();
 
-        return View();
+        return View(courseViewModels);
     }
 
     [HttpGet]
@@ -51,12 +50,19 @@ public class CourseController : Controller
     {
         try
         {
-            var course = new Course
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            var course = new Course()
             {
                 Name = courseViewModel.Name
             };
 
-            await _courseService.CreateCourse(course);
+            await _courseService.CreateCourse(course, currentUser);
 
             return RedirectToAction("Index");
         }
@@ -127,11 +133,8 @@ public class CourseController : Controller
                 throw new Exception("Course not found");
             }
 
-            CourseViewModel courseViewModel = new CourseViewModel
-            {
-                Id = course.Id,
-                Name = course.Name
-            };
+            var courseViewModel = new CourseViewModel();
+            course.MapTo(courseViewModel);
 
             return View(courseViewModel);
         }
@@ -173,14 +176,8 @@ public class CourseController : Controller
             return NotFound();
         }
 
-        var courseViewModel = new CourseViewModel
-        {
-            Id = course.Id,
-            Name = course.Name,
-            Groups = course.Groups,
-            EducationMaterials = course.EducationMaterials,
-            UserCourses = course.UserCourses
-        };
+        var courseViewModel = new CourseViewModel();
+        course.MapTo(courseViewModel);
 
         return View(courseViewModel);
     }
