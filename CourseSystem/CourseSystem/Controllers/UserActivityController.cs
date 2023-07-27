@@ -60,7 +60,7 @@ namespace UI.Controllers
                 TempData["Error"] = "This activity does not exist.";
 
                 // edit path
-                return RedirectToAction("Index", "Error");
+                return RedirectToAction("Index", "Home");
             }
 
             return View(activity);
