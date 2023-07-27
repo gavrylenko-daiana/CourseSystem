@@ -58,7 +58,7 @@ namespace BLL.Services
         {
             var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
 
-            if(allAdmins.Any())
+            if(allAdmins.Count != 0)
             {
                 #region Email body creation
                 var userRole = newUser.Role;
@@ -181,7 +181,7 @@ namespace BLL.Services
         {
             var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
 
-            if(allAdmins.Any())
+            if(allAdmins.Count != 0)
             {
                 #region Email body creation
 
