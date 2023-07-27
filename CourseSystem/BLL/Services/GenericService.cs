@@ -2,16 +2,18 @@ using System.Linq.Expressions;
 using BLL.Interfaces;
 using DAL.Interfaces;
 using DAL;
+using DAL.Repository;
 
 namespace BLL.Services;
 
 public class GenericService<T> : IGenericService<T> where T : class
 {
-    private readonly IRepository<T> _repository;
+    protected UnitOfWork _unitOfWork;
+    protected IRepository<T> _repository;
 
-    protected GenericService(IRepository<T> repository)
+    protected GenericService(UnitOfWork unitOfWork)
     {
-        _repository = repository;
+        _unitOfWork = unitOfWork;
     }
     
     public async Task<List<T>> GetAll()

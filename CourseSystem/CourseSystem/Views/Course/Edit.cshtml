@@ -1,0 +1,28 @@
+@model Core.Models.Course
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            Edit Course
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("Edit", "Course", FormMethod.Post))
+            {
+                @Html.HiddenFor(m => m.Id);
+            
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Name)
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                </div>
+
+                @if (!string.IsNullOrEmpty(ViewData["EditingError"] as string))
+                {
+                    <span style="color: red;">@ViewData["EditingError"]</span>
+                }
+
+                <button type="submit" class="btn btn-primary button-with-margin">Save</button>
+                <a href="@Url.Action("Details", "Course", new { id = Model.Id })" class="btn btn-secondary">Cancel</a>
+            }
+        </div>
+    </div>
+</div>
