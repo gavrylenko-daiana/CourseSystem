@@ -4,6 +4,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 
 namespace UI.Controllers;
@@ -14,7 +15,7 @@ public class AccountController : Controller
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IEmailService _emailService;
-    
+
     public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
         RoleManager<IdentityRole> roleManager, IEmailService emailService)
     {
@@ -22,6 +23,35 @@ public class AccountController : Controller
         _signInManager = signInManager;
         _roleManager = roleManager;
         _emailService = emailService;
+    }
+
+    private async Task CreateAppUserRoles()
+    {
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Admin.ToString()))
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Admin.ToString()));
+
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Teacher.ToString()))
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Teacher.ToString()));
+
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Student.ToString()))
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
+    }
+
+    private string CreateCallBackUrl(string code, string controllerName, string actionName, object routeValues)
+    {
+        if (controllerName.IsNullOrEmpty() || actionName.IsNullOrEmpty())
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+
+        if (routeValues == null)
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+
+        var callbackUrl = Url.Action(
+            actionName,
+            controllerName,
+            routeValues,
+            protocol: HttpContext.Request.Scheme);
+
+        return callbackUrl;
     }
 
     [HttpGet]
@@ -45,9 +75,21 @@ public class AccountController : Controller
             return View(loginViewModel);
         }
 
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
+
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
-            TempData["Error"] = "Admin hasn't verified your email yet";
+            if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
+            {
+                await _emailService.SendAdminEmailConfirmation(loginViewModel.EmailAddress, callbackUrl);
+                TempData["Error"] = "Your ADMIN account is not verified, we sent email for confirmation again";
+            }
+            else
+            {
+                await _emailService.SendUserApproveToAdmin(user, callbackUrl);
+                TempData["Error"] = "Admin hasn't verified your email yet, we sent email for confirmation again";
+            }
 
             return View(loginViewModel);
         }
@@ -101,20 +143,13 @@ public class AccountController : Controller
             University = registerViewModel.University,
             Role = registerViewModel.Role
         };
- 
+
         if (registerViewModel.Telegram != null) newUser.Telegram = registerViewModel.Telegram;
         if (registerViewModel.GitHub != null) newUser.GitHub = registerViewModel.GitHub;
 
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Admin.ToString()))
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Admin.ToString()));
-
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Teacher.ToString()))
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Teacher.ToString()));
-
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Student.ToString()))
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
+        await CreateAppUserRoles();
 
         if (newUserResponse.Succeeded)
         {
@@ -123,12 +158,7 @@ public class AccountController : Controller
             if (!roleResult.Succeeded) return View("Error");
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            var callbackUrl = Url.Action(
-                "ConfirmEmail",
-                "Account",
-                new { userId = newUser.Id, code = code },
-                protocol: HttpContext.Request.Scheme);
-
+            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
             await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
             if (registerViewModel.Role != AppUserRoles.Admin)
@@ -139,8 +169,10 @@ public class AccountController : Controller
             }
             else
             {
-                await _emailService.SendEmailAsync(registerViewModel.EmailAddress, "Confirm your account",
-                    $"Confirm registration, follow the link: <a href='{callbackUrl}'>link</a>");
+                var emailSentResult = await _emailService.SendAdminEmailConfirmation(registerViewModel.EmailAddress, callbackUrl);
+
+                if (!emailSentResult.IsSuccessful)
+                    TempData["Error"] = emailSentResult.Message;
 
                 TempData["Error"] = "To complete your ADMIN registration, check your email and follow the link provided in the email";
                 return View(registerViewModel);
@@ -149,7 +181,7 @@ public class AccountController : Controller
 
         return RedirectToAction("Login", "Account");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> ConfirmEmail(string userId, string code)
     {
@@ -157,25 +189,28 @@ public class AccountController : Controller
         {
             return View("Error");
         }
-        
+
         var user = await _userManager.FindByIdAsync(userId);
-        
+
         if (user == null)
         {
             return View("Error");
         }
-        
+
         var result = await _userManager.ConfirmEmailAsync(user, code);
-        
+
         if (result.Succeeded)
         {
-            await _emailService.SendEmailAboutSuccessfulRegistration(user);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var toUserProfileUrl = CreateCallBackUrl(token, "User", "Detail", new { id = user.Id });
+            await _emailService.SendEmailAboutSuccessfulRegistration(user, toUserProfileUrl);
 
             var confirmEmailVM = new ConfirmEmailViewModel()
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = user.Role
+                Role = user.Role,
+                UserId = userId
             };
 
             return View(confirmEmailVM);
@@ -183,7 +218,7 @@ public class AccountController : Controller
         else
         {
             return View("Error");
-        }           
+        }
     }
 
     [HttpGet]
@@ -200,7 +235,26 @@ public class AccountController : Controller
 
         return RedirectToAction("Login", "Account");
     }
-    
+
+    [HttpGet]
+    [Route("Delete/{userId}")]
+    public async Task<IActionResult> Delete(string userId)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user != null)
+                await _signInManager.UserManager.DeleteAsync(user);
+
+            return View();
+        }
+        catch
+        {
+            return View("Error");
+        }
+    }
+
     [HttpGet]
     public IActionResult ForgotPassword()
     {
@@ -239,11 +293,11 @@ public class AccountController : Controller
     public async Task<IActionResult> SendCodeUser()
     {
         var user = await _userManager.GetUserAsync(User);
-        
+
         if (user == null) return View("Error");
-        
+
         var emailCode = await _emailService.SendCodeToUser(user.Email!);
-        
+
         return RedirectToAction("CheckEmailCode",
             new { code = emailCode, email = user.Email });
     }
