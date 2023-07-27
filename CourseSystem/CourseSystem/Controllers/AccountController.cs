@@ -76,10 +76,12 @@ public class AccountController : Controller
         }
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
+        
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
+            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
+
             if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
             {
                 await _emailService.SendAdminEmailConfirmation(loginViewModel.EmailAddress, callbackUrl);
@@ -159,10 +161,11 @@ public class AccountController : Controller
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
             var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
-            await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
             if (registerViewModel.Role != AppUserRoles.Admin)
-            {
+            {               
+                await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
+
                 TempData["Error"] = "Please, wait for registration confirmation from the admin";
 
                 return View(registerViewModel);
