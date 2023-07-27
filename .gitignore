@@ -499,3 +499,6 @@ _NCrunch*
 *.dtbcache.v2
 *.futdcache.v2
 *.xml
+
+# Config files
+appsettings.Development.json
