@@ -16,8 +16,8 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">@course.Name</h5>
-                            <!-- Add other course information here -->
                             <a href="@Url.Action("Details", new { id = course.Id })" class="btn btn-primary">Details</a>
+                            <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-danger">Delete</a>
                         </div>
                     </div>
                 </div>

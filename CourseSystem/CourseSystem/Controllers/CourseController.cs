@@ -133,8 +133,10 @@ public class CourseController : Controller
                 throw new Exception("Course not found");
             }
 
-            var courseViewModel = new CourseViewModel();
-            course.MapTo(courseViewModel);
+            var courseViewModel = new CourseViewModel()
+            {
+                Name = course.Name
+            };
 
             return View(courseViewModel);
         }
