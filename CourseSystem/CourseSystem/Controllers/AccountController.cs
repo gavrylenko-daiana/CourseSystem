@@ -151,7 +151,7 @@ public class AccountController : Controller
         try
         {
             var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
-            
+
             await CreateAppUserRoles();
 
             if (newUserResponse.Succeeded)
@@ -163,12 +163,13 @@ public class AccountController : Controller
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
                 var callbackUrl =
                     CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
-                await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
 
                 if (registerViewModel.Role != AppUserRoles.Admin)
                 {
+                    await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
+                    
                     TempData["Error"] = "Please, wait for registration confirmation from the admin";
-
+                    
                     return View(registerViewModel);
                 }
                 else
@@ -186,7 +187,8 @@ public class AccountController : Controller
             }
             else
             {
-                TempData["Error"] = "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)";
+                TempData["Error"] =
+                    "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)";
                 return View(registerViewModel);
             }
         }
@@ -195,7 +197,7 @@ public class AccountController : Controller
             TempData["Error"] = $"{e.Message}";
             return View(registerViewModel);
         }
-        
+
         return RedirectToAction("Login", "Account");
     }
 
