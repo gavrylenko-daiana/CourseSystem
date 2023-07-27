@@ -6,9 +6,12 @@ namespace BLL.Interfaces
 {
     public interface IEmailService
     {
-        Task SendEmailAsync(string toEmail,string subject, string message);
         Task<int> SendCodeToUser(string email);
         Task SendUserApproveToAdmin(AppUser newUser, string callBackUrl);
-        Task SendEmailAboutSuccessfulRegistration(AppUser appUser);
+        Task SendEmailAboutSuccessfulRegistration(AppUser appUser, string linkToProfile);
+        Task<Result<bool>> SendEmailAsync(EmailData emailData);
+        Task<Result<bool>> SendAdminEmailConfirmation(string adminEmail, string callBackUrl);
+        Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl);
+        Task ConfirmUserDeletionByUser(AppUser userForDelete, string logOutLink);
     }
 }

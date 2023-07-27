@@ -1,80 +1,50 @@
 ﻿using BLL.Interfaces;
 using MimeKit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Mail;
-using Microsoft.Extensions.Configuration;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 using Microsoft.AspNetCore.Identity;
 using Core.Models;
 using System.Net.Http;
 using System.Text;
+using Microsoft.Extensions.Options;
+using Core.Configuration;
+using MailKit.Security;
+using System.Runtime;
 
 namespace BLL.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly IConfiguration _config;
         private readonly UserManager<AppUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly EmailSettings _emailSettings;
 
-        public EmailService(IConfiguration config,
-            UserManager<AppUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+        public EmailService(UserManager<AppUser> userManager,
+            IOptions<EmailSettings> settings)
         {
-            _config = config;
             _userManager = userManager;
-            _roleManager = roleManager;
+            _emailSettings = settings.Value;
         }
-        
-        public async Task SendEmailAsync(string toEmail, string subject, string message) 
-        {
-            var adminSettings = GetAdminSettings();
-            var emailMessage = new MimeMessage();
-
-            emailMessage.From.Add(new MailboxAddress("Course System", adminSettings.Item1));
-            emailMessage.To.Add(new MailboxAddress("", toEmail));
-            emailMessage.Subject = subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-            {
-                Text = message
-            };
-
-            using (var client = new SmtpClient())
-            {
-                await client.ConnectAsync("smtp.gmail.com", 587, false);
-                await client.AuthenticateAsync(adminSettings.Item1, adminSettings.Item2); //ключ доступа от Гугл
-                await client.SendAsync(emailMessage);
-
-                await client.DisconnectAsync(true);
-            }
-        }
-
-        private (string , string) GetAdminSettings() 
-        {
-            //метод для получение данных администрации
-            //сайта для рассылки аппрувов админам, студентам и учетилям
-            
-            var adminEmail = _config["AdminEmail"];
-            var adminAccessCode = _config["AdminAccessCode"];
-
-            return (adminEmail, adminAccessCode);
-        }
-        
+              
         public async Task<int> SendCodeToUser(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) 
                 throw new ArgumentNullException(nameof(email));
-        
+
+            int randomCode = new Random().Next(1000, 9999);
+
             try
             {
-                int randomCode = new Random().Next(1000, 9999);
-                var emailBody = $"<html><body> Your code: {randomCode} </body></html>";
-                var emailSubject = "Verify code for update password.";
+                var emailData = new EmailData(
+                    new List<string>() { email},
+                    "Verify code for update password.",
+                    $"<html><body> Your code: {randomCode} </body></html>"
+                    );
 
-                await SendEmailAsync(email, emailSubject, emailBody);
+                var result = await SendEmailAsync(emailData);
+
+                if(!result.IsSuccessful)
+                {
+                    return 0;
+                }
 
                 return randomCode;
             }
@@ -88,8 +58,9 @@ namespace BLL.Services
         {
             var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
 
-            if(allAdmins.Count != 0)
+            if(allAdmins.Any())
             {
+                #region Email body creation
                 var userRole = newUser.Role;
 
                 var userData = new StringBuilder()
@@ -101,14 +72,17 @@ namespace BLL.Services
                     $"<p>User email: {newUser.Email}</p>" +
                     $"<p>User role: {userRole}</p>");
 
-                userData.AppendLine($"<h5>Confirm registration of {newUser.FirstName} {newUser.LastName}, follow the link: <a href='{callBackUrl}'>link</a></h5>");
-
+                userData.AppendLine($"<h4>Confirm registration of {newUser.FirstName} {newUser.LastName}, follow the link: <a href='{callBackUrl}'>link</a></h4>");
+                #endregion
                 try
                 {
-                    foreach (var admin in allAdmins)
-                    {
-                        await SendEmailAsync(admin.Email, "Confirm user account", userData.ToString());
-                    }
+                    var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
+                    var emailData = new EmailData(
+                        allAdminsEmails,
+                        "Confirm user account",
+                        userData.ToString());
+
+                    await SendEmailAsync(emailData);
                 }
                 catch (Exception ex)
                 {
@@ -117,21 +91,156 @@ namespace BLL.Services
             }           
         }
 
-        public async Task SendEmailAboutSuccessfulRegistration(AppUser appUser)
+        public async Task SendEmailAboutSuccessfulRegistration(AppUser appUser, string linkToProfile)
         {
             if(appUser != null)
             {
+                #region Email body creation
                 var emailBody = new StringBuilder().AppendLine($"<h4>Dear {appUser.FirstName}, you have been successfully registered into system</h4>");
+                var buttonToUserProfileDetails = $"<form action=\"{linkToProfile}\">\r\n   " +
+                    $" <input type=\"submit\" style=\"color: red\" " +
+                    $"value=\"Your profile details\" />\r\n</form>";
+
+                emailBody.AppendLine(buttonToUserProfileDetails);
+                #endregion
+
+                var emailData = new EmailData(
+                    new List<string> { appUser.Email},
+                    "Successful registration",
+                    emailBody.ToString());
 
                 try
                 {
-                    await SendEmailAsync(appUser.Email, "Successful registration", emailBody.ToString());
+                    await SendEmailAsync(emailData);
                 }
                 catch (Exception ex)
                 {
                     throw new Exception($"Fail to send email about successful registration to user {appUser.Email} ");
                 }
             }          
+        }
+
+        public async Task<Result<bool>> SendEmailAsync(EmailData emailData)
+        {
+            try
+            {
+                var emailMessage = new MimeMessage();
+
+                emailMessage.From.Add(new MailboxAddress(_emailSettings.DisplayName, _emailSettings.From));
+
+                foreach (string emailToAdress in emailData.To)
+                    emailMessage.To.Add(MailboxAddress.Parse(emailToAdress));
+
+                #region Content
+
+                emailMessage.Subject = emailData.Subject;
+                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+                {
+                    Text = emailData.Body
+                };
+                #endregion
+
+                #region Email sending
+
+                using (var client = new SmtpClient())
+                {
+                    if (_emailSettings.UseSSL)
+                    {
+                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.SslOnConnect);
+                    }
+                    else if (_emailSettings.UseStartTls)
+                    {
+                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.StartTls);
+                    }
+
+                    await client.AuthenticateAsync(_emailSettings.UserName, _emailSettings.Password); //ключ доступа от Гугл
+                    await client.SendAsync(emailMessage);
+
+                    await client.DisconnectAsync(true);
+                }
+                #endregion
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to send email");
+            }
+        }
+
+        public async Task<Result<bool>> SendAdminEmailConfirmation(string adminEmail, string callBackUrl) 
+        {
+            var emailData = new EmailData(new List<string> { adminEmail },
+                     "Confirm your account",
+                     $"Confirm registration, follow the link: <a href='{callBackUrl}'>link</a>");
+
+           return await SendEmailAsync(emailData);
+        }
+
+        public async Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl)
+        {
+            var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
+
+            if(allAdmins.Any())
+            {
+                #region Email body creation
+
+                var userData = new StringBuilder()
+                    .AppendLine($"<h4>User data overview</h4>" +
+                    $"<hr/>" +
+                    $"<p>User first name: {userForDelete.FirstName}</p>" +
+                    $"<p>User last name: {userForDelete.LastName}</p>" +
+                    $"<p>Date of birth: {userForDelete.BirthDate.ToString("d")}</p>" +
+                    $"<p>User email: {userForDelete.Email}</p>" +
+                    $"<p>User role: {userForDelete.Role}</p>");
+
+                userData.AppendLine($"<h4>Confirm deletion of {userForDelete.FirstName} {userForDelete.LastName}, follow the link: <a href='{callbackUrl}'>link</a></h4>");
+                #endregion
+                try
+                {
+                    var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
+                    var emailData = new EmailData(
+                        allAdminsEmails,
+                        "Confirm deletion of user account",
+                        userData.ToString());
+
+                    await SendEmailAsync(emailData);
+
+                    return new Result<bool>(true);
+                }
+                catch (Exception ex)
+                {
+                    return new Result<bool>(false, $"Fail to send email to {userForDelete.Email}");
+                }
+            }
+
+            return new Result<bool>(false, $"Fail to send email to {userForDelete.Email}");
+        }
+
+        public async Task ConfirmUserDeletionByUser(AppUser userForDelete, string logOutLink)
+        {
+            if (userForDelete != null)
+            {
+                #region Email body creation
+                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {userForDelete.FirstName}, your deletion was successfully approved by admin</h4>");
+                var buttonToUserProfileDetails = $"<h4>Confirm your deletion, follow the link: <a href='{logOutLink}'>link</a></h4>";
+
+                emailBody.AppendLine(buttonToUserProfileDetails);
+                #endregion
+
+                var emailData = new EmailData(
+                    new List<string> { userForDelete.Email },
+                    "Successful deletion approve",
+                    emailBody.ToString());
+                try
+                {
+                    await SendEmailAsync(emailData);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Fail to send email about successful registration to user {userForDelete.Email} ");
+                }
+            }
         }
     }
 }
