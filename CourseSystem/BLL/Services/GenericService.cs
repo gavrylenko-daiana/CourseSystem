@@ -3,10 +3,11 @@ using BLL.Interfaces;
 using DAL.Interfaces;
 using DAL;
 using DAL.Repository;
+using Core.Models;
 
 namespace BLL.Services;
 
-public class GenericService<T> : IGenericService<T> where T : class
+public class GenericService<T> : IGenericService<T> where T : BaseEntity
 {
     protected UnitOfWork _unitOfWork;
     protected IRepository<T> _repository;
