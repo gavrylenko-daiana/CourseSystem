@@ -2,36 +2,58 @@
 using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
 
 namespace UI.Controllers
 {
     [CustomFilterAttributeException]
+    [Authorize]
     public class AssignmentController : Controller
     {
         private readonly IAssignmentService _assignmentService;
-        public AssignmentController(IAssignmentService assignmentService)
+        private readonly UserManager<AppUser> _userManager;
+        public AssignmentController(IAssignmentService assignmentService,
+            UserManager<AppUser> userManager)
         {
             _assignmentService = assignmentService;   
+            _userManager = userManager;
         }
+
+        [HttpGet]
         public async Task<IActionResult> Index(int id) //here is passing group id
         {
             //all group assignments view (for student - InProgress + AwaitedApproval, for teachers - All statuses) 
             //button for cretion of new one
+            var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(id);
 
-            return View();
+            if (!groupAssignmentsResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", groupAssignmentsResult.Message);
+                return RedirectToAction("Index", "Home");
+            }
+
+            var assignmentsVM = new List<AssignmentViewModel>();
+            foreach(var assignment in groupAssignmentsResult.Data)
+            {
+                var assignmentVM = new AssignmentViewModel();
+                assignment.MapTo<Assignment, AssignmentViewModel>(assignmentVM);
+                assignmentsVM.Add(assignmentVM);
+            }
+            
+            return View(assignmentsVM);
         }
 
         [HttpGet]        
         [Authorize(Roles = "Teacher")]
-        //[Route("Create/{id}")]
-        public async Task<IActionResult> Create()
+        [Route("Create/{id}")]
+        public async Task<IActionResult> Create(int id)
         {
             //check if this group exist 
 
             //for tests
-            int id = 1;
+            //int id = 1;
 
             var assignmentVM = new CreateAssignmentViewModel() { GroupId = id };
 
@@ -40,7 +62,7 @@ namespace UI.Controllers
 
         [HttpPost]
         [ActionName("Create")]
-        public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM)
+        public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM) //MARCDOWN
         {
             if(assignmentVM == null)
                 return View("Error");

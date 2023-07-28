@@ -1,6 +1,8 @@
 ﻿using BLL.Interfaces;
+using Core.Enums;
 using Core.Models;
 using DAL.Repository;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +34,36 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, "Fail to save assignment");
             }
+        }
+
+        public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId)
+        {
+            var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId); // group service
+
+            if (group == null)
+                return new Result<List<Assignment>>(false, "Failt to get group");
+
+            if (group.Assignments.IsNullOrEmpty())
+                return new Result<List<Assignment>>(true, "No assignment in group");
+
+            return new Result<List<Assignment>>(true, group.Assignments);
+
+            //var groupAssignmentsBasedOnUserRole = new List<Assignment>();
+            //var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId);
+
+            //if (group == null)
+            //    return new Result<List<Assignment>>(false, "Failt to get group");
+
+            //if(group.Assignments.IsNullOrEmpty())
+            //    return new Result<List<Assignment>>(true, "No assignment in group");
+
+            //if (userRoles.Contains(AppUserRoles.Teacher.ToString()))
+            //    return new Result<List<Assignment>>(true, group.Assignments);
+
+            //if (userRoles.Contains(AppUserRoles.Student.ToString()))
+            //    return new Result<List<Assignment>>(true, group.Assignments.Where(a => a.AssignmentAccess != AssignmentAccess.Planned).ToList());
+
+            //return new Result<List<Assignment>>(true, group.Assignments);
         }
     }
 }
