@@ -71,7 +71,8 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            TempData["Error"] = "Entered incorrect email. Please try again.";
+            // TempData["Error"] = "Entered incorrect email. Please try again.";
+            TempData.TempDataMessage("Error", "Entered incorrect email. Please try again.");
 
             return View(loginViewModel);
         }
