@@ -43,7 +43,7 @@ public class UserController : Controller
 
         if (user == null)
         {
-            TempData["Error"] = "This user does not exist.";
+            TempData.TempDataMessage("Error", "This user does not exist.");
 
             // edit path
             return RedirectToAction("Index", "Home");
@@ -92,7 +92,7 @@ public class UserController : Controller
     {
         if (!ModelState.IsValid)
         {
-            TempData["Error"] = "Failed to edit password";
+            TempData.TempDataMessage("Error", "Failed to edit password");
 
             return View("EditPassword", editUserPasswordViewModel);
         }
@@ -111,14 +111,14 @@ public class UserController : Controller
             user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, editUserPasswordViewModel.NewPassword);
             await _userManager.UpdateAsync(user);
 
-            TempData["SuccessMessage"] = "password has been successfully changed.";
+            TempData.TempDataMessage("SuccessMessage", "password has been successfully changed.");
 
             return View("EditPassword", editUserPasswordViewModel);
             // return RedirectToAction("Index", "User", new { user.Id });
         }
         else
         {
-            TempData["Error"] = "You entered incorrect password";
+            TempData.TempDataMessage("Error", "You entered incorrect password");
 
             return View("EditPassword", editUserPasswordViewModel);
         }
@@ -129,7 +129,7 @@ public class UserController : Controller
     {
         if (!ModelState.IsValid)
         {
-            TempData["Error"] = "Failed to edit profile";
+            TempData.TempDataMessage("Error", "Failed to edit profile");
 
             return View("Edit", editUserViewModel);
         }
@@ -172,9 +172,9 @@ public class UserController : Controller
         var deletionSendingResult = await _emailService.ConfirmUserDeletionByAdmin(user, callbackUrl);
 
         if (!deletionSendingResult.IsSuccessful)
-            TempData["Error"] = deletionSendingResult.Message;
+            TempData.TempDataMessage("Error", deletionSendingResult.Message);
 
-        TempData["Error"] = "Wait for confirmation of account deletion from the admin";
+        TempData.TempDataMessage("Error", "Wait for confirmation of account deletion from the admin");
         return RedirectToAction("Login", "Account");
     }
 

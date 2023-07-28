@@ -71,8 +71,7 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            // TempData["Error"] = "Entered incorrect email. Please try again.";
-            TempData.TempDataMessage("Error", "Entered incorrect email. Please try again.");
+            ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
 
             return View(loginViewModel);
         }
@@ -87,12 +86,12 @@ public class AccountController : Controller
             if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
             {
                 await _emailService.SendAdminEmailConfirmation(loginViewModel.EmailAddress, callbackUrl);
-                TempData["Error"] = "Your ADMIN account is not verified, we sent email for confirmation again";
+                TempData.TempDataMessage("Error", "Your ADMIN account is not verified, we sent email for confirmation again");
             }
             else
             {
                 await _emailService.SendUserApproveToAdmin(user, callbackUrl);
-                TempData["Error"] = "Admin hasn't verified your email yet, we sent email for confirmation again";
+                TempData.TempDataMessage("Error", "Admin hasn't verified your email yet, we sent email for confirmation again");
             }
 
             return View(loginViewModel);
@@ -111,7 +110,7 @@ public class AccountController : Controller
             }
         }
 
-        TempData["Error"] = "Entered incorrect password. Please try again.";
+        TempData.TempDataMessage("Error", "Entered incorrect password. Please try again.");
 
         return View(loginViewModel);
     }
@@ -133,7 +132,7 @@ public class AccountController : Controller
 
         if (user != null)
         {
-            TempData["Error"] = "This email is already in use";
+            TempData.TempDataMessage("Error", "This email is already in use");
             return View(registerViewModel);
         }
 
@@ -171,7 +170,7 @@ public class AccountController : Controller
                 {
                     await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
                     
-                    TempData["Error"] = "Please, wait for registration confirmation from the admin";
+                    TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
                     
                     return View(registerViewModel);
                 }
@@ -181,27 +180,25 @@ public class AccountController : Controller
                         await _emailService.SendAdminEmailConfirmation(registerViewModel.EmailAddress, callbackUrl);
 
                     if (!emailSentResult.IsSuccessful)
-                        TempData["Error"] = emailSentResult.Message;
+                        TempData.TempDataMessage("Error", emailSentResult.Message);
 
-                    TempData["Error"] =
-                        "To complete your ADMIN registration, check your email and follow the link provided in the email";
+                    TempData.TempDataMessage("Error",
+                        "To complete your ADMIN registration, check your email and follow the link provided in the email");
                     return View(registerViewModel);
                 }
             }
             else
             {
-                TempData["Error"] =
-                    "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)";
+                TempData.TempDataMessage("Error",
+                    "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)");
                 return View(registerViewModel);
             }
         }
         catch (Exception e)
         {
-            TempData["Error"] = $"{e.Message}";
+            TempData.TempDataMessage("Error", $"{e.Message}");
             return View(registerViewModel);
         }
-
-        return RedirectToAction("Login", "Account");
     }
 
     [HttpGet]
@@ -293,7 +290,7 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            TempData["Error"] = "You wrote an incorrect email. Try again!";
+            TempData.TempDataMessage("Error", "You wrote an incorrect email. Try again!");
 
             return View(forgotPasswordBeforeEnteringViewModel);
         }
@@ -347,7 +344,7 @@ public class AccountController : Controller
         }
         else
         {
-            TempData["Error"] = "Invalid code. Please try again.";
+            TempData.TempDataMessage("Error", "Invalid code. Please try again.");
 
             return RedirectToAction("Login", "Account");
         }
@@ -356,7 +353,7 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult ResetPassword(string email)
     {
-        TempData["SuccessMessage"] = "Code is valid. You can reset your password.";
+        TempData.TempDataMessage("SuccessMessage", "Code is valid. You can reset your password.");
 
         var resetPassword = new NewPasswordViewModel()
         {

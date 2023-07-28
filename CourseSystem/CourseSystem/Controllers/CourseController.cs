@@ -55,7 +55,9 @@ public class CourseController : Controller
 
             if (currentUser == null)
             {
-                throw new Exception("User not found");
+                TempData.TempDataMessage("Error", "User not found");
+                
+                return View(courseViewModel);
             }
 
             var course = new Course()
@@ -69,7 +71,8 @@ public class CourseController : Controller
         }
         catch (Exception e)
         {
-            ViewData["CreatingError"] = $"Failed to create course. Error: {e.Message}";
+            ViewData.ViewDataMessage("CreatingError", $"Failed to create course. Error: {e.Message}");
+
             return View(courseViewModel);
         }
     }
@@ -80,16 +83,20 @@ public class CourseController : Controller
         try
         {
             var course = await _courseService.GetById(id);
+            
             if (course == null)
             {
-                throw new Exception("Course not found");
+                ViewData.ViewDataMessage("Error", "Course not found");
+
+                return View("Error");
             }
 
             return View(course);
         }
         catch (Exception e)
         {
-            ViewData["EditingError"] = $"Failed to editing course. Error: {e.Message}";
+            ViewData.ViewDataMessage("EditingError", $"Failed to editing course. Error: {e.Message}");
+            
             return View("Error");
         }
     }
@@ -105,7 +112,8 @@ public class CourseController : Controller
         }
         catch (Exception e)
         {
-            ViewData["EditingError"] = $"Failed to editing course. Error: {e.Message}";
+            ViewData.ViewDataMessage("EditingError", $"Failed to editing course. Error: {e.Message}");
+            
             return View(newCourse);
         }
     }
@@ -116,9 +124,12 @@ public class CourseController : Controller
         try
         {
             var course = await _courseService.GetById(id);
+            
             if (course == null)
             {
-                throw new Exception("Course not found");
+                ViewData.ViewDataMessage("Error", "Course not found");
+
+                return View("Error");
             }
 
             var courseViewModel = new CourseViewModel()
@@ -130,7 +141,8 @@ public class CourseController : Controller
         }
         catch (Exception e)
         {
-            ViewData["DeletingError"] = $"Failed to delete course. Error: {e.Message}";
+            ViewData.ViewDataMessage("DeletingError", $"Failed to delete course. Error: {e.Message}");
+            
             return View("Error");
         }
     }
@@ -141,9 +153,12 @@ public class CourseController : Controller
         try
         {
             var course = await _courseService.GetById(id);
+            
             if (course == null)
             {
-                throw new Exception("Course not found");
+                ViewData.ViewDataMessage("Error", "Course not found");
+
+                return View("Error");
             }
 
             await _courseService.DeleteCourse(course.Id);
@@ -153,6 +168,7 @@ public class CourseController : Controller
         catch (Exception e)
         {
             ViewData["DeletingError"] = $"Failed to delete course. Error: {e.Message}";
+            
             return View("Error");
         }
     }
@@ -161,6 +177,7 @@ public class CourseController : Controller
     public async Task<IActionResult> Details(int id)
     {
         var course = await _courseService.GetById(id);
+        
         if (course == null)
         {
             return NotFound();
