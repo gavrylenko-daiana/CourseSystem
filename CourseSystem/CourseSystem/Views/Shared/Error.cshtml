@@ -1,6 +1,11 @@
 ﻿@model ErrorViewModel
 @{
     ViewData["Title"] = "Error";
+    var errorMessage = Context.Items["Error"] as string;
+}
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
 }
 
 <h1 class="text-danger">Error.</h1>

@@ -3,6 +3,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using Core.Helpers;
 
 namespace UI.Controllers
 {
@@ -57,7 +58,7 @@ namespace UI.Controllers
 
             if (activity == null)
             {
-                TempData["Error"] = "This activity does not exist.";
+                TempData.TempDataMessage("Error", "This activity does not exist.");
 
                 // edit path
                 return RedirectToAction("Index", "Home");

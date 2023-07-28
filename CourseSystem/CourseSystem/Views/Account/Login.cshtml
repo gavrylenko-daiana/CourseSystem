@@ -17,6 +17,10 @@
         <div class="col-md-6">
             <h1>@ViewData["Title"]</h1>
             <div class="py-2">
+                @if (ViewData["Error"] != null)
+                {
+                    <p class="text-danger">@ViewData["Error"]</p>
+                }
                 @if (TempData["Error"] != null)
                 {
                     <p class="text-danger">@TempData["Error"]</p>

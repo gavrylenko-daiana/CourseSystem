@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using Core.Enums;
+using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +10,7 @@ using UI.ViewModels;
 
 namespace UI.Controllers;
 
+[CustomFilterAttributeException]
 public class AccountController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
@@ -70,13 +72,14 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            TempData["Error"] = "Entered incorrect email. Please try again.";
-
-            return View(loginViewModel);
+            throw new Exception("User not found!");
+            
+            // ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
+            //
+            // return View(loginViewModel);
         }
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
@@ -85,12 +88,12 @@ public class AccountController : Controller
             if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
             {
                 await _emailService.SendAdminEmailConfirmation(loginViewModel.EmailAddress, callbackUrl);
-                TempData["Error"] = "Your ADMIN account is not verified, we sent email for confirmation again";
+                TempData.TempDataMessage("Error", "Your ADMIN account is not verified, we sent email for confirmation again");
             }
             else
             {
                 await _emailService.SendUserApproveToAdmin(user, callbackUrl);
-                TempData["Error"] = "Admin hasn't verified your email yet, we sent email for confirmation again";
+                TempData.TempDataMessage("Error", "Admin hasn't verified your email yet, we sent email for confirmation again");
             }
 
             return View(loginViewModel);
@@ -109,7 +112,7 @@ public class AccountController : Controller
             }
         }
 
-        TempData["Error"] = "Entered incorrect password. Please try again.";
+        TempData.TempDataMessage("Error", "Entered incorrect password. Please try again.");
 
         return View(loginViewModel);
     }
@@ -131,7 +134,7 @@ public class AccountController : Controller
 
         if (user != null)
         {
-            TempData["Error"] = "This email is already in use";
+            TempData.TempDataMessage("Error", "This email is already in use");
             return View(registerViewModel);
         }
 
@@ -149,40 +152,55 @@ public class AccountController : Controller
         if (registerViewModel.Telegram != null) newUser.Telegram = registerViewModel.Telegram;
         if (registerViewModel.GitHub != null) newUser.GitHub = registerViewModel.GitHub;
 
-        var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
-
-        await CreateAppUserRoles();
-
-        if (newUserResponse.Succeeded)
+        try
         {
-            var roleResult = await _userManager.AddToRoleAsync(newUser, registerViewModel.Role.ToString());
+            var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 
-            if (!roleResult.Succeeded) return View("Error");
+            await CreateAppUserRoles();
 
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
+            if (newUserResponse.Succeeded)
+            {
+                var roleResult = await _userManager.AddToRoleAsync(newUser, registerViewModel.Role.ToString());
 
-            if (registerViewModel.Role != AppUserRoles.Admin)
-            {               
-                await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
+                if (!roleResult.Succeeded) return View("Error");
 
-                TempData["Error"] = "Please, wait for registration confirmation from the admin";
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                var callbackUrl =
+                    CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
 
-                return View(registerViewModel);
+                if (registerViewModel.Role != AppUserRoles.Admin)
+                {
+                    await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
+                    
+                    TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
+                    
+                    return View(registerViewModel);
+                }
+                else
+                {
+                    var emailSentResult =
+                        await _emailService.SendAdminEmailConfirmation(registerViewModel.EmailAddress, callbackUrl);
+
+                    if (!emailSentResult.IsSuccessful)
+                        TempData.TempDataMessage("Error", emailSentResult.Message);
+
+                    TempData.TempDataMessage("Error",
+                        "To complete your ADMIN registration, check your email and follow the link provided in the email");
+                    return View(registerViewModel);
+                }
             }
             else
             {
-                var emailSentResult = await _emailService.SendAdminEmailConfirmation(registerViewModel.EmailAddress, callbackUrl);
-
-                if (!emailSentResult.IsSuccessful)
-                    TempData["Error"] = emailSentResult.Message;
-
-                TempData["Error"] = "To complete your ADMIN registration, check your email and follow the link provided in the email";
+                TempData.TempDataMessage("Error",
+                    "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)");
                 return View(registerViewModel);
             }
         }
-
-        return RedirectToAction("Login", "Account");
+        catch (Exception e)
+        {
+            TempData.TempDataMessage("Error", $"{e.Message}");
+            return View(registerViewModel);
+        }
     }
 
     [HttpGet]
@@ -208,13 +226,8 @@ public class AccountController : Controller
             var toUserProfileUrl = CreateCallBackUrl(token, "User", "Detail", new { id = user.Id });
             await _emailService.SendEmailAboutSuccessfulRegistration(user, toUserProfileUrl);
 
-            var confirmEmailVM = new ConfirmEmailViewModel()
-            {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Role = user.Role,
-                UserId = userId
-            };
+            var confirmEmailVM = new ConfirmEmailViewModel();
+            user.MapTo(confirmEmailVM);
 
             return View(confirmEmailVM);
         }
@@ -279,7 +292,7 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            TempData["Error"] = "You wrote an incorrect email. Try again!";
+            TempData.TempDataMessage("Error", "You wrote an incorrect email. Try again!");
 
             return View(forgotPasswordBeforeEnteringViewModel);
         }
@@ -333,7 +346,7 @@ public class AccountController : Controller
         }
         else
         {
-            TempData["Error"] = "Invalid code. Please try again.";
+            TempData.TempDataMessage("Error", "Invalid code. Please try again.");
 
             return RedirectToAction("Login", "Account");
         }
@@ -342,7 +355,7 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult ResetPassword(string email)
     {
-        TempData["SuccessMessage"] = "Code is valid. You can reset your password.";
+        TempData.TempDataMessage("SuccessMessage", "Code is valid. You can reset your password.");
 
         var resetPassword = new NewPasswordViewModel()
         {
