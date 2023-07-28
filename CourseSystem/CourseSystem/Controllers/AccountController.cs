@@ -10,6 +10,7 @@ using UI.ViewModels;
 
 namespace UI.Controllers;
 
+[CustomFilterAttributeException]
 public class AccountController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
@@ -71,13 +72,14 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
-
-            return View(loginViewModel);
+            throw new Exception("User not found!");
+            
+            // ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
+            //
+            // return View(loginViewModel);
         }
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
