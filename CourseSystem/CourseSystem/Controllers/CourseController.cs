@@ -29,15 +29,13 @@ public class CourseController : Controller
             course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
         );
 
-        var courseViewModels = courses.Select(c =>
+        var userCoursesViewModel = new UserCoursesViewModel()
         {
-            var courseViewModel = new CourseViewModel();
-            c.MapTo(courseViewModel);
-            courseViewModel.CurrentUser = currentUser;
-            return courseViewModel;
-        }).ToList();
+            CurrentUser = currentUser,
+            Courses = courses
+        };
 
-        return View(courseViewModels);
+        return View(userCoursesViewModel);
     }
 
     [HttpGet]
