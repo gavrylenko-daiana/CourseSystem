@@ -28,6 +28,6 @@ namespace UI.ViewModels
         [Display(Name = "* Assignment status")]
         public AssignmentAccess AssignmentAccess { get; set; }
         public int GroupId { get; set; }
-        public List<AssignmentFile> AssignmentFiles { get; set; }
+        public List<IFormFile>? AttachmentFiles { get; set; }
     }
 }

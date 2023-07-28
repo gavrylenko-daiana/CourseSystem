@@ -2,8 +2,9 @@
 @using Core.Enums
 @model CreateAssignmentViewModel
 
+
 @{
-    var assignmentStatuses = Html.GetEnumSelectList<AssignmentAccess>().Skip(2);
+    var assignmentStatuses = Html.GetEnumSelectList<AssignmentAccess>();
 }
 @if (TempData["Error"] != null)
 {
@@ -40,75 +41,59 @@
                 <div class="row flex-md-row card card-md">
                     <div class="card-body bg-light">
                         <div class="text-center mb-5">
-                            <h1 class="h2 mb-2">Create new assignment</h1>
+                            <h1 class="h2 mb-2">Create assignment</h1>
                         </div>
 
                         <!-- Assignment Creation Form -->
                         <div class="row justify-content-center">
                             <div class="col-12 col-lg-6">
-                                <form method="post" asp-action="CreateAssigment" enctype="multipart/form-data">
+                                <form method="post" asp-action="Create" enctype="multipart/form-data">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <input type="hidden" id="GroupId" name="GroupId" value="@Model.GroupId" />
-
                                     <!-- Assignment Details Inputs -->
                                     <div class="form-row form-group">
                                         <div class="col mb-3">
-                                            <input asp-for="Name" class="form-control form-control-lg" placeholder="Name" />
+                                            <label asp-for="Name" class="control-label"></label>
+                                            <input asp-for="Name" class="form-control">
                                             <span asp-validation-for="Name" class="text-danger"></span>
                                         </div>
                                         <div class="col mb-3">
-                                            <input asp-for="Description" class="form-control form-control-lg" placeholder="Description" />
+                                            <label asp-for="Description" class="control-label"></label>
+                                            <input asp-for="Description" class="form-control">
                                             <span asp-validation-for="Description" class="text-danger"></span>
+                                            
                                         </div>
                                     </div>
                                     <div class="form-row form-group">
                                         <div class="col mb-3">
-                                            <input asp-for="StartDate" class="form-control form-control-lg" placeholder="Start Date" />
+                                            <label asp-for="StartDate" class="control-label"></label>
+                                            <input asp-for="StartDate" class="form-control">
                                             <span asp-validation-for="StartDate" class="text-danger"></span>
                                         </div>
                                         <div class="col mb-3">
-                                            <input asp-for="EndDate" class="form-control form-control-lg" placeholder="End Date" />
+                                            <label asp-for="EndDate" class="control-label"></label>
+                                            <input asp-for="EndDate" class="form-control">
                                             <span asp-validation-for="EndDate" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="form-row form-group">
                                         <div class="col mb-3">
+                                            <label asp-for="AssignmentAccess" class="control-label"></label>
                                             <select asp-for="AssignmentAccess" asp-items="@assignmentStatuses" class="form-control form-control-lg">
                                                 <option value="">--Select--</option>
                                             </select>
                                             <span asp-validation-for="AssignmentAccess" class="text-danger"></span>
                                         </div>
                                     </div>
-
-                                   @* <!-- Responsible Users Checkboxes -->
-                                    <!--
-                                    <h6>Choose responsible users for task completing:</h6>
-
-                                    @foreach (var executor in Model.ResponsibleUsersCheckboxes)
-                                    {
-                                            <div class="form-check">
-                                                <input class="form-check-input"
-                                                       type="checkbox"
-                                                       value="@executor.Value.Id"
-                                                       name="ResponsibleUsers"
-                                                       id="checkbox_@executor.Value.Id"
-                                                       checked="@executor.IsActive">
-                                            @{
-                                                var user = await UserManager.FindByIdAsync(executor.Value.Id);
-                                                var executorRole = await UserManager.GetRolesAsync(user);
-                                            }
-                                                <label class="form-check-label" for="checkbox_@executor.Value.Id">
-                                                @executor.Description, Role: @executorRole.FirstOrDefault()
-                                                </label>
-                                            </div>
-                                    }
-                                    -->*@
-
-                                    <hr />
-
+                                    <!-- File Upload Input -->
+                                    <div class="form-group mb-3">
+                                        <label for="AttachmentFiles">Select File(s):</label>
+                                        <input asp-for="AttachmentFiles" type="file" class="form-control-file" id="AttachmentFiles" name="AttachmentFiles" multiple>
+                                    </div>
                                     <!-- Submit Button -->
                                     <div class="form-row form-group">
                                         <div class="col">
-                                            <input class="btn btn-block btn-success btn-lg" type="submit" value="Create" />
+                                            <input class="btn btn-outline-primary" type="submit" value="Create" />
                                         </div>
                                     </div>
                                 </form>

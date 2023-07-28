@@ -30,28 +30,36 @@ namespace UI.Controllers
         {
             //check if this group exist 
 
-            //for testing
-            var id = 1;
+            //for tests
+            int id = 1;
+
             var assignmentVM = new CreateAssignmentViewModel() { GroupId = id };
 
             return View(assignmentVM);
         }
 
         [HttpPost]
-        [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM)
+        public async Task<IActionResult> Create(CreateAssignmentViewModel assignmentVM)
         {
             if(assignmentVM == null)
                 return View("Error");
 
             if(!ModelState.IsValid)
             {
-                TempData.TempDataMessage("Error", "Failed to create assignment");
-                return View("Index", assignmentVM.GroupId);
+                TempData.TempDataMessage("Error", "Invalid input data");
+                return View(assignmentVM);
             }
 
             var assignment = new Assignment();
             LibraryForMapping.MapTo<CreateAssignmentViewModel, Assignment>(assignmentVM, assignment);
+
+            if(assignmentVM.AttachmentFiles != null)
+            {
+                //logic for loading files to the cloud
+
+                TempData.TempDataMessage("Error", "Files uploaded successfully");
+                return View(assignmentVM);
+            }
 
             try
             {
@@ -60,10 +68,10 @@ namespace UI.Controllers
             catch (Exception ex)
             {
                 TempData.TempDataMessage("Error", "Fail to create assignment");
-                return View("Index", assignmentVM.GroupId);
+                return View( assignmentVM );
             }
 
-            return View("Index", assignmentVM.GroupId);//? -> can be problem while saving changes to db
+            return RedirectToAction("Index", "Home");
         }
     }
 }
