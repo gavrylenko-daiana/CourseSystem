@@ -1,0 +1,129 @@
+﻿@using UI.ViewModels
+@using Core.Enums
+@model CreateAssignmentViewModel
+
+@{
+    var assignmentStatuses = Html.GetEnumSelectList<AssignmentAccess>().Skip(2);
+}
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span><b>Sorry!</b> - @TempData["Error"]</span>
+    </div>
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Assignment</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar-container">
+        <!-- Your navbar content goes here -->
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <section class="space-sm">
+            <div class="container">
+                <div class="row mb-5">
+                    <!-- Your other content goes here -->
+                </div>
+
+                <!-- Card for Create New Assignment Form -->
+                <div class="row flex-md-row card card-md">
+                    <div class="card-body bg-light">
+                        <div class="text-center mb-5">
+                            <h1 class="h2 mb-2">Create new assignment</h1>
+                        </div>
+
+                        <!-- Assignment Creation Form -->
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-lg-6">
+                                <form method="post" asp-action="CreateAssigment" enctype="multipart/form-data">
+                                    <input type="hidden" id="GroupId" name="GroupId" value="@Model.GroupId" />
+
+                                    <!-- Assignment Details Inputs -->
+                                    <div class="form-row form-group">
+                                        <div class="col mb-3">
+                                            <input asp-for="Name" class="form-control form-control-lg" placeholder="Name" />
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+                                        <div class="col mb-3">
+                                            <input asp-for="Description" class="form-control form-control-lg" placeholder="Description" />
+                                            <span asp-validation-for="Description" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-row form-group">
+                                        <div class="col mb-3">
+                                            <input asp-for="StartDate" class="form-control form-control-lg" placeholder="Start Date" />
+                                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                                        </div>
+                                        <div class="col mb-3">
+                                            <input asp-for="EndDate" class="form-control form-control-lg" placeholder="End Date" />
+                                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-row form-group">
+                                        <div class="col mb-3">
+                                            <select asp-for="AssignmentAccess" asp-items="@assignmentStatuses" class="form-control form-control-lg">
+                                                <option value="">--Select--</option>
+                                            </select>
+                                            <span asp-validation-for="AssignmentAccess" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                   @* <!-- Responsible Users Checkboxes -->
+                                    <!--
+                                    <h6>Choose responsible users for task completing:</h6>
+
+                                    @foreach (var executor in Model.ResponsibleUsersCheckboxes)
+                                    {
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       type="checkbox"
+                                                       value="@executor.Value.Id"
+                                                       name="ResponsibleUsers"
+                                                       id="checkbox_@executor.Value.Id"
+                                                       checked="@executor.IsActive">
+                                            @{
+                                                var user = await UserManager.FindByIdAsync(executor.Value.Id);
+                                                var executorRole = await UserManager.GetRolesAsync(user);
+                                            }
+                                                <label class="form-check-label" for="checkbox_@executor.Value.Id">
+                                                @executor.Description, Role: @executorRole.FirstOrDefault()
+                                                </label>
+                                            </div>
+                                    }
+                                    -->*@
+
+                                    <hr />
+
+                                    <!-- Submit Button -->
+                                    <div class="form-row form-group">
+                                        <div class="col">
+                                            <input class="btn btn-block btn-success btn-lg" type="submit" value="Create" />
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Bootstrap JS and other scripts here if needed -->
+    <!-- This script is for Bootstrap's JavaScript plugins, including the ones used in the form -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

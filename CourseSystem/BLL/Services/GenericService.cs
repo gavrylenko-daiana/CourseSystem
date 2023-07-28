@@ -7,7 +7,7 @@ using Core.Models;
 
 namespace BLL.Services;
 
-public class GenericService<T> : IGenericService<T> where T : BaseEntity
+public class GenericService<T> : IGenericService<T> where T : class
 {
     protected UnitOfWork _unitOfWork;
     protected IRepository<T> _repository;

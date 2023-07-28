@@ -11,7 +11,7 @@ namespace BLL.Services
 {
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
-        protected AssignmentService(UnitOfWork unitOfWork) : base(unitOfWork)
+        public AssignmentService(UnitOfWork unitOfWork) : base(unitOfWork)
         {
             _repository = unitOfWork.AssignmentRepository;
         }

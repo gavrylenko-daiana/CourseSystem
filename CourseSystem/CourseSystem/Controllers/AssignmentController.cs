@@ -7,6 +7,7 @@ using UI.ViewModels;
 
 namespace UI.Controllers
 {
+    [CustomFilterAttributeException]
     public class AssignmentController : Controller
     {
         private readonly IAssignmentService _assignmentService;
@@ -22,13 +23,16 @@ namespace UI.Controllers
             return View();
         }
 
-        [HttpGet]
-        [Route("Create/{groupId}")]
-        public async Task<IActionResult> Create(int groupId)
+        [HttpGet]        
+        [Authorize(Roles = "Teacher")]
+        //[Route("Create/{id}")]
+        public async Task<IActionResult> Create()
         {
             //check if this group exist 
 
-            var assignmentVM = new CreateAssignmentViewModel() { GroupId = groupId };
+            //for testing
+            var id = 1;
+            var assignmentVM = new CreateAssignmentViewModel() { GroupId = id };
 
             return View(assignmentVM);
         }
@@ -43,13 +47,23 @@ namespace UI.Controllers
             if(!ModelState.IsValid)
             {
                 TempData.TempDataMessage("Error", "Failed to create assignment");
-                return View("CreateAssignment", assignmentVM);
+                return View("Index", assignmentVM.GroupId);
             }
 
             var assignment = new Assignment();
             LibraryForMapping.MapTo<CreateAssignmentViewModel, Assignment>(assignmentVM, assignment);
 
-            return View();
+            try
+            {
+                await _assignmentService.Add(assignment);
+            }
+            catch (Exception ex)
+            {
+                TempData.TempDataMessage("Error", "Fail to create assignment");
+                return View("Index", assignmentVM.GroupId);
+            }
+
+            return View("Index", assignmentVM.GroupId);//? -> can be problem while saving changes to db
         }
     }
 }

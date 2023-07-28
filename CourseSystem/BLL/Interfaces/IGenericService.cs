@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace BLL.Interfaces;
 
-public interface IGenericService<T> where T : BaseEntity
+public interface IGenericService<T> where T : class
 {
     Task<List<T>> GetAll();
     Task<T> GetById(int id);
