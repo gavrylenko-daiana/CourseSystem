@@ -3,9 +3,6 @@
 @model CreateAssignmentViewModel
 
 
-@{
-    var assignmentStatuses = Html.GetEnumSelectList<AssignmentAccess>();
-}
 @if (TempData["Error"] != null)
 {
     <div class="col-md-12 alert alert-danger">
@@ -79,16 +76,18 @@
                                     <div class="form-row form-group">
                                         <div class="col mb-3">
                                             <label asp-for="AssignmentAccess" class="control-label"></label>
-                                            <select asp-for="AssignmentAccess" asp-items="@assignmentStatuses" class="form-control form-control-lg">
-                                                <option value="">--Select--</option>
+                                            <select asp-for="AssignmentAccess" class="form-control form-control-lg">
+                                                <option value="@AssignmentAccess.Planned">@AssignmentAccess.Planned</option>
+                                                <option value="@AssignmentAccess.InProgress">@AssignmentAccess.InProgress</option>
+                                                <option value="@AssignmentAccess.Completed">@AssignmentAccess.Completed</option>
                                             </select>
                                             <span asp-validation-for="AssignmentAccess" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <!-- File Upload Input -->
                                     <div class="form-group mb-3">
-                                        <label for="AttachmentFiles">Select File(s):</label>
-                                        <input asp-for="AttachmentFiles" type="file" class="form-control-file" id="AttachmentFiles" name="AttachmentFiles" multiple>
+                                        <label for="AttachedFiles">Select File(s):</label>
+                                        <input asp-for="AttachedFiles" type="file" class="form-control-file" id="AttachedFiles" name="AttachedFiles" multiple>
                                     </div>
                                     <!-- Submit Button -->
                                     <div class="form-row form-group">

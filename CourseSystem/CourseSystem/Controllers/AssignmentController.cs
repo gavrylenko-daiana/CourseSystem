@@ -39,7 +39,8 @@ namespace UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateAssignmentViewModel assignmentVM)
+        [ActionName("Create")]
+        public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM)
         {
             if(assignmentVM == null)
                 return View("Error");
@@ -53,22 +54,20 @@ namespace UI.Controllers
             var assignment = new Assignment();
             LibraryForMapping.MapTo<CreateAssignmentViewModel, Assignment>(assignmentVM, assignment);
 
-            if(assignmentVM.AttachmentFiles != null)
+            if(assignmentVM.AttachedFiles != null)
             {
-                //logic for loading files to the cloud
+                //logic for loading files to the cloud or this logic can be inside assignmentService
 
                 TempData.TempDataMessage("Error", "Files uploaded successfully");
                 return View(assignmentVM);
             }
 
-            try
+            var createResult = await _assignmentService.CreateAssignment(assignment);
+
+            if (!createResult.IsSuccessful)
             {
-                await _assignmentService.Add(assignment);
-            }
-            catch (Exception ex)
-            {
-                TempData.TempDataMessage("Error", "Fail to create assignment");
-                return View( assignmentVM );
+                TempData.TempDataMessage("Error", createResult.Message);
+                return View(assignmentVM);
             }
 
             return RedirectToAction("Index", "Home");
