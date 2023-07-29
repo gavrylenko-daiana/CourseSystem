@@ -51,9 +51,6 @@ namespace UI.Controllers
         {
             //check if this group exist 
 
-            //for tests
-            //int id = 1;
-
             var assignmentVM = new CreateAssignmentViewModel() { GroupId = id };
 
             return View(assignmentVM);
@@ -146,6 +143,12 @@ namespace UI.Controllers
             {
                 throw new Exception("Assignment not fount");
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            return View();
         }
     }
 }
