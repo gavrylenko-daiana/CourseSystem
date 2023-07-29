@@ -1,6 +1,129 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-<h1>Deatils Page</h1>
+﻿@using UI.ViewModels
+@using Core.Enums
+@model DetailsAssignmentViewModel
+
+<div class="container-fluid">
+
+<div class="container">
+    <!-- Title -->
+    <div class="d-flex justify-content-between align-items-center py-3">
+        <h2 class="h5 mb-0"><a href="#" class="text-muted"></a>Assignment name: @Model.Name</h2>
+    </div>
+
+    <!-- Main content -->
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Details -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div>
+                            <div class="me-3">Start Date: @Model.StartDate.ToString("d")</div>
+                            <hr>
+                                <div class="me-3">End Date: @Model.EndDate.ToString("d")</div>
+                            <hr>
+                            @*<div class="me-3">Priority: @Model.Priority</div>
+                            <hr>
+                            <div class="badge rounded-pill bg-info">@Model.Status</div>*@
+                        </div>
+                        @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+                        {
+                            <div class="d-inline-block">
+                                <a asp-controller="Assigment" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    Edit
+                                </a>
+                                <a asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    Delete
+                                </a>
+                            </div>
+                        }
+                        @if(User.IsInRole(AppUserRoles.Student.ToString()) && Model.AssignmentAccess.Equals(AssignmentAccess.InProgress))
+                        {
+                            <div class="d-inline-block">
+                                <a asp-controller="Assigment" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    Add answer
+                                </a>
+                            </div>
+                        }
+                    </div>
+                        @if (Model.AttachedFiles.Any()) //fro files 
+                        {
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>Assignment attached files:</tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var assignmentFile in Model.AttachedFiles)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex mb-2">
+                                                    <div class="flex-lg-grow-1 ms-3">
+                                                        <h6 class="small mb-0">@assignmentFile.Name</h6>
+                                                        
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }                        
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <!-- Customer Notes -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h6">Description</h3>
+                        <p>@Model.Description</p>
+                    </div>
+                </div>
+                @if(Model.UserAssignment != null)
+                {
+                    foreach(var assignmnetAnswer in Model.UserAssignment.AssignmentAnswers)
+                    {
+                        <div class="card-body">
+                            <h3 class="h6">Your answer files</h3>
+                            <strong>@assignmnetAnswer.Name</strong>
+                            <hr>
+                            @*<h3 class="h6">@Model.AssigmentProject.Description</h3>*@
+                        </div>
+                    }                        
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: #eee;
+    }
+
+    .card {
+        box-shadow: 0 20px 27px 0 rgb(0 0 0 / 5%);
+    }
+
+    .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #fff;
+        background-clip: border-box;
+        border: 0 solid rgba(0,0,0,.125);
+        border-radius: 1rem;
+    }
+
+    .text-reset {
+        --bs-text-opacity: 1;
+        color: inherit !important;
+    }
+
+    a {
+        color: #5465ff;
+        text-decoration: none;
+    }
+</style>

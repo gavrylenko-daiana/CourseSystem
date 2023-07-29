@@ -4,14 +4,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace UI.ViewModels
 {
-    public class CreateAssignmentViewModel
+    public class CreateAssignmentViewModel //add property for markdown text
     {
         [Required(ErrorMessage = "Assignment name is required")]
         [Display(Name = "* Assignment name")]
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Assignment description is required")]
-        [Display(Name = "* Assignment name")]
+        [Display(Name = "* Assignment description")]
         public string Description { get; set; }
 
         [Required(ErrorMessage = "Start date is required")]

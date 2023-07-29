@@ -60,7 +60,6 @@ namespace UI.Controllers
         }
 
         [HttpPost]
-        [ActionName("Create")]
         public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM) //MARCDOWN
         {
             if(assignmentVM == null)
@@ -98,15 +97,19 @@ namespace UI.Controllers
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> DeleteAssignment(int id)
         {
-            var assignment = await _assignmentService.GetById(id);
+            try
+            {
+                var assignment = await _assignmentService.GetById(id);
 
-            if (assignment == null)
-                return View("Error");
+                var assignentDeleteVM = new DeleteAssignmentViewModel();
+                assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
 
-            var assignentDeleteVM = new DeleteAssignmentViewModel();
-            assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
-
-            return View(assignentDeleteVM);
+                return View(assignentDeleteVM);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Assignment not fount");
+            }           
         }
 
         [HttpGet]
@@ -126,7 +129,23 @@ namespace UI.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            return View();
+            try
+            {
+                var assignment = await _assignmentService.GetById(id);
+
+                var assignentDetailsVM = new DetailsAssignmentViewModel();
+                assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
+                assignentDetailsVM.UserAssignment = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
+
+                //logic for getting assignmnet files 
+                assignentDetailsVM.AttachedFiles = new List<IFormFile>();
+
+                return View(assignentDetailsVM);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Assignment not fount");
+            }
         }
     }
 }

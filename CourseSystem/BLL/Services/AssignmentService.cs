@@ -66,24 +66,31 @@ namespace BLL.Services
             if (group.Assignments.IsNullOrEmpty())
                 return new Result<List<Assignment>>(true, "No assignment in group");
 
-            return new Result<List<Assignment>>(true, group.Assignments);
+            var groupAssignments = await ChechStartAndEndAssignmnetDate(group.Assignments);
 
-            //var groupAssignmentsBasedOnUserRole = new List<Assignment>();
-            //var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId);
+            return new Result<List<Assignment>>(true, groupAssignments);
+        }
 
-            //if (group == null)
-            //    return new Result<List<Assignment>>(false, "Failt to get group");
+        private async Task<List<Assignment>> ChechStartAndEndAssignmnetDate(List<Assignment> assignments)
+        {
+            foreach(var assignment in assignments)
+            {
+                if(assignment.StartDate <= DateTime.Now)
+                {
+                    assignment.AssignmentAccess = AssignmentAccess.InProgress;
+                }
 
-            //if(group.Assignments.IsNullOrEmpty())
-            //    return new Result<List<Assignment>>(true, "No assignment in group");
+                if(assignment.EndDate >= DateTime.Now) 
+                {
+                    assignment.AssignmentAccess = AssignmentAccess.AwaitingApproval;
+                }
 
-            //if (userRoles.Contains(AppUserRoles.Teacher.ToString()))
-            //    return new Result<List<Assignment>>(true, group.Assignments);
+                await _repository.UpdateAsync(assignment);
+            }
 
-            //if (userRoles.Contains(AppUserRoles.Student.ToString()))
-            //    return new Result<List<Assignment>>(true, group.Assignments.Where(a => a.AssignmentAccess != AssignmentAccess.Planned).ToList());
+            await _unitOfWork.Save();
 
-            //return new Result<List<Assignment>>(true, group.Assignments);
+            return assignments;
         }
     }
 }
