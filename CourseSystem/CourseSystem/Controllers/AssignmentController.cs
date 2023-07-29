@@ -58,7 +58,7 @@ namespace UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM) //MARCDOWN
+        public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM) //MARCDOWN for description
         {
             if(assignmentVM == null)
                 return View("Error");
@@ -148,7 +148,6 @@ namespace UI.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Teacher")]
-        //[Route("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -205,5 +204,12 @@ namespace UI.Controllers
 
             return RedirectToAction("Index", "Assignment", new {editAssignmentVM.GroupId });
         }
+
+        //[HttpGet]
+        //[Authorize(Roles = "Student")]
+        //public async Task<IActionResult> AddAnswer(int id)
+        //{
+        //    return View();
+        //}
     }
 }
