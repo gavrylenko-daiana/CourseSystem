@@ -71,6 +71,24 @@ namespace BLL.Services
             return new Result<List<Assignment>>(true, groupAssignments);
         }
 
+        public async Task<Result<bool>> UpdateAssignment(Assignment assignment)
+        {
+            if (assignment == null)
+                return new Result<bool>(false, "Invalid assignment data");
+
+            try
+            {
+                await _repository.UpdateAsync(assignment);
+                await _unitOfWork.Save();
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to update assgnment");
+            }
+        }
+
         private async Task<List<Assignment>> ChechStartAndEndAssignmnetDate(List<Assignment> assignments)
         {
             foreach(var assignment in assignments)

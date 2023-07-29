@@ -1,4 +1,5 @@
 ﻿using BLL.Interfaces;
+using Core.Enums;
 using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@ using UI.ViewModels;
 namespace UI.Controllers
 {
     [CustomFilterAttributeException]
-    [Authorize]
+    //[Authorize]
     public class AssignmentController : Controller
     {
         private readonly IAssignmentService _assignmentService;
@@ -146,9 +147,63 @@ namespace UI.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Teacher")]
+        //[Route("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
-            return View();
+            try
+            {
+                var assignment = await _assignmentService.GetById(id);
+                var assigmentVM = new EditAssignmentViewModel();
+                assignment.MapTo<Assignment, EditAssignmentViewModel>(assigmentVM);
+
+                var fileCheckBoxes = new List<FileCheckBoxViewModel>();
+                foreach (var assignmentFile in assignment.AssignmentFiles)
+                {
+                    var checkbox = new FileCheckBoxViewModel
+                    {
+                        IsActive = true,
+                        Description = $"{assignmentFile.Name}",
+                        Value = assignmentFile
+                    };
+
+                    fileCheckBoxes.Add(checkbox);
+                }
+
+                assigmentVM.AttachedFilesCheckBoxes = fileCheckBoxes;
+
+                return View(assigmentVM);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Assignment not fount");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(EditAssignmentViewModel editAssignmentVM)
+        {
+            if (editAssignmentVM == null)
+                return View("Error");
+           
+            var assignment = new Assignment();
+            editAssignmentVM.MapTo<EditAssignmentViewModel, Assignment>(assignment);
+
+            //AssignmentFiles Part
+            //logic for check if the checkbox files was in the assignmnet before
+
+            //logic fore saving new attached files
+
+            var updateAssignmnetResult = await _assignmentService.UpdateAssignment(assignment);
+
+            if (!updateAssignmnetResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", updateAssignmnetResult.Message);
+                return View(editAssignmentVM.Id);
+            }
+
+            return RedirectToAction("Index", "Assignment", new {editAssignmentVM.GroupId });
         }
     }
 }
