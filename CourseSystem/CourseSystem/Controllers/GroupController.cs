@@ -115,4 +115,18 @@ public class GroupController : Controller
         return View(group);
     }
 
+    [HttpPost]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var group = await _groupService.GetById(id);
+        
+        if (group == null)
+        {
+            return NotFound();
+        }
+
+        await _groupService.DeleteGroup(id);
+        
+        return RedirectToAction("Index");
+    }
 }
