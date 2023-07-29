@@ -6,10 +6,13 @@ namespace BLL.Services;
 
 public class GroupService : GenericService<Group>, IGroupService
 {
-    public GroupService(UnitOfWork unitOfWork) : base(unitOfWork)
+    private readonly IUserGroupService _userGroupService;
+    
+    public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService) : base(unitOfWork)
     {
         _unitOfWork = unitOfWork;
         _repository = unitOfWork.GroupRepository;
+        _userGroupService = userGroupService;
     }
 
     public async Task CreateGroup(Group group, AppUser currentUser)
@@ -26,6 +29,7 @@ public class GroupService : GenericService<Group>, IGroupService
                 AppUser = currentUser,
                 AppUserId = currentUser.Id
             };
+            await _userGroupService.CreateUserGroups(userGroup);
         }
         catch (Exception ex)
         {
