@@ -59,7 +59,7 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     }
 
-    public async Task UpdateGroup(int groupId)
+    public async Task UpdateGroup(int groupId, string newName, DateTime startDate, DateTime endDate)
     {
         try
         {
@@ -69,6 +69,10 @@ public class GroupService : GenericService<Group>, IGroupService
             {
                 throw new Exception("Course not found");
             }
+
+            group.Name = newName;
+            group.StartDate = startDate;
+            group.EndDate = endDate;
             
             await Update(group);
             await _unitOfWork.Save();
