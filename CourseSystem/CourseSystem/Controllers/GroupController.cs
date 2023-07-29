@@ -40,4 +40,33 @@ public class GroupController : Controller
         return View(userGroupsViewModel);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Create()
+    {
+        return View();
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Create(GroupViewModel groupViewModel)
+    {
+        var courseId = (int)(TempData["CourseId"] ?? throw new InvalidOperationException());
+
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+        {
+            TempData.TempDataMessage("Error", "User not found");
+                
+            return View(groupViewModel);
+        }
+
+        var group = new Group();
+        groupViewModel.MapTo(group);
+        group.CourseId = courseId;
+
+        await _groupService.CreateGroup(group, currentUser);
+
+        return RedirectToAction("Details");
+    }
+
 }
