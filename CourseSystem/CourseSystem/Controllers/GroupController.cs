@@ -69,6 +69,18 @@ public class GroupController : Controller
         return RedirectToAction("Details");
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var group = await _groupService.GetById(id);
+        
+        if (group == null)
+        {
+            return NotFound();
+        }
+
+        return View(group);
+    }
 
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
