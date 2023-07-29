@@ -1,0 +1,27 @@
+@model UI.ViewModels.UserGroupsViewModel
+
+<div class="container mt-4">
+    <h3>Groups</h3>
+    <hr />
+
+    @if (Model.Groups.Any())
+    {
+        <div class="row row-cols-2">
+            @foreach (var group in Model.Groups)
+            {
+                <div class="col mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@group.Name</h5>
+                            <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-primary">Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No groups found for the current user.</p>
+    }
+</div>
