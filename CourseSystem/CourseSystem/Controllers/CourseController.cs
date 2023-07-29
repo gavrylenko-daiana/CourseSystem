@@ -23,7 +23,7 @@ public class CourseController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null) return RedirectToAction("Login", "Account");;
+        if (currentUser == null) return RedirectToAction("Login", "Account");
 
         var courses = await _courseService.GetByPredicate(course =>
             course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
@@ -183,6 +183,8 @@ public class CourseController : Controller
 
         var courseViewModel = new CourseViewModel();
         course.MapTo(courseViewModel);
+        
+        TempData["CourseId"] = id;
 
         return View(courseViewModel);
     }
