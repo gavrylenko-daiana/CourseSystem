@@ -1,0 +1,29 @@
+﻿@using UI.ViewModels
+@model DeleteAssignmentViewModel
+
+<div class="container align-left">
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }
+    <div class="row">
+        <div class="mbr-white col-md-7 mt-4">
+            <h4 class="mbr-section-title mbr-semibold pb-2 mbr-fonts-style display-4">
+                Are you sure that do you want to delete assigment (@Model.Name)?
+            </h4>
+
+
+            <input type="radio" class="btn-check" name="options-outlined" id="danger-outlined" autocomplete="off">
+            <a asp-controller="Assigment" asp-action="DeleteAssignment" asp-route-id="@Model.Id" class="btn btn-outline-danger" for="danger-outlined">
+                Yes
+            </a>
+            <input type="radio" class="btn-check" name="options-outlined" id="success-outlined" autocomplete="off" checked>
+            <a asp-controller="Assignment" asp-action="Index" class="btn btn-outline-success" for="success-outlined">
+                No
+            </a>
+
+        </div>
+    </div>
+</div>

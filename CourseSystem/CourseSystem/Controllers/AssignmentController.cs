@@ -24,8 +24,6 @@ namespace UI.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(int id) //here is passing group id
         {
-            //all group assignments view (for student - InProgress + AwaitedApproval, for teachers - All statuses) 
-            //button for cretion of new one
             var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(id);
 
             if (!groupAssignmentsResult.IsSuccessful)
@@ -39,6 +37,7 @@ namespace UI.Controllers
             {
                 var assignmentVM = new AssignmentViewModel();
                 assignment.MapTo<Assignment, AssignmentViewModel>(assignmentVM);
+                assignmentVM.UserAssignment = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
                 assignmentsVM.Add(assignmentVM);
             }
             
@@ -93,6 +92,26 @@ namespace UI.Controllers
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var assignment = await _assignmentService.GetById(id);
+
+            if (assignment == null)
+                return View("Error");
+
+            var assignentDeleteVM = new DeleteAssignmentViewModel();
+            assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
+
+            return View(assignentDeleteVM);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteAssignment(int id)
+        {
+            return View("Index", "Home");
         }
     }
 }
