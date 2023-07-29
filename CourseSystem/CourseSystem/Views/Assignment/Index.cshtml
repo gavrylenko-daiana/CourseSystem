@@ -34,7 +34,7 @@
                     <div class="card-body">
                         <h5 class="card-title">@assignment.Name</h5>
                         <p class="card-text">@assignment.Description</p>
-                        @if (!User.IsInRole(AppUserRoles.Student.ToString()))
+                        @if (User.IsInRole(AppUserRoles.Student.ToString()))
                         {
                             if(assignment.AssignmentAccess == AssignmentAccess.Planned)
                             {
@@ -59,19 +59,23 @@
                                 </div>
                             }
                         }
-
-                        @if(assignment.AssignmentAccess == AssignmentAccess.Planned || assignment.AssignmentAccess == AssignmentAccess.InProgress)
-                        {
-                            <a href="#" class="btn btn-primary">Edit assignment</a>
-                        }
-                        else if (assignment.AssignmentAccess == AssignmentAccess.AwaitingApproval)
-                        {
-                            <a href="#" class="btn btn-primary">See all answers</a>
-                        }
                         else
                         {
-                            <a href="#" class="btn btn-primary">Delete</a>
-                        }
+                            @if (assignment.AssignmentAccess == AssignmentAccess.Planned || assignment.AssignmentAccess == AssignmentAccess.InProgress)
+                            {
+                                <a href="#" class="btn btn-primary">Edit assignment</a>
+                            }
+                            else if (assignment.AssignmentAccess == AssignmentAccess.AwaitingApproval)
+                            {
+                                <a href="#" class="btn btn-primary">See all answers</a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@assignment.Id" class="btn btn-primary">
+                                    Delete
+                                </a>
+                            }
+                        }                      
                     </div>
                     <div class="card-footer text-muted">Start Date: @assignment.StartDate.ToString("d")</div>
                     <div class="card-footer text-muted">End date: @assignment.EndDate.ToString("d")</div>

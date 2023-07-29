@@ -95,7 +95,8 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> DeleteAssignment(int id)
         {
             var assignment = await _assignmentService.GetById(id);
 
@@ -109,9 +110,18 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> DeleteAssignment(int id)
+        //[ActionName("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return View("Index", "Home");
+            var deleteResult = await _assignmentService.DeleteAssignment(id);
+
+            if (!deleteResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", deleteResult.Message);
+                return View();
+            }
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

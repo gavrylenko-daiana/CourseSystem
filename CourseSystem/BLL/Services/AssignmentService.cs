@@ -36,6 +36,26 @@ namespace BLL.Services
             }
         }
 
+        public async Task<Result<bool>> DeleteAssignment(int assignmentId)
+        {
+            var assignment = await GetById(assignmentId);
+
+            if (assignment == null)
+                return new Result<bool>(false, "Fail to get assignmnet");
+
+            try
+            {
+                await _repository.DeleteAsync(assignment);
+                await _unitOfWork.Save();
+
+                return new Result<bool>(true);
+            }
+            catch(Exception ex)
+            {
+                return new Result<bool>(false, "Fail to delete assignment");
+            }
+        }
+
         public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId)
         {
             var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId); // group service
