@@ -63,7 +63,9 @@
                         {
                             @if (assignment.AssignmentAccess == AssignmentAccess.Planned || assignment.AssignmentAccess == AssignmentAccess.InProgress)
                             {
-                                <a href="#" class="btn btn-primary">Edit assignment</a>
+                                <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-primary">
+                                    Details
+                                </a>
                             }
                             else if (assignment.AssignmentAccess == AssignmentAccess.AwaitingApproval)
                             {

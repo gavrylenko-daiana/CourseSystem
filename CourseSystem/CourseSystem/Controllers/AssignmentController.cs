@@ -110,7 +110,6 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        //[ActionName("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleteResult = await _assignmentService.DeleteAssignment(id);
@@ -122,6 +121,12 @@ namespace UI.Controllers
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            return View();
         }
     }
 }
