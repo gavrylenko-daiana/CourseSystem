@@ -19,6 +19,8 @@ public class GroupService : GenericService<Group>, IGroupService
     {
         try
         {
+            ValidateGroupDates(group.StartDate, group.EndDate);
+                
             await Add(group);
             await _unitOfWork.Save();
             
@@ -86,6 +88,14 @@ public class GroupService : GenericService<Group>, IGroupService
         catch (Exception ex)
         {
             throw new Exception($"Failed to sent approval for admin in group by id {groupId}. Exception: {ex.Message}");
+        }
+    }
+    
+    private void ValidateGroupDates(DateTime startDate, DateTime endDate)
+    {
+        if (startDate > endDate)
+        {
+            throw new ArgumentException("Start date must be less than end date.");
         }
     }
 }
