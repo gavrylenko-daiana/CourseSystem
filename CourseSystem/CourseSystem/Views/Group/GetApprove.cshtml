@@ -1,0 +1,26 @@
+﻿@model int 
+<div class="container align-left">
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+    <div class="row">
+        <div class="mbr-white col-md-7 mt-4">
+            <h4 class="mbr-section-title mbr-semibold pb-2 mbr-fonts-style display-4">
+                Do you want to receive confirmation from the admin to create a group of more than 20 people? If yes, we send them email
+            </h4>
+
+            <input type="radio" class="btn-check" name="options-outlined" id="danger-outlined" autocomplete="off">
+            <a asp-controller="Assignment" asp-action="GetApprove" asp-route-id="@Model" class="btn btn-outline-danger" for="danger-outlined">
+                Yes
+            </a>
+            <input type="radio" class="btn-check" name="options-outlined" id="success-outlined" autocomplete="off" checked>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-success" for="success-outlined">
+                No
+            </a>
+
+        </div>
+    </div>
+</div>

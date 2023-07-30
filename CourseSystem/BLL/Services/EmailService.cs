@@ -274,5 +274,72 @@ namespace BLL.Services
                 #endregion
             }
         }
+
+        public async Task<Result<bool>> SendToAdminConfirmationForGroups(Group group, string callbackUrl)
+        {
+            if (group == null)
+                return new Result<bool>(false, "Fail to send email");
+
+            var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
+
+            if (!allAdmins.Any())
+                return new Result<bool>(false, "No admins for sending emails");
+
+            var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
+
+            #region Email body
+            var emailBody = new StringBuilder();
+            emailBody.AppendLine($"<h4>Confirm the creation of a group {group.Name} of more than 20 people, follow the link: <a href='{callbackUrl}'>link</a></h4>");
+            #endregion
+
+            var emailData = new EmailData(
+                    allAdminsEmails ,
+                    "Group confirmation",
+                    emailBody.ToString());
+
+            #region Email sending
+            try
+            {
+                await SendEmailAsync(emailData);
+
+                return new Result<bool>(true, "Emails were sent to admins");
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to send email to admins");
+            }
+
+            #endregion
+        }
+
+        public async Task<Result<bool>> SendEmailToTeacherAboutApprovedGroup(AppUser teacher, Group group, string callbackUrl)
+        {
+            if (group == null || teacher == null)
+                return new Result<bool>(false, "Fail to send email");
+
+            #region Email body
+            var emailBody = new StringBuilder();
+            emailBody.AppendLine($"<h4>You get approve fot the creation of a group {group.Name} of more than 20 people, follow the link: <a href='{callbackUrl}'>link</a></h4>");
+            #endregion
+
+            var emailData = new EmailData(
+                    new List<string> { teacher.Email},
+                    "Group confirmation",
+                    emailBody.ToString());
+
+            #region Email sending
+            try
+            {
+                await SendEmailAsync(emailData);
+
+                return new Result<bool>(true, "Emails were sent to admins");
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to send email to admins");
+            }
+
+            #endregion
+        }
     }
 }

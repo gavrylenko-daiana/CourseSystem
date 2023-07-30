@@ -1,8 +1,16 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model List<UI.ViewModels.StudentSelectionViewModel>
 
+
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span>@TempData["Error"]</span>
+    </div>
+}
 <form method="post" asp-action="ConfirmSelection">
     <input type="hidden" name="groupId" value="@ViewBag.GroupId" />
+    <input type="hidden" name="approved" value="@ViewBag.Approved" />
     <div class="container mt-4">
         <div class="card">
             <div class="card-header">

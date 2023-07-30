@@ -4,6 +4,7 @@ using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 using UI.ViewModels;
 
 namespace UI.Controllers;
@@ -12,13 +13,16 @@ public class GroupController : Controller
 {
     private readonly IGroupService _groupService;
     private readonly ICourseService _courseService;
+    private readonly IEmailService _emailService;
     private readonly UserManager<AppUser> _userManager;
 
     public GroupController(IGroupService groupService, ICourseService courseService,
-        UserManager<AppUser> userManager)
+        UserManager<AppUser> userManager,
+        IEmailService emailService)
     {
         _groupService = groupService;
         _courseService = courseService;
+        _emailService = emailService;
         _userManager = userManager;
     }
     
@@ -61,7 +65,7 @@ public class GroupController : Controller
             return View(groupViewModel);
         }
 
-        var group = new Group();
+        var group = new Core.Models.Group();
         groupViewModel.MapTo(group);
         group.CourseId = courseId;
 
@@ -99,7 +103,7 @@ public class GroupController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Group newGroup)
+    public async Task<IActionResult> Edit(Core.Models.Group newGroup)
     {
         await _groupService.UpdateGroup(newGroup.Id, newGroup.Name, newGroup.StartDate, newGroup.EndDate);
         
@@ -135,7 +139,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectStudent()
+    public async Task<IActionResult> SelectStudent(bool approved = false)
     {
         var groupId = (int)(TempData["GroupId"] ?? throw new InvalidOperationException());
         var group = await _groupService.GetById(groupId);
@@ -155,21 +159,89 @@ public class GroupController : Controller
             .ToList();
         
         ViewBag.GroupId = groupId;
+        ViewBag.Approved = approved;
 
         return View(availableStudents);
     }
     
     [HttpPost]
-    public async Task<IActionResult> ConfirmSelection(int groupId, List<StudentSelectionViewModel> students)
+    public async Task<IActionResult> ConfirmSelection(int groupId, List<StudentSelectionViewModel> students, bool approved)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
         
-        if (selectedStudents.Count > 20)
+        if (selectedStudents.Count > 20 && !approved) 
         {
-            //send approval to admin
+            TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation");
+
+            return View("GetApprove", new {groupId});
+        }
+        else
+        {
+            //logic for creation
         }
 
         return RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetApprove(int groupId)
+    {
+        //send email to admin for getting approve
+        var group = await _groupService.GetById(groupId);
+        if (group == null)
+            return View("Error");
+
+        var currentTeacher = await _userManager.GetUserAsync(User);
+
+        var callbackUrl = Url.Action( 
+            "AdminApprove",
+            "Group",
+            new { groupId = groupId, teacherId = currentTeacher.Id },
+            protocol: HttpContext.Request.Scheme);
+
+        var sendEmailResult = await _emailService.SendToAdminConfirmationForGroups(group, callbackUrl);
+
+        if (!sendEmailResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", sendEmailResult.Message);
+            return View(groupId);
+        }
+
+        TempData.TempDataMessage("Error", sendEmailResult.Message);
+
+        return View(new {groupId});
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> AdminApprove(int groupId, string teacherId)
+    {
+        var group = await _groupService.GetById(groupId);
+        var teacher = await _userManager.FindByIdAsync(teacherId);
+        if (group == null || teacher == null)
+            return View("Error");
+
+        var callbackUrl = Url.Action( 
+           "ApprovedGroup",
+           "Group",
+           new { groupId = groupId},
+           protocol: HttpContext.Request.Scheme);
+
+
+        var sendEmailResult = await _emailService.SendEmailToTeacherAboutApprovedGroup(teacher, group, callbackUrl);
+
+        return View();
+    }
+
+
+    [HttpGet]
+    public async Task<IActionResult> ApprovedGroup(int groupId)
+    {
+        var group = await _groupService.GetById(groupId);
+
+        if (group == null)
+            return View("Error");
+
+        return RedirectToAction("SelectStudent", "Group", new { id = groupId, approved = true });
     }
 
 }
