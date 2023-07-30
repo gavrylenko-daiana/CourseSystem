@@ -204,12 +204,5 @@ namespace UI.Controllers
 
             return RedirectToAction("Index", "Assignment", new {editAssignmentVM.GroupId });
         }
-
-        //[HttpGet]
-        //[Authorize(Roles = "Student")]
-        //public async Task<IActionResult> AddAnswer(int id)
-        //{
-        //    return View();
-        //}
     }
 }

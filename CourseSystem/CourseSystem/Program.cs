@@ -19,6 +19,8 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IUserCourseService, UserCourseService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+builder.Services.AddScoped<IAssignmentAnswerService, AssignmentAnswerService>();
+builder.Services.AddScoped<IUserAssignmentService, UserAssignmentService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
