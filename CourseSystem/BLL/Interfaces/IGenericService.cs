@@ -1,3 +1,4 @@
+using Core.Models;
 using System.Linq.Expressions;
 
 namespace BLL.Interfaces;

@@ -3,6 +3,7 @@ using BLL.Interfaces;
 using DAL.Interfaces;
 using DAL;
 using DAL.Repository;
+using Core.Models;
 
 namespace BLL.Services;
 

@@ -1,0 +1,67 @@
+﻿@using UI.ViewModels
+@model AssignmentAnsweViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Assignment</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <section class="space-sm">
+            <div class="container">
+                <div class="row mb-5">
+                    <!-- Your other content goes here -->
+                </div>
+
+                <!-- Card for Create New Assignment Form -->
+                <div class="row flex-md-row card card-md">
+                    <div class="card-body bg-light">
+                        <div class="text-center mb-5">
+                            <h1 class="h2 mb-2">Create assignment answer</h1>
+                        </div>
+
+                        <!-- Assignment Creation Form -->
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-lg-6">
+                                <form method="post" asp-action="Create" enctype="multipart/form-data">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <input type="hidden" id="AssignmentId" name="AssignmentId" value="@Model.AssignmentId" />
+                                    <!-- Assignment Details Inputs -->
+                                    <div class="form-row form-group">
+                                        <div class="col mb-3">
+                                            <label asp-for="AnswerDescription" class="control-label"></label>
+                                            <input asp-for="AnswerDescription" type="text" class="form-control" id="AnswerDescription" placeholder="Enter your answer description">
+                                            <span asp-validation-for="AnswerDescription" class="text-danger"></span>
+                                        </div>                                   
+                                    <!-- File Upload Input -->
+                                    <h4>Your assignmnet answer:</h4>
+                                    <div class="form-group mb-3">
+                                        <label for="AssignmentAnswerFiles">Select File(s):</label>
+                                        <input asp-for="AssignmentAnswerFiles" type="file" class="form-control-file" id="AssignmentAnswerFiles" name="AssignmentAnswerFiles" multiple>
+                                    </div>
+                                    <!-- Submit Button -->
+                                    <div class="form-row form-group">
+                                        <div class="col">
+                                            <input class="btn btn-outline-primary" type="submit" value="Create" />
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Bootstrap JS and other scripts here if needed -->
+    <!-- This script is for Bootstrap's JavaScript plugins, including the ones used in the form -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
