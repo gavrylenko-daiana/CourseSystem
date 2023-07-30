@@ -27,7 +27,7 @@
     <div class="row mt-3">
         @foreach (var assignment in Model)
         {
-            <div class="col-sm-6">
+            <div class="col-sm-6  mb-3">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">@assignment.Name</h4>
@@ -42,7 +42,19 @@
                             }
                             else if(assignment.AssignmentAccess == AssignmentAccess.InProgress)
                             {
-                                <a href="#" class="btn btn-primary">Add answer</a> //another page
+                                if(assignment.UserAssignment != null)
+                                {
+                                    <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@assignment.Id" class="btn btn-primary">
+                                        See your answer
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@assignment.Id" class="btn btn-primary">
+                                        Add answer
+                                    </a>
+                                }
+                                
                             }
                             else if(assignment.AssignmentAccess == AssignmentAccess.AwaitingApproval)
                             {

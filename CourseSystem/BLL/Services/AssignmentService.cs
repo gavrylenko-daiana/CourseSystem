@@ -93,12 +93,17 @@ namespace BLL.Services
         {
             foreach(var assignment in assignments)
             {
-                if(assignment.StartDate <= DateTime.Now)
+                if(assignment.StartDate > DateTime.Now)
+                {
+                    assignment.AssignmentAccess = AssignmentAccess.Planned;
+                }
+
+                if(assignment.StartDate < DateTime.Now || assignment.EndDate > DateTime.Now)
                 {
                     assignment.AssignmentAccess = AssignmentAccess.InProgress;
                 }
 
-                if(assignment.EndDate >= DateTime.Now) 
+                if(assignment.EndDate < DateTime.Now) 
                 {
                     assignment.AssignmentAccess = AssignmentAccess.AwaitingApproval;
                 }

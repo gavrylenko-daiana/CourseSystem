@@ -6,14 +6,35 @@ namespace BLL.Services
 {
     public class AssignmentAnswerService : GenericService<AssignmentAnswer>, IAssignmentAnswerService
     {
-        public AssignmentAnswerService(UnitOfWork unitOfWork) : base(unitOfWork)
+        private readonly IUserAssignmentService _userAssignmentService;
+        public AssignmentAnswerService(UnitOfWork unitOfWork, IUserAssignmentService userAssignmentService) : base(unitOfWork)
         {
             _repository = unitOfWork.AssignmentAnswerRepository;
+            _userAssignmentService = userAssignmentService;
         }
 
-        public async Task<Result<bool>> CreateAssignmentAnswer(Assignment assignment, AppUser student)
+        public async Task<Result<bool>> CreateAssignmentAnswer(AssignmentAnswer assignmentAnswer, Assignment assignment, AppUser appUser)
         {
-            throw new NotImplementedException();
+            if (assignmentAnswer == null)
+                return new Result<bool>(false, "Invalid assignmnet answe");
+
+            var userAssignmnetResult = await _userAssignmentService.CreateUserAssignment(assignment, appUser);
+
+            if (!userAssignmnetResult.IsSuccessful)
+                return new Result<bool>(false, "Failt to create user assignment");
+            
+            try
+            {
+                assignmentAnswer.UserAssignmentId = userAssignmnetResult.Data.Id;
+                await _repository.AddAsync(assignmentAnswer);
+                await _unitOfWork.Save();
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, ex.Message);
+            }
         }
     }
 }
