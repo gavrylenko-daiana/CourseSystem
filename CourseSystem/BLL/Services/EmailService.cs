@@ -242,5 +242,37 @@ namespace BLL.Services
                 }
             }
         }
+
+        public async Task SendToTeacherCourseInventation(AppUser teacher, Course course, string inventationUrl)
+        {
+            if(teacher != null )
+            {
+                #region Body email creation
+                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {teacher.FirstName}, you were invited to the course {course.Name}</h4>");
+                emailBody.AppendLine("<h5>Сourse data overview</h5>");
+                emailBody.AppendLine($"<p>Course name: {course.Name}</p>");
+                var linkToConfirm = $"<h4>Сonfirm your participation in the course, follow the link: <a href='{inventationUrl}'>link</a></h4>";
+
+                emailBody.AppendLine(linkToConfirm);
+                #endregion
+
+                var emailData = new EmailData(
+                    new List<string> { teacher.Email },
+                    "Course Invitation",
+                    emailBody.ToString());
+
+                #region Email sending
+                try
+                {
+                    await SendEmailAsync(emailData);
+                }
+                catch(Exception ex)
+                {
+                    throw new Exception($"Fail to send email inventation to the techer");
+                }
+
+                #endregion
+            }
+        }
     }
 }

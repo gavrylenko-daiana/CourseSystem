@@ -13,5 +13,6 @@ namespace BLL.Interfaces
         Task<Result<bool>> SendAdminEmailConfirmation(string adminEmail, string callBackUrl);
         Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl);
         Task ConfirmUserDeletionByUser(AppUser userForDelete, string logOutLink);
+        Task SendToTeacherCourseInventation(AppUser teacher,Course course, string inventationUrl);
     }
 }
