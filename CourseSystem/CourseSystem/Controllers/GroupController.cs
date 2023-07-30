@@ -66,7 +66,7 @@ public class GroupController : Controller
 
         await _groupService.CreateGroup(group, currentUser);
 
-        return RedirectToAction("Details");
+        return RedirectToAction("Details", "Group", new { id = group.Id });
     }
 
     [HttpGet]
