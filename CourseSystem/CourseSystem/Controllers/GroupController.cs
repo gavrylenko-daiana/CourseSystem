@@ -1,4 +1,5 @@
 using BLL.Interfaces;
+using Core.Enums;
 using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
@@ -78,6 +79,8 @@ public class GroupController : Controller
         {
             return NotFound();
         }
+        
+        TempData["GroupId"] = id;
 
         return View(group);
     }
@@ -103,6 +106,7 @@ public class GroupController : Controller
         return RedirectToAction("Details", new { id = newGroup.Id });
     }
 
+    [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
         var group = await _groupService.GetById(id);
@@ -129,4 +133,43 @@ public class GroupController : Controller
         
         return RedirectToAction("Index");
     }
+
+    [HttpGet]
+    public async Task<IActionResult> SelectStudent()
+    {
+        var groupId = (int)(TempData["GroupId"] ?? throw new InvalidOperationException());
+        var group = await _groupService.GetById(groupId);
+
+        var students = await _userManager.GetUsersInRoleAsync("Student");
+        
+        var studentsInGroupIds = group.UserGroups.Select(ug => ug.AppUserId);
+        
+        var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
+            .Select(u => new StudentSelectionViewModel
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                IsSelected = false
+            })
+            .ToList();
+        
+        ViewBag.GroupId = groupId;
+
+        return View(availableStudents);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> ConfirmSelection(int groupId, List<StudentSelectionViewModel> students)
+    {
+        var selectedStudents = students.Where(s => s.IsSelected).ToList();
+        
+        if (selectedStudents.Count > 20)
+        {
+            //send approval to admin
+        }
+
+        return RedirectToAction("Index");
+    }
+
 }
