@@ -1,0 +1,31 @@
+@model List<UI.ViewModels.TeacherViewModel>
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            Select Teachers
+        </div>
+        <div class="card-body">
+            <ul>
+                @foreach (var teacher in Model)
+                {
+                    <li>
+                        @teacher.FirstName @teacher.LastName
+                        @if (teacher.IsInvited)
+                        {
+                            <span>(Invitation Sent)</span>
+                        }
+                        else
+                        {
+                            <form asp-action="SendInvitation" asp-controller="Course" method="post">
+                                <input type="hidden" name="teacherId" value="@teacher.Id" />
+                                <input type="hidden" name="courseId" value="@TempData["CourseId"]" />
+                                <button type="submit" class="btn btn-primary btn-sm">Send Invitation</button>
+                            </form>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

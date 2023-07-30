@@ -1,9 +1,12 @@
 @using Core.Enums
-@model List<UI.ViewModels.CourseViewModel>
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model UI.ViewModels.UserCoursesViewModel
 
 <div class="container mt-4">
+    <h3>Courses</h3>
+    <hr />
     <div class="row">
-        @if (Model.Count == 0)
+        @if (Model.Courses.Count == 0)
         {
             <div class="col">
                 <div class="alert alert-warning">No courses found.</div>
@@ -11,14 +14,14 @@
         }
         else
         {
-            @foreach (var course in Model)
+            @foreach (var course in Model.Courses)
             {
                 <div class="col-md-4 mb-4">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">@course.Name</h5>
                             <a href="@Url.Action("Details", new { id = course.Id })" class="btn btn-primary">Details</a>
-                             @if (Model.Any(m => m.CurrentUser.Role == AppUserRoles.Admin))
+                             @if (Model.CurrentUser.Role == AppUserRoles.Admin)
                              {
                                  <a href="@Url.Action("Edit", new { id = course.Id })" class="btn btn-warning">Edit</a>
                                  <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-danger">Delete</a>
@@ -30,9 +33,9 @@
         }
     </div>
 </div>
- @if (Model.Any(m => m.CurrentUser.Role == AppUserRoles.Admin))
+ @if (Model.CurrentUser.Role == AppUserRoles.Admin)
  {
      <p>
-         <a asp-action="Create" class="btn btn-primary">Create New Project</a>
+         <a asp-action="Create" class="btn btn-primary">Create New Course</a>
      </p>
  }

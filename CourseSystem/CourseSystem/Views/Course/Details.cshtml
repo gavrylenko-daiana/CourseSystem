@@ -8,15 +8,26 @@
         <div class="card-body">
             <h5 class="card-title">@Model.Name</h5>
 
+            <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
+
             @if (Model.Groups != null && Model.Groups.Count > 0)
             {
                 <h6>Groups:</h6>
-                <ul>
+                <div class="row">
                     @foreach (var group in Model.Groups)
                     {
-                        <li>@group.Name</li>
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">@group.Name</h6>
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-info btn-sm">Details</a>
+                                    <a href="@Url.Action("Edit", "Group", new { id = group.Id })" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="@Url.Action("Delete", "Group", new { id = group.Id })" class="btn btn-danger btn-sm">Delete</a>
+                                </div>
+                            </div>
+                        </div>
                     }
-                </ul>
+                </div>
             }
             else
             {
@@ -38,6 +49,7 @@
                 <p>No education materials found for this course.</p>
             }
 
+            <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="btn btn-primary mb-3">Add teachers</a>
             @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
             {
                 <h6>Users:</h6>
