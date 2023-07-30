@@ -41,7 +41,7 @@ namespace BLL.Services
             var assignment = await GetById(assignmentId);
 
             if (assignment == null)
-                return new Result<bool>(false, "Fail to get assignmnet");
+                return new Result<bool>(false, "Fail to get assignment");
 
             try
             {
@@ -61,7 +61,7 @@ namespace BLL.Services
             var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId); // group service
 
             if (group == null)
-                return new Result<List<Assignment>>(false, "Failt to get group");
+                return new Result<List<Assignment>>(false, "Fail to get group");
 
             if (group.Assignments.IsNullOrEmpty())
                 return new Result<List<Assignment>>(true, "No assignment in group");
@@ -85,7 +85,7 @@ namespace BLL.Services
             }
             catch (Exception ex)
             {
-                return new Result<bool>(false, "Fail to update assgnment");
+                return new Result<bool>(false, "Fail to update assignment");
             }
         }
 

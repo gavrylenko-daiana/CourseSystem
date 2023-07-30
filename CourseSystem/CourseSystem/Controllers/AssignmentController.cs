@@ -34,14 +34,18 @@ namespace UI.Controllers
             }
 
             var assignmentsVM = new List<AssignmentViewModel>();
-            foreach(var assignment in groupAssignmentsResult.Data)
-            {
-                var assignmentVM = new AssignmentViewModel();
-                assignment.MapTo<Assignment, AssignmentViewModel>(assignmentVM);
-                assignmentVM.UserAssignment = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
-                assignmentsVM.Add(assignmentVM);
-            }
             
+            if (groupAssignmentsResult.Data != null)
+            {
+                foreach(var assignment in groupAssignmentsResult.Data)
+                {
+                    var assignmentVM = new AssignmentViewModel();
+                    assignment.MapTo<Assignment, AssignmentViewModel>(assignmentVM);
+                    assignmentVM.UserAssignment = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
+                    assignmentsVM.Add(assignmentVM);
+                }
+            }
+
             return View(assignmentsVM);
         }
 

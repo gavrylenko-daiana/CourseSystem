@@ -24,7 +24,9 @@
             }
         </div>
     </div>
-    <div class="row mt-3">
+<div class="row mt-3">
+    @if (Model.Any())
+    {
         @foreach (var assignment in Model)
         {
             <div class="col-sm-6  mb-3">
@@ -34,15 +36,15 @@
                         @*<p class="card-text">@assignment.Description</p>*@
                         @if (User.IsInRole(AppUserRoles.Student.ToString()))
                         {
-                            if(assignment.AssignmentAccess == AssignmentAccess.Planned)
+                            if (assignment.AssignmentAccess == AssignmentAccess.Planned)
                             {
                                 <div class="inline-icon">
                                     <i class="fa fa-times" aria-hidden="true"></i>Access denied
                                 </div>
                             }
-                            else if(assignment.AssignmentAccess == AssignmentAccess.InProgress)
+                            else if (assignment.AssignmentAccess == AssignmentAccess.InProgress)
                             {
-                                if(assignment.UserAssignment != null)
+                                if (assignment.UserAssignment != null)
                                 {
                                     <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@assignment.Id" class="btn btn-primary">
                                         See your answer
@@ -54,9 +56,9 @@
                                         Add answer
                                     </a>
                                 }
-                                
+
                             }
-                            else if(assignment.AssignmentAccess == AssignmentAccess.AwaitingApproval)
+                            else if (assignment.AssignmentAccess == AssignmentAccess.AwaitingApproval)
                             {
                                 <div class="inline-icon">
                                     <i class="fa fa-hourglass" aria-hidden="true"></i> Wait for grade
@@ -66,7 +68,7 @@
                             {
                                 <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-primary">
                                     See your grade and comments
-                                </a>                                
+                                </a>
                             }
                         }
                         else
@@ -85,16 +87,21 @@
                             {
                                 <a asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@assignment.Id" class="btn btn-primary">
                                     Delete
-                                </a> 
+                                </a>
                             }
-                        }                      
+                        }
                     </div>
                     <div class="card-footer text-muted">Start Date: @assignment.StartDate.ToString("d")</div>
                     <div class="card-footer text-muted">End date: @assignment.EndDate.ToString("d")</div>
                 </div>
             </div>
         }
-    </div>
+    }
+    else
+    {
+        <p>No assignment found for this group.</p>
+    }
+</div>
     <!-- Add Bootstrap JS and other scripts here if needed -->
     <!-- This script is for Bootstrap's JavaScript plugins, including the ones used in the form -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
