@@ -204,7 +204,10 @@ namespace BLL.Services
                         "Confirm deletion of user account",
                         userData.ToString());
 
-                    await SendEmailAsync(emailData);
+                    var result = await SendEmailAsync(emailData);
+
+                    if (!result.IsSuccessful)
+                        return new Result<bool>(false, result.Message);
 
                     return new Result<bool>(true);
                 }
@@ -264,7 +267,10 @@ namespace BLL.Services
                 #region Email sending
                 try
                 {
-                    await SendEmailAsync(emailData);
+                    var result = await SendEmailAsync(emailData);
+
+                    //if (!result.IsSuccessful)
+                    //    return new Result<bool>(false, result.Message);
                 }
                 catch(Exception ex)
                 {
@@ -300,7 +306,10 @@ namespace BLL.Services
             #region Email sending
             try
             {
-                await SendEmailAsync(emailData);
+                var result = await SendEmailAsync(emailData);
+
+                if (!result.IsSuccessful)
+                    return new Result<bool>(false, result.Message);
 
                 return new Result<bool>(true, "Emails were sent to admins");
             }
@@ -330,7 +339,10 @@ namespace BLL.Services
             #region Email sending
             try
             {
-                await SendEmailAsync(emailData);
+                var result = await SendEmailAsync(emailData);
+
+                if (!result.IsSuccessful)
+                    return new Result<bool>(false, result.Message);
 
                 return new Result<bool>(true, "Emails were sent to admins");
             }
