@@ -16,8 +16,7 @@ namespace BLL.Services
     {
         public ActivityService(UnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _unitOfWork = unitOfWork;
-            //_repository = 
+            _repository = unitOfWork.UserActivityRepository;
         }
 
         public async Task AddAssignmentCreatedActivity(AppUser teacher, Assignment assignment)

@@ -20,10 +20,38 @@ namespace DAL.Repository
         private Repository<UserAssignments> _userAssignmentsRepository;
         private Repository<UserCourses> _userCoursesRepository;
         private Repository<UserGroups> _userGroupsRepository;
+        private Repository<UserActivity> _userActivityRepository;
+        private Repository<Notification> _notificationRepository;
 
         public UnitOfWork(ApplicationContext context)
         {
             _context = context;
+        }
+
+        public Repository<Notification> NotificationRepository
+        {
+            get
+            {
+                if (_notificationRepository == null)
+                {
+                    _notificationRepository = new Repository<Notification>(_context);
+                }
+
+                return _notificationRepository;
+            }
+        }
+
+        public Repository<UserActivity> UserActivityRepository
+        {
+            get
+            {
+                if (_userActivityRepository == null)
+                {
+                    _userActivityRepository = new Repository<UserActivity>(_context);
+                }
+
+                return _userActivityRepository;
+            }
         }
 
         public Repository<Assignment> AssignmentRepository
