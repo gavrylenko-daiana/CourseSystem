@@ -54,6 +54,7 @@
             {
                 <p>No users found for this group.</p>
             }
+            <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Id })" class="btn btn-primary">Add student in group</a>
             
             <div class="btn-group" role="group">
                 <a href="@Url.Action("Edit", "Group", new { id = Model.Id })" class="btn btn-primary">Edit Group</a>
