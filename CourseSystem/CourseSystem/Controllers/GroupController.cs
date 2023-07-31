@@ -15,16 +15,19 @@ public class GroupController : Controller
     private readonly IGroupService _groupService;
     private readonly ICourseService _courseService;
     private readonly IEmailService _emailService;
+    private readonly IUserGroupService _userGroupService;
     private readonly UserManager<AppUser> _userManager;
 
     public GroupController(IGroupService groupService, ICourseService courseService,
         UserManager<AppUser> userManager,
-        IEmailService emailService)
+        IEmailService emailService,
+        IUserGroupService userGroupService)
     {
         _groupService = groupService;
         _courseService = courseService;
         _emailService = emailService;
         _userManager = userManager;
+        _userGroupService = userGroupService;
     }
     
     [HttpGet]
@@ -250,7 +253,20 @@ public class GroupController : Controller
         if (group == null)
             return View("Error");
 
-        //await service registration
+        var userGroup = new UserGroups()
+        {
+            AppUserId = currentUser.Id,
+            GroupId = groupId
+        };
+
+        try
+        {
+            await _userGroupService.CreateUserGroups(userGroup);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Failt to register");
+        }
 
         var inventationVM = new InventationViewModel() { GroupName = group.Name, UserName = currentUser.UserName};
 
