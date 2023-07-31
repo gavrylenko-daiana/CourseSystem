@@ -2,6 +2,13 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model UI.ViewModels.UserCoursesViewModel
 
+
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span>@TempData["Error"]</span>
+    </div>
+}
 <style>
     .card {
         transition: box-shadow 0.3s ease;
