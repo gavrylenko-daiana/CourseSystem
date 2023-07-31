@@ -22,7 +22,7 @@ namespace DAL
         {
             var builder = new ConfigurationBuilder();
             builder.SetBasePath(Directory.GetCurrentDirectory());
-            builder.AddJsonFile("");
+            builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
             var config = builder.Build();
             string connectionString = config.GetConnectionString("DefaultConnection");
 
