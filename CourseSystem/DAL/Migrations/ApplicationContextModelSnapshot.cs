@@ -142,7 +142,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("Assignments");
+                    b.ToTable("Assignments", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.AssignmentAnswer", b =>
@@ -175,7 +175,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("UserAssignmentAppUserId", "UserAssignmentAssignmentId");
 
-                    b.ToTable("AssignmentAnswers");
+                    b.ToTable("AssignmentAnswers", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.AssignmentFile", b =>
@@ -201,7 +201,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("AssignmentId");
 
-                    b.ToTable("AssignmentFiles");
+                    b.ToTable("AssignmentFiles", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Course", b =>
@@ -218,7 +218,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.EducationMaterial", b =>
@@ -252,7 +252,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("EducationMaterials");
+                    b.ToTable("EducationMaterials", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Group", b =>
@@ -280,7 +280,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Groups");
+                    b.ToTable("Groups", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Notification", b =>
@@ -313,7 +313,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.UserActivity", b =>
@@ -343,7 +343,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("UserActivities");
+                    b.ToTable("UserActivities", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.UserAssignments", b =>
@@ -364,7 +364,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("AssignmentId");
 
-                    b.ToTable("UserAssignments");
+                    b.ToTable("UserAssignments", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.UserCourses", b =>
@@ -382,7 +382,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("UserCourses");
+                    b.ToTable("UserCourses", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.UserGroups", b =>
@@ -400,7 +400,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("UserGroups");
+                    b.ToTable("UserGroups", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

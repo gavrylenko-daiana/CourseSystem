@@ -22,10 +22,7 @@ namespace UI.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            var notifications = currentUser.Notification
-                .Where(n => !n.IsRead)
-                    .OrderByDescending(a => a.Created)
-                        .ToList();
+            var notifications = currentUser.Notification.NotRead().OrderByDate();
 
             return View(notifications);
         }
@@ -35,9 +32,7 @@ namespace UI.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            var notifications = currentUser.Notification
-                    .OrderByDescending(a => a.Created)
-                        .ToList();
+            var notifications = currentUser.Notification.OrderByDate();
 
             return View(notifications);
         }
