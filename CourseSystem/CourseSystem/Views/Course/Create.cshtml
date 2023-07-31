@@ -7,15 +7,11 @@
             @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
         </div>
 
-        @if (!string.IsNullOrEmpty(ViewData["CreatingError"] as string))
+        @if (TempData["CreatingError"] != null)
         {
-            <span style="color: red;">@ViewData["CreatingError"]</span>
+            <p class="text-danger">@TempData["CreatingError"]</p>
         }
         
         <input type="submit" value="Create" class="btn btn-primary" />
-        
-        @* <a href="@Url.Action("CollectGroup", "YourControllerName")" class="btn btn-secondary">Add Group</a> *@
-        @* <a href="@Url.Action("CollectUser", "YourControllerName")" class="btn btn-secondary">Add User</a> *@
-        @* <a href="@Url.Action("CollectMaterial", "YourControllerName")" class="btn btn-secondary">Add Material</a> *@
     </div>
 }

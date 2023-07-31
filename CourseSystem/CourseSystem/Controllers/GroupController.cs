@@ -56,7 +56,7 @@ public class GroupController : Controller
 
         if (currentUser == null)
         {
-            TempData.TempDataMessage("Error", "User not found");
+            TempData.TempDataMessage("CreatingError", "User not found");
                 
             return View(groupViewModel);
         }
@@ -73,7 +73,7 @@ public class GroupController : Controller
         {
             TempData["CourseId"] = courseId; 
             
-            TempData.TempDataMessage("Error", "Your end day must be more than start day");
+            TempData.TempDataMessage("CreatingError", "Your end day must be more than start day");
                 
             return View(groupViewModel);
         }
