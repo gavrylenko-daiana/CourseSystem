@@ -73,7 +73,18 @@ public class GroupController : Controller
         groupViewModel.MapTo(group);
         group.CourseId = courseId;
 
-        await _groupService.CreateGroup(group, currentUser);
+        try
+        {
+            await _groupService.CreateGroup(group, currentUser);
+        }
+        catch (Exception ex)
+        {
+            TempData["CourseId"] = courseId; 
+            
+            TempData.TempDataMessage("Error", "Your end day must be more than start day");
+                
+            return View(groupViewModel);
+        }
 
         return RedirectToAction("Details", "Group", new { id = group.Id });
     }

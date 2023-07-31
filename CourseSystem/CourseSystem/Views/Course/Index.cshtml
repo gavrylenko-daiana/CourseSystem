@@ -2,12 +2,27 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model UI.ViewModels.UserCoursesViewModel
 
+
 @if (TempData["Error"] != null)
 {
     <div class="col-md-12 alert alert-danger">
         <span>@TempData["Error"]</span>
     </div>
 }
+<style>
+    .card {
+        transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .selected-card {
+        border: 2px solid #ff0000;
+    }
+</style>
+
 <div class="container mt-4">
     <h3>Courses</h3>
     <hr />
@@ -27,11 +42,11 @@
                         <div class="card-body">
                             <h5 class="card-title">@course.Name</h5>
                             <a href="@Url.Action("Details", new { id = course.Id })" class="btn btn-primary">Details</a>
-                             @if (Model.CurrentUser.Role == AppUserRoles.Admin)
-                             {
-                                 <a href="@Url.Action("Edit", new { id = course.Id })" class="btn btn-warning">Edit</a>
-                                 <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-danger">Delete</a>
-                             }
+                            @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                            {
+                                <a href="@Url.Action("Edit", new { id = course.Id })" class="btn btn-warning">Edit</a>
+                                <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-danger">Delete</a>
+                            }
                         </div>
                     </div>
                 </div>
@@ -45,3 +60,11 @@
          <a asp-action="Create" class="btn btn-primary">Create New Course</a>
      </p>
  }
+
+<script>
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', function () {
+            window.location.href = this.querySelector('.btn-primary').href;
+        });
+    });
+</script>
