@@ -130,7 +130,7 @@ public class CourseController : Controller
 
                 return View("Error");
             }
-
+            
             var courseViewModel = new CourseViewModel()
             {
                 Name = course.Name
@@ -184,6 +184,7 @@ public class CourseController : Controller
 
         var courseViewModel = new CourseViewModel();
         course.MapTo(courseViewModel);
+        courseViewModel.CurrentUser = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException();
         
         TempData["CourseId"] = id;
 

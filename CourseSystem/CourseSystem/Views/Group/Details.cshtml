@@ -1,4 +1,5 @@
-@model Core.Models.Group
+@using Core.Enums
+@model UI.ViewModels.UserGroupViewModel
 
 <div class="container mt-4">
     <div class="card">
@@ -6,15 +7,15 @@
             Group Details
         </div>
         <div class="card-body">
-            <h5 class="card-title">@Model.Name</h5>
-            <p><strong>Start Date:</strong> @Model.StartDate.ToString("dd/MM/yyyy")</p>
-            <p><strong>End Date:</strong> @Model.EndDate.ToString("dd/MM/yyyy")</p>
+            <h5 class="card-title">@Model.Group.Name</h5>
+            <p><strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")</p>
+            <p><strong>End Date:</strong> @Model.Group.EndDate.ToString("dd/MM/yyyy")</p>
 
-            @if (Model.EducationMaterials != null && Model.EducationMaterials.Count > 0)
+            @if (Model.Group.EducationMaterials != null && Model.Group.EducationMaterials.Count > 0)
             {
                 <h6>Education Materials:</h6>
                 <ul>
-                    @foreach (var material in Model.EducationMaterials)
+                    @foreach (var material in Model.Group.EducationMaterials)
                     {
                         <li>@material.Name</li>
                     }
@@ -24,12 +25,12 @@
             {
                 <p>No education materials found for this group.</p>
             }
-
-            @if (Model.Assignments != null && Model.Assignments.Count > 0)
+            
+            @if (Model.Group.Assignments != null && Model.Group.Assignments.Count > 0)
             {
                 <h6>Assignments:</h6>
                 <ul>
-                    @foreach (var assignment in Model.Assignments)
+                    @foreach (var assignment in Model.Group.Assignments)
                     {
                         <li>@assignment.Name</li>
                     }
@@ -39,12 +40,14 @@
             {
                 <p>No assignments found for this group.</p>
             }
+            
+            <a href="@Url.Action("Index", "Assignment", new { id = Model.Group.Id })" class="btn btn-primary">Assignment</a>
 
-            @if (Model.UserGroups != null && Model.UserGroups.Count > 0)
+            @if (Model.Group.UserGroups != null && Model.Group.UserGroups.Count > 0)
             {
                 <h6>Users:</h6>
                 <ul>
-                    @foreach (var userGroup in Model.UserGroups)
+                    @foreach (var userGroup in Model.Group.UserGroups)
                     {
                         <li>@userGroup.AppUser.FirstName</li>
                     }
@@ -54,11 +57,14 @@
             {
                 <p>No users found for this group.</p>
             }
-            <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Id })" class="btn btn-primary">Add student in group</a>
+            <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
             
             <div class="btn-group" role="group">
-                <a href="@Url.Action("Edit", "Group", new { id = Model.Id })" class="btn btn-primary">Edit Group</a>
-                <a href="@Url.Action("Delete", "Group", new { id = Model.Id })" class="btn btn-danger">Delete Group</a>
+                @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                {
+                    <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="btn btn-outline-primary">Edit Group</a>
+                    <a href="@Url.Action("Delete", "Group", new { id = Model.Group.Id })" class="btn btn-outline-danger">Delete Group</a>
+                }
             </div>
         </div>
     </div>

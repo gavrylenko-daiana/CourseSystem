@@ -27,7 +27,7 @@
                     <div class="card group-card">
                         <div class="card-body">
                             <h5 class="card-title">@group.Name</h5>
-                            <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-primary">Details</a>
+                            <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-outline-primary">Details</a>
                         </div>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
 <script>
     document.querySelectorAll('.group-card').forEach(groupCard => {
         groupCard.addEventListener('click', function () {
-            window.location.href = this.querySelector('.btn-primary').href;
+            window.location.href = this.querySelector('.btn-outline-primary').href;
         });
     });
 </script>

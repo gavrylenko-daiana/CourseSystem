@@ -1,3 +1,4 @@
+@using Core.Enums
 @model UI.ViewModels.CourseViewModel
 
 <style>
@@ -34,9 +35,12 @@
                             <div class="card group-card">
                                 <div class="card-body">
                                     <h6 class="card-title">@group.Name</h6>
-                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-info btn-sm">Details</a>
-                                    <a href="@Url.Action("Edit", "Group", new { id = group.Id })" class="btn btn-warning btn-sm">Edit</a>
-                                    <a href="@Url.Action("Delete", "Group", new { id = group.Id })" class="btn btn-danger btn-sm">Delete</a>
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-outline-info btn-sm">Details</a>
+                                    @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                                    {
+                                        <a href="@Url.Action("Edit", "Group", new { id = group.Id })" class="btn btn-outline-warning btn-sm">Edit</a>
+                                        <a href="@Url.Action("Delete", "Group", new { id = group.Id })" class="btn btn-outline-danger btn-sm">Delete</a>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -85,7 +89,7 @@
 <script>
     document.querySelectorAll('.group-card').forEach(groupCard => {
         groupCard.addEventListener('click', function () {
-            window.location.href = this.querySelector('.btn-info').href;
+            window.location.href = this.querySelector('.btn-outline-info').href;
         });
     });
 </script>

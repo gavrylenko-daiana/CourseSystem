@@ -34,11 +34,11 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">@course.Name</h5>
-                            <a href="@Url.Action("Details", new { id = course.Id })" class="btn btn-primary">Details</a>
+                            <a href="@Url.Action("Details", new { id = course.Id })" class="btn btn-outline-primary">Details</a>
                             @if (Model.CurrentUser.Role == AppUserRoles.Admin)
                             {
-                                <a href="@Url.Action("Edit", new { id = course.Id })" class="btn btn-warning">Edit</a>
-                                <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-danger">Delete</a>
+                                <a href="@Url.Action("Edit", new { id = course.Id })" class="btn btn-outline-warning">Edit</a>
+                                <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-outline-danger">Delete</a>
                             }
                         </div>
                     </div>
@@ -57,7 +57,7 @@
 <script>
     document.querySelectorAll('.card').forEach(card => {
         card.addEventListener('click', function () {
-            window.location.href = this.querySelector('.btn-primary').href;
+            window.location.href = this.querySelector('.btn-outline-primary').href;
         });
     });
 </script>

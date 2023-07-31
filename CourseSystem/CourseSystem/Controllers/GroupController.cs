@@ -93,7 +93,13 @@ public class GroupController : Controller
         
         TempData["GroupId"] = id;
 
-        return View(group);
+        var userGroupVM = new UserGroupViewModel()
+        {
+            Group = group,
+            CurrentUser = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException()
+        };
+
+        return View(userGroupVM);
     }
 
     [HttpGet]
