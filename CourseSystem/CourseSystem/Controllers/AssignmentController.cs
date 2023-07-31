@@ -46,6 +46,7 @@ namespace UI.Controllers
                 }
             }
 
+            ViewBag.GroupId = id;
             return View(assignmentsVM);
         }
 
