@@ -34,62 +34,11 @@
                     <div class="card-body">
                         <h4 class="card-title">@assignment.Name</h4>
                         @*<p class="card-text">@assignment.Description</p>*@
-                        @if (User.IsInRole(AppUserRoles.Student.ToString()))
-                        {
-                            if (assignment.AssignmentAccess == AssignmentAccess.Planned)
-                            {
-                                <div class="inline-icon">
-                                    <i class="fa fa-times" aria-hidden="true"></i>Access denied
-                                </div>
-                            }
-                            else if (assignment.AssignmentAccess == AssignmentAccess.InProgress)
-                            {
-                                if (assignment.UserAssignment != null)
-                                {
-                                    <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@assignment.Id" class="btn btn-primary">
-                                        See your answer
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@assignment.Id" class="btn btn-primary">
-                                        Add answer
-                                    </a>
-                                }
 
-                            }
-                            else if (assignment.AssignmentAccess == AssignmentAccess.AwaitingApproval)
-                            {
-                                <div class="inline-icon">
-                                    <i class="fa fa-hourglass" aria-hidden="true"></i> Wait for grade
-                                </div>
-                            }
-                            else
-                            {
-                                <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-primary">
-                                    See your grade and comments
-                                </a>
-                            }
-                        }
-                        else
-                        {
-                            @if (assignment.AssignmentAccess == AssignmentAccess.Planned || assignment.AssignmentAccess == AssignmentAccess.InProgress)
-                            {
-                                <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-primary">
-                                    Details
-                                </a>
-                            }
-                            else if (assignment.AssignmentAccess == AssignmentAccess.AwaitingApproval)
-                            {
-                                <a href="#" class="btn btn-primary">See all student answers</a>
-                            }
-                            else
-                            {
-                                <a asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@assignment.Id" class="btn btn-primary">
-                                    Delete
-                                </a>
-                            }
-                        }
+                        <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-primary">
+                            Details
+                        </a>
+                      
                     </div>
                     <div class="card-footer text-muted">Start Date: @assignment.StartDate.ToString("d")</div>
                     <div class="card-footer text-muted">End date: @assignment.EndDate.ToString("d")</div>
