@@ -1,5 +1,19 @@
 @model UI.ViewModels.UserGroupsViewModel
 
+<style>
+    .group-card {
+        transition: box-shadow 0.3s ease;
+    }
+
+    .group-card:hover {
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .selected-group-card {
+        border: 2px solid #ff0000;
+    }
+</style>
+
 <div class="container mt-4">
     <h3>Groups</h3>
     <hr />
@@ -10,7 +24,7 @@
             @foreach (var group in Model.Groups)
             {
                 <div class="col mb-4">
-                    <div class="card">
+                    <div class="card group-card">
                         <div class="card-body">
                             <h5 class="card-title">@group.Name</h5>
                             <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-primary">Details</a>
@@ -25,3 +39,11 @@
         <p>No groups found for the current user.</p>
     }
 </div>
+
+<script>
+    document.querySelectorAll('.group-card').forEach(groupCard => {
+        groupCard.addEventListener('click', function () {
+            window.location.href = this.querySelector('.btn-primary').href;
+        });
+    });
+</script>
