@@ -246,39 +246,41 @@ namespace BLL.Services
             }
         }
 
-        public async Task SendToTeacherCourseInventation(AppUser teacher, Course course, string inventationUrl)
+        public async Task<Result<bool>> SendToTeacherCourseInventation(AppUser teacher, Course course, string inventationUrl)
         {
-            if(teacher != null )
+            if (teacher == null || course == null)
+                return new Result<bool>(false, $"Fail to send email inventation to the techer");
+
+            #region Body email creation
+            var emailBody = new StringBuilder().AppendLine($"<h4>Dear {teacher.FirstName}, you were invited to the course {course.Name}</h4>");
+            emailBody.AppendLine("<h5>Сourse data overview</h5>");
+            emailBody.AppendLine($"<p>Course name: {course.Name}</p>");
+            var linkToConfirm = $"<h4>Сonfirm your participation in the course, follow the link: <a href='{inventationUrl}'>link</a></h4>";
+
+            emailBody.AppendLine(linkToConfirm);
+            #endregion
+
+            var emailData = new EmailData(
+                new List<string> { teacher.Email },
+                "Course Invitation",
+                emailBody.ToString());
+
+            #region Email sending
+            try
             {
-                #region Body email creation
-                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {teacher.FirstName}, you were invited to the course {course.Name}</h4>");
-                emailBody.AppendLine("<h5>Сourse data overview</h5>");
-                emailBody.AppendLine($"<p>Course name: {course.Name}</p>");
-                var linkToConfirm = $"<h4>Сonfirm your participation in the course, follow the link: <a href='{inventationUrl}'>link</a></h4>";
+                var result = await SendEmailAsync(emailData);
 
-                emailBody.AppendLine(linkToConfirm);
-                #endregion
+                if (!result.IsSuccessful)
+                    return new Result<bool>(false, result.Message);
 
-                var emailData = new EmailData(
-                    new List<string> { teacher.Email },
-                    "Course Invitation",
-                    emailBody.ToString());
-
-                #region Email sending
-                try
-                {
-                    var result = await SendEmailAsync(emailData);
-
-                    //if (!result.IsSuccessful)
-                    //    return new Result<bool>(false, result.Message);
-                }
-                catch(Exception ex)
-                {
-                    throw new Exception($"Fail to send email inventation to the techer");
-                }
-
-                #endregion
+                return new Result<bool>(true);
             }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, $"Fail to send email inventation to the techer");
+            }
+
+            #endregion
         }
 
         public async Task<Result<bool>> SendToAdminConfirmationForGroups(Group group, string callbackUrl)

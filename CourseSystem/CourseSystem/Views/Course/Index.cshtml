@@ -2,6 +2,12 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model UI.ViewModels.UserCoursesViewModel
 
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span>@TempData["Error"]</span>
+    </div>
+}
 <div class="container mt-4">
     <h3>Courses</h3>
     <hr />
