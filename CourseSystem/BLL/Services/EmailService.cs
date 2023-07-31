@@ -353,5 +353,37 @@ namespace BLL.Services
 
             #endregion
         }
+
+        public async Task<Result<bool>> SendInventationToStudents(Dictionary<string, string> studentsData, Group group)
+        {
+            #region Email body
+            var emailBody = new StringBuilder();
+            emailBody.AppendLine($"<h4>You get inventation to the group {group.Name}");
+            #endregion
+            #region Email sending
+            try
+            {
+                foreach(var studentData in studentsData)
+                {
+                    var emailData = new EmailData(
+                        new List<string> { studentData.Key },
+                        "Group inventation",
+                        emailBody.AppendLine($", follow the link: <a href='{studentData.Value}'>link</a></h4>").ToString());
+
+                    var result = await SendEmailAsync(emailData);
+
+                    if (!result.IsSuccessful)
+                        return new Result<bool>(false, result.Message);
+                }
+               
+                return new Result<bool>(true, "Emails were sent to students");
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to send email to students");
+            }
+
+            #endregion
+        }
     }
 }

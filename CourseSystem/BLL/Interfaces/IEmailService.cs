@@ -16,5 +16,6 @@ namespace BLL.Interfaces
         Task SendToTeacherCourseInventation(AppUser teacher,Course course, string inventationUrl);
         Task<Result<bool>> SendToAdminConfirmationForGroups(Group group, string callbackUrl);
         Task<Result<bool>> SendEmailToTeacherAboutApprovedGroup(AppUser teacher, Group group, string callbackUrl);
+        Task<Result<bool>> SendInventationToStudents(Dictionary<string, string> studentData, Group group);
     }
 }

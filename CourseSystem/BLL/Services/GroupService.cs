@@ -1,18 +1,22 @@
 using BLL.Interfaces;
 using Core.Models;
 using DAL.Repository;
+using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Services;
 
 public class GroupService : GenericService<Group>, IGroupService
 {
     private readonly IUserGroupService _userGroupService;
+    private readonly UserManager<AppUser> _userManager;
     
-    public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService) : base(unitOfWork)
+    public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService,
+        UserManager<AppUser> userManager) : base(unitOfWork)
     {
         _unitOfWork = unitOfWork;
         _repository = unitOfWork.GroupRepository;
         _userGroupService = userGroupService;
+        _userManager = userManager;
     }
 
     public async Task CreateGroup(Group group, AppUser currentUser)
@@ -101,5 +105,25 @@ public class GroupService : GenericService<Group>, IGroupService
         {
             throw new ArgumentException("Start date must be less than end date.");
         }
+    }
+
+    public async Task<List<string>> GetAllStudentsEmailByIds(List<string> studentIds)
+    {
+        var emails = new List<string>();
+
+        foreach (var studentId in studentIds)
+        {
+            try
+            {
+                var student = await _userManager.FindByIdAsync(studentId);
+                emails.Add(student.Email);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Failt to get students");
+            }
+        }
+
+        return emails;
     }
 }

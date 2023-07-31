@@ -2,6 +2,7 @@ using BLL.Interfaces;
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
@@ -168,7 +169,8 @@ public class GroupController : Controller
     public async Task<IActionResult> ConfirmSelection(int groupId, List<StudentSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
-        
+        var group = await _groupService.GetById(groupId);
+
         if (selectedStudents.Count > 20)
         {
             TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation");
@@ -177,7 +179,27 @@ public class GroupController : Controller
         }
         else
         {
-            //logic for creation
+            var studentIds = selectedStudents.Select(s => s.Id).ToList();
+            var studentsData = new Dictionary<string, string>();
+            var callBacks = new List<string>();
+            foreach (var studentId in studentIds) 
+            {
+                var student = await _userManager.FindByIdAsync(studentId);
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(student);
+                var callbackUrl = Url.Action(
+                "InventationToGroup",
+                "Group",
+                new { groupId = groupId, code = code },
+                protocol: HttpContext.Request.Scheme);
+                callBacks.Add(callbackUrl);
+
+                studentsData.Add(student.Email, callbackUrl);
+            }
+
+            var result = await _emailService.SendInventationToStudents(studentsData, group);
+
+            if (!result.IsSuccessful)
+                TempData.TempDataMessage("Error", result.Message);
         }
 
         return RedirectToAction("Index");
@@ -186,10 +208,54 @@ public class GroupController : Controller
     public async Task<IActionResult> ApprovedSelection(int groupId, List<StudentSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
+        var group = await _groupService.GetById(groupId);
 
-        //cretion logic
+        var studentIds = selectedStudents.Select(s => s.Id).ToList();
+        var studentsData = new Dictionary<string, string>();
+        var callBacks = new List<string>();
+        foreach (var studentId in studentIds)
+        {
+            var student = await _userManager.FindByIdAsync(studentId);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(student);
+            var callbackUrl = Url.Action(
+            "InventationToGroup",
+            "Group",
+            new { groupId = groupId, code = code },
+            protocol: HttpContext.Request.Scheme);
+            callBacks.Add(callbackUrl);
+
+            studentsData.Add(student.Email, code);
+        }
+
+        var result = await _emailService.SendInventationToStudents(studentsData, group);
+
+        if (!result.IsSuccessful)
+            TempData.TempDataMessage("Error", result.Message);
 
         return RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> InventationToGroup(int groupId, string code)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        var result = await _userManager.ConfirmEmailAsync(currentUser, code);
+
+        if (!result.Succeeded)
+            return View("Error");
+
+        var group = await _groupService.GetById(groupId);
+
+        if (group == null)
+            return View("Error");
+
+        //await service registration
+
+        var inventationVM = new InventationViewModel() { GroupName = group.Name, UserName = currentUser.UserName};
+
+        return View(inventationVM);
+
     }
 
     [HttpGet]
@@ -223,6 +289,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles ="Admin")]
     public async Task<IActionResult> AdminApprove(int groupId, string teacherId)
     {
         var group = await _groupService.GetById(groupId);
@@ -230,10 +297,11 @@ public class GroupController : Controller
         if (group == null || teacher == null)
             return View("Error");
 
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacher);
         var callbackUrl = Url.Action( 
            "ApprovedGroup",
            "Group",
-           new { groupId = groupId},
+           new { groupId = groupId, code = code},
            protocol: HttpContext.Request.Scheme);
 
         await _emailService.SendEmailToTeacherAboutApprovedGroup(teacher, group, callbackUrl);
@@ -243,8 +311,15 @@ public class GroupController : Controller
 
 
     [HttpGet]
-    public async Task<IActionResult> ApprovedGroup(int groupId)
+    [Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> ApprovedGroup(int groupId, string code)
     {
+        var currentUser = await _userManager.GetUserAsync(User);
+        var result = await _userManager.ConfirmEmailAsync(currentUser, code);
+
+        if (!result.Succeeded)
+            return View("Error");
+
         var group = await _groupService.GetById(groupId);
 
         if (group == null)
