@@ -1,0 +1,176 @@
+﻿@using UI.ViewModels
+@using Core.Enums
+@model DetailsAssignmentViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add Font Awesome CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Title -->
+        <div class="d-flex justify-content-between align-items-center py-3">
+            <h2 class="h5 mb-0"><a href="#" class="text-muted"></a>Assignment name: @Model.Name</h2>
+        </div>
+
+        <!-- Main content -->
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Details -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="mb-3 d-flex justify-content-between">
+                            <div>
+                                <div class="me-3">Start Date: @Model.StartDate.ToString("d")</div>
+                                <hr>
+                                <div class="me-3">End Date: @Model.EndDate.ToString("d")</div>
+                                <hr>
+                            </div>
+                            @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+                            {
+                                <div class="d-inline-block">
+                                    <a asp-controller="Assignment" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                        Edit
+                                    </a>
+                                    <a asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@Model.Id" class="btn btn-primary">
+                                        Delete
+                                    </a>
+                                    <a href="#" class="btn btn-primary">See all student answers</a>
+                                </div>
+                            }
+                            @if (User.IsInRole(AppUserRoles.Student.ToString()))
+                            {
+                                <div class="d-inline-block">
+                                    @if (Model.AssignmentAccess == AssignmentAccess.Planned)
+                                    {
+                                        <div class="inline-icon">
+                                            <i class="fa fa-times" aria-hidden="true"></i>Access denied
+                                        </div>
+                                    }
+                                    else if (Model.AssignmentAccess == AssignmentAccess.InProgress)
+                                    {                                       
+                                        <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@Model.Id" class="btn btn-primary">
+                                            Add answer
+                                        </a>
+                                    }
+                                    else if (Model.AssignmentAccess == AssignmentAccess.AwaitingApproval)
+                                    {
+                                        <div class="inline-icon">
+                                            <i class="fa fa-hourglass" aria-hidden="true"></i> Wait for grade
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="badge rounded-pill bg-info">Grade: @Model.UserAssignment?.Grade</div>
+                                    }
+                                </div>                               
+                            }
+                        </div>
+                        <!-- Customer Notes -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h3 class="h6">Description</h3>
+                                <p>@Model.Description</p>
+                            </div>
+                        </div>
+                        <hr/>                       
+                        @if (Model.AttachedFiles.Any()) //fro files
+                        {
+                            <h4>Attached files for assignmnet: </h4>
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>Assignment attached files:</tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var assignmentFile in Model.AttachedFiles)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex mb-2">
+                                                    <div class="flex-lg-grow-1 ms-3">
+                                                        <h6 class="small mb-0">@assignmentFile.Name</h6>
+
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="d-inline-block">
+                                <p>No attached files</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <hr />
+                <div class="col-lg-4">    
+                    
+                    @if (Model.UserAssignment != null)
+                    {
+                        <h4>Your answer:</h4>
+                        foreach (var assignmnetAnswer in Model.UserAssignment.AssignmentAnswers)
+                        {
+                            <div class="card-body">
+                                <h3 class="h6">Your answer files</h3>
+                                <strong>@assignmnetAnswer.Name</strong>
+                                <hr>
+                            </div>
+                        }
+                    }
+                    else if(User.IsInRole("Student"))
+                    {
+                        <div class="d-inline-block">
+                            <p>No answers</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        body {
+            background: #eee;
+        }
+
+        .card {
+            box-shadow: 0 20px 27px 0 rgb(0 0 0 / 5%);
+        }
+
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 0 solid rgba(0,0,0,.125);
+            border-radius: 1rem;
+        }
+
+        .text-reset {
+            --bs-text-opacity: 1;
+            color: inherit !important;
+        }
+
+        a {
+            color: #5465ff;
+            text-decoration: none;
+        }
+    </style>
+</body>
+</html>
+
+

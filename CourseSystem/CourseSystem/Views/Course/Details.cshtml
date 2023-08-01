@@ -1,4 +1,19 @@
+@using Core.Enums
 @model UI.ViewModels.CourseViewModel
+
+<style>
+    .group-card {
+        transition: box-shadow 0.3s ease;
+    }
+
+    .group-card:hover {
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .selected-group-card {
+        border: 2px solid #ff0000;
+    }
+</style>
 
 <div class="container mt-4">
     <div class="card">
@@ -8,15 +23,29 @@
         <div class="card-body">
             <h5 class="card-title">@Model.Name</h5>
 
+            <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
+
             @if (Model.Groups != null && Model.Groups.Count > 0)
             {
                 <h6>Groups:</h6>
-                <ul>
+                <div class="row">
                     @foreach (var group in Model.Groups)
                     {
-                        <li>@group.Name</li>
+                        <div class="col-md-4 mb-3">
+                            <div class="card group-card">
+                                <div class="card-body">
+                                    <h6 class="card-title">@group.Name</h6>
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-outline-info btn-sm">Details</a>
+                                    @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                                    {
+                                        <a href="@Url.Action("Edit", "Group", new { id = group.Id })" class="btn btn-outline-warning btn-sm">Edit</a>
+                                        <a href="@Url.Action("Delete", "Group", new { id = group.Id })" class="btn btn-outline-danger btn-sm">Delete</a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
                     }
-                </ul>
+                </div>
             }
             else
             {
@@ -38,6 +67,7 @@
                 <p>No education materials found for this course.</p>
             }
 
+            <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="btn btn-primary mb-3">Add teachers</a>
             @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
             {
                 <h6>Users:</h6>
@@ -55,3 +85,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.group-card').forEach(groupCard => {
+        groupCard.addEventListener('click', function () {
+            window.location.href = this.querySelector('.btn-outline-info').href;
+        });
+    });
+</script>
+
+

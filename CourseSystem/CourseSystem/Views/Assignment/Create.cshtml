@@ -1,0 +1,113 @@
+﻿@using UI.ViewModels
+@using Core.Enums
+@model CreateAssignmentViewModel
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Assignment</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }
+    <!-- Navbar -->
+    <div class="navbar-container">
+        <!-- Your navbar content goes here -->
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <section class="space-sm">
+            <div class="container">
+                <div class="row mb-5">
+                    <!-- Your other content goes here -->
+                </div>
+
+                <!-- Card for Create New Assignment Form -->
+                <div class="row flex-md-row card card-md">
+                    <div class="card-body bg-light">
+                        <div class="text-center mb-5">
+                            <h1 class="h2 mb-2">Create assignment</h1>
+                        </div>
+
+                        <!-- Assignment Creation Form -->
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-lg-6">
+                                <form method="post" asp-action="CreateAssignment" enctype="multipart/form-data">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <input type="hidden" id="GroupId" name="GroupId" value="@Model.GroupId" />
+                                    <!-- Assignment Details Inputs -->
+                                    <div class="form-row form-group">
+                                        <div class="col mb-3">
+                                            <label asp-for="Name" class="control-label"></label>
+                                            <input asp-for="Name" class="form-control">
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+                                        <div class="col mb-3">
+                                            <label asp-for="Description" class="control-label"></label>
+                                            <input asp-for="Description" class="form-control">
+                                            <span asp-validation-for="Description" class="text-danger"></span>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="form-row form-group">
+                                        <div class="col mb-3">
+                                            <label asp-for="StartDate" class="control-label"></label>
+                                            <input asp-for="StartDate" class="form-control">
+                                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                                        </div>
+                                        <div class="col mb-3">
+                                            <label asp-for="EndDate" class="control-label"></label>
+                                            <input asp-for="EndDate" class="form-control">
+                                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-row form-group">
+                                        <div class="col mb-3">
+                                            <label asp-for="AssignmentAccess" class="control-label"></label>
+                                            <select asp-for="AssignmentAccess" class="form-control form-control-lg">
+                                                <option value="@AssignmentAccess.Planned">@AssignmentAccess.Planned</option>
+                                                <option value="@AssignmentAccess.InProgress">@AssignmentAccess.InProgress</option>
+                                                <option value="@AssignmentAccess.Completed">@AssignmentAccess.Completed</option>
+                                            </select>
+                                            <span asp-validation-for="AssignmentAccess" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <!-- File Upload Input -->
+                                    <div class="form-group mb-3">
+                                        <label for="AttachedFiles">Select File(s):</label>
+                                        <input asp-for="AttachedFiles" type="file" class="form-control-file" id="AttachedFiles" name="AttachedFiles" multiple>
+                                    </div>
+                                    <!-- Submit Button -->
+                                    <div class="form-row form-group">
+                                        <div class="col">
+                                            <input class="btn btn-outline-primary" type="submit" value="Create" />
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Bootstrap JS and other scripts here if needed -->
+    <!-- This script is for Bootstrap's JavaScript plugins, including the ones used in the form -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

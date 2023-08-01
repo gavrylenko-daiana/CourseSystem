@@ -12,6 +12,25 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         _repository = unitOfWork.UserCoursesRepository;
     }
 
+    public async  Task AddTeacherToCourse(Course course, AppUser teacher)
+    {
+        try
+        {
+            var courseTeacher = new UserCourses()
+            {
+                Course = course,
+                AppUser = teacher
+            };
+
+            await _repository.AddAsync(courseTeacher);
+            await _unitOfWork.Save();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Failed to add teacher to course. Exception: {ex.Message}");
+        }
+    }
+
     public async Task CreateUserCourses(UserCourses userCourses)
     {
         try
