@@ -16,7 +16,7 @@ namespace BLL.Services
         public async Task<Result<bool>> CreateAssignmentAnswer(AssignmentAnswer assignmentAnswer, Assignment assignment, AppUser appUser)
         {
             if (assignmentAnswer == null)
-                return new Result<bool>(false, "Invalid assignmnet answe");
+                return new Result<bool>(false, "Invalid assignmnet answer");
 
             var userAssignmnetResult = await _userAssignmentService.CreateUserAssignment(assignment, appUser);
 
@@ -25,7 +25,7 @@ namespace BLL.Services
             
             try
             {
-                assignmentAnswer.UserAssignmentId = userAssignmnetResult.Data.Id;
+                assignmentAnswer.UserAssignment = userAssignmnetResult.Data;
                 await _repository.AddAsync(assignmentAnswer);
                 await _unitOfWork.Save();
 
