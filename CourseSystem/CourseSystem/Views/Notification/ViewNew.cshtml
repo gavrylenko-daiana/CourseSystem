@@ -1,0 +1,33 @@
+﻿@model List<Notification>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User notifications</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card w-100 pb-0">
+                    <div class="card-header text-center">
+                        <h4>Your new notifications</h4>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var notification in Model)
+                        {
+                            @Html.ActionLink(
+                        notification.Name,
+                        "NotificationDetails",
+                        new { notification.Id },
+                        new { @class="list-group-item" }
+                        )
+                            <p>@notification.Created.ToString("f")</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -16,8 +16,7 @@ namespace BLL.Services
     {
         public ActivityService(UnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _unitOfWork = unitOfWork;
-            //_repository = 
+            _repository = unitOfWork.UserActivityRepository;
         }
 
         public async Task AddAssignmentCreatedActivity(AppUser teacher, Assignment assignment)
@@ -71,7 +70,7 @@ namespace BLL.Services
                 {
                     Name = "You marked an assignment",
                     Description = $"<p>You marked the solution {userAssignments.AppUser.FirstName} {userAssignments.AppUser.LastName} submited for assignment \"{userAssignments.Assignment.Name}\".</p>" +
-                    $"<p>Your grade: {userAssignments.Grade}/100.</p>",
+                    $"<p>His/her grade: {userAssignments.Grade}/100.</p>",
                     Created = DateTime.Now,
                     AppUser = teacher,
                 };
