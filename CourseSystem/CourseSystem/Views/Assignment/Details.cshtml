@@ -117,10 +117,10 @@
                 <hr />
                 <div class="col-lg-4">    
                     
-                    @if (Model.UserAssignment != null)
+                    @if (Model.AssignmentAnswers.Any())
                     {
                         <h4>Your answer:</h4>
-                        foreach (var assignmnetAnswer in Model.UserAssignment.AssignmentAnswers)
+                        foreach (var assignmnetAnswer in Model.AssignmentAnswers)
                         {
                             <div class="card-body">
                                 <h3 class="h6">Your answer files</h3>

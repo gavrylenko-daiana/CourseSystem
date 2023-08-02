@@ -138,7 +138,14 @@ namespace UI.Controllers
 
                 var assignentDetailsVM = new DetailsAssignmentViewModel();
                 assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
-                assignentDetailsVM.UserAssignment = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
+                var userAssignmnet = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
+                //var assignmentAnswers = userAssignmnets.Select(ua => ua.AssignmentAnswers).ToList();
+                assignentDetailsVM.UserAssignment = userAssignmnet;
+
+                if (userAssignmnet?.AssignmentAnswers == null)
+                    assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
+                else
+                    assignentDetailsVM.AssignmentAnswers = userAssignmnet.AssignmentAnswers;
 
                 //logic for getting assignmnet files 
                 assignentDetailsVM.AttachedFiles = new List<IFormFile>();

@@ -23,6 +23,11 @@ namespace BLL.Services
 
             try
             {
+                var chechUserAssignmnet = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
+
+                if (chechUserAssignmnet.Any())
+                    return new Result<UserAssignments>(true, chechUserAssignmnet.FirstOrDefault());
+
                 var userAssignmnet = new UserAssignments()
                 {
                     AssignmentId = assignment.Id,
