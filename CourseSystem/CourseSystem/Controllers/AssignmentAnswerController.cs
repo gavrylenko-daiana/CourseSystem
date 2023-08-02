@@ -78,7 +78,24 @@ namespace UI.Controllers
                 return RedirectToAction("CreateAnswer", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
             }
 
-            return RedirectToAction("Index", "Home");//Course page redirection
+            return RedirectToAction("Details", "Assignment", new {id = assignmnet.Id});
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int assignmentAnswerId)
+        {
+            var assignmentAnswer = await _assignmentAnswerService.GetById(assignmentAnswerId);
+            var asignmentId = assignmentAnswer.UserAssignment.AssignmentId;
+
+            if (assignmentAnswer == null)
+                return NotFound();
+
+            var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
+
+            if(!deleteResult.IsSuccessful)
+                TempData.TempDataMessage("Error", deleteResult.Message);
+
+            return RedirectToAction("Details", "Assignment", new { id = asignmentId });
         }
     }
 }

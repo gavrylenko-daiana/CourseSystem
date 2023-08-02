@@ -36,5 +36,23 @@ namespace BLL.Services
                 return new Result<bool>(false, ex.Message);
             }
         }
+
+        public async Task<Result<bool>> DeleteAssignmentAnswer(AssignmentAnswer assignmentAnswer)
+        {
+            if (assignmentAnswer == null)
+                return new Result<bool>(false, "Fail to delet answer");
+
+            try
+            {
+                await Delete(assignmentAnswer.Id);
+                await _unitOfWork.Save();
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to delete answer");
+            }
+        }
     }
 }

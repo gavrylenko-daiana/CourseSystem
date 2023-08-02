@@ -14,7 +14,12 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
-
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }
     <div class="container">
         <!-- Title -->
         <div class="d-flex justify-content-between align-items-center py-3">
@@ -97,7 +102,6 @@
                                                 <div class="d-flex mb-2">
                                                     <div class="flex-lg-grow-1 ms-3">
                                                         <h6 class="small mb-0">@assignmentFile.Name</h6>
-
                                                     </div>
                                                 </div>
                                             </td>
@@ -122,9 +126,13 @@
                         <h4>Your answer:</h4>
                         foreach (var assignmnetAnswer in Model.AssignmentAnswers)
                         {
-                            <div class="card-body">
-                                <h3 class="h6">Your answer files</h3>
-                                <strong>@assignmnetAnswer.Name</strong>
+                            <div class="card-body">                               
+                                <strong>@assignmnetAnswer.Name</strong>                               
+                                <div class="d-inline-block">
+                                    <a href="@Url.Action("Delete", "AssignmentAnswer", new { assignmentAnswerId = @assignmnetAnswer.Id})" class="btn btn-primary">
+                                        Delete
+                                    </a>
+                                </div>
                                 <hr>
                             </div>
                         }
