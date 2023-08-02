@@ -41,10 +41,7 @@
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6 offset-md-3">
-                <div class="card w-100 pb-0">
+                <div class="card">
                     <div class="card-header text-center">
                         <h4>Activity in @Month[((DateTime)ViewData["DateTime"]).Month - 1]</h4>
                         @{
@@ -99,7 +96,7 @@
                                             {
                                                 var todayActivities = Model.Where(a => a.Created.Day == thisDay.Day).ToList();
                                                 <ul class="list-group">
-                                                @if(todayActivities.Count <= 5)
+                                                @if(todayActivities.Count <= 4)
                                                 {
                                                     foreach(var activity in todayActivities)
                                                     {
@@ -113,7 +110,7 @@
                                                 }
                                                 else
                                                 {
-                                                    for(int i = 0; i < 5; i++)
+                                                    for(int i = 0; i < 3; i++)
                                                     {
                                                         @Html.ActionLink(
                                                             todayActivities[i].Name,
@@ -124,7 +121,7 @@
                                                     }
 
                                                     @Html.ActionLink(
-                                                        $"And {todayActivities.Count - 4} more",
+                                                        $"And {todayActivities.Count - 3} more",
                                                         "ActivityForDay",
                                                         new { thisDay },
                                                         new { @class="link-secondary", @style="font-size:12px;" }
@@ -152,9 +149,5 @@
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>

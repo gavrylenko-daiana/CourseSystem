@@ -25,10 +25,7 @@ namespace UI.Controllers
 
             var currentUser = await _userManager.GetUserAsync(User);
 
-            var activities = currentUser.UserActivities
-                .Where(a => a.Created.Month == month.Month)
-                    .OrderByDescending(a => a.Created)
-                        .ToList();
+            var activities = currentUser.UserActivities.ForMonth(month);
 
             ViewData["DateTime"] = month;
 
@@ -41,10 +38,7 @@ namespace UI.Controllers
             var day = thisDay ?? DateTime.Today;
             var currentUser = await _userManager.GetUserAsync(User);
 
-            var activities = currentUser.UserActivities
-                .Where(a => a.Created.Day == day.Day)
-                    .OrderByDescending(a => a.Created)
-                        .ToList();
+            var activities = currentUser.UserActivities.ForDate(day);
 
             ViewData["DateTime"] = day;
 
