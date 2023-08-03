@@ -1,8 +1,14 @@
 @using Core.Enums
 @model UI.ViewModels.UserGroupViewModel
 
+<style>
+    .object-list li {
+        margin-top: 10px;
+    }
+</style>
+
 <div class="container mt-4">
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header">
             Group Details
         </div>
@@ -26,46 +32,80 @@
                 <p>No education materials found for this group.</p>
             }
             
-            @if (Model.Group.Assignments != null && Model.Group.Assignments.Count > 0)
+            @if (Model.CurrentUser.Role != AppUserRoles.Student)
             {
-                <h6>Assignments:</h6>
+                <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="btn btn-outline-primary">Edit Group</a>
+                <a href="@Url.Action("Delete", "Group", new { id = Model.Group.Id })" class="btn btn-outline-danger">Delete Group</a>
+            }
+        </div>
+    </div>
+
+    @if (Model.Group.Assignments != null && Model.Group.Assignments.Count > 0)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                Assignments
+            </div>
+            <div class="card-body, object-list">
                 <ul>
                     @foreach (var assignment in Model.Group.Assignments)
                     {
                         <li>@assignment.Name</li>
                     }
                 </ul>
-            }
-            else
-            {
-                <p>No assignments found for this group.</p>
-            }
-            
-            <a href="@Url.Action("Index", "Assignment", new { id = Model.Group.Id })" class="btn btn-primary">Assignment</a>
-
-            @if (Model.Group.UserGroups != null && Model.Group.UserGroups.Count > 0)
-            {
-                <h6>Users:</h6>
-                <ul>
-                    @foreach (var userGroup in Model.Group.UserGroups)
-                    {
-                        <li>@userGroup.AppUser.FirstName</li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No users found for this group.</p>
-            }
-            <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
-            
-            <div class="btn-group" role="group">
-                @if (Model.CurrentUser.Role != AppUserRoles.Student)
-                {
-                    <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="btn btn-outline-primary">Edit Group</a>
-                    <a href="@Url.Action("Delete", "Group", new { id = Model.Group.Id })" class="btn btn-outline-danger">Delete Group</a>
-                }
+            </div>
+            <div class="card-footer"> 
+                <a href="@Url.Action("Index", "Assignment", new { id = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                Assignments
+            </div>
+            <div class="card-body">
+                <p>No assignments found for this group.</p>
+            </div>
+        </div>
+    }
+
+    @if (Model.Group.UserGroups != null && Model.Group.UserGroups.Count > 0)
+    {
+        <div class="card">
+            <div class="card-header">
+                Users
+            </div>
+            <div class="card-body, object-list">
+                <ul>
+                    @foreach (var userGroup in Model.Group.UserGroups.OrderBy(ug => ug.AppUser.Role))
+                    {
+                        <li>
+                            @userGroup.AppUser.Role - @userGroup.AppUser.FirstName
+                            <a href="@Url.Action("Detail", "User", new { id = userGroup.AppUser.Id })" class="btn btn-sm btn-outline-primary ml-2">View Profile</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header">
+                Users
+            </div>
+            <div class="card-body">
+                <p>No users found for this group.</p>
+            </div>
+        </div>
+    }
+    
+      @if (Model.CurrentUser.Role != AppUserRoles.Student)
+      {
+          <div class="card-footer">
+              <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
+          </div>
+      }
 </div>
