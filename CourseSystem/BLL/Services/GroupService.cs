@@ -1,4 +1,5 @@
 using BLL.Interfaces;
+using Core.Enums;
 using Core.Models;
 using DAL.Repository;
 using Microsoft.AspNetCore.Identity;
@@ -32,6 +33,9 @@ public class GroupService : GenericService<Group>, IGroupService
             {
                 foreach (var userCourse in course.UserCourses)
                 {
+                    if (userCourse.AppUser.Role == AppUserRoles.Student)
+                        return;
+
                     var userGroup = new UserGroups()
                     {
                         Group = group,
