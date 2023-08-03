@@ -101,7 +101,11 @@
             </div>
         </div>
     }
-    <div class="card-footer">
-        <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
-    </div>
+    
+      @if (Model.CurrentUser.Role != AppUserRoles.Student)
+      {
+          <div class="card-footer">
+              <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
+          </div>
+      }
 </div>
