@@ -250,8 +250,7 @@ public class CourseController : Controller
         {
             TempData.TempDataMessage("Error", sendResult.Message);
             return View("SelectTeachers");
-        }          
-        
+        }
 
         TempData["CourseId"] = course.Id;
         

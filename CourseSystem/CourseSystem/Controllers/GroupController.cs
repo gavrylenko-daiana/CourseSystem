@@ -59,7 +59,8 @@ public class GroupController : Controller
     public async Task<IActionResult> Create(GroupViewModel groupViewModel)
     {
         var courseId = (int)(TempData["CourseId"] ?? throw new InvalidOperationException());
-
+        var course = await _courseService.GetById(courseId);
+        
         var currentUser = await _userManager.GetUserAsync(User);
 
         if (currentUser == null)
@@ -75,7 +76,7 @@ public class GroupController : Controller
 
         try
         {
-            await _groupService.CreateGroup(group, currentUser);
+            await _groupService.CreateGroup(group, course);
         }
         catch (Exception ex)
         {

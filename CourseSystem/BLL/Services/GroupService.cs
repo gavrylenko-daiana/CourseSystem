@@ -19,7 +19,7 @@ public class GroupService : GenericService<Group>, IGroupService
         _userManager = userManager;
     }
 
-    public async Task CreateGroup(Group group, AppUser currentUser)
+    public async Task CreateGroup(Group group, Course course)
     {
         try
         {
@@ -27,15 +27,22 @@ public class GroupService : GenericService<Group>, IGroupService
                 
             await Add(group);
             await _unitOfWork.Save();
-            
-            var userGroup = new UserGroups()
+
+            if (course.UserCourses.Any())
             {
-                Group = group,
-                GroupId = group.Id,
-                AppUser = currentUser,
-                AppUserId = currentUser.Id
-            };
-            await _userGroupService.CreateUserGroups(userGroup);
+                foreach (var userCourse in course.UserCourses)
+                {
+                    var userGroup = new UserGroups()
+                    {
+                        Group = group,
+                        GroupId = group.Id,
+                        AppUser = userCourse.AppUser,
+                        AppUserId = userCourse.AppUserId
+                    };
+                    
+                    await _userGroupService.CreateUserGroups(userGroup);
+                }
+            }
         }
         catch (Exception ex)
         {
