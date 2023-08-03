@@ -48,7 +48,9 @@
                                     <a asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@Model.Id" class="btn btn-primary">
                                         Delete
                                     </a>
-                                    <a href="#" class="btn btn-primary">See all student answers</a>
+                                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = Model.Id})" class="btn btn-primary">
+                                        See all student answers
+                                    </a>
                                 </div>
                             }
                             @if (User.IsInRole(AppUserRoles.Student.ToString()))
@@ -124,7 +126,7 @@
                 <hr />
                 <div class="col-lg-4">    
                     
-                    @if (Model.AssignmentAnswers.Any())
+                    @if (Model.AssignmentAnswers.Any() && User.IsInRole("Student"))
                     {
                         <h4>Your answer:</h4>
                         foreach (var assignmnetAnswer in Model.AssignmentAnswers)

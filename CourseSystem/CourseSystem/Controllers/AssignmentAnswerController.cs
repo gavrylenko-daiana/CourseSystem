@@ -10,19 +10,22 @@ using UI.ViewModels;
 namespace UI.Controllers
 {
     [CustomFilterAttributeException]
-    [Authorize(Roles = "Student")]
+
     public class AssignmentAnswerController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IAssignmentService _assignmentService;
         private readonly IAssignmentAnswerService _assignmentAnswerService;
+        private readonly IUserAssignmentService _userAssignmentService;
         public AssignmentAnswerController(UserManager<AppUser> userManager,
             IAssignmentService assignmentService,
-            IAssignmentAnswerService assignmentAnswerService)
+            IAssignmentAnswerService assignmentAnswerService,
+            IUserAssignmentService userAssignmentService)
         {
             _userManager = userManager;
             _assignmentService = assignmentService;
             _assignmentAnswerService = assignmentAnswerService;
+            _userAssignmentService = userAssignmentService;
         }
         public IActionResult Index()
         {
@@ -31,6 +34,7 @@ namespace UI.Controllers
 
         [HttpGet]
         [Route("CreateAnswer/{id}")]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> CreateAnswer(int id)
         {
             try
@@ -48,7 +52,8 @@ namespace UI.Controllers
             }
         }
 
-        [HttpPost]      
+        [HttpPost]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
         {
             if(!ModelState.IsValid)
@@ -82,6 +87,7 @@ namespace UI.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> Delete(int assignmentAnswerId)
         {
             var assignmentAnswer = await _assignmentAnswerService.GetById(assignmentAnswerId);
@@ -96,6 +102,27 @@ namespace UI.Controllers
                 TempData.TempDataMessage("Error", deleteResult.Message);
 
             return RedirectToAction("Details", "Assignment", new { id = asignmentId });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> SeeStudentAnswers(int assignmentId)
+        {
+            var assignment = await _assignmentService.GetById(assignmentId);
+
+            if(assignment == null)
+                return NotFound();
+
+            var userAssignmentVMs = new List<UserAssignmentViewModel>();
+
+            foreach(var userAssignment in assignment.UserAssignments)
+            {
+                var userAssignmentVM = new UserAssignmentViewModel();
+                userAssignment.MapTo<UserAssignments, UserAssignmentViewModel>(userAssignmentVM);
+                userAssignmentVMs.Add(userAssignmentVM);
+            }
+
+            return View(userAssignmentVMs);
         }
     }
 }
