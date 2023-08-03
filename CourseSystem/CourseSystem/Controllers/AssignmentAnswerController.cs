@@ -124,5 +124,20 @@ namespace UI.Controllers
 
             return View(userAssignmentVMs);
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> CheckAnswer(int userAssignmentId)
+        {
+            var userAssignment = await _userAssignmentService.GetById(userAssignmentId);
+            
+            if(userAssignment == null)
+                return NotFound();
+
+            var checkAnswerVM = new CheckAnswerViewModel();
+            userAssignment.MapTo<UserAssignments,  CheckAnswerViewModel>(checkAnswerVM);
+
+            return View(checkAnswerVM);
+        }
     }
 }

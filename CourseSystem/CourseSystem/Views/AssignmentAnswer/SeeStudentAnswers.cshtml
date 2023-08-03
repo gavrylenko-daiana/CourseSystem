@@ -34,7 +34,9 @@
                     {
                         <p class="card-text">File: @answer.Name</p>
                     }
-                    <a href="#" class="btn btn-primary">Check</a>
+                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.Id})" class="btn btn-primary">
+                        Check
+                    </a>
                 </div>
                 <div class="card-footer bg-transparent border-success">
                     Grade: @userAssignment.Grade / 100
