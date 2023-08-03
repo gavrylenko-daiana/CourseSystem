@@ -54,9 +54,6 @@
                     }
                 </ul>
             </div>
-            <div class="card-footer"> 
-                <a href="@Url.Action("Index", "Assignment", new { id = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
-            </div>
         </div>
     }
     else
@@ -70,6 +67,9 @@
             </div>
         </div>
     }
+    <div class="card-footer"> 
+        <a href="@Url.Action("Index", "Assignment", new { id = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
+    </div>
 
     @if (Model.Group.UserGroups != null && Model.Group.UserGroups.Count > 0)
     {
