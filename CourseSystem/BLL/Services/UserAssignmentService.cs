@@ -16,6 +16,27 @@ namespace BLL.Services
             _repository = unitOfWork.UserAssignmentsRepository;
         }
 
+        public async Task<Result<bool>> ChangeUserAssignmentGrade(UserAssignments userAssignment, int newGrade)
+        {
+            if (userAssignment == null)
+                return new Result<bool>(false, "Fail to get user assignment");
+
+            try
+            {
+                userAssignment.Grade = newGrade;
+                userAssignment.IsChecked = true;
+
+                await Update(userAssignment);
+                await _unitOfWork.Save();
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to update assignment");
+            }
+        }
+
         public async Task<Result<UserAssignments>> CreateUserAssignment(Assignment assignment, AppUser appUser)
         {
             if(assignment == null || appUser == null)

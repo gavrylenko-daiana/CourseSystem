@@ -144,7 +144,34 @@ namespace UI.Controllers
             var checkAnswerVM = new CheckAnswerViewModel();
             userAssignment.MapTo<UserAssignments,  CheckAnswerViewModel>(checkAnswerVM);
 
+            TempData["AssignmentId"] = assignmentId;
+            TempData["StudentId"] = studentId;
+
             return View(checkAnswerVM);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeGrade(int grade)
+        {
+            var assignmentId = (int)TempData["AssignmentId"];
+            var studentId = TempData["StudentId"].ToString();
+
+            var assignment = await _assignmentService.GetById(assignmentId);
+            var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
+
+            if (userAssignment == null)
+                return NotFound();
+
+            var updateResult = await _userAssignmentService.ChangeUserAssignmentGrade(userAssignment, grade);
+
+            if (!updateResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", updateResult.Message); 
+
+                return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId});
+            }
+
+            return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId });
         }
     }
 }

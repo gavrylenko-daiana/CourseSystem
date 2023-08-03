@@ -35,21 +35,20 @@
          </div>
         
     </section>
-    <form method="post" asp-action="CreateAssignment" class="form-outline">
-        <input type="hidden" id="GroupId" name="GroupId" value="@Model.Id" />
+    <form method="post" asp-controller="AssignmentAnswer" asp-action="ChangeGrade" class="form-outline">
+        @*<input type="hidden" id="userAssignmentId" name="userAssignmentId" value="@Model.Id" />*@
         <!-- Assignment Details Inputs -->
         <div class="form-row form-group">
             <div class="col mb-3">
                 <label asp-for="Grade" class="form-label" for="form12"></label>
                 <input asp-for="Grade" type="text" id="form12" class="form-control">
-                @*<span asp-validation-for="Name" class="text-danger"></span>*@
+                <span asp-validation-for="Grade" class="text-danger"></span>
             </div>
-
         </div>
         <!-- Submit Button -->
         <div class="form-row form-group">
             <div class="col">
-                <input class="btn btn-outline-primary" type="submit" value="Set grade" />
+                <input class="btn btn-outline-primary" type="submit" value="Save" />
             </div>
         </div>
     </form>
