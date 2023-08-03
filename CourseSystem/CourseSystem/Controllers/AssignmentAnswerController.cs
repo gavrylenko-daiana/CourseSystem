@@ -119,6 +119,7 @@ namespace UI.Controllers
             {
                 var userAssignmentVM = new UserAssignmentViewModel();
                 userAssignment.MapTo<UserAssignments, UserAssignmentViewModel>(userAssignmentVM);
+                userAssignmentVM.Id = userAssignment.Id;
                 userAssignmentVMs.Add(userAssignmentVM);
             }
 
@@ -127,9 +128,15 @@ namespace UI.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> CheckAnswer(int userAssignmentId)
+        public async Task<IActionResult> CheckAnswer(int assignmentId, string studentId)
         {
-            var userAssignment = await _userAssignmentService.GetById(userAssignmentId);
+            var student = await _userManager.FindByIdAsync(studentId);
+
+            if (student == null)
+                return NotFound();
+
+            var assignment = await _assignmentService.GetById(assignmentId);
+            var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId ==  student.Id);
             
             if(userAssignment == null)
                 return NotFound();

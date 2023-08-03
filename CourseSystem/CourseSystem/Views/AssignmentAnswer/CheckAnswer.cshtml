@@ -1,4 +1,63 @@
 ﻿@using UI.ViewModels
 @model CheckAnswerViewModel
 
+<div class="container-fluid">
+    <section>
+        <div class="row">
+            <div class="col-12 mt-3 mb-1 bg-light">
+                <h5 class="text-uppercase">@Model.AppUser.FirstName @Model.AppUser.LastName</h5>
+                <p>@Model.AppUser.Email</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-6 col-md-12 mb-4">
+                <h5>Answer files:</h5>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between p-md-1">
+                            <div class="d-flex flex-row">
+                                
+                                @if (Model.AssignmentAnswers.Any())
+                                {
+                                    foreach(var answer in Model.AssignmentAnswers)
+                                    {
+                                        <div>
+                                            <h4>@answer.Name</h4>
+                                            @*<p class="mb-0">Monthly blog posts</p>*@
+                                        </div>
+                                    }
+                                }                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>  
+         </div>
+        
+    </section>
+    <form method="post" asp-action="CreateAssignment" class="form-outline">
+        <input type="hidden" id="GroupId" name="GroupId" value="@Model.Id" />
+        <!-- Assignment Details Inputs -->
+        <div class="form-row form-group">
+            <div class="col mb-3">
+                <label asp-for="Grade" class="form-label" for="form12"></label>
+                <input asp-for="Grade" type="text" id="form12" class="form-control">
+                @*<span asp-validation-for="Name" class="text-danger"></span>*@
+            </div>
 
+        </div>
+        <!-- Submit Button -->
+        <div class="form-row form-group">
+            <div class="col">
+                <input class="btn btn-outline-primary" type="submit" value="Set grade" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control {
+        width: 300px;
+        height: 40px;
+    }
+</style>

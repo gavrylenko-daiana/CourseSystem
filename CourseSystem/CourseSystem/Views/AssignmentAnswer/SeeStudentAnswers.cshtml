@@ -34,7 +34,7 @@
                     {
                         <p class="card-text">File: @answer.Name</p>
                     }
-                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.Id})" class="btn btn-primary">
+                    <a href="@Url.Action("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.Assignment.Id, studentId = userAssignment.AppUser.Id})" class="btn btn-primary">
                         Check
                     </a>
                 </div>
