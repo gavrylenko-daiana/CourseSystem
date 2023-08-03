@@ -54,27 +54,30 @@
                             @if (User.IsInRole(AppUserRoles.Student.ToString()))
                             {
                                 <div class="d-inline-block">
-                                    @if (Model.AssignmentAccess == AssignmentAccess.Planned)
+                                    @if (Model.IsChecked)
                                     {
-                                        <div class="inline-icon">
-                                            <i class="fa fa-times" aria-hidden="true"></i>Access denied
-                                        </div>
-                                    }
-                                    else if (Model.AssignmentAccess == AssignmentAccess.InProgress)
-                                    {                                       
-                                        <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@Model.Id" class="btn btn-primary">
-                                            Add answer
-                                        </a>
-                                    }
-                                    else if (Model.AssignmentAccess == AssignmentAccess.AwaitingApproval)
-                                    {
-                                        <div class="inline-icon">
-                                            <i class="fa fa-hourglass" aria-hidden="true"></i> Wait for grade
-                                        </div>
+                                        <div class="badge rounded-pill bg-info">Grade: @Model.UserAssignment?.Grade</div>
                                     }
                                     else
                                     {
-                                        <div class="badge rounded-pill bg-info">Grade: @Model.UserAssignment?.Grade</div>
+                                        @if (Model.AssignmentAccess == AssignmentAccess.Planned)
+                                        {
+                                            <div class="inline-icon">
+                                                <i class="fa fa-times" aria-hidden="true"></i>Access denied
+                                            </div>
+                                        }
+                                        else if (Model.AssignmentAccess == AssignmentAccess.InProgress)
+                                        {
+                                            <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@Model.Id" class="btn btn-primary">
+                                                Add answer
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <div class="inline-icon">
+                                                <i class="fa fa-hourglass" aria-hidden="true"></i> Wait for grade
+                                            </div>
+                                        }
                                     }
                                 </div>                               
                             }
