@@ -47,6 +47,26 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         }
     }
 
+    public async Task AddStudentToGroupAndCourse(UserGroups userGroups)
+    {
+        try
+        {
+            await _userGroupService.CreateUserGroups(userGroups);
+
+            var userCourses = new UserCourses()
+            {
+                AppUser = userGroups.AppUser,
+                Course = userGroups.Group.Course
+            };
+
+            await CreateUserCourses(userCourses);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
+        }
+    }
+
     public async Task CreateUserCourses(UserCourses userCourses)
     {
         try

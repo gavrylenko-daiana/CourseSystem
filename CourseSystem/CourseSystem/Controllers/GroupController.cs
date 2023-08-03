@@ -16,18 +16,21 @@ public class GroupController : Controller
     private readonly ICourseService _courseService;
     private readonly IEmailService _emailService;
     private readonly IUserGroupService _userGroupService;
+    private readonly IUserCourseService _userCourseService;
     private readonly UserManager<AppUser> _userManager;
 
     public GroupController(IGroupService groupService, ICourseService courseService,
         UserManager<AppUser> userManager,
         IEmailService emailService,
-        IUserGroupService userGroupService)
+        IUserGroupService userGroupService,
+        IUserCourseService userCourseService)
     {
         _groupService = groupService;
         _courseService = courseService;
         _emailService = emailService;
         _userManager = userManager;
         _userGroupService = userGroupService;
+        _userCourseService = userCourseService;
     }
     
     [HttpGet]
@@ -279,7 +282,7 @@ public class GroupController : Controller
 
         try
         {
-            await _userGroupService.CreateUserGroups(userGroup);
+            await _userCourseService.AddStudentToGroupAndCourse(userGroup);
         }
         catch (Exception ex)
         {
