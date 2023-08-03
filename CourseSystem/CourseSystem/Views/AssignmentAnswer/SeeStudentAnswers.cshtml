@@ -11,37 +11,45 @@
     <h1 class="mb-3">Students answers</h1>
 </div>
 <div class="row ">
-    @foreach(var userAssignment in Model)
+    @if (Model.Any())
     {
-        <div class="col-sm-6">
-            <div class="card">
-                @if (userAssignment.IsChecked)
-                {
-                    <div class="card-header bg-transparent border-success">
-                        Marked
-                    </div>
-                }
-                else
-                {
-                    <div class="card-header bg-transparent border-danger">
-                        Not Marked
-                    </div>
-                }
-                
-                <div class="card-body">
-                    <h5 class="card-title">@userAssignment.AppUser.FirstName @userAssignment.AppUser.LastName</h5>
-                    @foreach (var answer in userAssignment.AssignmentAnswers)
+        @foreach (var userAssignment in Model)
+        {
+            <div class="col-sm-6">
+                <div class="card">
+                    @if (userAssignment.IsChecked)
                     {
-                        <p class="card-text">File: @answer.Name</p>
+                        <div class="card-header bg-transparent border-success">
+                            Marked
+                        </div>
                     }
-                    <a href="@Url.Action("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.Assignment.Id, studentId = userAssignment.AppUser.Id})" class="btn btn-primary">
-                        Check
-                    </a>
-                </div>
-                <div class="card-footer bg-transparent border-success">
-                    Grade: @userAssignment.Grade / 100
+                    else
+                    {
+                        <div class="card-header bg-transparent border-danger">
+                            Not Marked
+                        </div>
+                    }
+
+                    <div class="card-body">
+                        <h5 class="card-title">@userAssignment.AppUser.FirstName @userAssignment.AppUser.LastName</h5>
+                        @foreach (var answer in userAssignment.AssignmentAnswers)
+                        {
+                            <p class="card-text">File: @answer.Name</p>
+                        }
+                        <a href="@Url.Action("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.Assignment.Id, studentId = userAssignment.AppUser.Id})" class="btn btn-primary">
+                            Check
+                        </a>
+                    </div>
+                    <div class="card-footer bg-transparent border-success">
+                        Grade: @userAssignment.Grade / 100
+                    </div>
                 </div>
             </div>
-        </div>
+        }
     }
+    else
+    {
+        <h5>No students answers</h5>
+    }
+
 </div>

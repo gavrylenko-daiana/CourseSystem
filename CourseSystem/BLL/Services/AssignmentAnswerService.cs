@@ -45,6 +45,13 @@ namespace BLL.Services
             try
             {
                 await Delete(assignmentAnswer.Id);
+
+
+                if (assignmentAnswer.UserAssignment.AssignmentAnswers.Count() == 1)
+                {
+                    await _unitOfWork.UserAssignmentsRepository.DeleteUserAssignment(assignmentAnswer.UserAssignment.AppUserId, assignmentAnswer.UserAssignment.AssignmentId);
+                }
+
                 await _unitOfWork.Save();
 
                 return new Result<bool>(true);

@@ -19,13 +19,12 @@
                                 
                                 @if (Model.AssignmentAnswers.Any())
                                 {
-                                    foreach(var answer in Model.AssignmentAnswers)
-                                    {
-                                        <div>
+                                    <div>
+                                        @foreach(var answer in Model.AssignmentAnswers)
+                                        {
                                             <h4>@answer.Name</h4>
-                                            @*<p class="mb-0">Monthly blog posts</p>*@
-                                        </div>
-                                    }
+                                        }
+                                    </div>
                                 }                                
                             </div>
                         </div>
