@@ -72,11 +72,9 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            throw new Exception("User not found!");
+            ViewData.ViewDataMessage("Error", "Entered incorrect email or password. Please try again.");
             
-            // ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
-            //
-            // return View(loginViewModel);
+            return View(loginViewModel);
         }
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -112,7 +110,7 @@ public class AccountController : Controller
             }
         }
 
-        TempData.TempDataMessage("Error", "Entered incorrect password. Please try again.");
+        TempData.TempDataMessage("Error", "Entered incorrect email or password. Please try again.");
 
         return View(loginViewModel);
     }
