@@ -7,10 +7,12 @@
             @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
         </div>
 
-        @if (TempData["CreatingError"] != null)
+        @if (TempData["Error"] != null)
         {
-            <p class="text-danger">@TempData["CreatingError"]</p>
-        }
+            <div class="col-md-12 alert alert-danger">
+                <span><b>Sorry!</b> - @TempData["Error"]</span>
+            </div>
+        }  
         
         <input type="submit" value="Create" class="btn btn-primary" />
     </div>
