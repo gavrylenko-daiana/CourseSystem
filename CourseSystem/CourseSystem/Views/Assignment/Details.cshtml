@@ -46,7 +46,7 @@
                                     <a asp-controller="Assignment" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
                                         Edit
                                     </a>
-                                    <a asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    <a href="@Url.Action("DeleteAssignment", "Assignment", new { assignmentId = @Model.Id })" class="btn btn-primary">
                                         Delete
                                     </a>
                                     <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = Model.Id})" class="btn btn-primary">

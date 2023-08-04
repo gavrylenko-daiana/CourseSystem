@@ -23,9 +23,9 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int id) //here is passing group id
+        public async Task<IActionResult> Index(int assignmentId) //here is passing group id
         {
-            var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(id);
+            var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(assignmentId);
 
             if (!groupAssignmentsResult.IsSuccessful)
             {
@@ -37,27 +37,25 @@ namespace UI.Controllers
             
             if (groupAssignmentsResult.Data != null)
             {
-                foreach(var assignment in groupAssignmentsResult.Data)
+                groupAssignmentsResult.Data.ForEach(assignment =>
                 {
                     var assignmentVM = new AssignmentViewModel();
                     assignment.MapTo<Assignment, AssignmentViewModel>(assignmentVM);
                     assignmentVM.UserAssignment = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
                     assignmentsVM.Add(assignmentVM);
-                }
+                });
             }
 
-            ViewBag.GroupId = id;
+            ViewBag.GroupId = assignmentId;
             return View(assignmentsVM);
         }
 
         [HttpGet]        
         [Authorize(Roles = "Teacher")]
-        [Route("Create/{id}")]
-        public async Task<IActionResult> Create(int id)
+        [Route("Create/{groupId}")]
+        public async Task<IActionResult> Create(int groupId)
         {
-            //check if this group exist 
-
-            var assignmentVM = new CreateAssignmentViewModel() { GroupId = id };
+            var assignmentVM = new CreateAssignmentViewModel() { GroupId = groupId };
 
             return View(assignmentVM);
         }
@@ -93,16 +91,16 @@ namespace UI.Controllers
                 return View(assignmentVM);
             }
 
-            return RedirectToAction("Index", "Assignment", new {id = assignmentVM .GroupId});
+            return RedirectToAction("Index", "Assignment", new { assignmentId = assignmentVM .GroupId});
         }
 
         [HttpGet]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> DeleteAssignment(int id)
+        public async Task<IActionResult> DeleteAssignment(int assignmentId)
         {
             try
             {
-                var assignment = await _assignmentService.GetById(id);
+                var assignment = await _assignmentService.GetById(assignmentId);
 
                 var assignentDeleteVM = new DeleteAssignmentViewModel();
                 assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
@@ -197,6 +195,12 @@ namespace UI.Controllers
         {
             if (editAssignmentVM == null)
                 return View("Error");
+
+            if(!ModelState.IsValid)
+            {
+                TempData.TempDataMessage("Error", "Invalid data input");
+                return View(editAssignmentVM.Id);
+            }
            
             var assignment = new Assignment();
             editAssignmentVM.MapTo<EditAssignmentViewModel, Assignment>(assignment);

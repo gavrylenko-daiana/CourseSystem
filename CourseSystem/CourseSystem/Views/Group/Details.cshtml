@@ -41,7 +41,9 @@
                 <p>No assignments found for this group.</p>
             }
             
-            <a href="@Url.Action("Index", "Assignment", new { id = Model.Group.Id })" class="btn btn-primary">Assignment</a>
+            <a href="@Url.Action("Index", "Assignment", new { assignmentId = Model.Group.Id })" class="btn btn-primary">
+                Assignments
+            </a>
 
             @if (Model.Group.UserGroups != null && Model.Group.UserGroups.Count > 0)
             {
