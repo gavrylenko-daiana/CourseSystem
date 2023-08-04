@@ -68,7 +68,7 @@ namespace UI.Controllers
                 //set the name of file to model
             }
 
-            assignmnetAnswer.Name = assignmentAnswerVM.AnswerDescription;
+            assignmnetAnswer.Name = "Some file name";
             assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
             assignmnetAnswer.Url = "Some URL";
 

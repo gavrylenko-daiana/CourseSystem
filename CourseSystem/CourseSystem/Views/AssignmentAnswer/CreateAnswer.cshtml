@@ -36,7 +36,7 @@
                                     <div class="form-row form-group">
                                         <div class="col mb-3">
                                             <label asp-for="AnswerDescription" class="control-label"></label>
-                                            <input asp-for="AnswerDescription" type="text" class="form-control" id="AnswerDescription" placeholder="Enter your answer description">
+                                            <textarea asp-for="AnswerDescription" class="form-control custom-textarea" rows="5" id="AnswerDescription" placeholder="Enter your answer description"></textarea>
                                             <span asp-validation-for="AnswerDescription" class="text-danger"></span>
                                         </div>                                   
                                     <!-- File Upload Input -->

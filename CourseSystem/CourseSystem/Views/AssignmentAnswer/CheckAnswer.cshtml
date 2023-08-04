@@ -1,4 +1,5 @@
 ﻿@using UI.ViewModels
+@using Westwind.AspNetCore.Markdown;
 @model CheckAnswerViewModel
 
 <div class="container-fluid">
@@ -10,7 +11,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-xl-6 col-md-12 mb-4">
+            <div class="col-xl-6 col-md-12 mb-4">                
                 <h5>Answer files:</h5>
                 <div class="card">
                     <div class="card-body">
@@ -23,6 +24,13 @@
                                         @foreach(var answer in Model.AssignmentAnswers)
                                         {
                                             <h4>@answer.Name</h4>
+                                            @if(answer.Text != null)
+                                            {
+                                                <h6>Answer description: </h6>
+                                                <div>
+                                                    @Markdown.ParseHtmlString(answer.Text)
+                                                </div>
+                                            }                                          
                                         }
                                     </div>
                                 }                                

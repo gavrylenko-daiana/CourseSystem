@@ -93,7 +93,7 @@ namespace UI.Controllers
                 return View(assignmentVM);
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Assignment", new {id = assignmentVM .GroupId});
         }
 
         [HttpGet]
