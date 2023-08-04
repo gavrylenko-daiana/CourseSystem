@@ -16,6 +16,7 @@
             <h5 class="card-title">@Model.Group.Name</h5>
             <p><strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")</p>
             <p><strong>End Date:</strong> @Model.Group.EndDate.ToString("dd/MM/yyyy")</p>
+             <p><strong>Progress:</strong> @Model.Progress%</p>
 
             @if (Model.Group.EducationMaterials != null && Model.Group.EducationMaterials.Count > 0)
             {

@@ -42,11 +42,20 @@ public class GroupController : Controller
 
         var groups = await _groupService.GetByPredicate(g =>
             g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUser.Id)));
+        
+        var groupViewModels = groups.Select(group =>
+        {
+            var groupViewModel = new GroupViewModel();
+            group.MapTo(groupViewModel);
+            groupViewModel.Progress = _groupService.CalculateGroupProgress(group.Id).Result;
+            
+            return groupViewModel;
+        }).ToList();
 
         var userGroupsViewModel = new UserGroupsViewModel()
         {
-            Groups = groups,
-            CurrentUser = currentUser
+            Groups = groupViewModels,
+            CurrentUser = currentUser,
         };
         
         return View(userGroupsViewModel);

@@ -9,4 +9,5 @@ public interface IGroupService : IGenericService<Group>
     Task UpdateGroup(int groupId, string newName, DateTime startDate, DateTime endDate);    
     Task SentApprovalForAdmin(int groupId);
     Task<List<string>> GetAllStudentsEmailByIds(List<string> studentIds);
+    Task<double> CalculateGroupProgress(int groupId);
 }
