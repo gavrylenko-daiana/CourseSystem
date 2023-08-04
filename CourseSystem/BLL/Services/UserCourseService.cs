@@ -53,6 +53,9 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         {
             await _userGroupService.CreateUserGroups(userGroups);
 
+            if (userGroups.Group.Course.UserCourses.Any(uc => uc.AppUserId == userGroups.AppUserId))
+                return;
+            
             var userCourses = new UserCourses()
             {
                 AppUser = userGroups.AppUser,
