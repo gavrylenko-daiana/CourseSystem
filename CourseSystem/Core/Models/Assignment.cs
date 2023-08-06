@@ -18,5 +18,6 @@ namespace Core.Models
         public virtual Group Group { get; set; }
         public virtual List<AssignmentFile> AssignmentFiles { get; set; }
         public virtual List<UserAssignments> UserAssignments { get; set; }
+        public virtual List<ChatMessage> ChatMessages { get; set; }
     }
 }

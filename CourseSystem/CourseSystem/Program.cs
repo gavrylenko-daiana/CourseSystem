@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UI;
 using Westwind.AspNetCore.Markdown;
+using UI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddMarkdown();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
@@ -34,6 +36,8 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
         .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+//For chats
+builder.Services.AddSignalR();
 
 //Email settings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(nameof(EmailSettings)));
@@ -64,5 +68,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+//For chats
+app.MapHub<ChatHub>("/chat");
 
 app.Run();

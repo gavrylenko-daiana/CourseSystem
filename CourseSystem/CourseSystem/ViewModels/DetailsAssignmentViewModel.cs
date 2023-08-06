@@ -16,5 +16,6 @@ namespace UI.ViewModels
         public List<IFormFile> AttachedFiles { get; set; }
         public UserAssignments UserAssignment { get; set; }
         public List<AssignmentAnswer> AssignmentAnswers  { get; set; }
+        public List<ChatMessage> ChatMessages { get; set; }
     }
 }
