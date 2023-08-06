@@ -22,10 +22,24 @@ namespace DAL.Repository
         private Repository<UserGroups> _userGroupsRepository;
         private Repository<UserActivity> _userActivityRepository;
         private Repository<Notification> _notificationRepository;
+        private Repository<ChatMessage> _chatMessageRepository;
 
         public UnitOfWork(ApplicationContext context)
         {
             _context = context;
+        }
+
+        public Repository<ChatMessage> ChatMessageRepository
+        {
+            get
+            {
+                if (_chatMessageRepository == null)
+                {
+                    _chatMessageRepository = new Repository<ChatMessage>(_context);
+                }
+
+                return _chatMessageRepository;
+            }
         }
 
         public Repository<Notification> NotificationRepository

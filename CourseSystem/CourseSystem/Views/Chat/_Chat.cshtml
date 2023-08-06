@@ -1,0 +1,64 @@
+﻿@using UI.ViewModels
+@model AssignmentChatViewModel
+
+    <div id="inputForm">
+        <input type="hidden" id="assignmentId" value=@Model.Id />
+        <input type="text" id="message" />
+        <input type="button" id="sendBtn" value="Отправить" disabled="disabled" />
+    </div>
+    <div id="chatroom">
+        @foreach(var message in Model.ChatMessages.OrderByDescending(m => m.Created).ToList())
+        {
+            <p>
+                <b>@message.AppUser.FirstName @message.AppUser.LastName :</b>
+                @message.Text
+                <br />
+                <i>@message.Created.ToString("g")</i>
+            </p>
+        }
+    </div>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat.js"></script>
+    <script>
+        const hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chat")
+            .build();
+
+        document.getElementById("sendBtn").addEventListener("click", function () {
+            let message = document.getElementById("message").value;
+            let assignment = document.getElementById("assignmentId").value;
+            hubConnection.invoke("Send", message, assignment)
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+
+            document.getElementById("message").value = null;
+        });
+
+        hubConnection.on("Receive", function (message, userName, created) {
+
+            const userNameElem = document.createElement("b");
+            userNameElem.textContent = `${userName} : `;
+
+            const createdElem = document.createElement("i");
+            createdElem.innerHTML = `<br/ >${created}`;
+
+            const elem = document.createElement("p");
+            elem.appendChild(userNameElem);
+            elem.appendChild(document.createTextNode(message));
+            elem.appendChild(createdElem);
+
+            const firstElem = document.getElementById("chatroom").firstChild;
+            document.getElementById("chatroom").insertBefore(elem, firstElem);
+        });
+
+        hubConnection.start()
+            .then(function () {
+                let assignment = document.getElementById("assignmentId").value;
+                hubConnection.invoke("AddToAssignmentChat", assignment);
+                document.getElementById("sendBtn").disabled = false;
+            })
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+    </script>
