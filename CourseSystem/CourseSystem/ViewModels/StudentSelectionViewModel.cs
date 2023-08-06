@@ -1,6 +1,6 @@
 namespace UI.ViewModels;
 
-public class StudentSelectionViewModel
+public class UserSelectionViewModel
 {
     public string Id { get; set; }
     public string FirstName { get; set; }

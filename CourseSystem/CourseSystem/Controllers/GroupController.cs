@@ -183,7 +183,7 @@ public class GroupController : Controller
         var studentsInGroupIds = group.UserGroups.Select(ug => ug.AppUserId);
         
         var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
-            .Select(u => new StudentSelectionViewModel
+            .Select(u => new UserSelectionViewModel
             {
                 Id = u.Id,
                 FirstName = u.FirstName,
@@ -197,9 +197,9 @@ public class GroupController : Controller
 
         return View(availableStudents);
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> ConfirmSelection(int groupId, List<StudentSelectionViewModel> students)
+    public async Task<IActionResult> ConfirmSelection(int groupId, List<UserSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
         var group = await _groupService.GetById(groupId);
@@ -238,7 +238,7 @@ public class GroupController : Controller
         return RedirectToAction("Index");
     }
     [HttpPost]
-    public async Task<IActionResult> ApprovedSelection(int groupId, List<StudentSelectionViewModel> students)
+    public async Task<IActionResult> ApprovedSelection(int groupId, List<UserSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
         var group = await _groupService.GetById(groupId);
