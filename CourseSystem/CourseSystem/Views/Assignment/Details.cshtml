@@ -137,6 +137,16 @@
                     }
                 </div>
             </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <p>Chat</p>
+                    </div>
+                    <div class="card-body">
+                        @await Html.PartialAsync("~/Views/Chat/_Chat.cshtml", new AssignmentChatViewModel { Id = Model.Id, ChatMessages = Model.ChatMessages })
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <style>

@@ -14,5 +14,6 @@ namespace UI.ViewModels
         public  Group Group { get; set; }
         public List<IFormFile> AttachedFiles { get; set; }
         public UserAssignments UserAssignment { get; set; }
+        public List<ChatMessage> ChatMessages { get; set; }
     }
 }

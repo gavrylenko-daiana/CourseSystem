@@ -24,5 +24,6 @@ namespace Core.Models
         public virtual List<UserGroups> UserGroups { get; set; }
         public virtual List<UserActivity> UserActivities { get; set; }
         public virtual List<Notification> Notifications { get; set; }
+        public virtual List<ChatMessage> ChatMessages { get; set; }
     }
 }
