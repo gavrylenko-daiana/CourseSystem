@@ -237,6 +237,60 @@ public class GroupController : Controller
 
         return RedirectToAction("Index");
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> SelectTeachers(int courseId, int groupId)
+    {
+        var course = await _courseService.GetById(courseId);
+        var group = await _groupService.GetById(groupId);
+        
+        if (course == null || group == null)
+        {
+            return NotFound();
+        }
+        
+        var teachersInCourse = course.UserCourses.Where(uc => uc.AppUser.Role == AppUserRoles.Teacher).Select(uc => uc.AppUser);
+        var teachersNotInGroup = teachersInCourse.Except(group.UserGroups.Select(ug => ug.AppUser));
+        
+        var teachersViewModels = teachersNotInGroup.Select(teacher => new UserSelectionViewModel
+        {
+            Id = teacher.Id,
+            FirstName = teacher.FirstName,
+            LastName = teacher.LastName,
+            IsSelected = false
+        }).ToList();
+
+        ViewBag.GroupId = groupId;
+
+        return View(teachersViewModels);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ConfirmTeachersSelection(int groupId, List<UserSelectionViewModel> teachers)
+    {
+        var selectedTeachersVM = teachers.Where(s => s.IsSelected).ToList();
+        var selectedTeachersTasks = selectedTeachersVM.Select(s => s.Id).
+            Select(id => _userManager.FindByIdAsync(id));
+        var selectedTeachers = (await Task.WhenAll(selectedTeachersTasks)).ToList();
+        var group = await _groupService.GetById(groupId);
+
+        if (selectedTeachers != null && selectedTeachers.Count > 0)
+        {
+            foreach (var teacher in selectedTeachers)
+            {
+                var userGroup = new UserGroups
+                {
+                    AppUser = teacher,
+                    Group = group
+                };
+
+                await _userGroupService.CreateUserGroups(userGroup);
+            }
+        }
+
+        return RedirectToAction("Details", new { id = groupId });
+    }
+    
     [HttpPost]
     public async Task<IActionResult> ApprovedSelection(int groupId, List<UserSelectionViewModel> students)
     {

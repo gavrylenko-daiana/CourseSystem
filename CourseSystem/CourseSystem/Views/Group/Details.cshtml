@@ -108,5 +108,11 @@
           <div class="card-footer">
               <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
           </div>
+          @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+          {
+              <div class="card-footer">
+                  <a href="@Url.Action("SelectTeachers", "Group", new { courseId = Model.Group.CourseId, groupId = Model.Group.Id })" class="btn btn-primary">Add teacher in group</a>
+              </div>
+          }
       }
 </div>
