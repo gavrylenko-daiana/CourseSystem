@@ -157,6 +157,13 @@ namespace UI.Controllers
             var assignmentId = (int)TempData["AssignmentId"];
             var studentId = TempData["StudentId"].ToString();
 
+            if (grade < 0 || grade > 100)
+            {
+                TempData.TempDataMessage("Error", "Grade can't be more than 100 or less than 0");
+                return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = assignmentId, studentId = studentId });
+            }
+            
+
             var assignment = await _assignmentService.GetById(assignmentId);
             var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
 

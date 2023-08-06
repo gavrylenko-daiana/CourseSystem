@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Core.Configuration;
 using MailKit.Security;
 using System.Runtime;
+using Core.Enums;
 
 namespace BLL.Services
 {
@@ -120,7 +121,7 @@ namespace BLL.Services
             }          
         }
 
-        public async Task<Result<bool>> SendEmailAsync(EmailData emailData)
+        private async Task<Result<bool>> SendEmailAsync(EmailData emailData)
         {
             try
             {
@@ -179,7 +180,7 @@ namespace BLL.Services
 
         public async Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl)
         {
-            var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
+            var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
 
             if(allAdmins.Any())
             {
@@ -220,29 +221,34 @@ namespace BLL.Services
             return new Result<bool>(false, $"Fail to send email to {userForDelete.Email}");
         }
 
-        public async Task ConfirmUserDeletionByUser(AppUser userForDelete, string logOutLink)
+        public async Task<Result<bool>> ConfirmUserDeletionByUser(AppUser userForDelete, string logOutLink)
         {
-            if (userForDelete != null)
+            if (userForDelete == null)
+                return new Result<bool>(false, "Invalid user for delete");
+
+            #region Email body creation
+            var emailBody = new StringBuilder().AppendLine($"<h4>Dear {userForDelete.FirstName}, your deletion was successfully approved by admin</h4>");
+            var buttonToUserProfileDetails = $"<h4>Confirm your deletion, follow the link: <a href='{logOutLink}'>link</a></h4>";
+
+            emailBody.AppendLine(buttonToUserProfileDetails);
+            #endregion
+
+            var emailData = new EmailData(
+                new List<string> { userForDelete.Email },
+                "Successful deletion approve",
+                emailBody.ToString());
+            try
             {
-                #region Email body creation
-                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {userForDelete.FirstName}, your deletion was successfully approved by admin</h4>");
-                var buttonToUserProfileDetails = $"<h4>Confirm your deletion, follow the link: <a href='{logOutLink}'>link</a></h4>";
+                var result = await SendEmailAsync(emailData);
 
-                emailBody.AppendLine(buttonToUserProfileDetails);
-                #endregion
+                if (!result.IsSuccessful)
+                    return new Result<bool>(false, result.Message);
 
-                var emailData = new EmailData(
-                    new List<string> { userForDelete.Email },
-                    "Successful deletion approve",
-                    emailBody.ToString());
-                try
-                {
-                    await SendEmailAsync(emailData);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"Fail to send email about successful registration to user {userForDelete.Email} ");
-                }
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Fail to send email about successful registration to user {userForDelete.Email} ");
             }
         }
 

@@ -2,6 +2,12 @@
 @using Westwind.AspNetCore.Markdown;
 @model CheckAnswerViewModel
 
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span>@TempData["Error"]</span>
+    </div>
+}
 <div class="container-fluid">
     <section>
         <div class="row">
@@ -43,8 +49,6 @@
         
     </section>
     <form method="post" asp-controller="AssignmentAnswer" asp-action="ChangeGrade" class="form-outline">
-        @*<input type="hidden" id="userAssignmentId" name="userAssignmentId" value="@Model.Id" />*@
-        <!-- Assignment Details Inputs -->
         <div class="form-row form-group">
             <div class="col mb-3">
                 <label asp-for="Grade" class="form-label" for="form12"></label>
