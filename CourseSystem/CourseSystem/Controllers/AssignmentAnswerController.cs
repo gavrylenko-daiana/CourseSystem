@@ -8,9 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 
 namespace UI.Controllers
-{
+{   
+    [Authorize]
     [CustomFilterAttributeException]
-
     public class AssignmentAnswerController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -151,6 +151,7 @@ namespace UI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> ChangeGrade(int grade)
         {
             var assignmentId = (int)TempData["AssignmentId"];

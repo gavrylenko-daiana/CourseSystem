@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
 
 namespace UI.Controllers
-{
-    [CustomFilterAttributeException]
+{    
     [Authorize]
+    [CustomFilterAttributeException]
     public class AssignmentController : Controller
     {
         private readonly IAssignmentService _assignmentService;

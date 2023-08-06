@@ -40,7 +40,7 @@ namespace BLL.Services
         public async Task<Result<bool>> DeleteAssignmentAnswer(AssignmentAnswer assignmentAnswer)
         {
             if (assignmentAnswer == null)
-                return new Result<bool>(false, "Fail to delet answer");
+                return new Result<bool>(false, "Fail to delete answer");
 
             try
             {
@@ -49,7 +49,7 @@ namespace BLL.Services
 
                 if (assignmentAnswer.UserAssignment.AssignmentAnswers.Count() == 1)
                 {
-                    await _unitOfWork.UserAssignmentsRepository.DeleteUserAssignment(assignmentAnswer.UserAssignment.AppUserId, assignmentAnswer.UserAssignment.AssignmentId);
+                    await _unitOfWork.UserAssignmentsRepository.DeleteEntityByKeys(new object[]{ assignmentAnswer.UserAssignment.AppUserId, assignmentAnswer.UserAssignment.AssignmentId});                   
                 }
 
                 await _unitOfWork.Save();

@@ -24,5 +24,6 @@ namespace DAL.Interfaces
 
         Task UpdateAsync(T entity);
         Task DeleteUserAssignment(string userId, int id);
+        Task DeleteEntityByKeys(params object[] keys);
     }
 }
