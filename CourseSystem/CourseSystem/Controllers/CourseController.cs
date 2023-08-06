@@ -184,16 +184,22 @@ public class CourseController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null) return RedirectToAction("Login", "Account");
+        
         var course = await _courseService.GetById(id);
         
-        if (course == null)
-        {
-            return NotFound();
-        }
-
+        if (course == null) return NotFound();
+        
+        var currentGroups = course.Groups
+            .Where(group => group.UserGroups.Any(ug => ug.AppUserId == currentUser.Id))
+            .ToList();
+        
         var courseViewModel = new CourseViewModel();
         course.MapTo(courseViewModel);
         courseViewModel.CurrentUser = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException();
+        courseViewModel.CurrentGroups = currentGroups;
         
         TempData["CourseId"] = id;
 
@@ -250,8 +256,7 @@ public class CourseController : Controller
         {
             TempData.TempDataMessage("Error", sendResult.Message);
             return View("SelectTeachers");
-        }          
-        
+        }
 
         TempData["CourseId"] = course.Id;
         

@@ -6,16 +6,32 @@ namespace BLL.Services;
 
 public class UserCourseService : GenericService<UserCourses>, IUserCourseService
 {
-    public UserCourseService(UnitOfWork unitOfWork) : base(unitOfWork)
+    private readonly IUserGroupService _userGroupService;
+    public UserCourseService(UnitOfWork unitOfWork, IUserGroupService userGroupService) : base(unitOfWork)
     {
         _unitOfWork = unitOfWork;
         _repository = unitOfWork.UserCoursesRepository;
+        _userGroupService = userGroupService;
     }
 
     public async  Task AddTeacherToCourse(Course course, AppUser teacher)
     {
         try
         {
+            if (course.Groups.Any())
+            {
+                foreach (var group in course.Groups)
+                {
+                    var userGroup = new UserGroups()
+                    {
+                        AppUser = teacher,
+                        Group = group,
+                    };
+                    
+                    await _userGroupService.CreateUserGroups(userGroup);
+                }
+            }
+            
             var courseTeacher = new UserCourses()
             {
                 Course = course,
@@ -28,6 +44,29 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         catch (Exception ex)
         {
             throw new Exception($"Failed to add teacher to course. Exception: {ex.Message}");
+        }
+    }
+
+    public async Task AddStudentToGroupAndCourse(UserGroups userGroups)
+    {
+        try
+        {
+            await _userGroupService.CreateUserGroups(userGroups);
+
+            if (userGroups.Group.Course.UserCourses.Any(uc => uc.AppUserId == userGroups.AppUserId))
+                return;
+            
+            var userCourses = new UserCourses()
+            {
+                AppUser = userGroups.AppUser,
+                Course = userGroups.Group.Course
+            };
+
+            await CreateUserCourses(userCourses);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
         }
     }
 

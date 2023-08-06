@@ -23,13 +23,16 @@
         <div class="card-body">
             <h5 class="card-title">@Model.Name</h5>
 
-            <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
+             @if (Model.CurrentUser.Role != AppUserRoles.Student)
+             {
+                 <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
+             }
 
-            @if (Model.Groups != null && Model.Groups.Count > 0)
+            @if (Model.CurrentGroups != null && Model.CurrentGroups.Count > 0)
             {
                 <h6>Groups:</h6>
                 <div class="row">
-                    @foreach (var group in Model.Groups)
+                    @foreach (var group in Model.CurrentGroups)
                     {
                         <div class="col-md-4 mb-3">
                             <div class="card group-card">
@@ -67,7 +70,11 @@
                 <p>No education materials found for this course.</p>
             }
 
-            <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="btn btn-primary mb-3">Add teachers</a>
+            @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+            {
+                <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="btn btn-primary mb-3">Add teachers</a>
+            }
+            
             @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
             {
                 <h6>Users:</h6>
