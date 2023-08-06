@@ -97,18 +97,6 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     }
 
-    public async Task SentApprovalForAdmin(int groupId)
-    {
-        try
-        {
-
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to sent approval for admin in group by id {groupId}. Exception: {ex.Message}");
-        }
-    }
-    
     private void ValidateGroupDates(DateTime startDate, DateTime endDate)
     {
         if (startDate > endDate)
