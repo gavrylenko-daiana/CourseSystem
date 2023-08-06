@@ -20,33 +20,32 @@ public class GroupService : GenericService<Group>, IGroupService
         _userManager = userManager;
     }
 
-    public async Task CreateGroup(Group group, Course course)
+    public async Task CreateGroup(Group group, AppUser currentUser)
     {
         try
         {
+            if (group == null)
+            {
+                throw new ArgumentNullException("Group is null");
+            }
+
+            if (currentUser == null)
+            {
+                throw new ArgumentNullException("User is null");
+            }
+            
             ValidateGroupDates(group.StartDate, group.EndDate);
                 
             await Add(group);
             await _unitOfWork.Save();
 
-            if (course.UserCourses.Any())
+            var userGroup = new UserGroups()
             {
-                foreach (var userCourse in course.UserCourses)
-                {
-                    if (userCourse.AppUser.Role == AppUserRoles.Student)
-                        return;
-
-                    var userGroup = new UserGroups()
-                    {
-                        Group = group,
-                        GroupId = group.Id,
-                        AppUser = userCourse.AppUser,
-                        AppUserId = userCourse.AppUserId
-                    };
-                    
-                    await _userGroupService.CreateUserGroups(userGroup);
-                }
-            }
+                Group = group,
+                AppUser = currentUser
+            };
+            
+            await _userGroupService.CreateUserGroups(userGroup);
         }
         catch (Exception ex)
         {

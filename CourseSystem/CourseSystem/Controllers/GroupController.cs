@@ -88,7 +88,7 @@ public class GroupController : Controller
 
         try
         {
-            await _groupService.CreateGroup(group, course);
+            await _groupService.CreateGroup(group, currentUser);
         }
         catch (Exception ex)
         {
