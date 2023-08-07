@@ -4,6 +4,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
+using UI.ViewModels.EmailViewModels;
 
 namespace UI.Controllers;
 

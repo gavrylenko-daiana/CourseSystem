@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
+using UI.ViewModels.EmailViewModels;
 
 namespace UI.Controllers;
 
