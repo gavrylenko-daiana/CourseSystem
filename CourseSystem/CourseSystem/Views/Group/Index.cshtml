@@ -27,6 +27,7 @@
                     <div class="card group-card">
                         <div class="card-body">
                             <h5 class="card-title">@group.Name</h5>
+                            <p>Progress: @group.Progress%</p>
                             <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-outline-primary">Details</a>
                         </div>
                     </div>

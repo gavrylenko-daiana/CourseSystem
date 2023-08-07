@@ -3,7 +3,6 @@
 <div class="container mt-4">
     <h3>Create Group</h3>
     <hr />
-
     @using (Html.BeginForm("Create", "Group", FormMethod.Post))
     {
         <div class="form-group">
@@ -27,4 +26,11 @@
         <button type="submit" class="btn btn-primary">Create</button>
         <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
     }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }    
 </div>

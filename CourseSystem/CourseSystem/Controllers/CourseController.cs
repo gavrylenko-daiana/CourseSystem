@@ -79,7 +79,7 @@ public class CourseController : Controller
         }
         catch (Exception e)
         {
-            ViewData.ViewDataMessage("CreatingError", $"Failed to create course. Error: {e.Message}");
+            ViewData.ViewDataMessage("Error", $"Failed to create course. Error: {e.Message}");
 
             return View(courseViewModel);
         }
@@ -103,7 +103,7 @@ public class CourseController : Controller
         }
         catch (Exception e)
         {
-            ViewData.ViewDataMessage("EditingError", $"Failed to editing course. Error: {e.Message}");
+            ViewData.ViewDataMessage("Error", $"Failed to editing course. Error: {e.Message}");
             
             return View("Error");
         }
@@ -120,7 +120,7 @@ public class CourseController : Controller
         }
         catch (Exception e)
         {
-            ViewData.ViewDataMessage("EditingError", $"Failed to editing course. Error: {e.Message}");
+            ViewData.ViewDataMessage("Error", $"Failed to editing course. Error: {e.Message}");
             
             return View(newCourse);
         }
@@ -149,7 +149,7 @@ public class CourseController : Controller
         }
         catch (Exception e)
         {
-            ViewData.ViewDataMessage("DeletingError", $"Failed to delete course. Error: {e.Message}");
+            ViewData.ViewDataMessage("Error", $"Failed to delete course. Error: {e.Message}");
             
             return View("Error");
         }
@@ -175,7 +175,7 @@ public class CourseController : Controller
         }
         catch (Exception e)
         {
-            ViewData["DeletingError"] = $"Failed to delete course. Error: {e.Message}";
+            ViewData["Error"] = $"Failed to delete course. Error: {e.Message}";
             
             return View("Error");
         }

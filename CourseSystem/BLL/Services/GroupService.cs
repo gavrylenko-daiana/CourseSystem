@@ -20,33 +20,32 @@ public class GroupService : GenericService<Group>, IGroupService
         _userManager = userManager;
     }
 
-    public async Task CreateGroup(Group group, Course course)
+    public async Task CreateGroup(Group group, AppUser currentUser)
     {
         try
         {
+            if (group == null)
+            {
+                throw new ArgumentNullException("Group is null");
+            }
+
+            if (currentUser == null)
+            {
+                throw new ArgumentNullException("User is null");
+            }
+            
             ValidateGroupDates(group.StartDate, group.EndDate);
                 
             await Add(group);
             await _unitOfWork.Save();
 
-            if (course.UserCourses.Any())
+            var userGroup = new UserGroups()
             {
-                foreach (var userCourse in course.UserCourses)
-                {
-                    if (userCourse.AppUser.Role == AppUserRoles.Student)
-                        return;
-
-                    var userGroup = new UserGroups()
-                    {
-                        Group = group,
-                        GroupId = group.Id,
-                        AppUser = userCourse.AppUser,
-                        AppUserId = userCourse.AppUserId
-                    };
-                    
-                    await _userGroupService.CreateUserGroups(userGroup);
-                }
-            }
+                Group = group,
+                AppUser = currentUser
+            };
+            
+            await _userGroupService.CreateUserGroups(userGroup);
         }
         catch (Exception ex)
         {
@@ -98,18 +97,6 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     }
 
-    public async Task SentApprovalForAdmin(int groupId)
-    {
-        try
-        {
-
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to sent approval for admin in group by id {groupId}. Exception: {ex.Message}");
-        }
-    }
-    
     private void ValidateGroupDates(DateTime startDate, DateTime endDate)
     {
         if (startDate > endDate)
@@ -136,5 +123,26 @@ public class GroupService : GenericService<Group>, IGroupService
         }
 
         return emails;
+    }
+
+    public async Task<double> CalculateGroupProgress(int groupId)
+    {
+        try
+        {
+            var group = await _repository.GetByIdAsync(groupId);
+            if (group == null || group.Assignments == null || group.Assignments.Count == 0)
+            {
+                return 0.0;
+            }
+
+            var totalAssignments = group.Assignments.Count;
+            var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
+
+            return (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Failed to calculate progress in group by id {groupId}. Exception: {ex.Message}");
+        }
     }
 }

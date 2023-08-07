@@ -15,10 +15,12 @@
                     @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
                 </div>
 
-                @if (!string.IsNullOrEmpty(ViewData["EditingError"] as string))
+                @if (TempData["Error"] != null)
                 {
-                    <span style="color: red;">@ViewData["EditingError"]</span>
-                }
+                    <div class="col-md-12 alert alert-danger">
+                        <span><b>Sorry!</b> - @TempData["Error"]</span>
+                    </div>
+                }  
 
                 <button type="submit" class="btn btn-primary button-with-margin">Save</button>
                 <a href="@Url.Action("Details", "Course", new { id = Model.Id })" class="btn btn-secondary">Cancel</a>

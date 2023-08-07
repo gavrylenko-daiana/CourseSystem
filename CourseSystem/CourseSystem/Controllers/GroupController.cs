@@ -42,11 +42,20 @@ public class GroupController : Controller
 
         var groups = await _groupService.GetByPredicate(g =>
             g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUser.Id)));
+        
+        var groupViewModels = groups.Select(group =>
+        {
+            var groupViewModel = new GroupViewModel();
+            group.MapTo(groupViewModel);
+            groupViewModel.Progress = _groupService.CalculateGroupProgress(group.Id).Result;
+            
+            return groupViewModel;
+        }).ToList();
 
         var userGroupsViewModel = new UserGroupsViewModel()
         {
-            Groups = groups,
-            CurrentUser = currentUser
+            Groups = groupViewModels,
+            CurrentUser = currentUser,
         };
         
         return View(userGroupsViewModel);
@@ -68,7 +77,7 @@ public class GroupController : Controller
 
         if (currentUser == null)
         {
-            TempData.TempDataMessage("CreatingError", "User not found");
+            TempData.TempDataMessage("Error", "User not found");
                 
             return View(groupViewModel);
         }
@@ -79,13 +88,13 @@ public class GroupController : Controller
 
         try
         {
-            await _groupService.CreateGroup(group, course);
+            await _groupService.CreateGroup(group, currentUser);
         }
         catch (Exception ex)
         {
             TempData["CourseId"] = courseId; 
             
-            TempData.TempDataMessage("CreatingError", "Your end day must be more than start day");
+            TempData.TempDataMessage("Error", "Your end day must be more than start day");
                 
             return View(groupViewModel);
         }
@@ -174,7 +183,7 @@ public class GroupController : Controller
         var studentsInGroupIds = group.UserGroups.Select(ug => ug.AppUserId);
         
         var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
-            .Select(u => new StudentSelectionViewModel
+            .Select(u => new UserSelectionViewModel
             {
                 Id = u.Id,
                 FirstName = u.FirstName,
@@ -188,9 +197,9 @@ public class GroupController : Controller
 
         return View(availableStudents);
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> ConfirmSelection(int groupId, List<StudentSelectionViewModel> students)
+    public async Task<IActionResult> ConfirmSelection(int groupId, List<UserSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
         var group = await _groupService.GetById(groupId);
@@ -228,8 +237,62 @@ public class GroupController : Controller
 
         return RedirectToAction("Index");
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> SelectTeachers(int courseId, int groupId)
+    {
+        var course = await _courseService.GetById(courseId);
+        var group = await _groupService.GetById(groupId);
+        
+        if (course == null || group == null)
+        {
+            return NotFound();
+        }
+        
+        var teachersInCourse = course.UserCourses.Where(uc => uc.AppUser.Role == AppUserRoles.Teacher).Select(uc => uc.AppUser);
+        var teachersNotInGroup = teachersInCourse.Except(group.UserGroups.Select(ug => ug.AppUser));
+        
+        var teachersViewModels = teachersNotInGroup.Select(teacher => new UserSelectionViewModel
+        {
+            Id = teacher.Id,
+            FirstName = teacher.FirstName,
+            LastName = teacher.LastName,
+            IsSelected = false
+        }).ToList();
+
+        ViewBag.GroupId = groupId;
+
+        return View(teachersViewModels);
+    }
+
     [HttpPost]
-    public async Task<IActionResult> ApprovedSelection(int groupId, List<StudentSelectionViewModel> students)
+    public async Task<IActionResult> ConfirmTeachersSelection(int groupId, List<UserSelectionViewModel> teachers)
+    {
+        var selectedTeachersVM = teachers.Where(s => s.IsSelected).ToList();
+        var selectedTeachersTasks = selectedTeachersVM.Select(s => s.Id).
+            Select(id => _userManager.FindByIdAsync(id));
+        var selectedTeachers = (await Task.WhenAll(selectedTeachersTasks)).ToList();
+        var group = await _groupService.GetById(groupId);
+
+        if (selectedTeachers != null && selectedTeachers.Count > 0)
+        {
+            foreach (var teacher in selectedTeachers)
+            {
+                var userGroup = new UserGroups
+                {
+                    AppUser = teacher,
+                    Group = group
+                };
+
+                await _userGroupService.CreateUserGroups(userGroup);
+            }
+        }
+
+        return RedirectToAction("Details", new { id = groupId });
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> ApprovedSelection(int groupId, List<UserSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
         var group = await _groupService.GetById(groupId);

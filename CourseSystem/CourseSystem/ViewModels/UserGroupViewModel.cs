@@ -6,4 +6,5 @@ public class UserGroupViewModel
 {
     public Group Group { get; set; }
     public AppUser CurrentUser { get; set; }
+    public double Progress { get; set; }    
 }
