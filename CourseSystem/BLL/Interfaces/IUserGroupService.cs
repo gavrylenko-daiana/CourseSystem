@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace BLL.Interfaces;
 
-public interface IUserGroupService : IGenericService<UserGroups>
+public interface IUserGroupService
 {
     Task CreateUserGroups(UserGroups userGroups);
 }

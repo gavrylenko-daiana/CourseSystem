@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Interfaces
 {
-    public interface INotificationService : IGenericService<Notification>
+    public interface INotificationService
     {
         Task MarkAsRead(Notification notification);
 

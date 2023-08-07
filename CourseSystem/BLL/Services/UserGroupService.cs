@@ -6,17 +6,15 @@ namespace BLL.Services;
 
 public class UserGroupService : GenericService<UserGroups>, IUserGroupService
 {
-    public UserGroupService(UnitOfWork unitOfWork) : base(unitOfWork)
+    public UserGroupService(UnitOfWork unitOfWork) : base(unitOfWork, unitOfWork.UserGroupsRepository)
     {
-        _unitOfWork = unitOfWork;
-        _repository = unitOfWork.UserGroupsRepository;
     }
 
     public async Task CreateUserGroups(UserGroups userGroups)
     {
         try
         {
-            await Add(userGroups);
+            await _repository.AddAsync(userGroups);
             await _unitOfWork.Save();
         }
         catch (Exception ex)

@@ -14,9 +14,9 @@ namespace BLL.Services
 {
     public class ActivityService : GenericService<UserActivity>, IActivityService
     {
-        public ActivityService(UnitOfWork unitOfWork) : base(unitOfWork)
+        public ActivityService(UnitOfWork unitOfWork) 
+            : base(unitOfWork, unitOfWork.UserActivityRepository)
         {
-            _repository = unitOfWork.UserActivityRepository;
         }
 
         public async Task AddAssignmentCreatedActivity(AppUser teacher, Assignment assignment)
@@ -43,7 +43,7 @@ namespace BLL.Services
                     AppUser = teacher,
                 };
 
-                await Add(userActivity);
+                await _repository.AddAsync(userActivity);
 
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace BLL.Services
                     AppUser = teacher,
                 };
 
-                await Add(userActivity);
+                await _repository.AddAsync(userActivity);
 
             }
             catch (Exception ex)
@@ -106,7 +106,7 @@ namespace BLL.Services
                     AppUser = student,
                 };
 
-                await Add(userActivity);
+                await _repository.AddAsync(userActivity);
 
             }
             catch (Exception ex)
@@ -137,7 +137,7 @@ namespace BLL.Services
                     AppUser = user,
                 };
 
-                await Add(userActivity);
+                await _repository.AddAsync(userActivity);
 
             }
             catch (Exception ex)

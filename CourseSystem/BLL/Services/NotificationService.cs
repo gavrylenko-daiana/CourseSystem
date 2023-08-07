@@ -11,9 +11,9 @@ namespace BLL.Services
 {
     public class NotificationService : GenericService<Notification>, INotificationService
     {
-        public NotificationService(UnitOfWork unitOfWork) : base(unitOfWork)
+        public NotificationService(UnitOfWork unitOfWork) 
+            : base(unitOfWork, unitOfWork.NotificationRepository)
         {
-            _repository = unitOfWork.NotificationRepository;
         }
 
         public async Task AddAssignmentClosedNotificationForStudent(AppUser student, Assignment assignment)
@@ -40,7 +40,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -73,7 +73,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -107,7 +107,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -134,7 +134,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -167,7 +167,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -200,7 +200,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -233,7 +233,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -265,7 +265,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -297,7 +297,7 @@ namespace BLL.Services
                     IsRead = false
                 };
 
-                await Add(notification);
+                await _repository.AddAsync(notification);
 
             }
             catch (Exception ex)
@@ -317,7 +317,7 @@ namespace BLL.Services
 
                 notification.IsRead = true;
 
-                await Update(notification);
+                await _repository.UpdateAsync(notification);
                 await _unitOfWork.Save();
             }
             catch (Exception ex)
