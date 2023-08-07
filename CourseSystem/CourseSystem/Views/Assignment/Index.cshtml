@@ -20,8 +20,7 @@
             <h3 class="font-weight-normal pb-2">Available group assignmnets</h3>
             @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
             {
-                <a href="@Url.Action("Create", "Assignment", new { id = ViewBag.GroupId })" class="btn btn-primary">Create new Assignment</a>
-                @*<a type="button" class="btn btn-outline-secondary" asp-controller="Assignment" asp-action="Create" asp-route-id="@Model.FirstOrDefault()?.GroupId"></a>*@
+                <a href="@Url.Action("Create", "Assignment", new { groupId = ViewBag.GroupId })" class="btn btn-primary">Create new Assignment</a>                
             }
         </div>
     </div>

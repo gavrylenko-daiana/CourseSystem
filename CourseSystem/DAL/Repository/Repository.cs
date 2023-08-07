@@ -114,5 +114,22 @@ namespace DAL.Repository
                 throw new Exception($"Exception message:{ex.Message}");
             }
         }
+
+        public async Task DeleteEntityByKeys(params object[] keys)
+        {
+            var entity = _dbSet.Find(keys);
+
+            if (entity == null)
+                throw new Exception($"Entity {nameof(T)} wasn't found");
+
+            try
+            {
+                _dbSet.Remove(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Exception message:{ex.Message}");
+            }
+        }
     }
 }

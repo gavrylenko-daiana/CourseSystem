@@ -13,6 +13,7 @@ namespace Core.Models
         public int AssignmentId { get; set; }
         public virtual Assignment Assignment { get; set; }
         public int Grade { get; set; }
+        public bool IsChecked { get; set; }
         public virtual List<AssignmentAnswer> AssignmentAnswers { get; set; }
     }
 }

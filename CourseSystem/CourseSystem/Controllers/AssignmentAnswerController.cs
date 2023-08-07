@@ -8,21 +8,24 @@ using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 
 namespace UI.Controllers
-{
+{   
+    [Authorize]
     [CustomFilterAttributeException]
-    [Authorize(Roles = "Student")]
     public class AssignmentAnswerController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IAssignmentService _assignmentService;
         private readonly IAssignmentAnswerService _assignmentAnswerService;
+        private readonly IUserAssignmentService _userAssignmentService;
         public AssignmentAnswerController(UserManager<AppUser> userManager,
             IAssignmentService assignmentService,
-            IAssignmentAnswerService assignmentAnswerService)
+            IAssignmentAnswerService assignmentAnswerService,
+            IUserAssignmentService userAssignmentService)
         {
             _userManager = userManager;
             _assignmentService = assignmentService;
             _assignmentAnswerService = assignmentAnswerService;
+            _userAssignmentService = userAssignmentService;
         }
         public IActionResult Index()
         {
@@ -31,6 +34,7 @@ namespace UI.Controllers
 
         [HttpGet]
         [Route("CreateAnswer/{id}")]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> CreateAnswer(int id)
         {
             try
@@ -48,7 +52,8 @@ namespace UI.Controllers
             }
         }
 
-        [HttpPost]      
+        [HttpPost]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
         {
             if(!ModelState.IsValid)
@@ -63,7 +68,7 @@ namespace UI.Controllers
                 //set the name of file to model
             }
 
-            assignmnetAnswer.Name = assignmentAnswerVM.AnswerDescription;
+            assignmnetAnswer.Name = "Some file name";
             assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
             assignmnetAnswer.Url = "Some URL";
 
@@ -78,7 +83,103 @@ namespace UI.Controllers
                 return RedirectToAction("CreateAnswer", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
             }
 
-            return RedirectToAction("Index", "Home");//Course page redirection
+            return RedirectToAction("Details", "Assignment", new {id = assignmnet.Id});
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> Delete(int assignmentAnswerId)
+        {
+            var assignmentAnswer = await _assignmentAnswerService.GetById(assignmentAnswerId);
+            var asignmentId = assignmentAnswer.UserAssignment.AssignmentId;
+
+            if (assignmentAnswer == null)
+                return NotFound();
+
+            var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
+
+            if(!deleteResult.IsSuccessful)
+                TempData.TempDataMessage("Error", deleteResult.Message);
+
+            return RedirectToAction("Details", "Assignment", new { id = asignmentId });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> SeeStudentAnswers(int assignmentId)
+        {
+            var assignment = await _assignmentService.GetById(assignmentId);
+
+            if(assignment == null)
+                return NotFound();
+
+            var userAssignmentVMs = new List<UserAssignmentViewModel>();
+
+            foreach(var userAssignment in assignment.UserAssignments)
+            {
+                var userAssignmentVM = new UserAssignmentViewModel();
+                userAssignment.MapTo<UserAssignments, UserAssignmentViewModel>(userAssignmentVM);
+                userAssignmentVM.Id = userAssignment.Id;
+                userAssignmentVMs.Add(userAssignmentVM);
+            }
+
+            return View(userAssignmentVMs);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> CheckAnswer(int assignmentId, string studentId)
+        {
+            var student = await _userManager.FindByIdAsync(studentId);
+
+            if (student == null)
+                return NotFound();
+
+            var assignment = await _assignmentService.GetById(assignmentId);
+            var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId ==  student.Id);
+            
+            if(userAssignment == null)
+                return NotFound();
+
+            var checkAnswerVM = new CheckAnswerViewModel();
+            userAssignment.MapTo<UserAssignments,  CheckAnswerViewModel>(checkAnswerVM);
+
+            TempData["AssignmentId"] = assignmentId;
+            TempData["StudentId"] = studentId;
+
+            return View(checkAnswerVM);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> ChangeGrade(int grade)
+        {
+            var assignmentId = (int)TempData["AssignmentId"];
+            var studentId = TempData["StudentId"].ToString();
+
+            if (grade < 0 || grade > 100)
+            {
+                TempData.TempDataMessage("Error", "Grade can't be more than 100 or less than 0");
+                return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = assignmentId, studentId = studentId });
+            }
+            
+
+            var assignment = await _assignmentService.GetById(assignmentId);
+            var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
+
+            if (userAssignment == null)
+                return NotFound();
+
+            var updateResult = await _userAssignmentService.ChangeUserAssignmentGrade(userAssignment, grade);
+
+            if (!updateResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", updateResult.Message); 
+
+                return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId});
+            }
+
+            return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId });
         }
     }
 }

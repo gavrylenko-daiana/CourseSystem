@@ -16,7 +16,7 @@ namespace BLL.Services
         public async Task<Result<bool>> CreateAssignmentAnswer(AssignmentAnswer assignmentAnswer, Assignment assignment, AppUser appUser)
         {
             if (assignmentAnswer == null)
-                return new Result<bool>(false, "Invalid assignmnet answe");
+                return new Result<bool>(false, "Invalid assignmnet answer");
 
             var userAssignmnetResult = await _userAssignmentService.CreateUserAssignment(assignment, appUser);
 
@@ -25,7 +25,7 @@ namespace BLL.Services
             
             try
             {
-                assignmentAnswer.UserAssignmentId = userAssignmnetResult.Data.Id;
+                assignmentAnswer.UserAssignment = userAssignmnetResult.Data;
                 await _repository.AddAsync(assignmentAnswer);
                 await _unitOfWork.Save();
 
@@ -34,6 +34,31 @@ namespace BLL.Services
             catch (Exception ex)
             {
                 return new Result<bool>(false, ex.Message);
+            }
+        }
+
+        public async Task<Result<bool>> DeleteAssignmentAnswer(AssignmentAnswer assignmentAnswer)
+        {
+            if (assignmentAnswer == null)
+                return new Result<bool>(false, "Fail to delete answer");
+
+            try
+            {
+                await Delete(assignmentAnswer.Id);
+
+
+                if (assignmentAnswer.UserAssignment.AssignmentAnswers.Count() == 1)
+                {
+                    await _unitOfWork.UserAssignmentsRepository.DeleteEntityByKeys(new object[]{ assignmentAnswer.UserAssignment.AppUserId, assignmentAnswer.UserAssignment.AssignmentId});                   
+                }
+
+                await _unitOfWork.Save();
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to delete answer");
             }
         }
     }

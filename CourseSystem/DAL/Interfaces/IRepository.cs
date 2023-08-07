@@ -23,5 +23,6 @@ namespace DAL.Interfaces
         Task DeleteAsync(T entity);
 
         Task UpdateAsync(T entity);
+        Task DeleteEntityByKeys(params object[] keys);
     }
 }

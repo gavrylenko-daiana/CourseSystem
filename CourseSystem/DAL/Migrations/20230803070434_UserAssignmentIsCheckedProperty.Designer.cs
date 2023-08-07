@@ -4,6 +4,7 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230803070434_UserAssignmentIsCheckedProperty")]
+    partial class UserAssignmentIsCheckedProperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,37 +209,6 @@ namespace DAL.Migrations
                     b.HasIndex("AssignmentId");
 
                     b.ToTable("AssignmentFiles");
-                });
-
-            modelBuilder.Entity("Core.Models.ChatMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AppUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AssignmentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("AssignmentId");
-
-                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("Core.Models.Course", b =>
@@ -607,25 +579,6 @@ namespace DAL.Migrations
                     b.Navigation("Assignment");
                 });
 
-            modelBuilder.Entity("Core.Models.ChatMessage", b =>
-                {
-                    b.HasOne("Core.Models.AppUser", "AppUser")
-                        .WithMany("ChatMessages")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Models.Assignment", "Assignment")
-                        .WithMany("ChatMessages")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-
-                    b.Navigation("Assignment");
-                });
-
             modelBuilder.Entity("Core.Models.EducationMaterial", b =>
                 {
                     b.HasOne("Core.Models.Course", "Course")
@@ -784,8 +737,6 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Core.Models.AppUser", b =>
                 {
-                    b.Navigation("ChatMessages");
-
                     b.Navigation("Notifications");
 
                     b.Navigation("UserActivities");
@@ -800,8 +751,6 @@ namespace DAL.Migrations
             modelBuilder.Entity("Core.Models.Assignment", b =>
                 {
                     b.Navigation("AssignmentFiles");
-
-                    b.Navigation("ChatMessages");
 
                     b.Navigation("UserAssignments");
                 });
