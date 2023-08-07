@@ -10,6 +10,7 @@ using Core.Configuration;
 using MailKit.Security;
 using System.Runtime;
 using Core.Enums;
+using Core.EmailTemplates;
 
 namespace BLL.Services
 {
@@ -34,10 +35,13 @@ namespace BLL.Services
 
             try
             {
+                var subjectAndBody = EmailTemplate.GetEmailSubjectAndBody(EmailType.CodeVerification, 
+                    new Dictionary<string, object>() { { @"{randomCode}", randomCode } });
+                
                 var emailData = new EmailData(
                     new List<string>() { email},
-                    "Verify code for update password.",
-                    $"<html><body> Your code: {randomCode} </body></html>"
+                    subjectAndBody.Item1,
+                    subjectAndBody.Item2
                     );
 
                 var result = await SendEmailAsync(emailData);
@@ -64,24 +68,25 @@ namespace BLL.Services
                 #region Email body creation
                 var userRole = newUser.Role;
 
-                var userData = new StringBuilder()
-                    .AppendLine($"<h4>User data overview</h4>" +
-                    $"<hr/>" +
-                    $"<p>User first name: {newUser.FirstName}</p>" +
-                    $"<p>User last name: {newUser.LastName}</p>" +
-                    $"<p>Date of birth: {newUser.BirthDate.ToString("d")}</p>" +
-                    $"<p>User email: {newUser.Email}</p>" +
-                    $"<p>User role: {userRole}</p>");
-
-                userData.AppendLine($"<h4>Confirm registration of {newUser.FirstName} {newUser.LastName}, follow the link: <a href='{callBackUrl}'>link</a></h4>");
+                var subjectAndBody = EmailTemplate.GetEmailSubjectAndBody(EmailType.AccountApproveByAdmin,
+                    new Dictionary<string, object>()
+                    {
+                        {@"{firstName}", newUser.FirstName },
+                        {@"{lastName}", newUser.LastName },
+                        {@"{birthDate}", newUser.BirthDate },
+                        {@"{email}", newUser.Email },
+                        {@"{userRole}", userRole},
+                        {@"{callBackUrl}", callBackUrl }
+                    });
+               
                 #endregion
                 try
                 {
                     var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
                     var emailData = new EmailData(
                         allAdminsEmails,
-                        "Confirm user account",
-                        userData.ToString());
+                        subjectAndBody.Item1,
+                        subjectAndBody.Item2);
 
                     await SendEmailAsync(emailData);
                 }
@@ -107,7 +112,7 @@ namespace BLL.Services
 
                 var emailData = new EmailData(
                     new List<string> { appUser.Email},
-                    "Successful registration",
+                    String.Empty,
                     emailBody.ToString());
 
                 try
