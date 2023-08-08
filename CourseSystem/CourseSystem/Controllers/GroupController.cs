@@ -2,6 +2,7 @@ using BLL.Interfaces;
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
+using Core.EmailTemplates;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -375,7 +376,7 @@ public class GroupController : Controller
             new { groupId = id, teacherId = currentTeacher.Id },
             protocol: HttpContext.Request.Scheme);
 
-        var sendEmailResult = await _emailService.SendEmailGroups(Core.EmailTemplates.EmailType.GroupConfirmationByAdmin, group, callbackUrl);
+        var sendEmailResult = await _emailService.SendEmailGroups(EmailType.GroupConfirmationByAdmin, group, callbackUrl);
 
         if (!sendEmailResult.IsSuccessful)
         {
@@ -404,7 +405,7 @@ public class GroupController : Controller
            new { groupId = groupId, code = code},
            protocol: HttpContext.Request.Scheme);
 
-        await _emailService.SendEmailGroups(Core.EmailTemplates.EmailType.ApprovedGroupCreation, group, callbackUrl, teacher);
+        await _emailService.SendEmailGroups(EmailType.ApprovedGroupCreation, group, callbackUrl, teacher);
 
         return View();
     }
