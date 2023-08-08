@@ -115,22 +115,16 @@ public class GroupService : GenericService<Group>, IGroupService
     
     public async Task<double> CalculateGroupProgress(int groupId)
     {
-        try
+        var group = await _repository.GetByIdAsync(groupId);
+        
+        if (group == null || group.Assignments == null || group.Assignments.Count == 0)
         {
-            var group = await _repository.GetByIdAsync(groupId);
-            if (group == null || group.Assignments == null || group.Assignments.Count == 0)
-            {
-                return 0.0;
-            }
-
-            var totalAssignments = group.Assignments.Count;
-            var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
-
-            return (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+            return 0.0;
         }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to calculate progress in group by id {groupId}. Exception: {ex.Message}");
-        }
+
+        var totalAssignments = group.Assignments.Count;
+        var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
+
+        return (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
     }
 }
