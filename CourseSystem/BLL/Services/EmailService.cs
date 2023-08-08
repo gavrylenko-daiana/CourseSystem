@@ -109,104 +109,16 @@ namespace BLL.Services
             }
         }
 
-
-        public async Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl)
-        {
-            var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
-
-            if(allAdmins.Any())
-            {
-                #region Email body creation
-
-                var userData = new StringBuilder()
-                    .AppendLine($"<h4>User data overview</h4>" +
-                    $"<hr/>" +
-                    $"<p>User first name: {userForDelete.FirstName}</p>" +
-                    $"<p>User last name: {userForDelete.LastName}</p>" +
-                    $"<p>Date of birth: {userForDelete.BirthDate.ToString("d")}</p>" +
-                    $"<p>User email: {userForDelete.Email}</p>" +
-                    $"<p>User role: {userForDelete.Role}</p>");
-
-                userData.AppendLine($"<h4>Confirm deletion of {userForDelete.FirstName} {userForDelete.LastName}, follow the link: <a href='{callbackUrl}'>link</a></h4>");
-                #endregion
-                try
-                {
-                    var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
-                    var emailData = new EmailData(
-                        allAdminsEmails,
-                        "Confirm deletion of user account",
-                        userData.ToString());
-
-                    var result = await SendEmailAsync(emailData);
-
-                    if (!result.IsSuccessful)
-                        return new Result<bool>(false, result.Message);
-
-                    return new Result<bool>(true);
-                }
-                catch (Exception ex)
-                {
-                    return new Result<bool>(false, $"Fail to send email to {userForDelete.Email}");
-                }
-            }
-
-            return new Result<bool>(false, $"Fail to send email to {userForDelete.Email}");
-        }
-
-        public async Task<Result<bool>> ConfirmUserDeletionByUser(AppUser userForDelete, string logOutLink)
-        {
-            if (userForDelete == null)
-                return new Result<bool>(false, "Invalid user for delete");
-
-            #region Email body creation
-            var emailBody = new StringBuilder().AppendLine($"<h4>Dear {userForDelete.FirstName}, your deletion was successfully approved by admin</h4>");
-            var buttonToUserProfileDetails = $"<h4>Confirm your deletion, follow the link: <a href='{logOutLink}'>link</a></h4>";
-
-            emailBody.AppendLine(buttonToUserProfileDetails);
-            #endregion
-
-            var emailData = new EmailData(
-                new List<string> { userForDelete.Email },
-                "Successful deletion approve",
-                emailBody.ToString());
-            try
-            {
-                var result = await SendEmailAsync(emailData);
-
-                if (!result.IsSuccessful)
-                    return new Result<bool>(false, result.Message);
-
-                return new Result<bool>(true);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Fail to send email about successful registration to user {userForDelete.Email} ");
-            }
-        }
-
         public async Task<Result<bool>> SendToTeacherCourseInventation(AppUser teacher, Course course, string inventationUrl)
         {
             if (teacher == null || course == null)
-                return new Result<bool>(false, $"Fail to send email inventation to the techer");
+                return new Result<bool>(false, $"Fail to send email inventation to the techer");            
 
-            #region Body email creation
-            var emailBody = new StringBuilder().AppendLine($"<h4>Dear {teacher.FirstName}, you were invited to the course {course.Name}</h4>");
-            emailBody.AppendLine("<h5>Сourse data overview</h5>");
-            emailBody.AppendLine($"<p>Course name: {course.Name}</p>");
-            var linkToConfirm = $"<h4>Сonfirm your participation in the course, follow the link: <a href='{inventationUrl}'>link</a></h4>";
-
-            emailBody.AppendLine(linkToConfirm);
-            #endregion
-
-            var emailData = new EmailData(
-                new List<string> { teacher.Email },
-                "Course Invitation",
-                emailBody.ToString());
-
-            #region Email sending
             try
             {
-                var result = await SendEmailAsync(emailData);
+                var emailContent = GetEmailSubjectAndBody(EmailType.CourseInvitation, teacher, course, inventationUrl);
+                var result = await CreateAndSendEmail(new List<string> { teacher.Email }, emailContent.Item1, emailContent.Item2);
+
 
                 if (!result.IsSuccessful)
                     return new Result<bool>(false, result.Message);
@@ -218,80 +130,6 @@ namespace BLL.Services
                 return new Result<bool>(false, $"Fail to send email inventation to the techer");
             }
 
-            #endregion
-        }
-
-        public async Task<Result<bool>> SendToAdminConfirmationForGroups(Group group, string callbackUrl)
-        {
-            if (group == null)
-                return new Result<bool>(false, "Fail to send email");
-
-            var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
-
-            if (!allAdmins.Any())
-                return new Result<bool>(false, "No admins for sending emails");
-
-            var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
-
-            #region Email body
-            var emailBody = new StringBuilder();
-            emailBody.AppendLine($"<h4>Confirm the creation of a group {group.Name} of more than 20 people, follow the link: <a href='{callbackUrl}'>link</a></h4>");
-            #endregion
-
-            var emailData = new EmailData(
-                    allAdminsEmails ,
-                    "Group confirmation",
-                    emailBody.ToString());
-
-            #region Email sending
-            try
-            {
-                var result = await SendEmailAsync(emailData);
-
-                if (!result.IsSuccessful)
-                    return new Result<bool>(false, result.Message);
-
-                return new Result<bool>(true, "Emails were sent to admins");
-            }
-            catch (Exception ex)
-            {
-                return new Result<bool>(false, "Fail to send email to admins");
-            }
-
-            #endregion
-        }
-
-        public async Task<Result<bool>> SendEmailToTeacherAboutApprovedGroup(AppUser teacher, Group group, string callbackUrl)
-        {
-            if (group == null || teacher == null)
-                return new Result<bool>(false, "Fail to send email");
-
-            #region Email body
-            var emailBody = new StringBuilder();
-            emailBody.AppendLine($"<h4>You get approve fot the creation of a group {group.Name} of more than 20 people, follow the link: <a href='{callbackUrl}'>link</a></h4>");
-            #endregion
-
-            var emailData = new EmailData(
-                    new List<string> { teacher.Email},
-                    "Group confirmation",
-                    emailBody.ToString());
-
-            #region Email sending
-            try
-            {
-                var result = await SendEmailAsync(emailData);
-
-                if (!result.IsSuccessful)
-                    return new Result<bool>(false, result.Message);
-
-                return new Result<bool>(true, "Emails were sent to admins");
-            }
-            catch (Exception ex)
-            {
-                return new Result<bool>(false, "Fail to send email to admins");
-            }
-
-            #endregion
         }
 
         public async Task<Result<bool>> SendInventationToStudents(Dictionary<string, string> studentsData, Group group)
@@ -300,14 +138,8 @@ namespace BLL.Services
             {
                 foreach(var studentData in studentsData)
                 {
-                    var emailBody = new StringBuilder();
-                    emailBody.AppendLine($"<h4>You get inventation to the group {group.Name}");
-                    var emailData = new EmailData(
-                        new List<string> { studentData.Key },
-                        "Group inventation",
-                        emailBody.Append($", follow the link: <a href='{studentData.Value}'>link</a></h4>").ToString());
-
-                    var result = await SendEmailAsync(emailData);
+                    var emailContent = GetEmailSubjectAndBody(EmailType.GroupInvitationToStudent, group, studentData.Value, await _userManager.FindByEmailAsync(studentData.Key));
+                    var result = await CreateAndSendEmail(new List<string> { studentData.Key}, emailContent.Item1, emailContent.Item2);
 
                     if (!result.IsSuccessful)
                         return new Result<bool>(false, result.Message);
@@ -402,9 +234,9 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Group group, string callBackUrl = null)
+        public (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
         {
-            if (appUser == null || group == null)
+            if (group == null)
                 return (String.Empty, String.Empty);
 
             var parameters = new Dictionary<string, object>();
@@ -454,7 +286,7 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public async Task<Result<bool>> SendEmailAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null)
+        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null)
         {
             if (appUser == null)
                 return new Result<bool>(false, "Fail to send email");
@@ -479,5 +311,29 @@ namespace BLL.Services
 
             return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
         }
+
+        public async Task<Result<bool>> SendEmailGroups(EmailType emailType,Group group, string callBackUrl = null, AppUser appUser = null)
+        {
+            if (group == null)
+                return new Result<bool>(false, "Fail to send email");
+
+            var emailContent = GetEmailSubjectAndBody(emailType, group, callBackUrl, appUser);
+
+            var toEmail = new List<string>();
+            var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
+
+            switch (emailType)
+            {
+                case EmailType.GroupConfirmationByAdmin:
+                    toEmail = allAdmins.Select(a => a.Email).ToList();
+                    break;
+                default:
+                    toEmail.Add(appUser.Email);
+                    break;
+            }
+
+            return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
+        }
+
     }
 }

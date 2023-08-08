@@ -375,7 +375,7 @@ public class GroupController : Controller
             new { groupId = id, teacherId = currentTeacher.Id },
             protocol: HttpContext.Request.Scheme);
 
-        var sendEmailResult = await _emailService.SendToAdminConfirmationForGroups(group, callbackUrl);
+        var sendEmailResult = await _emailService.SendEmailGroups(Core.EmailTemplates.EmailType.GroupConfirmationByAdmin, group, callbackUrl);
 
         if (!sendEmailResult.IsSuccessful)
         {
@@ -404,7 +404,7 @@ public class GroupController : Controller
            new { groupId = groupId, code = code},
            protocol: HttpContext.Request.Scheme);
 
-        await _emailService.SendEmailToTeacherAboutApprovedGroup(teacher, group, callbackUrl);
+        await _emailService.SendEmailGroups(Core.EmailTemplates.EmailType.ApprovedGroupCreation, group, callbackUrl, teacher);
 
         return View();
     }
