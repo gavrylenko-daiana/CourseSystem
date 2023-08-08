@@ -27,7 +27,7 @@ public class UserActivityController : Controller
 
         var currentUser = await _userManager.GetUserAsync(User);
 
-        var activities = currentUser.UserActivities.ForMonth(month);
+        var activities = currentUser.UserActivities.ForMonth(month) ?? throw new ArgumentNullException("currentUser.UserActivities.ForMonth(month)");
 
         ViewData["DateTime"] = month;
 
@@ -40,7 +40,7 @@ public class UserActivityController : Controller
         var day = thisDay ?? DateTime.Today;
         var currentUser = await _userManager.GetUserAsync(User);
 
-        var activities = currentUser.UserActivities.ForDate(day);
+        var activities = currentUser.UserActivities.ForDate(day) ?? throw new ArgumentNullException("currentUser.UserActivities.ForDate(day)");
 
         ViewData["DateTime"] = day;
 
@@ -55,7 +55,6 @@ public class UserActivityController : Controller
         if (activity == null)
         {
             TempData.TempDataMessage("Error", "This activity does not exist.");
-
             // edit path
             return RedirectToAction("Index", "Home");
         }

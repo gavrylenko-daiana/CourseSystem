@@ -64,7 +64,9 @@ public class AssignmentController : Controller
     public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM) //MARCDOWN for description
     {
         if (assignmentVM == null)
+        {
             return View("Error");
+        }
 
         if (!ModelState.IsValid)
         {
@@ -98,19 +100,18 @@ public class AssignmentController : Controller
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteAssignment(int assignmentId)
     {
-        try
-        {
-            var assignment = await _assignmentService.GetById(assignmentId);
+        var assignment = await _assignmentService.GetById(assignmentId);
 
-            var assignentDeleteVM = new DeleteAssignmentViewModel();
-            assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
+        var assignentDeleteVM = new DeleteAssignmentViewModel();
 
-            return View(assignentDeleteVM);
-        }
-        catch (Exception ex)
+        if (assignentDeleteVM == null)
         {
-            throw new Exception("Assignment not fount");
+            throw new ArgumentNullException(nameof(assignentDeleteVM));
         }
+
+        assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
+
+        return View(assignentDeleteVM);
     }
 
     [HttpGet]
@@ -130,70 +131,74 @@ public class AssignmentController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        try
+        var assignment = await _assignmentService.GetById(id);
+
+        var assignentDetailsVM = new DetailsAssignmentViewModel();
+
+        if (assignentDetailsVM == null)
         {
-            var assignment = await _assignmentService.GetById(id);
-
-            var assignentDetailsVM = new DetailsAssignmentViewModel();
-            assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
-            var userAssignmnet = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
-            //var assignmentAnswers = userAssignmnets.Select(ua => ua.AssignmentAnswers).ToList();
-            assignentDetailsVM.UserAssignment = userAssignmnet;
-
-            if (userAssignmnet?.AssignmentAnswers == null)
-                assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
-            else
-                assignentDetailsVM.AssignmentAnswers = userAssignmnet.AssignmentAnswers;
-
-            //logic for getting assignmnet files 
-            assignentDetailsVM.AttachedFiles = new List<IFormFile>();
-
-            return View(assignentDetailsVM);
+            throw new ArgumentNullException(nameof(assignentDetailsVM));
         }
-        catch (Exception ex)
+
+        assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
+        var userAssignmnet = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
+        //var assignmentAnswers = userAssignmnets.Select(ua => ua.AssignmentAnswers).ToList();
+        assignentDetailsVM.UserAssignment = userAssignmnet;
+
+        if (userAssignmnet?.AssignmentAnswers == null)
         {
-            throw new Exception("Assignment not fount");
+            assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
         }
+        else
+        {
+            assignentDetailsVM.AssignmentAnswers = userAssignmnet.AssignmentAnswers;
+        }
+
+        //logic for getting assignmnet files 
+        assignentDetailsVM.AttachedFiles = new List<IFormFile>();
+
+        return View(assignentDetailsVM);
     }
 
     [HttpGet]
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> Edit(int id)
     {
-        try
-        {
-            var assignment = await _assignmentService.GetById(id);
-            var assigmentVM = new EditAssignmentViewModel();
-            assignment.MapTo<Assignment, EditAssignmentViewModel>(assigmentVM);
+        var assignment = await _assignmentService.GetById(id);
+        var assigmentVM = new EditAssignmentViewModel();
 
-            var fileCheckBoxes = new List<FileCheckBoxViewModel>();
-            foreach (var assignmentFile in assignment.AssignmentFiles)
+        if (assigmentVM == null)
+        {
+            throw new ArgumentNullException(nameof(assigmentVM));
+        }
+
+        assignment.MapTo<Assignment, EditAssignmentViewModel>(assigmentVM);
+
+        var fileCheckBoxes = new List<FileCheckBoxViewModel>();
+        foreach (var assignmentFile in assignment.AssignmentFiles)
+        {
+            var checkbox = new FileCheckBoxViewModel
             {
-                var checkbox = new FileCheckBoxViewModel
-                {
-                    IsActive = true,
-                    Description = $"{assignmentFile.Name}",
-                    Value = assignmentFile
-                };
+                IsActive = true,
+                Description = $"{assignmentFile.Name}",
+                Value = assignmentFile
+            };
 
-                fileCheckBoxes.Add(checkbox);
-            }
-
-            assigmentVM.AttachedFilesCheckBoxes = fileCheckBoxes;
-
-            return View(assigmentVM);
+            fileCheckBoxes.Add(checkbox);
         }
-        catch (Exception ex)
-        {
-            throw new Exception("Assignment not fount");
-        }
+
+        assigmentVM.AttachedFilesCheckBoxes = fileCheckBoxes;
+
+        return View(assigmentVM);
     }
 
     [HttpPost]
     public async Task<IActionResult> Edit(EditAssignmentViewModel editAssignmentVM)
     {
         if (editAssignmentVM == null)
+        {
             return View("Error");
+        }
 
         if (!ModelState.IsValid)
         {

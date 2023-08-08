@@ -37,19 +37,14 @@ public class AssignmentAnswerController : Controller
     [Authorize(Roles = "Student")]
     public async Task<IActionResult> CreateAnswer(int id)
     {
-        try
+        var assignmnetAnsweVM = new AssignmentAnsweViewModel()
         {
-            var assignmnetAnsweVM = new AssignmentAnsweViewModel()
-            {
-                AssignmentId = id
-            };
+            AssignmentId = id
+        };
+        
+        if (assignmnetAnsweVM == null) throw new ArgumentNullException(nameof(assignmnetAnsweVM));
 
-            return View(assignmnetAnsweVM);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Assignment doesn't found");
-        }
+        return View(assignmnetAnsweVM);
     }
 
     [HttpPost]
@@ -57,7 +52,9 @@ public class AssignmentAnswerController : Controller
     public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
     {
         if (!ModelState.IsValid)
+        {
             return View(assignmentAnswerVM);
+        }
 
         var assignmnetAnswer = new AssignmentAnswer();
         assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmnetAnswer);
@@ -95,12 +92,16 @@ public class AssignmentAnswerController : Controller
         var asignmentId = assignmentAnswer.UserAssignment.AssignmentId;
 
         if (assignmentAnswer == null)
+        {
             return NotFound();
+        }
 
         var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
 
         if (!deleteResult.IsSuccessful)
+        {
             TempData.TempDataMessage("Error", deleteResult.Message);
+        }
 
         return RedirectToAction("Details", "Assignment", new { id = asignmentId });
     }
@@ -112,7 +113,9 @@ public class AssignmentAnswerController : Controller
         var assignment = await _assignmentService.GetById(assignmentId);
 
         if (assignment == null)
+        {
             return NotFound();
+        }
 
         var userAssignmentVMs = new List<UserAssignmentViewModel>();
 
@@ -134,13 +137,17 @@ public class AssignmentAnswerController : Controller
         var student = await _userManager.FindByIdAsync(studentId);
 
         if (student == null)
+        {
             return NotFound();
+        }
 
         var assignment = await _assignmentService.GetById(assignmentId);
         var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId == student.Id);
 
         if (userAssignment == null)
+        {
             return NotFound();
+        }
 
         var checkAnswerVM = new CheckAnswerViewModel();
         userAssignment.MapTo<UserAssignments, CheckAnswerViewModel>(checkAnswerVM);
@@ -165,12 +172,13 @@ public class AssignmentAnswerController : Controller
                 new { assignmentId = assignmentId, studentId = studentId });
         }
 
-
         var assignment = await _assignmentService.GetById(assignmentId);
         var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
 
         if (userAssignment == null)
+        {
             return NotFound();
+        }
 
         var updateResult = await _userAssignmentService.ChangeUserAssignmentGrade(userAssignment, grade);
 

@@ -50,7 +50,6 @@ public class UserController : Controller
         if (user == null)
         {
             TempData.TempDataMessage("Error", "This user does not exist.");
-
             // edit path
             return RedirectToAction("Index", "Home");
         }
@@ -124,7 +123,6 @@ public class UserController : Controller
         else
         {
             TempData.TempDataMessage("Error", "You entered incorrect password");
-
             return View("EditPassword", editUserPasswordViewModel);
         }
     }
@@ -202,7 +200,7 @@ public class UserController : Controller
             return View("Error");
         }
 
-        //send messege to user to delete his or her account
+        //send message to user to delete his or her account
         var actionLink = Url.Action(
             "Delete",
             "Account",

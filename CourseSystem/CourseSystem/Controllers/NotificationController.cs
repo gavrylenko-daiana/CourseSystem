@@ -24,7 +24,7 @@ public class NotificationController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        var notifications = currentUser.Notifications.NotRead().OrderByDate();
+        var notifications = currentUser.Notifications.NotRead().OrderByDate() ?? throw new ArgumentNullException("currentUser.Notifications.NotRead().OrderByDate()");
 
         return View(notifications);
     }
@@ -34,7 +34,7 @@ public class NotificationController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        var notifications = currentUser.Notifications.OrderByDate();
+        var notifications = currentUser.Notifications.OrderByDate() ?? throw new ArgumentNullException("currentUser.Notifications.OrderByDate()");
 
         return View(notifications);
     }
@@ -49,7 +49,6 @@ public class NotificationController : Controller
         if (notification == null)
         {
             TempData.TempDataMessage("Error", "This notification does not exist.");
-
             // edit path
             return RedirectToAction("Index", "Home");
         }
