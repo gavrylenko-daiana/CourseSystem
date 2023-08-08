@@ -23,10 +23,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddCreatedAssignmentActivity(AppUser user, Assignment assignment)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (assignment == null)
+            {
                 return new Result<bool>(false, "Invalid assignment");
+            }  
 
             var activity = new UserActivity()
             {
@@ -43,10 +47,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddCreatedCourseActivity(AppUser user, Course course)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (course == null)
+            {
                 return new Result<bool>(false, "Invalid course");
+            }
 
             var activity = new UserActivity()
             {
@@ -62,10 +70,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddCreatedGroupActivity(AppUser user, Group group)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (group == null)
+            {
                 return new Result<bool>(false, "Invalid group");
+            }
 
             var activity = new UserActivity()
             {
@@ -82,10 +94,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddJoinedCourseActivity(AppUser user, Course course)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (course == null)
+            {
                 return new Result<bool>(false, "Invalid course");
+            }
 
             var activity = new UserActivity()
             {
@@ -101,10 +117,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddJoinedGroupActivity(AppUser user, Group group)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (group == null)
+            {
                 return new Result<bool>(false, "Invalid group");
+            }
 
             var activity = new UserActivity()
             {
@@ -121,10 +141,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddMarkedAssignmentActivity(AppUser user, UserAssignments userAssignment)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (userAssignment == null)
-                return new Result<bool>(false, "Invalid assignment");
+            {
+                return new Result<bool>(false, "Invalid userAssignment");
+            }
 
             var activity = new UserActivity()
             {
@@ -141,10 +165,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddSubmittedAssignmentActivity(AppUser user, Assignment assignment)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (assignment == null)
+            {
                 return new Result<bool>(false, "Invalid assignment");
+            }
 
             var activity = new UserActivity()
             {
@@ -160,10 +188,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddAttachedEducationalMaterialForCourseActivity(AppUser user, Course course)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (course == null)
+            {
                 return new Result<bool>(false, "Invalid course");
+            }
 
             var activity = new UserActivity()
             {
@@ -179,10 +211,14 @@ namespace BLL.Services
         public async Task<Result<bool>> AddAttachedEducationalMaterialForGroupActivity(AppUser user, Group group)
         {
             if (user == null)
+            {
                 return new Result<bool>(false, "Invalid user");
+            }
 
             if (group == null)
-                return new Result<bool>(false, "Invalid course");
+            {
+                return new Result<bool>(false, "Invalid group");
+            }
 
             var activity = new UserActivity()
             {
