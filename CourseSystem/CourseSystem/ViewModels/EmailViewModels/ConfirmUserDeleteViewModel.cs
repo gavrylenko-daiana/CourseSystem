@@ -1,6 +1,6 @@
 ﻿using Core.Enums;
 
-namespace UI.ViewModels
+namespace UI.ViewModels.EmailViewModels
 {
     public class ConfirmUserDeleteViewModel
     {

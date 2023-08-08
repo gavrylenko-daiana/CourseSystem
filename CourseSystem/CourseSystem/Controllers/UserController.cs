@@ -1,9 +1,11 @@
 using BLL.Interfaces;
 using Core.Helpers;
 using Core.Models;
+using Core.EmailTemplates;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
+using UI.ViewModels.EmailViewModels;
 
 namespace UI.Controllers;
 
@@ -169,7 +171,7 @@ public class UserController : Controller
             new { userId = user.Id },
             protocol: HttpContext.Request.Scheme);
 
-        var deletionSendingResult = await _emailService.ConfirmUserDeletionByAdmin(user, callbackUrl);
+        var deletionSendingResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByAdmin, user, callbackUrl);
 
         if (!deletionSendingResult.IsSuccessful)
             TempData.TempDataMessage("Error", deletionSendingResult.Message);
@@ -198,7 +200,7 @@ public class UserController : Controller
             new { userId = userId },
             protocol: HttpContext.Request.Scheme);
 
-        await _emailService.ConfirmUserDeletionByUser(user, actionLink);
+        await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByUser, user, actionLink);
         
         var confirmDeleteVM = new ConfirmUserDeleteViewModel();
         user.MapTo(confirmDeleteVM);
