@@ -1,12 +1,11 @@
 ﻿using Core.Enums;
+using Core.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace UI.ViewModels
+namespace UI.ViewModels.AssignmentViewModels
 {
-    public class EditAssignmentViewModel
+    public class CreateAssignmentViewModel //add property for markdown text
     {
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "Assignment name is required")]
         [Display(Name = "* Assignment name")]
         public string Name { get; set; }
@@ -29,8 +28,6 @@ namespace UI.ViewModels
         [Display(Name = "* Assignment status")]
         public AssignmentAccess AssignmentAccess { get; set; }
         public int GroupId { get; set; }
-        public List<FileCheckBoxViewModel> AttachedFilesCheckBoxes  { get; set; } = new List<FileCheckBoxViewModel>();
-        public List<string>? AttachedFilesUrls { get; set; }
-        public List<IFormFile> NewAddedFiles { get; set; }
+        public List<IFormFile>? AttachedFiles { get; set; }
     }
 }

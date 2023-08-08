@@ -1,7 +1,7 @@
 ﻿using Core.Enums;
 using Core.Models;
 
-namespace UI.ViewModels
+namespace UI.ViewModels.AssignmentViewModels
 {
     public class AssignmentViewModel
     {

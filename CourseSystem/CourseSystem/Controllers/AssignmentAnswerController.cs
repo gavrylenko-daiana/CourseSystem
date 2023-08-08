@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
+using UI.ViewModels.AssignmentViewModels;
 
 namespace UI.Controllers
-{   
+{
     [Authorize]
     [CustomFilterAttributeException]
     public class AssignmentAnswerController : Controller
