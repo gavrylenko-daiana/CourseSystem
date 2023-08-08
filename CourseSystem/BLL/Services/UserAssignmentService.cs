@@ -11,9 +11,9 @@ namespace BLL.Services
 {
     public class UserAssignmentService : GenericService<UserAssignments>, IUserAssignmentService
     {
-        public UserAssignmentService(UnitOfWork unitOfWork) : base(unitOfWork)
+        public UserAssignmentService(UnitOfWork unitOfWork) 
+            : base(unitOfWork, unitOfWork.UserAssignmentsRepository)
         {
-            _repository = unitOfWork.UserAssignmentsRepository;
         }
 
         public async Task<Result<bool>> ChangeUserAssignmentGrade(UserAssignments userAssignment, int newGrade)
@@ -26,7 +26,7 @@ namespace BLL.Services
                 userAssignment.Grade = newGrade;
                 userAssignment.IsChecked = true;
 
-                await Update(userAssignment);
+                await _repository.UpdateAsync(userAssignment);
                 await _unitOfWork.Save();
 
                 return new Result<bool>(true);

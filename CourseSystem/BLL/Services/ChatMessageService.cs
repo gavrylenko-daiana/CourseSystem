@@ -11,9 +11,9 @@ namespace BLL.Services
 {
     public class ChatMessageService : GenericService<ChatMessage>, IChatMessageService
     {
-        public ChatMessageService(UnitOfWork unitOfWork) : base(unitOfWork)
+        public ChatMessageService(UnitOfWork unitOfWork) 
+            : base(unitOfWork, unitOfWork.ChatMessageRepository)
         {
-            _repository = unitOfWork.ChatMessageRepository;
         }
         public async Task<ChatMessage> CreateChatMessage(AppUser appUser, Assignment assignment, string text)
         {
@@ -42,7 +42,7 @@ namespace BLL.Services
                     Created = DateTime.Now,
                 };
 
-                await Add(message);
+                await _repository.AddAsync(message);
                 await _unitOfWork.Save();
 
                 return message;

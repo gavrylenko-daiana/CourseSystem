@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Interfaces
 {
-    public interface IActivityService : IGenericService<UserActivity>
+    public interface IActivityService
     {
         Task AddAssignmentSubmitedActivity(AppUser student, Assignment assignment);
 

@@ -7,10 +7,9 @@ namespace BLL.Services;
 public class UserCourseService : GenericService<UserCourses>, IUserCourseService
 {
     private readonly IUserGroupService _userGroupService;
-    public UserCourseService(UnitOfWork unitOfWork, IUserGroupService userGroupService) : base(unitOfWork)
+    public UserCourseService(UnitOfWork unitOfWork, IUserGroupService userGroupService) 
+        : base(unitOfWork, unitOfWork.UserCoursesRepository)
     {
-        _unitOfWork = unitOfWork;
-        _repository = unitOfWork.UserCoursesRepository;
         _userGroupService = userGroupService;
     }
 
@@ -74,7 +73,7 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
     {
         try
         {
-            await Add(userCourses);
+            await _repository.AddAsync(userCourses);
             await _unitOfWork.Save();
         }
         catch (Exception ex)

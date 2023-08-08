@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Interfaces
 {
-    public interface IAssignmentService : IGenericService<Assignment>
+    public interface IAssignmentService
     {
         Task<Result<bool>> CreateAssignment(Assignment assignment);
         Task<Result<List<Assignment>>> GetGroupAssignments(int groupId);

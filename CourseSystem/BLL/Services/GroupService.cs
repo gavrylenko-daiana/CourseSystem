@@ -12,10 +12,9 @@ public class GroupService : GenericService<Group>, IGroupService
     private readonly UserManager<AppUser> _userManager;
     
     public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService,
-        UserManager<AppUser> userManager) : base(unitOfWork)
+        UserManager<AppUser> userManager) 
+            : base(unitOfWork, unitOfWork.GroupRepository)
     {
-        _unitOfWork = unitOfWork;
-        _repository = unitOfWork.GroupRepository;
         _userGroupService = userGroupService;
         _userManager = userManager;
     }
@@ -36,7 +35,7 @@ public class GroupService : GenericService<Group>, IGroupService
             
             ValidateGroupDates(group.StartDate, group.EndDate);
                 
-            await Add(group);
+            await _repository.AddAsync(group);
             await _unitOfWork.Save();
 
             var userGroup = new UserGroups()
@@ -57,14 +56,14 @@ public class GroupService : GenericService<Group>, IGroupService
     {
         try
         {
-            var group = await GetById(groupId);
+            var group = await _repository.GetByIdAsync(groupId);
             
             if (group == null)
             {
                 throw new Exception("Course not found");
             }
 
-            await Delete(group.Id);
+            await _repository.DeleteAsync(group);
             await _unitOfWork.Save();
         }
         catch (Exception ex)
@@ -77,7 +76,7 @@ public class GroupService : GenericService<Group>, IGroupService
     {
         try
         {
-            var group = await GetById(groupId);
+            var group = await _repository.GetByIdAsync(groupId);
             
             if (group == null)
             {
@@ -88,7 +87,7 @@ public class GroupService : GenericService<Group>, IGroupService
             group.StartDate = startDate;
             group.EndDate = endDate;
             
-            await Update(group);
+            await _repository.UpdateAsync(group);
             await _unitOfWork.Save();
         }
         catch (Exception ex)

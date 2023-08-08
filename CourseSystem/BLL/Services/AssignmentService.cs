@@ -13,9 +13,9 @@ namespace BLL.Services
 {
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
-        public AssignmentService(UnitOfWork unitOfWork) : base(unitOfWork)
+        public AssignmentService(UnitOfWork unitOfWork) 
+            : base(unitOfWork, unitOfWork.AssignmentRepository)
         {
-            _repository = unitOfWork.AssignmentRepository;
         }
 
         public async Task<Result<bool>> CreateAssignment(Assignment assignment)
@@ -38,7 +38,7 @@ namespace BLL.Services
 
         public async Task<Result<bool>> DeleteAssignment(int assignmentId)
         {
-            var assignment = await GetById(assignmentId);
+            var assignment = await _repository.GetByIdAsync(assignmentId);
 
             if (assignment == null)
                 return new Result<bool>(false, "Fail to get assignment");

@@ -7,9 +7,9 @@ namespace BLL.Services
     public class AssignmentAnswerService : GenericService<AssignmentAnswer>, IAssignmentAnswerService
     {
         private readonly IUserAssignmentService _userAssignmentService;
-        public AssignmentAnswerService(UnitOfWork unitOfWork, IUserAssignmentService userAssignmentService) : base(unitOfWork)
+        public AssignmentAnswerService(UnitOfWork unitOfWork, IUserAssignmentService userAssignmentService) 
+            : base(unitOfWork, unitOfWork.AssignmentAnswerRepository)
         {
-            _repository = unitOfWork.AssignmentAnswerRepository;
             _userAssignmentService = userAssignmentService;
         }
 
@@ -44,7 +44,7 @@ namespace BLL.Services
 
             try
             {
-                await Delete(assignmentAnswer.Id);
+                await _repository.DeleteAsync(assignmentAnswer);
 
 
                 if (assignmentAnswer.UserAssignment.AssignmentAnswers.Count() == 1)

@@ -11,10 +11,8 @@ public class CourseService : GenericService<Course>, ICourseService
     private readonly IUserCourseService _userCourseService;
     
     public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService) 
-        : base(unitOfWork)
+        : base(unitOfWork, unitOfWork.CourseRepository)
     {
-        _unitOfWork = unitOfWork;
-        _repository = unitOfWork.CourseRepository;
         _userCourseService = userCourseService;
     }
 
@@ -27,7 +25,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 throw new Exception("Course title cannot be empty.");
             }
 
-            await Add(course);
+            await _repository.AddAsync(course);
             await _unitOfWork.Save();
             
             var userCourse = new UserCourses()
@@ -49,14 +47,14 @@ public class CourseService : GenericService<Course>, ICourseService
     {
         try
         {
-            var course = await GetById(courseId);
+            var course = await _repository.GetByIdAsync(courseId);
             
             if (course == null)
             {
                 throw new Exception("Course not found");
             }
 
-            await Delete(course.Id);
+            await _repository.DeleteAsync(course);
             await _unitOfWork.Save();
         }
         catch (Exception ex)
@@ -69,7 +67,7 @@ public class CourseService : GenericService<Course>, ICourseService
     {
         try
         {
-            var course = await GetById(courseId);
+            var course = await _repository.GetByIdAsync(courseId);
             
             if (course == null)
             {
@@ -78,7 +76,7 @@ public class CourseService : GenericService<Course>, ICourseService
 
             course.Name = newName;
 
-            await Update(course);
+            await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
         }
         catch (Exception ex)

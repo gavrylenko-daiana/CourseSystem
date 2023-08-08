@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace BLL.Interfaces;
 
-public interface IGroupService : IGenericService<Group>
+public interface IGroupService
 {
     Task CreateGroup(Group group, AppUser currentUser);
     Task DeleteGroup(int groupId);
