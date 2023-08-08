@@ -72,14 +72,11 @@ public class GroupController : Controller
     public async Task<IActionResult> Create(GroupViewModel groupViewModel)
     {
         var courseId = (int)(TempData["CourseId"] ?? throw new InvalidOperationException());
-        var course = await _courseService.GetById(courseId);
-        
         var currentUser = await _userManager.GetUserAsync(User);
 
         if (currentUser == null)
         {
             TempData.TempDataMessage("Error", "User not found");
-                
             return View(groupViewModel);
         }
 
@@ -87,19 +84,15 @@ public class GroupController : Controller
         groupViewModel.MapTo(group);
         group.CourseId = courseId;
 
-        try
+        var createResult = await _groupService.CreateGroup(group, currentUser);
+
+        if (!createResult.IsSuccessful)
         {
-            await _groupService.CreateGroup(group, currentUser);
-        }
-        catch (Exception ex)
-        {
-            TempData["CourseId"] = courseId; 
-            
-            TempData.TempDataMessage("Error", "Your end day must be more than start day");
-                
+            TempData["CourseId"] = courseId;
+            TempData.TempDataMessage("Error", $"{createResult.Message}");
             return View(groupViewModel);
         }
-
+        
         return RedirectToAction("Details", "Group", new { id = group.Id });
     }
 

@@ -19,22 +19,25 @@ public class GroupService : GenericService<Group>, IGroupService
         _userManager = userManager;
     }
 
-    public async Task CreateGroup(Group group, AppUser currentUser)
+    public async Task<Result<bool>> CreateGroup(Group group, AppUser currentUser)
     {
+        if (group == null)
+        {
+            return new Result<bool>(false, $"{nameof(group)} not found");
+        }
+        
+        if (currentUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(currentUser)} not found");
+        }
+        
+        if (group.StartDate > group.EndDate)
+        {
+            return new Result<bool>(false, $"Start date must be less than end date");
+        }
+        
         try
         {
-            if (group == null)
-            {
-                throw new ArgumentNullException("Group is null");
-            }
-
-            if (currentUser == null)
-            {
-                throw new ArgumentNullException("User is null");
-            }
-            
-            ValidateGroupDates(group.StartDate, group.EndDate);
-                
             await _repository.AddAsync(group);
             await _unitOfWork.Save();
 
@@ -44,11 +47,19 @@ public class GroupService : GenericService<Group>, IGroupService
                 AppUser = currentUser
             };
             
-            await _userGroupService.CreateUserGroups(userGroup);
+            var createUserGroupResult = await _userGroupService.CreateUserGroups(userGroup);
+
+            if (!createUserGroupResult.IsSuccessful)
+            {
+                await _repository.DeleteAsync(group);
+                await _unitOfWork.Save();
+            }
+
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to create group {group.Name}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to create group {group.Name}. Exception: {ex.Message}");
         }
     }
 
@@ -93,14 +104,6 @@ public class GroupService : GenericService<Group>, IGroupService
         catch (Exception ex)
         {
             throw new Exception($"Failed to update group by id {groupId}. Exception: {ex.Message}");
-        }
-    }
-
-    private void ValidateGroupDates(DateTime startDate, DateTime endDate)
-    {
-        if (startDate > endDate)
-        {
-            throw new ArgumentException("Start date must be less than end date.");
         }
     }
 
