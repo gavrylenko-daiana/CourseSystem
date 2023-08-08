@@ -1,4 +1,5 @@
 ﻿using BLL.Interfaces;
+using Core.ActivityTemplates;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
@@ -19,131 +20,195 @@ namespace BLL.Services
         {
         }
 
-        public async Task AddAssignmentCreatedActivity(AppUser teacher, Assignment assignment)
+        public async Task<Result<bool>> AddCreatedAssignmentActivity(AppUser user, Assignment assignment)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (assignment == null)
+                return new Result<bool>(false, "Invalid assignment");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.CreatedAssignment),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedAssignment,
+                    new object[] { assignment.Name, assignment.Group.Name, assignment.StartDate, assignment.EndDate }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddCreatedCourseActivity(AppUser user, Course course)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (course == null)
+                return new Result<bool>(false, "Invalid course");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.CreatedCourse),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedCourse, new object[] { course.Name }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddCreatedGroupActivity(AppUser user, Group group)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (group == null)
+                return new Result<bool>(false, "Invalid group");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.CreatedGroup),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedGroup,
+                    new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddJoinedCourseActivity(AppUser user, Course course)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (course == null)
+                return new Result<bool>(false, "Invalid course");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.JoinedCourse),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.JoinedCourse, new object[] { course.Name }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddJoinedGroupActivity(AppUser user, Group group)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (group == null)
+                return new Result<bool>(false, "Invalid group");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.JoinedGroup),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.JoinedGroup,
+                    new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddMarkedAssignmentActivity(AppUser user, UserAssignments userAssignment)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (userAssignment == null)
+                return new Result<bool>(false, "Invalid assignment");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.MarkedAssignment),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.MarkedAssignment,
+                    new object[] { userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, userAssignment.Grade }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddSubmittedAssignmentActivity(AppUser user, Assignment assignment)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (assignment == null)
+                return new Result<bool>(false, "Invalid assignment");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.SubmittedAssignment),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.SubmittedAssignment, new object[] { assignment.Name }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddAttachedEducationalMaterialForCourseActivity(AppUser user, Course course)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (course == null)
+                return new Result<bool>(false, "Invalid course");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.AttachedEducationalMaterialForCourse),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForCourse, new object[] { course.Name }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddAttachedEducationalMaterialForGroupActivity(AppUser user, Group group)
+        {
+            if (user == null)
+                return new Result<bool>(false, "Invalid user");
+
+            if (group == null)
+                return new Result<bool>(false, "Invalid course");
+
+            var activity = new UserActivity()
+            {
+                Name = ActivityTemplate.GetActivityName(ActivityType.AttachedEducationalMaterialForCourse),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForCourse, new object[] { group.Name }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        private async Task<Result<bool>> SaveActivity(UserActivity activity)
         {
             try
             {
-                if (teacher == null)
-                {
-                    throw new ArgumentNullException("Teacher was null");
-                }
+                await _repository.AddAsync(activity);
+                await _unitOfWork.Save();
 
-                if (assignment == null)
-                {
-                    throw new ArgumentNullException("Assignment was null");
-                }
-
-                var userActivity = new UserActivity()
-                {
-                    Name = "You created new assignment",
-                    Description = $"<p>You created a new assignment \"{assignment.Name}\" for group \"{assignment.Group.Name}\".</p>" +
-                    $"<p>Assignment activity starts on {assignment.StartDate.ToString("D")}, at {assignment.StartDate.ToString("t")}." +
-                    $"It ends on {assignment.EndDate.ToString("D")}, at {assignment.EndDate.ToString("t")}.</p>",
-                    Created = DateTime.Now,
-                    AppUser = teacher,
-                };
-
-                await _repository.AddAsync(userActivity);
-
+                return new Result<bool>(true);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to add activity record. Exception: {ex.Message}");
+                return new Result<bool>(false, ex.Message);
             }
         }
 
-        public async Task AddAssignmentMarkedActivity(AppUser teacher, UserAssignments userAssignments)
-        {
-            try
-            {
-                if (teacher == null)
-                {
-                    throw new ArgumentNullException("Teacher was null");
-                }
-
-                if (userAssignments == null)
-                {
-                    throw new ArgumentNullException("UserAssignment was null");
-                }
-
-                var userActivity = new UserActivity()
-                {
-                    Name = "You marked an assignment",
-                    Description = $"<p>You marked the solution {userAssignments.AppUser.FirstName} {userAssignments.AppUser.LastName} submited for assignment \"{userAssignments.Assignment.Name}\".</p>" +
-                    $"<p>His/her grade: {userAssignments.Grade}/100.</p>",
-                    Created = DateTime.Now,
-                    AppUser = teacher,
-                };
-
-                await _repository.AddAsync(userActivity);
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Failed to add activity record. Exception: {ex.Message}");
-            }
-        }
-
-        public async Task AddAssignmentSubmitedActivity(AppUser student, Assignment assignment)
-        {
-            try
-            {
-                if (student == null)
-                {
-                    throw new ArgumentNullException("Student was null");
-                }
-
-                if (assignment == null)
-                {
-                    throw new ArgumentNullException("Assignment was null");
-                }
-
-                var userActivity = new UserActivity()
-                {
-                    Name = "You submitted an assignment",
-                    Description = $"<p>You subbmited a solution for assignment \"{assignment.Name}\".</p>",
-                    Created = DateTime.Now,
-                    AppUser = student,
-                };
-
-                await _repository.AddAsync(userActivity);
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Failed to add activity record. Exception: {ex.Message}");
-            }
-        }
-
-        public async Task AddJoinedCourseActivity(AppUser user, Course course)
-        {
-            try
-            {
-                if (user == null)
-                {
-                    throw new ArgumentNullException("User was null");
-                }
-
-                if (course == null)
-                {
-                    throw new ArgumentNullException("Course was null");
-                }
-
-                var userActivity = new UserActivity()
-                {
-                    Name = "You joined a new course",
-                    Description = $"<p>You joined a new course - \"{course.Name}\".</p>",
-                    Created = DateTime.Now,
-                    AppUser = user,
-                };
-
-                await _repository.AddAsync(userActivity);
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Failed to add activity record. Exception: {ex.Message}");
-            }
-        }
     }
 }
