@@ -12,6 +12,7 @@ using Group = Core.Models.Group;
 
 namespace UI.Controllers;
 
+[Authorize]
 public class GroupController : Controller
 {
     private readonly IGroupService _groupService;

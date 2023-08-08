@@ -10,6 +10,7 @@ using UI.ViewModels;
 
 namespace UI.Controllers;
 
+[Authorize]
 public class CourseController : Controller
 {
     private readonly ICourseService _courseService;

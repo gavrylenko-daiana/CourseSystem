@@ -2,6 +2,7 @@ using BLL.Interfaces;
 using Core.Helpers;
 using Core.Models;
 using Core.EmailTemplates;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
@@ -9,6 +10,7 @@ using UI.ViewModels.EmailViewModels;
 
 namespace UI.Controllers;
 
+[Authorize]
 public class UserController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
@@ -29,7 +31,10 @@ public class UserController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null) return View("Error");
+        if (currentUser == null)
+        {
+            return View("Error");
+        }
 
         var userViewModel = new AppUser();
         currentUser.MapTo(userViewModel);
@@ -38,7 +43,6 @@ public class UserController : Controller
     }
 
     [HttpGet]
-    [Route("Detail/{id}")]
     public async Task<IActionResult> Detail(string id)
     {
         var user = await _userManager.FindByIdAsync(id);
@@ -95,7 +99,6 @@ public class UserController : Controller
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Failed to edit password");
-
             return View("EditPassword", editUserPasswordViewModel);
         }
 
@@ -132,7 +135,6 @@ public class UserController : Controller
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Failed to edit profile");
-
             return View("Edit", editUserViewModel);
         }
 
@@ -162,7 +164,10 @@ public class UserController : Controller
     {
         var user = await _userManager.GetUserAsync(User);
 
-        if (user == null) return View("Error");
+        if (user == null)
+        {
+            return View("Error");
+        }
 
         //Comes to the e-mail Admin, he or she have to confirm the deletion of the account
         var callbackUrl = Url.Action(
@@ -174,7 +179,9 @@ public class UserController : Controller
         var deletionSendingResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByAdmin, user, callbackUrl);
 
         if (!deletionSendingResult.IsSuccessful)
+        {
             TempData.TempDataMessage("Error", deletionSendingResult.Message);
+        }
 
         TempData.TempDataMessage("Error", "Wait for confirmation of account deletion from the admin");
         return RedirectToAction("Login", "Account");
@@ -184,7 +191,9 @@ public class UserController : Controller
     public async Task<IActionResult> ConfirmUserDeletion(string userId)
     {
         if (userId == null)
+        {
             return View("Error");
+        }
 
         var user = await _userManager.FindByIdAsync(userId);
 
