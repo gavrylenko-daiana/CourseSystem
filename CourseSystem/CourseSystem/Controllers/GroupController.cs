@@ -364,13 +364,12 @@ public class GroupController : Controller
             GroupId = groupId
         };
 
-        try
+        var addStudentToGroupAndCourseResult = await _userCourseService.AddStudentToGroupAndCourse(userGroup);
+            
+        if (!addStudentToGroupAndCourseResult.IsSuccessful)
         {
-            await _userCourseService.AddStudentToGroupAndCourse(userGroup);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Failt to register");
+            TempData.TempDataMessage("Error", addStudentToGroupAndCourseResult.Message);
+            return RedirectToAction("Index", "Home");
         }
 
         var inventationVM = new InventationViewModel() { GroupName = group.Name, UserName = currentUser.UserName};

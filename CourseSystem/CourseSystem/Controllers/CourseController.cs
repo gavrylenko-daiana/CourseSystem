@@ -258,13 +258,11 @@ public class CourseController : Controller
             return View("Index");
         }
 
-        try
+        var addTeacherToCourseResult = await _userCourseService.AddTeacherToCourse(course, currentUser);
+        
+        if (!addTeacherToCourseResult.IsSuccessful)
         {
-            await _userCourseService.AddTeacherToCourse(course, currentUser);
-        }
-        catch(Exception ex)
-        {
-            ViewData.ViewDataMessage("Error", $"Failed to add teacher to course. Message: {ex.Message}");
+            ViewData.ViewDataMessage("Error", $"{addTeacherToCourseResult.Message}");
             return View("Index");
         }
 
