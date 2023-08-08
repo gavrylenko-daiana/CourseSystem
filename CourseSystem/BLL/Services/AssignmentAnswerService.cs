@@ -16,13 +16,17 @@ namespace BLL.Services
         public async Task<Result<bool>> CreateAssignmentAnswer(AssignmentAnswer assignmentAnswer, Assignment assignment, AppUser appUser)
         {
             if (assignmentAnswer == null)
+            {
                 return new Result<bool>(false, "Invalid assignmnet answer");
+            }              
 
             var userAssignmnetResult = await _userAssignmentService.CreateUserAssignment(assignment, appUser);
 
             if (!userAssignmnetResult.IsSuccessful)
+            {
                 return new Result<bool>(false, "Failt to create user assignment");
-            
+            }
+                            
             try
             {
                 assignmentAnswer.UserAssignment = userAssignmnetResult.Data;
@@ -40,12 +44,13 @@ namespace BLL.Services
         public async Task<Result<bool>> DeleteAssignmentAnswer(AssignmentAnswer assignmentAnswer)
         {
             if (assignmentAnswer == null)
+            {
                 return new Result<bool>(false, "Fail to delete answer");
+            }
 
             try
             {
                 await _repository.DeleteAsync(assignmentAnswer);
-
 
                 if (assignmentAnswer.UserAssignment.AssignmentAnswers.Count() == 1)
                 {
