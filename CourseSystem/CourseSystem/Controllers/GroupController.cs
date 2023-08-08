@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using UI.ViewModels;
+using Group = Core.Models.Group;
 
 namespace UI.Controllers;
 
@@ -127,13 +128,25 @@ public class GroupController : Controller
             return NotFound();
         }
 
-        return View(group);
+        var groupViewModel = new GroupViewModel();
+        group.MapTo(groupViewModel);
+
+        return View(groupViewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Core.Models.Group newGroup)
+    public async Task<IActionResult> Edit(GroupViewModel newGroupViewModel)
     {
-        await _groupService.UpdateGroup(newGroup.Id, newGroup.Name, newGroup.StartDate, newGroup.EndDate);
+        var newGroup = new Group();
+        newGroupViewModel.MapTo(newGroup);
+        
+        var updateResult = await _groupService.UpdateGroup(newGroup);
+        
+        if (!updateResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{updateResult.Message}");
+            return View(newGroupViewModel);
+        }
         
         return RedirectToAction("Details", new { id = newGroup.Id });
     }

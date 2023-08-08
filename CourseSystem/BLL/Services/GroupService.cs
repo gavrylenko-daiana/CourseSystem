@@ -83,27 +83,33 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     }
 
-    public async Task UpdateGroup(int groupId, string newName, DateTime startDate, DateTime endDate)
+    public async Task<Result<bool>> UpdateGroup(Group newGroup)
     {
+        if (newGroup == null)
+        {
+            return new Result<bool>(false, $"{nameof(newGroup)} not found");
+        }
+        
+        if (newGroup.StartDate > newGroup.EndDate)
+        {
+            return new Result<bool>(false, $"Start date must be less than end date");
+        }
+        
         try
         {
-            var group = await _repository.GetByIdAsync(groupId);
-            
-            if (group == null)
-            {
-                throw new Exception("Course not found");
-            }
-
-            group.Name = newName;
-            group.StartDate = startDate;
-            group.EndDate = endDate;
+            var group = await _repository.GetByIdAsync(newGroup.Id);
+            group.Name = newGroup.Name;
+            group.StartDate = newGroup.StartDate;
+            group.EndDate = newGroup.EndDate;
             
             await _repository.UpdateAsync(group);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to update group by id {groupId}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to update group {newGroup.Id}. Exception: {ex.Message}");
         }
     }
 

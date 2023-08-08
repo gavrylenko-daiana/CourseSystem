@@ -1,27 +1,33 @@
 @model List<UI.ViewModels.UserSelectionViewModel>
 
 <form method="post" asp-action="ConfirmTeachersSelection">
-        <input type="hidden" name="groupId" value="@ViewBag.GroupId" />
-        <div class="container mt-4">
-            <div class="card">
-                <div class="card-header">
-                    Select Teachers 
-                </div>
+    <input type="hidden" name="groupId" value="@ViewBag.GroupId" />
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                Select Teachers 
+            </div>
 
-                <div class="card-body">
-                    <ul>
-                        @for (int i = 0; i < Model.Count; i++)
-                        {
-                            <li>
-                                <input type="checkbox" asp-for="@Model[i].IsSelected" />
-                                @Model[i].FirstName @Model[i].LastName
-                                <input type="hidden" asp-for="@Model[i].Id" />
-                            </li>
-                        }
-                    </ul>
-                </div>
+            <div class="card-body">
+                <ul>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <li>
+                            <input type="checkbox" asp-for="@Model[i].IsSelected" />
+                            @Model[i].FirstName @Model[i].LastName
+                            <input type="hidden" asp-for="@Model[i].Id" />
+                        </li>
+                    }
+                </ul>
             </div>
         </div>
+    </div>
 
-        <button type="submit" class="btn btn-primary mt-2">Submit</button>
-    </form>
+    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+</form>
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span><b>Sorry!</b> - @TempData["Error"]</span>
+    </div>
+} 
