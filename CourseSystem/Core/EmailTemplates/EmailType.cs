@@ -10,14 +10,13 @@ namespace Core.EmailTemplates
     {
         CodeVerification,
         AccountApproveByAdmin,
-        ApprovedGroup,
-        Registration,
-        Confirm,
+        ApprovedGroupCreation,
+        UserRegistration,
+        ConfirmAdminRegistration,
         ConfirmDeletionByAdmin,
         ConfirmDeletionByUser,
         CourseInvitation,
         GroupConfirmationByAdmin,
-        GroupConfirmationByTeacher,
-        GroupInvitation
+        GroupInvitationToStudent
     }
 }

@@ -11,6 +11,7 @@ using MailKit.Security;
 using System.Runtime;
 using Core.Enums;
 using Core.EmailTemplates;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BLL.Services
 {
@@ -18,6 +19,7 @@ namespace BLL.Services
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly EmailSettings _emailSettings;
+
 
         public EmailService(UserManager<AppUser> userManager,
             IOptions<EmailSettings> settings)
@@ -57,73 +59,6 @@ namespace BLL.Services
             {
                 throw new Exception(ex.Message);
             }
-        }
-
-        public async Task SendUserApproveToAdmin(AppUser newUser, string callBackUrl)
-        {
-            var allAdmins = await _userManager.GetUsersInRoleAsync("Admin");
-
-            if(allAdmins.Any())
-            {
-                #region Email body creation
-                var userRole = newUser.Role;
-
-                var subjectAndBody = EmailTemplate.GetEmailSubjectAndBody(EmailType.AccountApproveByAdmin,
-                    new Dictionary<string, object>()
-                    {
-                        {@"{firstName}", newUser.FirstName },
-                        {@"{lastName}", newUser.LastName },
-                        {@"{birthDate}", newUser.BirthDate },
-                        {@"{email}", newUser.Email },
-                        {@"{userRole}", userRole},
-                        {@"{callBackUrl}", callBackUrl }
-                    });
-               
-                #endregion
-                try
-                {
-                    var allAdminsEmails = allAdmins.Select(a => a.Email).ToList();
-                    var emailData = new EmailData(
-                        allAdminsEmails,
-                        subjectAndBody.Item1,
-                        subjectAndBody.Item2);
-
-                    await SendEmailAsync(emailData);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"Fail to send email to {newUser.Email}");
-                }
-            }           
-        }
-
-        public async Task SendEmailAboutSuccessfulRegistration(AppUser appUser, string linkToProfile)
-        {
-            if(appUser != null)
-            {
-                #region Email body creation
-                var emailBody = new StringBuilder().AppendLine($"<h4>Dear {appUser.FirstName}, you have been successfully registered into system</h4>");
-                var buttonToUserProfileDetails = $"<form action=\"{linkToProfile}\">\r\n   " +
-                    $" <input type=\"submit\" style=\"color: red\" " +
-                    $"value=\"Your profile details\" />\r\n</form>";
-
-                emailBody.AppendLine(buttonToUserProfileDetails);
-                #endregion
-
-                var emailData = new EmailData(
-                    new List<string> { appUser.Email},
-                    String.Empty,
-                    emailBody.ToString());
-
-                try
-                {
-                    await SendEmailAsync(emailData);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"Fail to send email about successful registration to user {appUser.Email} ");
-                }
-            }          
         }
 
         private async Task<Result<bool>> SendEmailAsync(EmailData emailData)
@@ -174,14 +109,6 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Result<bool>> SendAdminEmailConfirmation(string adminEmail, string callBackUrl) 
-        {
-            var emailData = new EmailData(new List<string> { adminEmail },
-                     "Confirm your account",
-                     $"Confirm registration, follow the link: <a href='{callBackUrl}'>link</a>");
-
-           return await SendEmailAsync(emailData);
-        }
 
         public async Task<Result<bool>> ConfirmUserDeletionByAdmin(AppUser userForDelete, string callbackUrl)
         {
@@ -393,6 +320,164 @@ namespace BLL.Services
                 return new Result<bool>(false, "Fail to send email to students");
             }
 
+        }
+
+        private async Task<Result<bool>> CreateAndSendEmail(List<string> toEmails, string subject, string body = null, string displayName = null)
+        {
+            if (toEmails.IsNullOrEmpty())
+                return new Result<bool>(false, "No emails to send data");
+
+            var emailData = new EmailData(toEmails, subject, body, displayName);
+
+            try
+            {
+                var result = await SendEmailAsync(emailData);
+
+                if (!result.IsSuccessful)
+                    return new Result<bool>(false, result.Message);
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, "Fail to send email");
+            }
+
+        }
+
+        public (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null) 
+        {
+            if(appUser == null)
+                return (String.Empty, String.Empty);
+
+            var parameters = new Dictionary<string, object>();
+            switch(emailType)
+            {
+                case EmailType.AccountApproveByAdmin:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{lastname}", appUser.LastName },
+                        {@"{birthdate}", appUser.BirthDate },
+                        {@"{email}", appUser.Email },
+                        {@"{userrole}", appUser.Role},
+                        {@"{callbackurl}", callBackUrl }
+                    };
+                    break;
+                case EmailType.UserRegistration:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{callbackurl}", callBackUrl }
+                    };
+                    break;
+                case EmailType.ConfirmAdminRegistration:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{callbackurl}", callBackUrl }
+                    };
+                    break;
+                case EmailType.ConfirmDeletionByAdmin:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{lastname}", appUser.LastName },
+                        {@"{birthdate}", appUser.BirthDate },
+                        {@"{email}", appUser.Email },
+                        {@"{userrole}", appUser.Role},
+                        {@"{callbackurl}", callBackUrl }
+                    };
+                    break;
+                case EmailType.ConfirmDeletionByUser:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{callbackurl}", callBackUrl }
+                    };
+                    break;
+                default:
+                    return (String.Empty, String.Empty);
+            }
+
+            return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
+        }
+
+        public (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Group group, string callBackUrl = null)
+        {
+            if (appUser == null || group == null)
+                return (String.Empty, String.Empty);
+
+            var parameters = new Dictionary<string, object>();
+            var groupEmailTypes = new List<EmailType>() {
+                EmailType.GroupConfirmationByAdmin,
+                EmailType.ApprovedGroupCreation,
+                EmailType.GroupInvitationToStudent
+            };
+
+            if (!groupEmailTypes.Contains(emailType))
+            {
+                return (String.Empty, String.Empty);
+            }
+
+            parameters = new Dictionary<string, object>()
+                    {
+                        {@"{groupname}", group.Name },
+                        {@"{callbackurl}", callBackUrl }
+                    };           
+
+            return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
+        }
+
+        public (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course, string callBackUrl = null)
+        {
+            if (appUser == null || course == null)
+                return (String.Empty, String.Empty);
+
+            var parameters = new Dictionary<string, object>();
+            switch (emailType)
+            {
+                case EmailType.CourseInvitation:
+                    if (course == null)
+                        break;
+
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{coursename}", course.Name },
+                        {@"{callbackurl}", callBackUrl }
+                    };
+                    break;
+                default:
+                    return (String.Empty, String.Empty);
+            }
+
+            return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
+        }
+
+        public async Task<Result<bool>> SendEmailAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null)
+        {
+            if (appUser == null)
+                return new Result<bool>(false, "Fail to send email");
+
+            var emailContent = GetEmailSubjectAndBody(emailType, appUser, callBackUrl);
+
+            var toEmail = new List<string>();
+            var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
+            
+            switch (emailType)
+            {               
+                case EmailType.ConfirmDeletionByAdmin:                   
+                    toEmail  = allAdmins.Select(a => a.Email).ToList();
+                    break;
+                case EmailType.AccountApproveByAdmin:                   
+                    toEmail = allAdmins.Select(a => a.Email).ToList();
+                    break;
+                default:
+                    toEmail.Add(appUser.Email);
+                    break;
+            }
+
+            return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
         }
     }
 }

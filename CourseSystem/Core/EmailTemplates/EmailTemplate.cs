@@ -13,14 +13,14 @@ namespace Core.EmailTemplates
         {
             {EmailType.CodeVerification, "Verify code for update password."},
             {EmailType.AccountApproveByAdmin, "Confirm user account" },
-            {EmailType.Registration,  "Successful registration"},
-            {EmailType.Confirm, "Confirm your account" },
+            {EmailType.UserRegistration,  "Successful registration"},
+            {EmailType.ConfirmAdminRegistration, "Confirm your account" },
             {EmailType.ConfirmDeletionByAdmin,  "Confirm deletion of user account"},
             {EmailType.ConfirmDeletionByUser, "Successful deletion approve" },
             {EmailType.CourseInvitation, "Course Invitation" },
             {EmailType.GroupConfirmationByAdmin,  "Group confirmation" },
-            {EmailType.ApprovedGroup,  "Group confirmation"},
-            {EmailType.GroupInvitation, "Group inventation" }
+            {EmailType.ApprovedGroupCreation,  "Group confirmation"},
+            {EmailType.GroupInvitationToStudent, "Group inventation" }
         };
 
         private static Dictionary<EmailType, string> BodyGetter = new()
@@ -34,11 +34,11 @@ namespace Core.EmailTemplates
                     "<p>User role: {userrole}</p>"+
                     "<h4>Confirm registration of {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4>"
             },
-            {EmailType.Registration, @"<h4>Dear {firstname}, you have been successfully registered into system</h4>"+
-                "<form action=\"{linkToProfile}\">\r\n   " +
+            {EmailType.UserRegistration, @"<h4>Dear {firstname}, you have been successfully registered into system</h4>"+
+                "<form action=\"{callbackurl}\">\r\n   " +
                 " <input type=\"submit\" style=\"color: red\" " +
                 "value=\"Your profile details\" />\r\n</form>"},
-            {EmailType.Confirm, @"Confirm registration, follow the link: <a href='{callbackurl}'>link</a>" },
+            {EmailType.ConfirmAdminRegistration, @"Confirm registration, follow the link: <a href='{callbackurl}'>link</a>" },
             {EmailType.ConfirmDeletionByAdmin, @"<h4>User data overview</h4>" +
                     "<hr/>" +
                     "<p>User first name: {firstname}</p>" +
@@ -54,9 +54,9 @@ namespace Core.EmailTemplates
                 @"<p>Course name: {coursename}</p>"+
                 @"<h4>Сonfirm your participation in the course, follow the link: <a href='{callbackurl}'>link</a></h4>"},
             {EmailType.GroupConfirmationByAdmin,  @"<h4>Confirm the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>"},
-            {EmailType.ApprovedGroup, @"<h4>You get approve fot the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>" },
-            {EmailType.GroupInvitation, @"<h4>You get inventation to the group {groupname}"+
-                ", follow the link: <a href='{callbackurl}'>link</a></h4>"}
+            {EmailType.ApprovedGroupCreation, @"<h4>You get approve fot the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>" },
+            {EmailType.GroupInvitationToStudent, @"<h4>You get inventation to the group {groupname}"+
+                ", follow the link: <a href='{callbackurl}'>link</a></h4>"},           
         };
 
         public static (string, string) GetEmailSubjectAndBody(EmailType emailType, Dictionary<string, object> placeholderNamesandValues)
@@ -89,11 +89,11 @@ namespace Core.EmailTemplates
 
                 if(value is DateTime date)
                 {
-                    parameters.Add(parameterName, date.ToString("d").ToLower());
+                    parameters.Add(parameterName, date.ToString("d"));
                 }
                 else
                 {
-                    parameters.Add(parameterName, value.ToString().ToLower());
+                    parameters.Add(parameterName, value.ToString());
                 }                
             }
 

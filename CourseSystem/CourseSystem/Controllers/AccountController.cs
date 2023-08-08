@@ -2,6 +2,7 @@ using BLL.Interfaces;
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
+using Core.EmailTemplates;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -86,12 +87,12 @@ public class AccountController : Controller
 
             if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
             {
-                await _emailService.SendAdminEmailConfirmation(loginViewModel.EmailAddress, callbackUrl);
+                await _emailService.SendEmailAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
                 TempData.TempDataMessage("Error", "Your ADMIN account is not verified, we sent email for confirmation again");
             }
             else
             {
-                await _emailService.SendUserApproveToAdmin(user, callbackUrl);
+                await _emailService.SendEmailAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
                 TempData.TempDataMessage("Error", "Admin hasn't verified your email yet, we sent email for confirmation again");
             }
 
@@ -169,8 +170,8 @@ public class AccountController : Controller
 
                 if (registerViewModel.Role != AppUserRoles.Admin)
                 {
-                    await _emailService.SendUserApproveToAdmin(newUser, callbackUrl);
-                    
+                    await _emailService.SendEmailAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
+
                     TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
                     
                     return View(registerViewModel);
@@ -178,7 +179,7 @@ public class AccountController : Controller
                 else
                 {
                     var emailSentResult =
-                        await _emailService.SendAdminEmailConfirmation(registerViewModel.EmailAddress, callbackUrl);
+                         await _emailService.SendEmailAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
 
                     if (!emailSentResult.IsSuccessful)
                         TempData.TempDataMessage("Error", emailSentResult.Message);
@@ -223,7 +224,7 @@ public class AccountController : Controller
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var toUserProfileUrl = CreateCallBackUrl(token, "User", "Detail", new { id = user.Id });
-            await _emailService.SendEmailAboutSuccessfulRegistration(user, toUserProfileUrl);
+            await _emailService.SendEmailAppUsers(EmailType.UserRegistration, user, toUserProfileUrl);
 
             var confirmEmailVM = new ConfirmEmailViewModel();
             user.MapTo(confirmEmailVM);
