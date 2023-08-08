@@ -112,27 +112,7 @@ public class GroupService : GenericService<Group>, IGroupService
             return new Result<bool>(false,$"Failed to update group {newGroup.Id}. Exception: {ex.Message}");
         }
     }
-
-    public async Task<List<string>> GetAllStudentsEmailByIds(List<string> studentIds)
-    {
-        var emails = new List<string>();
-
-        foreach (var studentId in studentIds)
-        {
-            try
-            {
-                var student = await _userManager.FindByIdAsync(studentId);
-                emails.Add(student.Email);
-            }
-            catch(Exception ex)
-            {
-                throw new Exception("Failt to get students");
-            }
-        }
-
-        return emails;
-    }
-
+    
     public async Task<double> CalculateGroupProgress(int groupId)
     {
         try
