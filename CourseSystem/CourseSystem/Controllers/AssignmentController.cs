@@ -10,7 +10,6 @@ using UI.ViewModels;
 namespace UI.Controllers
 {    
     [Authorize]
-    [CustomFilterAttributeException]
     public class AssignmentController : Controller
     {
         private readonly IAssignmentService _assignmentService;

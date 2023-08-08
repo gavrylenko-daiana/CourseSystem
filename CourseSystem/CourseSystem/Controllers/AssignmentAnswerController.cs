@@ -10,7 +10,6 @@ using UI.ViewModels;
 namespace UI.Controllers
 {   
     [Authorize]
-    [CustomFilterAttributeException]
     public class AssignmentAnswerController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

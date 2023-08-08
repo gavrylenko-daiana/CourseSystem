@@ -12,7 +12,6 @@ using UI.ViewModels.EmailViewModels;
 
 namespace UI.Controllers;
 
-[CustomFilterAttributeException]
 public class AccountController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
