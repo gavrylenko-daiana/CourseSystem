@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace BLL.Interfaces;
 
-public interface ICourseService
+public interface ICourseService : IGenericService<Course>
 {
     Task CreateCourse(Course course, AppUser currentUser);
     Task DeleteCourse(int courseId);
