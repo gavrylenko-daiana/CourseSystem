@@ -55,45 +55,49 @@ public class CourseService : GenericService<Course>, ICourseService
         }
     }
 
-    public async Task DeleteCourse(int courseId)
+    public async Task<Result<bool>> DeleteCourse(int courseId)
     {
+        var course = await _repository.GetByIdAsync(courseId);
+        
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
+        }
+        
         try
         {
-            var course = await _repository.GetByIdAsync(courseId);
-            
-            if (course == null)
-            {
-                throw new Exception("Course not found");
-            }
-
             await _repository.DeleteAsync(course);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to delete course. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to delete {nameof(course)} by {courseId}. Exception: {ex.Message}");
         }
     }
 
-    public async Task UpdateName(int courseId, string newName)
+    public async Task<Result<bool>> UpdateName(int courseId, string newName)
     {
+        var course = await _repository.GetByIdAsync(courseId);
+        
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
+        }
+        
         try
         {
-            var course = await _repository.GetByIdAsync(courseId);
-            
-            if (course == null)
-            {
-                throw new Exception("Course not found");
-            }
-
             course.Name = newName;
 
             await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to update course by {courseId} with new name: {newName}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to update {nameof(course)} by {courseId} with {newName}. Exception: {ex.Message}");
         }
     }
 }

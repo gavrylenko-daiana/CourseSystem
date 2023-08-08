@@ -13,7 +13,7 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         _userGroupService = userGroupService;
     }
 
-    public async  Task AddTeacherToCourse(Course course, AppUser teacher)
+    public async Task AddTeacherToCourse(Course course, AppUser teacher)
     {
         try
         {
