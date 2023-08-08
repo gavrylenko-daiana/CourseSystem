@@ -63,23 +63,25 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     }
 
-    public async Task DeleteGroup(int groupId)
+    public async Task<Result<bool>> DeleteGroup(int groupId)
     {
+        var group = await _repository.GetByIdAsync(groupId);
+            
+        if (group == null)
+        {
+            return new Result<bool>(false, $"Group by id {groupId} not found");
+        }
+        
         try
         {
-            var group = await _repository.GetByIdAsync(groupId);
-            
-            if (group == null)
-            {
-                throw new Exception("Course not found");
-            }
-
             await _repository.DeleteAsync(group);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to delete group by id {groupId}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to delete group by id {groupId}. Exception: {ex.Message}");
         }
     }
 

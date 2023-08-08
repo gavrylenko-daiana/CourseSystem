@@ -81,7 +81,7 @@ public class GroupController : Controller
             return View(groupViewModel);
         }
 
-        var group = new Core.Models.Group();
+        var group = new Group();
         groupViewModel.MapTo(group);
         group.CourseId = courseId;
 
@@ -167,14 +167,13 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var group = await _groupService.GetById(id);
+        var deleteResult = await _groupService.DeleteGroup(id);
         
-        if (group == null)
+        if (!deleteResult.IsSuccessful)
         {
-            return NotFound();
+            TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+            return View("Delete");
         }
-
-        await _groupService.DeleteGroup(id);
         
         return RedirectToAction("Index");
     }
