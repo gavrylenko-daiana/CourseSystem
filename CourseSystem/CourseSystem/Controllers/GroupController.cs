@@ -40,7 +40,10 @@ public class GroupController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null) return RedirectToAction("Login", "Account");
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
 
         var groups = await _groupService.GetByPredicate(g =>
             g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUser.Id)));
@@ -183,11 +186,14 @@ public class GroupController : Controller
     {
         var groupId = (int)(TempData["GroupId"] ?? id);
         var group = await _groupService.GetById(groupId);
+        
+        if (group == null)
+        {
+            return NotFound();
+        }
 
         var students = await _userManager.GetUsersInRoleAsync("Student");
-        
         var studentsInGroupIds = group.UserGroups.Select(ug => ug.AppUserId);
-        
         var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
             .Select(u => new UserSelectionViewModel
             {
@@ -213,7 +219,6 @@ public class GroupController : Controller
         if (selectedStudents.Count > 20)
         {
             TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation");
-
             return View("GetApprove", groupId);
         }
         else
@@ -221,6 +226,7 @@ public class GroupController : Controller
             var studentIds = selectedStudents.Select(s => s.Id).ToList();
             var studentsData = new Dictionary<string, string>();
             var callBacks = new List<string>();
+            
             foreach (var studentId in studentIds) 
             {
                 var student = await _userManager.FindByIdAsync(studentId);
@@ -238,7 +244,9 @@ public class GroupController : Controller
             var result = await _emailService.SendInventationToStudents(studentsData, group);
 
             if (!result.IsSuccessful)
+            {
                 TempData.TempDataMessage("Error", result.Message);
+            }
         }
 
         return RedirectToAction("Index");
@@ -306,6 +314,7 @@ public class GroupController : Controller
         var studentIds = selectedStudents.Select(s => s.Id).ToList();
         var studentsData = new Dictionary<string, string>();
         var callBacks = new List<string>();
+        
         foreach (var studentId in studentIds)
         {
             var student = await _userManager.FindByIdAsync(studentId);
@@ -323,7 +332,9 @@ public class GroupController : Controller
         var result = await _emailService.SendInventationToStudents(studentsData, group);
 
         if (!result.IsSuccessful)
+        {
             TempData.TempDataMessage("Error", result.Message);
+        }
 
         return RedirectToAction("Index");
     }
@@ -336,12 +347,16 @@ public class GroupController : Controller
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);
 
         if (!result.Succeeded)
+        {
             return View("Error");
+        }
 
         var group = await _groupService.GetById(groupId);
 
         if (group == null)
+        {
             return View("Error");
+        }
 
         var userGroup = new UserGroups()
         {
