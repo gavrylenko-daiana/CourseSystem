@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using Core.Enums;
+using Core.Helpers;
 using Core.Models;
 using DAL.Repository;
 using Microsoft.AspNetCore.Identity;
@@ -19,22 +20,25 @@ public class GroupService : GenericService<Group>, IGroupService
         _userManager = userManager;
     }
 
-    public async Task CreateGroup(Group group, AppUser currentUser)
+    public async Task<Result<bool>> CreateGroup(Group group, AppUser currentUser)
     {
+        if (group == null)
+        {
+            return new Result<bool>(false, $"{nameof(group)} not found");
+        }
+        
+        if (currentUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(currentUser)} not found");
+        }
+        
+        if (group.StartDate > group.EndDate)
+        {
+            return new Result<bool>(false, $"Start date must be less than end date");
+        }
+        
         try
         {
-            if (group == null)
-            {
-                throw new ArgumentNullException("Group is null");
-            }
-
-            if (currentUser == null)
-            {
-                throw new ArgumentNullException("User is null");
-            }
-            
-            ValidateGroupDates(group.StartDate, group.EndDate);
-                
             await _repository.AddAsync(group);
             await _unitOfWork.Save();
 
@@ -44,104 +48,87 @@ public class GroupService : GenericService<Group>, IGroupService
                 AppUser = currentUser
             };
             
-            await _userGroupService.CreateUserGroups(userGroup);
+            var createUserGroupResult = await _userGroupService.CreateUserGroups(userGroup);
+
+            if (!createUserGroupResult.IsSuccessful)
+            {
+                await _repository.DeleteAsync(group);
+                await _unitOfWork.Save();
+            }
+
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to create group {group.Name}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to create group {group.Name}. Exception: {ex.Message}");
         }
     }
 
-    public async Task DeleteGroup(int groupId)
+    public async Task<Result<bool>> DeleteGroup(int groupId)
     {
+        var group = await _repository.GetByIdAsync(groupId);
+            
+        if (group == null)
+        {
+            return new Result<bool>(false, $"Group by id {groupId} not found");
+        }
+        
         try
         {
-            var group = await _repository.GetByIdAsync(groupId);
-            
-            if (group == null)
-            {
-                throw new Exception("Course not found");
-            }
-
             await _repository.DeleteAsync(group);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to delete group by id {groupId}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to delete group by id {groupId}. Exception: {ex.Message}");
         }
     }
 
-    public async Task UpdateGroup(int groupId, string newName, DateTime startDate, DateTime endDate)
+    public async Task<Result<bool>> UpdateGroup(Group newGroup)
     {
+        if (newGroup == null)
+        {
+            return new Result<bool>(false, $"{nameof(newGroup)} not found");
+        }
+        
+        if (newGroup.StartDate > newGroup.EndDate)
+        {
+            return new Result<bool>(false, $"Start date must be less than end date");
+        }
+        
         try
         {
-            var group = await _repository.GetByIdAsync(groupId);
-            
-            if (group == null)
-            {
-                throw new Exception("Course not found");
-            }
-
-            group.Name = newName;
-            group.StartDate = startDate;
-            group.EndDate = endDate;
+            var group = await _repository.GetByIdAsync(newGroup.Id);
+            group.Name = newGroup.Name;
+            group.StartDate = newGroup.StartDate;
+            group.EndDate = newGroup.EndDate;
             
             await _repository.UpdateAsync(group);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to update group by id {groupId}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to update group {newGroup.Id}. Exception: {ex.Message}");
         }
     }
-
-    private void ValidateGroupDates(DateTime startDate, DateTime endDate)
-    {
-        if (startDate > endDate)
-        {
-            throw new ArgumentException("Start date must be less than end date.");
-        }
-    }
-
-    public async Task<List<string>> GetAllStudentsEmailByIds(List<string> studentIds)
-    {
-        var emails = new List<string>();
-
-        foreach (var studentId in studentIds)
-        {
-            try
-            {
-                var student = await _userManager.FindByIdAsync(studentId);
-                emails.Add(student.Email);
-            }
-            catch(Exception ex)
-            {
-                throw new Exception("Failt to get students");
-            }
-        }
-
-        return emails;
-    }
-
+    
     public async Task<double> CalculateGroupProgress(int groupId)
     {
-        try
+        var group = await _repository.GetByIdAsync(groupId);
+        
+        if (group == null || group.Assignments == null || group.Assignments.Count == 0)
         {
-            var group = await _repository.GetByIdAsync(groupId);
-            if (group == null || group.Assignments == null || group.Assignments.Count == 0)
-            {
-                return 0.0;
-            }
-
-            var totalAssignments = group.Assignments.Count;
-            var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
-
-            return (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+            return 0.0;
         }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to calculate progress in group by id {groupId}. Exception: {ex.Message}");
-        }
+
+        var totalAssignments = group.Assignments.Count;
+        var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
+
+        var groupProgress = (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+        return groupProgress;
     }
 }

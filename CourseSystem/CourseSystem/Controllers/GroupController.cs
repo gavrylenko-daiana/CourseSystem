@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using UI.ViewModels;
+using Group = Core.Models.Group;
 
 namespace UI.Controllers;
 
@@ -39,7 +40,10 @@ public class GroupController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null) return RedirectToAction("Login", "Account");
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
 
         var groups = await _groupService.GetByPredicate(g =>
             g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUser.Id)));
@@ -72,34 +76,27 @@ public class GroupController : Controller
     public async Task<IActionResult> Create(GroupViewModel groupViewModel)
     {
         var courseId = (int)(TempData["CourseId"] ?? throw new InvalidOperationException());
-        var course = await _courseService.GetById(courseId);
-        
         var currentUser = await _userManager.GetUserAsync(User);
 
         if (currentUser == null)
         {
             TempData.TempDataMessage("Error", "User not found");
-                
             return View(groupViewModel);
         }
 
-        var group = new Core.Models.Group();
+        var group = new Group();
         groupViewModel.MapTo(group);
         group.CourseId = courseId;
 
-        try
+        var createResult = await _groupService.CreateGroup(group, currentUser);
+
+        if (!createResult.IsSuccessful)
         {
-            await _groupService.CreateGroup(group, currentUser);
-        }
-        catch (Exception ex)
-        {
-            TempData["CourseId"] = courseId; 
-            
-            TempData.TempDataMessage("Error", "Your end day must be more than start day");
-                
+            TempData["CourseId"] = courseId;
+            TempData.TempDataMessage("Error", $"{createResult.Message}");
             return View(groupViewModel);
         }
-
+        
         return RedirectToAction("Details", "Group", new { id = group.Id });
     }
 
@@ -134,13 +131,25 @@ public class GroupController : Controller
             return NotFound();
         }
 
-        return View(group);
+        var groupViewModel = new GroupViewModel();
+        group.MapTo(groupViewModel);
+
+        return View(groupViewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Core.Models.Group newGroup)
+    public async Task<IActionResult> Edit(GroupViewModel newGroupViewModel)
     {
-        await _groupService.UpdateGroup(newGroup.Id, newGroup.Name, newGroup.StartDate, newGroup.EndDate);
+        var newGroup = new Group();
+        newGroupViewModel.MapTo(newGroup);
+        
+        var updateResult = await _groupService.UpdateGroup(newGroup);
+        
+        if (!updateResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{updateResult.Message}");
+            return View(newGroupViewModel);
+        }
         
         return RedirectToAction("Details", new { id = newGroup.Id });
     }
@@ -161,14 +170,13 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var group = await _groupService.GetById(id);
+        var deleteResult = await _groupService.DeleteGroup(id);
         
-        if (group == null)
+        if (!deleteResult.IsSuccessful)
         {
-            return NotFound();
+            TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+            return View("Delete");
         }
-
-        await _groupService.DeleteGroup(id);
         
         return RedirectToAction("Index");
     }
@@ -178,11 +186,14 @@ public class GroupController : Controller
     {
         var groupId = (int)(TempData["GroupId"] ?? id);
         var group = await _groupService.GetById(groupId);
+        
+        if (group == null)
+        {
+            return NotFound();
+        }
 
         var students = await _userManager.GetUsersInRoleAsync("Student");
-        
         var studentsInGroupIds = group.UserGroups.Select(ug => ug.AppUserId);
-        
         var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
             .Select(u => new UserSelectionViewModel
             {
@@ -208,7 +219,6 @@ public class GroupController : Controller
         if (selectedStudents.Count > 20)
         {
             TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation");
-
             return View("GetApprove", groupId);
         }
         else
@@ -216,6 +226,7 @@ public class GroupController : Controller
             var studentIds = selectedStudents.Select(s => s.Id).ToList();
             var studentsData = new Dictionary<string, string>();
             var callBacks = new List<string>();
+            
             foreach (var studentId in studentIds) 
             {
                 var student = await _userManager.FindByIdAsync(studentId);
@@ -233,7 +244,9 @@ public class GroupController : Controller
             var result = await _emailService.SendInventationToStudents(studentsData, group);
 
             if (!result.IsSuccessful)
+            {
                 TempData.TempDataMessage("Error", result.Message);
+            }
         }
 
         return RedirectToAction("Index");
@@ -301,6 +314,7 @@ public class GroupController : Controller
         var studentIds = selectedStudents.Select(s => s.Id).ToList();
         var studentsData = new Dictionary<string, string>();
         var callBacks = new List<string>();
+        
         foreach (var studentId in studentIds)
         {
             var student = await _userManager.FindByIdAsync(studentId);
@@ -318,7 +332,9 @@ public class GroupController : Controller
         var result = await _emailService.SendInventationToStudents(studentsData, group);
 
         if (!result.IsSuccessful)
+        {
             TempData.TempDataMessage("Error", result.Message);
+        }
 
         return RedirectToAction("Index");
     }
@@ -331,12 +347,16 @@ public class GroupController : Controller
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);
 
         if (!result.Succeeded)
+        {
             return View("Error");
+        }
 
         var group = await _groupService.GetById(groupId);
 
         if (group == null)
+        {
             return View("Error");
+        }
 
         var userGroup = new UserGroups()
         {

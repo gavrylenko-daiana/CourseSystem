@@ -40,6 +40,12 @@
         <p>No groups found for the current user.</p>
     }
 </div>
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span><b>Sorry!</b> - @TempData["Error"]</span>
+    </div>
+}  
 
 <script>
     document.querySelectorAll('.group-card').forEach(groupCard => {

@@ -10,16 +10,23 @@ public class UserGroupService : GenericService<UserGroups>, IUserGroupService
     {
     }
 
-    public async Task CreateUserGroups(UserGroups userGroups)
+    public async Task<Result<bool>> CreateUserGroups(UserGroups userGroups)
     {
+        if (userGroups == null)
+        {
+            return new Result<bool>(false, $"{nameof(userGroups)} not found");
+        }
+        
         try
         {
             await _repository.AddAsync(userGroups);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to create userGroups {userGroups.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to create userGroups {userGroups.Id}. Exception: {ex.Message}");
         }
     }
 }

@@ -4,5 +4,5 @@ namespace BLL.Interfaces;
 
 public interface IUserGroupService : IGenericService<UserGroups>
 {
-    Task CreateUserGroups(UserGroups userGroups);
+    Task<Result<bool>> CreateUserGroups(UserGroups userGroups);
 }
