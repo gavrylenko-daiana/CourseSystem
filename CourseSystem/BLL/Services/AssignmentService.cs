@@ -13,16 +13,20 @@ namespace BLL.Services
 {
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
-        public AssignmentService(UnitOfWork unitOfWork) 
+        private readonly IGroupService _groupService;
+        public AssignmentService(UnitOfWork unitOfWork, IGroupService groupService) 
             : base(unitOfWork, unitOfWork.AssignmentRepository)
         {
+            _groupService = groupService;
         }
 
         public async Task<Result<bool>> CreateAssignment(Assignment assignment)
         {
             if (assignment == null)
+            {
                 return new Result<bool>(false, "Invalid assignment data");
-
+            }
+               
             try
             {
                 await _repository.AddAsync(assignment);
@@ -41,8 +45,10 @@ namespace BLL.Services
             var assignment = await _repository.GetByIdAsync(assignmentId);
 
             if (assignment == null)
+            {
                 return new Result<bool>(false, "Fail to get assignment");
-
+            }
+                
             try
             {
                 await _repository.DeleteAsync(assignment);
@@ -58,14 +64,18 @@ namespace BLL.Services
 
         public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId)
         {
-            var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId); // group service
+            var group = await _groupService.GetById(groupId); 
 
             if (group == null)
+            {
                 return new Result<List<Assignment>>(false, "Fail to get group");
-
+            }
+                
             if (group.Assignments.IsNullOrEmpty())
+            {
                 return new Result<List<Assignment>>(true, "No assignment in group");
-
+            }
+                
             var groupAssignments = await ChechStartAndEndAssignmnetDate(group.Assignments);
 
             return new Result<List<Assignment>>(true, groupAssignments);
@@ -74,8 +84,10 @@ namespace BLL.Services
         public async Task<Result<bool>> UpdateAssignment(Assignment assignment)
         {
             if (assignment == null)
+            {
                 return new Result<bool>(false, "Invalid assignment data");
-
+            }
+                
             try
             {
                 await _repository.UpdateAsync(assignment);
