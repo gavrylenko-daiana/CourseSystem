@@ -170,7 +170,7 @@ public class AccountController : Controller
 
                 if (registerViewModel.Role != AppUserRoles.Admin)
                 {
-                    await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
+                    await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, newUser, callbackUrl);
 
                     TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
                     
@@ -179,7 +179,7 @@ public class AccountController : Controller
                 else
                 {
                     var emailSentResult =
-                         await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
+                         await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, newUser, callbackUrl);
 
                     if (!emailSentResult.IsSuccessful)
                         TempData.TempDataMessage("Error", emailSentResult.Message);

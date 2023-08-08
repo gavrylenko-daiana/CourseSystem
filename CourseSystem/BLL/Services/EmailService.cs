@@ -112,24 +112,11 @@ namespace BLL.Services
         public async Task<Result<bool>> SendToTeacherCourseInventation(AppUser teacher, Course course, string inventationUrl)
         {
             if (teacher == null || course == null)
-                return new Result<bool>(false, $"Fail to send email inventation to the techer");            
-
-            try
-            {
-                var emailContent = GetEmailSubjectAndBody(EmailType.CourseInvitation, teacher, course, inventationUrl);
-                var result = await CreateAndSendEmail(new List<string> { teacher.Email }, emailContent.Item1, emailContent.Item2);
-
-
-                if (!result.IsSuccessful)
-                    return new Result<bool>(false, result.Message);
-
-                return new Result<bool>(true);
-            }
-            catch (Exception ex)
-            {
                 return new Result<bool>(false, $"Fail to send email inventation to the techer");
-            }
 
+            var emailContent = GetEmailSubjectAndBody(EmailType.CourseInvitation, teacher, course, inventationUrl);
+
+            return await CreateAndSendEmail(new List<string> { teacher.Email }, emailContent.Item1, emailContent.Item2);
         }
 
         public async Task<Result<bool>> SendInventationToStudents(Dictionary<string, string> studentsData, Group group)
@@ -177,7 +164,7 @@ namespace BLL.Services
 
         }
 
-        public (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null) 
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null) 
         {
             if(appUser == null)
                 return (String.Empty, String.Empty);
@@ -234,7 +221,7 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
         {
             if (group == null)
                 return (String.Empty, String.Empty);
@@ -260,7 +247,7 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course, string callBackUrl = null)
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course, string callBackUrl = null)
         {
             if (appUser == null || course == null)
                 return (String.Empty, String.Empty);
