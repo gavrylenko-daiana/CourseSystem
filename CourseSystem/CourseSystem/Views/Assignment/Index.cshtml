@@ -33,11 +33,10 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">@assignment.Name</h4>
-                        @*<p class="card-text">@assignment.Description</p>*@
 
-                        <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-primary">
-                            Details
-                        </a>
+                            <a href="@Url.Action("Details", "Assignment", new { assignmentId = assignment.Id })" class="btn btn-primary">
+                                Details
+                            </a>
                       
                     </div>
                     <div class="card-footer text-muted">Start Date: @assignment.StartDate.ToString("d")</div>

@@ -24,9 +24,9 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int assignmentId) //here is passing group id
+        public async Task<IActionResult> Index(int groupId) 
         {
-            var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(assignmentId);
+            var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId);
 
             if (!groupAssignmentsResult.IsSuccessful)
             {
@@ -47,13 +47,12 @@ namespace UI.Controllers
                 });
             }
 
-            ViewBag.GroupId = assignmentId;
+            ViewBag.GroupId = groupId;
             return View(assignmentsVM);
         }
 
         [HttpGet]        
         [Authorize(Roles = "Teacher")]
-        [Route("Create/{groupId}")]
         public async Task<IActionResult> Create(int groupId)
         {
             var assignmentVM = new CreateAssignmentViewModel() { GroupId = groupId };
@@ -62,7 +61,7 @@ namespace UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM) //MARCDOWN for description
+        public async Task<IActionResult> Create(CreateAssignmentViewModel assignmentVM) //MARCDOWN for description
         {
             if(assignmentVM == null)
                 return View("Error");
@@ -129,16 +128,15 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int assignmentId)
         {
             try
             {
-                var assignment = await _assignmentService.GetById(id);
+                var assignment = await _assignmentService.GetById(assignmentId);
 
                 var assignentDetailsVM = new DetailsAssignmentViewModel();
                 assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
                 var userAssignmnet = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
-                //var assignmentAnswers = userAssignmnets.Select(ua => ua.AssignmentAnswers).ToList();
                 assignentDetailsVM.UserAssignment = userAssignmnet;
 
                 if (userAssignmnet?.AssignmentAnswers == null)
