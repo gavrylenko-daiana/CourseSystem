@@ -57,32 +57,27 @@ public class CourseController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(CourseViewModel courseViewModel)
     {
-        try
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser == null)
-            {
-                TempData.TempDataMessage("Error", "User not found");
-                
-                return View(courseViewModel);
-            }
-
-            var course = new Course()
-            {
-                Name = courseViewModel.Name
-            };
-
-            await _courseService.CreateCourse(course, currentUser);
-
-            return RedirectToAction("Index");
+            return RedirectToAction("Login", "Account");
         }
-        catch (Exception e)
+            
+        var course = new Course()
         {
-            ViewData.ViewDataMessage("Error", $"Failed to create course. Error: {e.Message}");
+            Name = courseViewModel.Name
+        };
 
+        var createResult = await _courseService.CreateCourse(course, currentUser);
+            
+        if (!createResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{createResult.Message}");
             return View(courseViewModel);
         }
+
+        return RedirectToAction("Index");
     }
     
     [HttpGet]

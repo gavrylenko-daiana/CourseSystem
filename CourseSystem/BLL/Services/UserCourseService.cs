@@ -69,16 +69,23 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         }
     }
 
-    public async Task CreateUserCourses(UserCourses userCourses)
+    public async Task<Result<bool>> CreateUserCourses(UserCourses userCourses)
     {
+        if (userCourses == null)
+        {
+            return new Result<bool>(false, $"{nameof(userCourses)} not found");
+        }
+        
         try
         {
             await _repository.AddAsync(userCourses);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to create userCourses {userCourses.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
         }
     }
 }

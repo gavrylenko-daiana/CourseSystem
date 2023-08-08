@@ -16,30 +16,42 @@ public class CourseService : GenericService<Course>, ICourseService
         _userCourseService = userCourseService;
     }
 
-    public async Task CreateCourse(Course course, AppUser currentUser)
+    public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)
     {
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} not found");
+        }
+        
+        if (currentUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(currentUser)} not found");
+        }
+        
         try
         {
-            if (string.IsNullOrEmpty(course.Name))
-            {
-                throw new Exception("Course title cannot be empty.");
-            }
-
             await _repository.AddAsync(course);
             await _unitOfWork.Save();
             
             var userCourse = new UserCourses()
             {
                 Course = course,
-                CourseId = course.Id,
                 AppUser = currentUser,
-                AppUserId = currentUser.Id
             };
-            await _userCourseService.CreateUserCourses(userCourse);
+            
+            var createUserCoursesResult = await _userCourseService.CreateUserCourses(userCourse);
+            
+            if (!createUserCoursesResult.IsSuccessful)
+            {
+                await _repository.DeleteAsync(course);
+                await _unitOfWork.Save();
+            }
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to create course {course.Name}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to create {nameof(course)} {course.Id}. Exception: {ex.Message}");
         }
     }
 
