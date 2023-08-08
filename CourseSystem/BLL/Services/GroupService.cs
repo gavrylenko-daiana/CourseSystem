@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using Core.Enums;
+using Core.Helpers;
 using Core.Models;
 using DAL.Repository;
 using Microsoft.AspNetCore.Identity;
@@ -127,6 +128,7 @@ public class GroupService : GenericService<Group>, IGroupService
         var totalAssignments = group.Assignments.Count;
         var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
 
-        return (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+        var groupProgress = (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+        return groupProgress;
     }
 }
