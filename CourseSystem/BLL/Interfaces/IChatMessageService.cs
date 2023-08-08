@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Interfaces
 {
-    public interface IChatMessageService
+    public interface IChatMessageService : IGenericService<ChatMessage>
     {
         Task<ChatMessage> CreateChatMessage(AppUser appUser, Assignment assignment, string text);
     }

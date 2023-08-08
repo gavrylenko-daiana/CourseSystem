@@ -2,7 +2,7 @@
 
 namespace BLL.Interfaces
 {
-    public interface IAssignmentAnswerService
+    public interface IAssignmentAnswerService : IGenericService<AssignmentAnswer>
     {
         Task<Result<bool>> CreateAssignmentAnswer(AssignmentAnswer assignmentAnswer, Assignment assignment, AppUser appUser);
         Task<Result<bool>> DeleteAssignmentAnswer(AssignmentAnswer assignmentAnswer);
