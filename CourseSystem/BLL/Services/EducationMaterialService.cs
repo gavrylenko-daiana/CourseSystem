@@ -87,7 +87,9 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
         await _repository.AddAsync(materialFile);
         await _unitOfWork.Save();
-        // await _groupService.Add(materialFile);
+        
+        group.EducationMaterials.Add(materialFile);
+        await _groupService.UpdateGroup(group);
     }
 
     public async Task<List<EducationMaterial>> GetAllMaterialAsync()
@@ -102,5 +104,11 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         var material = await GetById(id);
 
         return material;
+    }
+
+    public async Task DeleteUploadFileAsync(EducationMaterial material)
+    {
+        await _repository.DeleteAsync(material);
+        await _unitOfWork.Save();
     }
 }

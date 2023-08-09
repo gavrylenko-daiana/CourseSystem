@@ -15,4 +15,6 @@ public interface IEducationMaterialService
     Task AddToGroup(IFormFile material, int groupId, string url);
 
     Task<EducationMaterial> GetByIdMaterialAsync(int id);
+
+    Task DeleteUploadFileAsync(EducationMaterial material);
 }

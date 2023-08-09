@@ -49,6 +49,7 @@ else
 <div class="mt-3">
     <!-- Add a button to download the file. Then change with a path to Download method -->
     <a href="@url" class="btn btn-primary" download>Download</a>
+    <a type="button" class="btn btn-outline-danger" asp-controller="EducationMaterial" asp-action="Delete" asp-route-id="@Model.Id">Delete material</a>
 </div>
 </body>
 </html>

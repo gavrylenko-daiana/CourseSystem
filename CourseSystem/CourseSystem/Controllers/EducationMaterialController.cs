@@ -1,6 +1,8 @@
 using BLL.Interfaces;
 using CloudinaryDotNet.Actions;
+using Core.Enums;
 using Core.Helpers;
+using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
 
@@ -64,5 +66,44 @@ public class EducationMaterialController : Controller
         TempData["UploadResult"] = material.Url;
 
         return View(material);
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var fileToDelete = await _educationMaterialService.GetByIdMaterialAsync(id);
+
+        if (fileToDelete == null)
+        {
+            return NotFound();
+        }
+        
+        var access = fileToDelete.MaterialAccess;
+
+        switch (access)
+        {
+            case MaterialAccess.Group:
+                await _educationMaterialService.DeleteFileAsync(fileToDelete.Url);
+                await _educationMaterialService.DeleteUploadFileAsync(fileToDelete);
+                
+                var group = fileToDelete.Group;
+                
+                if (group != null)
+                {
+                    group.EducationMaterials.Remove(fileToDelete);
+                    await _groupService.UpdateGroup(group);
+                }
+                break;
+            case MaterialAccess.Course:
+                
+                break;
+            case MaterialAccess.General:
+                
+                break;
+            default:
+                break;
+        }
+
+        return RedirectToAction("Index", "Course");
     }
 }
