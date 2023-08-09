@@ -4,7 +4,7 @@ namespace BLL.Interfaces;
 
 public interface ICourseService : IGenericService<Course>
 {
-    Task CreateCourse(Course course, AppUser currentUser);
-    Task DeleteCourse(int courseId);
-    Task UpdateName(int courseId, string newName);
+    Task<Result<bool>> CreateCourse(Course course, AppUser currentUser);
+    Task<Result<bool>> DeleteCourse(int courseId);
+    Task<Result<bool>> UpdateName(int courseId, string newName);
 }

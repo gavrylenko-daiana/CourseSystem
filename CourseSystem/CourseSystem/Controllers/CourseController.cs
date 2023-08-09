@@ -10,6 +10,7 @@ using UI.ViewModels;
 
 namespace UI.Controllers;
 
+[Authorize]
 public class CourseController : Controller
 {
     private readonly ICourseService _courseService;
@@ -17,7 +18,7 @@ public class CourseController : Controller
     private readonly IEmailService _emailService;
     private readonly IUserCourseService _userCourseService;
 
-    public CourseController(ICourseService courseService, 
+    public CourseController(ICourseService courseService,
         UserManager<AppUser> userManager,
         IEmailService emailService,
         IUserCourseService userCourseService)
@@ -27,13 +28,16 @@ public class CourseController : Controller
         _emailService = emailService;
         _userCourseService = userCourseService;
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Index()
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null) return RedirectToAction("Login", "Account");
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
 
         var courses = await _courseService.GetByPredicate(course =>
             course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
@@ -53,154 +57,116 @@ public class CourseController : Controller
     {
         return View();
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Create(CourseViewModel courseViewModel)
     {
-        try
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser == null)
-            {
-                TempData.TempDataMessage("Error", "User not found");
-                
-                return View(courseViewModel);
-            }
-
-            var course = new Course()
-            {
-                Name = courseViewModel.Name
-            };
-
-            await _courseService.CreateCourse(course, currentUser);
-
-            return RedirectToAction("Index");
+            return RedirectToAction("Login", "Account");
         }
-        catch (Exception e)
+        
+        var course = new Course()
         {
-            ViewData.ViewDataMessage("Error", $"Failed to create course. Error: {e.Message}");
-
+            Name = courseViewModel.Name
+        };
+        
+        var createResult = await _courseService.CreateCourse(course, currentUser);
+            
+        if (!createResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{createResult.Message}");
             return View(courseViewModel);
         }
+
+        return RedirectToAction("Index");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        try
-        {
-            var course = await _courseService.GetById(id);
-            
-            if (course == null)
-            {
-                ViewData.ViewDataMessage("Error", "Course not found");
+        var course = await _courseService.GetById(id);
 
-                return View("Error");
-            }
-
-            return View(course);
-        }
-        catch (Exception e)
+        if (course == null)
         {
-            ViewData.ViewDataMessage("Error", $"Failed to editing course. Error: {e.Message}");
-            
-            return View("Error");
+            ViewData.ViewDataMessage("Error", "Course not found");
+            return View("Index");
         }
+
+        return View(course);
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Edit(Course newCourse)
     {
-        try
-        {
-            await _courseService.UpdateName(newCourse.Id, newCourse.Name);
+        var updateResult = await _courseService.UpdateName(newCourse.Id, newCourse.Name);
 
-            return RedirectToAction("Index");
-        }
-        catch (Exception e)
+        if (!updateResult.IsSuccessful)
         {
-            ViewData.ViewDataMessage("Error", $"Failed to editing course. Error: {e.Message}");
-            
+            TempData.TempDataMessage("Error", $"{updateResult.Message}");
             return View(newCourse);
         }
+            
+        return RedirectToAction("Index");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
-        try
+        var course = await _courseService.GetById(id);
+        
+        if (course == null)
         {
-            var course = await _courseService.GetById(id);
-            
-            if (course == null)
-            {
-                ViewData.ViewDataMessage("Error", "Course not found");
-
-                return View("Error");
-            }
-            
-            var courseViewModel = new CourseViewModel()
-            {
-                Name = course.Name
-            };
-
-            return View(courseViewModel);
+            ViewData.ViewDataMessage("Error", "Course not found");
+            return View("Index");
         }
-        catch (Exception e)
-        {
-            ViewData.ViewDataMessage("Error", $"Failed to delete course. Error: {e.Message}");
-            
-            return View("Error");
-        }
+
+        return View(course);
     }
     
-    [HttpPost, ActionName("Delete")]
+    [HttpPost]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        try
+        var deleteResult = await _courseService.DeleteCourse(id);
+
+        if (!deleteResult.IsSuccessful)
         {
-            var course = await _courseService.GetById(id);
-            
-            if (course == null)
-            {
-                ViewData.ViewDataMessage("Error", "Course not found");
-
-                return View("Error");
-            }
-
-            await _courseService.DeleteCourse(course.Id);
-
-            return RedirectToAction("Index");
+            TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+            return View("Delete");
         }
-        catch (Exception e)
-        {
-            ViewData["Error"] = $"Failed to delete course. Error: {e.Message}";
             
-            return View("Error");
-        }
+        return RedirectToAction("Index");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null) return RedirectToAction("Login", "Account");
-        
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
         var course = await _courseService.GetById(id);
         
-        if (course == null) return NotFound();
-        
+        if (course == null)
+        {
+            ViewData.ViewDataMessage("Error", "Course not found");
+            return View("Index");
+        }
+
         var currentGroups = course.Groups
             .Where(group => group.UserGroups.Any(ug => ug.AppUserId == currentUser.Id))
             .ToList();
-        
+
         var courseViewModel = new CourseViewModel();
         course.MapTo(courseViewModel);
         courseViewModel.CurrentUser = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException();
         courseViewModel.CurrentGroups = currentGroups;
-        
+
         TempData["CourseId"] = id;
 
         return View(courseViewModel);
@@ -211,10 +177,11 @@ public class CourseController : Controller
     {
         var courseId = (int)(TempData["CourseId"] ?? throw new InvalidOperationException());
         var course = await _courseService.GetById(courseId);
-        
+
         if (course == null)
         {
-            return NotFound();
+            ViewData.ViewDataMessage("Error", "Course not found");
+            return View("Index");
         }
 
         var userCoursesForCourse = course.UserCourses.Select(uc => uc.AppUserId).ToList();
@@ -241,15 +208,16 @@ public class CourseController : Controller
 
         if (teacher == null || course == null)
         {
-            return NotFound();
+            ViewData.ViewDataMessage("Error", "Course or Teacher not found");
+            return View("Index");
         }
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacher);
         var callbackUrl = Url.Action(
-           "ConfirmTeacherForCourse",
+            "ConfirmTeacherForCourse",
             "Course",
-           new { courseId = courseId, code = code },
-           protocol: HttpContext.Request.Scheme);
+            new { courseId = courseId, code = code },
+            protocol: HttpContext.Request.Scheme);
 
         var sendResult = await _emailService.SendToTeacherCourseInventation(teacher, course, callbackUrl);
 
@@ -260,7 +228,7 @@ public class CourseController : Controller
         }
 
         TempData["CourseId"] = course.Id;
-        
+
         return RedirectToAction("Index");
     }
 
@@ -279,25 +247,32 @@ public class CourseController : Controller
         if (courseTecahers.Contains(currentUser.Id))
         {
             TempData.TempDataMessage("Error", "You are already registered for the course");
-            return RedirectToAction("Index", "Course");
+            return RedirectToAction("Index");
         }
 
         if (currentUser == null || course == null)
-            return NotFound();
+        {
+            ViewData.ViewDataMessage("Error", "Course or currentUser not found");
+            return View("Index");
+        }
 
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);
 
         if (!result.Succeeded)
-            return View("Error");
+        {
+            ViewData.ViewDataMessage("Error", "Confirm email is not successful");
+            return View("Index");
+        }
 
-        try
+        var addTeacherToCourseResult = await _userCourseService.AddTeacherToCourse(course, currentUser);
+        
+        if (!addTeacherToCourseResult.IsSuccessful)
         {
-            await _userCourseService.AddTeacherToCourse(course, currentUser);
+            ViewData.ViewDataMessage("Error", $"{addTeacherToCourseResult.Message}");
+            return View("Index");
         }
-        catch(Exception ex)
-        {
-            throw new Exception("Fail to add teacher to course");
-        }
+
+        await _userCourseService.AddTeacherToCourse(course, currentUser);
 
         return View();
     }

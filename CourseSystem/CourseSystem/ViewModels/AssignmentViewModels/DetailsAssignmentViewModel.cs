@@ -1,6 +1,7 @@
 ﻿using Core.Enums;
 using Core.Models;
 
+
 namespace UI.ViewModels.AssignmentViewModels
 {
     public class DetailsAssignmentViewModel //property for markdown text

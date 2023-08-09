@@ -4,61 +4,61 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Core.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
-namespace UI.Controllers
+namespace UI.Controllers;
+
+[Authorize]
+public class UserActivityController : Controller
 {
-    public class UserActivityController : Controller
+    private readonly UserManager<AppUser> _userManager;
+    private readonly IActivityService _activityService;
+
+    public UserActivityController(UserManager<AppUser> userManager, IActivityService activityService)
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly IActivityService _activityService;
+        _userManager = userManager;
+        _activityService = activityService;
+    }
 
-        public UserActivityController(UserManager<AppUser> userManager, IActivityService activityService)
+    [HttpGet]
+    public async Task<IActionResult> ActivityForMonth(DateTime? dateTime = null)
+    {
+        var month = dateTime ?? DateTime.Now;
+
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        var activities = currentUser.UserActivities.ForMonth(month) ?? throw new ArgumentNullException("currentUser.UserActivities.ForMonth(month)");
+
+        ViewData["DateTime"] = month;
+
+        return View(activities);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ActivityForDay(DateTime? thisDay)
+    {
+        var day = thisDay ?? DateTime.Today;
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        var activities = currentUser.UserActivities.ForDate(day) ?? throw new ArgumentNullException("currentUser.UserActivities.ForDate(day)");
+
+        ViewData["DateTime"] = day;
+
+        return View(activities);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ActivityDetails(int id)
+    {
+        var activity = await _activityService.GetById(id);
+
+        if (activity == null)
         {
-            _userManager = userManager;
-            _activityService = activityService;
+            TempData.TempDataMessage("Error", "This activity does not exist.");
+            // edit path
+            return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ActivityForMonth(DateTime? dateTime = null)
-        {
-            var month = dateTime ?? DateTime.Now;
-
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            var activities = currentUser.UserActivities.ForMonth(month);
-
-            ViewData["DateTime"] = month;
-
-            return View(activities);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ActivityForDay(DateTime? thisDay)
-        {
-            var day = thisDay ?? DateTime.Today;
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            var activities = currentUser.UserActivities.ForDate(day);
-
-            ViewData["DateTime"] = day;
-
-            return View(activities);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ActivityDetails(int id)
-        {
-            var activity = await _activityService.GetById(id);
-
-            if (activity == null)
-            {
-                TempData.TempDataMessage("Error", "This activity does not exist.");
-
-                // edit path
-                return RedirectToAction("Index", "Home");
-            }
-
-            return View(activity);
-        }
+        return View(activity);
     }
 }
