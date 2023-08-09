@@ -96,6 +96,12 @@ public class AccountController : Controller
             return View(loginViewModel);
         }
 
+        if (!ValidationHelpers.IsValidEmail(loginViewModel.EmailAddress))
+        {
+            ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
+            return View(loginViewModel);
+        }
+
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
