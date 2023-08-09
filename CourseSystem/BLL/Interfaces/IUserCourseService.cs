@@ -4,7 +4,7 @@ namespace BLL.Interfaces;
 
 public interface IUserCourseService : IGenericService<UserCourses>
 {
-    Task CreateUserCourses(UserCourses userCourses);
-    Task AddTeacherToCourse(Course course, AppUser teacher);
-    Task AddStudentToGroupAndCourse(UserGroups userGroups);
+    Task<Result<bool>> CreateUserCourses(UserCourses userCourses);
+    Task<Result<bool>> AddTeacherToCourse(Course course, AppUser teacher);
+    Task<Result<bool>> AddStudentToGroupAndCourse(UserGroups userGroups);
 }

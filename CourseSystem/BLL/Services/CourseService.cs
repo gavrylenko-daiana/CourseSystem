@@ -16,72 +16,88 @@ public class CourseService : GenericService<Course>, ICourseService
         _userCourseService = userCourseService;
     }
 
-    public async Task CreateCourse(Course course, AppUser currentUser)
+    public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)
     {
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} not found");
+        }
+        
+        if (currentUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(currentUser)} not found");
+        }
+        
         try
         {
-            if (string.IsNullOrEmpty(course.Name))
-            {
-                throw new Exception("Course title cannot be empty.");
-            }
-
             await _repository.AddAsync(course);
             await _unitOfWork.Save();
             
             var userCourse = new UserCourses()
             {
                 Course = course,
-                CourseId = course.Id,
                 AppUser = currentUser,
-                AppUserId = currentUser.Id
             };
-            await _userCourseService.CreateUserCourses(userCourse);
+            
+            var createUserCoursesResult = await _userCourseService.CreateUserCourses(userCourse);
+            
+            if (!createUserCoursesResult.IsSuccessful)
+            {
+                await _repository.DeleteAsync(course);
+                await _unitOfWork.Save();
+            }
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to create course {course.Name}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to create {nameof(course)} {course.Id}. Exception: {ex.Message}");
         }
     }
 
-    public async Task DeleteCourse(int courseId)
+    public async Task<Result<bool>> DeleteCourse(int courseId)
     {
+        var course = await _repository.GetByIdAsync(courseId);
+        
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
+        }
+        
         try
         {
-            var course = await _repository.GetByIdAsync(courseId);
-            
-            if (course == null)
-            {
-                throw new Exception("Course not found");
-            }
-
             await _repository.DeleteAsync(course);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to delete course. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to delete {nameof(course)} by {courseId}. Exception: {ex.Message}");
         }
     }
 
-    public async Task UpdateName(int courseId, string newName)
+    public async Task<Result<bool>> UpdateName(int courseId, string newName)
     {
+        var course = await _repository.GetByIdAsync(courseId);
+        
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
+        }
+        
         try
         {
-            var course = await _repository.GetByIdAsync(courseId);
-            
-            if (course == null)
-            {
-                throw new Exception("Course not found");
-            }
-
             course.Name = newName;
 
             await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to update course by {courseId} with new name: {newName}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to update {nameof(course)} by {courseId} with {newName}. Exception: {ex.Message}");
         }
     }
 }

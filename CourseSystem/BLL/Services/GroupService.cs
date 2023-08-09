@@ -54,6 +54,8 @@ public class GroupService : GenericService<Group>, IGroupService
             {
                 await _repository.DeleteAsync(group);
                 await _unitOfWork.Save();
+                
+                return new Result<bool>(false, $"{createUserGroupResult.Message}");
             }
 
             return new Result<bool>(true);

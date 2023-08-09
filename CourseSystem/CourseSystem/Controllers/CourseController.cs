@@ -67,13 +67,19 @@ public class CourseController : Controller
         {
             return RedirectToAction("Login", "Account");
         }
-
+        
         var course = new Course()
         {
             Name = courseViewModel.Name
         };
-
-        await _courseService.CreateCourse(course, currentUser);
+        
+        var createResult = await _courseService.CreateCourse(course, currentUser);
+            
+        if (!createResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{createResult.Message}");
+            return View(courseViewModel);
+        }
 
         return RedirectToAction("Index");
     }
@@ -86,7 +92,7 @@ public class CourseController : Controller
         if (course == null)
         {
             ViewData.ViewDataMessage("Error", "Course not found");
-            return View("Error");
+            return View("Index");
         }
 
         return View(course);
@@ -95,8 +101,14 @@ public class CourseController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(Course newCourse)
     {
-        await _courseService.UpdateName(newCourse.Id, newCourse.Name);
+        var updateResult = await _courseService.UpdateName(newCourse.Id, newCourse.Name);
 
+        if (!updateResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{updateResult.Message}");
+            return View(newCourse);
+        }
+            
         return RedirectToAction("Index");
     }
 
@@ -104,34 +116,27 @@ public class CourseController : Controller
     public async Task<IActionResult> Delete(int id)
     {
         var course = await _courseService.GetById(id);
-
+        
         if (course == null)
         {
             ViewData.ViewDataMessage("Error", "Course not found");
-            return View("Error");
+            return View("Index");
         }
 
-        var courseViewModel = new CourseViewModel()
-        {
-            Name = course.Name
-        };
-
-        return View(courseViewModel);
+        return View(course);
     }
-
-    [HttpPost, ActionName("Delete")]
+    
+    [HttpPost]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var course = await _courseService.GetById(id);
+        var deleteResult = await _courseService.DeleteCourse(id);
 
-        if (course == null)
+        if (!deleteResult.IsSuccessful)
         {
-            ViewData.ViewDataMessage("Error", "Course not found");
-            return View("Error");
+            TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+            return View("Delete");
         }
-
-        await _courseService.DeleteCourse(course.Id);
-
+            
         return RedirectToAction("Index");
     }
 
@@ -146,10 +151,11 @@ public class CourseController : Controller
         }
 
         var course = await _courseService.GetById(id);
-
+        
         if (course == null)
         {
-            return NotFound();
+            ViewData.ViewDataMessage("Error", "Course not found");
+            return View("Index");
         }
 
         var currentGroups = course.Groups
@@ -174,7 +180,8 @@ public class CourseController : Controller
 
         if (course == null)
         {
-            return NotFound();
+            ViewData.ViewDataMessage("Error", "Course not found");
+            return View("Index");
         }
 
         var userCoursesForCourse = course.UserCourses.Select(uc => uc.AppUserId).ToList();
@@ -201,7 +208,8 @@ public class CourseController : Controller
 
         if (teacher == null || course == null)
         {
-            return NotFound();
+            ViewData.ViewDataMessage("Error", "Course or Teacher not found");
+            return View("Index");
         }
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacher);
@@ -235,19 +243,29 @@ public class CourseController : Controller
         if (courseTecahers.Contains(currentUser.Id))
         {
             TempData.TempDataMessage("Error", "You are already registered for the course");
-            return RedirectToAction("Index", "Course");
+            return RedirectToAction("Index");
         }
 
         if (currentUser == null || course == null)
         {
-            return NotFound();
+            ViewData.ViewDataMessage("Error", "Course or currentUser not found");
+            return View("Index");
         }
 
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);
 
         if (!result.Succeeded)
         {
-            return View("Error");
+            ViewData.ViewDataMessage("Error", "Confirm email is not successful");
+            return View("Index");
+        }
+
+        var addTeacherToCourseResult = await _userCourseService.AddTeacherToCourse(course, currentUser);
+        
+        if (!addTeacherToCourseResult.IsSuccessful)
+        {
+            ViewData.ViewDataMessage("Error", $"{addTeacherToCourseResult.Message}");
+            return View("Index");
         }
 
         await _userCourseService.AddTeacherToCourse(course, currentUser);
