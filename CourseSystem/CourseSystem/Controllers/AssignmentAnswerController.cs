@@ -11,7 +11,6 @@ using UI.ViewModels.AssignmentViewModels;
 namespace UI.Controllers
 {
     [Authorize]
-    [CustomFilterAttributeException]
     public class AssignmentAnswerController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -34,31 +33,26 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        //[Route("CreateAnswer/{id}")]
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> Create(int id)
         {
-            try
+            var assignmnetAnsweVM = new AssignmentAnsweViewModel()
             {
-                var assignmnetAnsweVM = new AssignmentAnsweViewModel()
-                {
-                    AssignmentId = id
-                };
-               
-                return View(assignmnetAnsweVM);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Assignment doesn't found");
-            }
+                AssignmentId = id
+            };
+
+            return View(assignmnetAnsweVM);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
+            {
+                TempData.TempDataMessage("Error", "Fail to create assignment answer");
                 return View(assignmentAnswerVM);
-
+            }
+               
             var assignmnetAnswer = new AssignmentAnswer();
             assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmnetAnswer);
 
@@ -73,7 +67,19 @@ namespace UI.Controllers
             assignmnetAnswer.Url = "Some URL";
 
             var assignmnet = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
+
+            if(assignmnet == null)
+            {
+                TempData.TempDataMessage("Error", "Fail to create assignment answer");
+                return View(assignmentAnswerVM);
+            }
+
             var currentUser = await _userManager.GetUserAsync(User);
+
+            if(currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
             var answerResult = await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnet, currentUser);
 
@@ -98,9 +104,9 @@ namespace UI.Controllers
 
             var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
 
-            if(!deleteResult.IsSuccessful)
+            if (!deleteResult.IsSuccessful)
                 TempData.TempDataMessage("Error", deleteResult.Message);
-
+                
             return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
         }
 
@@ -163,7 +169,6 @@ namespace UI.Controllers
                 return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = assignmentId, studentId = studentId });
             }
             
-
             var assignment = await _assignmentService.GetById(assignmentId);
             var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
 
@@ -175,7 +180,6 @@ namespace UI.Controllers
             if (!updateResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", updateResult.Message); 
-
                 return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId});
             }
 

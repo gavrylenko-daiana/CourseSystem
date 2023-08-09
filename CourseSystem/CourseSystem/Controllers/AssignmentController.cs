@@ -11,7 +11,6 @@ using UI.ViewModels.AssignmentViewModels;
 namespace UI.Controllers
 {
     [Authorize]
-    [CustomFilterAttributeException]
     public class AssignmentController : Controller
     {
         private readonly IAssignmentService _assignmentService;
@@ -31,7 +30,7 @@ namespace UI.Controllers
             if (!groupAssignmentsResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", groupAssignmentsResult.Message);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Group");
             }
 
             var assignmentsVM = new List<AssignmentViewModel>();
@@ -91,26 +90,25 @@ namespace UI.Controllers
                 return View(assignmentVM);
             }
 
-            return RedirectToAction("Index", "Assignment", new { assignmentId = assignmentVM .GroupId});
+            return RedirectToAction("Index", "Assignment", new { assignmentId = assignmentVM.GroupId});
         }
 
         [HttpGet]
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> DeleteAssignment(int assignmentId)
         {
-            try
+            var assignment = await _assignmentService.GetById(assignmentId);
+
+            if(assignment == null)
             {
-                var assignment = await _assignmentService.GetById(assignmentId);
-
-                var assignentDeleteVM = new DeleteAssignmentViewModel();
-                assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
-
-                return View(assignentDeleteVM);
+                TempData.TempDataMessage("Error", "Fail delete assignment");
+                return RedirectToAction("Index", "Group");
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Assignment not fount");
-            }           
+
+            var assignentDeleteVM = new DeleteAssignmentViewModel();
+            assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
+
+            return View(assignentDeleteVM);                    
         }
 
         [HttpGet]
@@ -121,7 +119,7 @@ namespace UI.Controllers
             if (!deleteResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", deleteResult.Message);
-                return View();
+                return RedirectToAction("Index", "Home");
             }
 
             return RedirectToAction("Index", "Home");
@@ -130,63 +128,61 @@ namespace UI.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int assignmentId)
         {
-            try
+            var assignment = await _assignmentService.GetById(assignmentId);
+
+            if (assignment == null)
             {
-                var assignment = await _assignmentService.GetById(assignmentId);
-
-                var assignentDetailsVM = new DetailsAssignmentViewModel();
-                assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
-                var userAssignmnet = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
-                assignentDetailsVM.UserAssignment = userAssignmnet;
-
-                if (userAssignmnet?.AssignmentAnswers == null)
-                    assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
-                else
-                    assignentDetailsVM.AssignmentAnswers = userAssignmnet.AssignmentAnswers;
-
-                //logic for getting assignmnet files 
-                assignentDetailsVM.AttachedFiles = new List<IFormFile>();
-
-                return View(assignentDetailsVM);
+                TempData.TempDataMessage("Error", "Failt to get assignment data");
+                return RedirectToAction("Index", "Group");
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Assignment not fount");
-            }
+
+            var assignentDetailsVM = new DetailsAssignmentViewModel();
+            assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
+            var userAssignmnet = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
+            assignentDetailsVM.UserAssignment = userAssignmnet;
+
+            if (userAssignmnet?.AssignmentAnswers == null)
+                assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
+            else
+                assignentDetailsVM.AssignmentAnswers = userAssignmnet.AssignmentAnswers;
+
+            //logic for getting assignmnet files 
+            assignentDetailsVM.AttachedFiles = new List<IFormFile>();
+
+            return View(assignentDetailsVM);          
         }
 
         [HttpGet]
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Edit(int id)
         {
-            try
-            {
-                var assignment = await _assignmentService.GetById(id);
-                var assigmentVM = new EditAssignmentViewModel();
-                assignment.MapTo<Assignment, EditAssignmentViewModel>(assigmentVM);
+            var assignment = await _assignmentService.GetById(id);
 
-                var fileCheckBoxes = new List<FileCheckBoxViewModel>();
-                foreach (var assignmentFile in assignment.AssignmentFiles)
+            if (assignment == null)
+            {
+                TempData.TempDataMessage("Error", "Fail to get edit page");
+                return RedirectToAction("Details", "Assignment", new { assignmentId = id });
+            }
+
+            var assigmentVM = new EditAssignmentViewModel();
+            assignment.MapTo<Assignment, EditAssignmentViewModel>(assigmentVM);
+
+            var fileCheckBoxes = new List<FileCheckBoxViewModel>();
+            foreach (var assignmentFile in assignment.AssignmentFiles)
+            {
+                var checkbox = new FileCheckBoxViewModel
                 {
-                    var checkbox = new FileCheckBoxViewModel
-                    {
-                        IsActive = true,
-                        Description = $"{assignmentFile.Name}",
-                        Value = assignmentFile
-                    };
+                    IsActive = true,
+                    Description = $"{assignmentFile.Name}",
+                    Value = assignmentFile
+                };
 
-                    fileCheckBoxes.Add(checkbox);
-                }
-
-                assigmentVM.AttachedFilesCheckBoxes = fileCheckBoxes;
-
-                return View(assigmentVM);
-
+                fileCheckBoxes.Add(checkbox);
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Assignment not fount");
-            }
+
+            assigmentVM.AttachedFilesCheckBoxes = fileCheckBoxes;
+
+            return View(assigmentVM);
         }
 
         [HttpPost]
@@ -214,7 +210,7 @@ namespace UI.Controllers
             if (!updateAssignmnetResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", updateAssignmnetResult.Message);
-                return View(editAssignmentVM.Id);
+                return View(editAssignmentVM);
             }
 
             return RedirectToAction("Index", "Assignment", new {editAssignmentVM.GroupId });

@@ -15,6 +15,13 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span>@TempData["Error"]</span>
+        </div>
+    }
     <div class="position-relative m-5 text-center bg-light">
         <div class="col-md-5 p-lg-5 mx-auto my-5">
             <h3 class="font-weight-normal pb-2">Available group assignmnets</h3>
