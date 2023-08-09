@@ -20,13 +20,19 @@
         <div class="card-header">
             Course Details
         </div>
+        @if (TempData["Error"] != null)
+        {
+            <div class="col-md-12 alert alert-danger">
+                <span><b>Sorry!</b> - @TempData["Error"]</span>
+            </div>
+        }
         <div class="card-body">
             <h5 class="card-title">@Model.Name</h5>
 
-             @if (Model.CurrentUser.Role != AppUserRoles.Student)
-             {
-                 <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
-             }
+            @if (Model.CurrentUser.Role != AppUserRoles.Student)
+            {
+                <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
+            }
 
             @if (Model.CurrentGroups != null && Model.CurrentGroups.Count > 0)
             {
@@ -74,7 +80,7 @@
             {
                 <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="btn btn-primary mb-3">Add teachers</a>
             }
-            
+
             @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
             {
                 <h6>Users:</h6>
@@ -91,12 +97,6 @@
             }
         </div>
     </div>
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
-        </div>
-    }
 </div>
 
 <script>
@@ -106,5 +106,3 @@
         });
     });
 </script>
-
-

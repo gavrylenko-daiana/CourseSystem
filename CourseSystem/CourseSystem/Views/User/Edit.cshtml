@@ -12,7 +12,13 @@
     <h1>Edit your informaition</h1>
     @if (TempData["Error"] != null)
     {
-        <p class="text-danger">@TempData["Error"]</p>
+        <div class="col-md-12 alert alert-danger">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <p class="text-success">@TempData["SuccessMessage"]</p>
     }
     <form method="post" asp-controller="User" asp-action="Edit" enctype="multipart/form-data">
         <div class="form-group">

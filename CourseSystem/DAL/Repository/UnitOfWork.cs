@@ -11,6 +11,7 @@ namespace DAL.Repository
     public class UnitOfWork : IDisposable
     {
         private ApplicationContext _context;
+        private Repository<AppUser> _userRepository;
         private Repository<Assignment> _assignmentRepository;
         private Repository<AssignmentAnswer> _assignmentAnswerRepository;
         private Repository<AssignmentFile> _assignmentFileRepository;
@@ -27,6 +28,19 @@ namespace DAL.Repository
         public UnitOfWork(ApplicationContext context)
         {
             _context = context;
+        }
+        
+        public Repository<AppUser> UserRepository
+        {
+            get
+            {
+                if (_userRepository == null)
+                {
+                    _userRepository = new Repository<AppUser>(_context);
+                }
+
+                return _userRepository;
+            }
         }
 
         public Repository<ChatMessage> ChatMessageRepository
