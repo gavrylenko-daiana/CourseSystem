@@ -70,6 +70,11 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Login()
     {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Logout", "Account");
+        }
+        
         var login = new LoginViewModel();
 
         return View(login);
