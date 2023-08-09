@@ -13,51 +13,29 @@ namespace UI.Controllers;
 [Authorize]
 public class UserController : Controller
 {
-    private readonly UserManager<AppUser> _userManager;
-    private readonly SignInManager<AppUser> _signInManager;
+    private readonly IUserService _userService;
     private readonly IEmailService _emailService;
 
-    public UserController(UserManager<AppUser> userManager,
-        SignInManager<AppUser> signInManager,
-        IEmailService emailService)
+    public UserController(IEmailService emailService, IUserService userService)
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
         _emailService = emailService;
+        _userService = userService;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var userViewModel = await _userService.GetInfoUserByCurrentUser(User);
 
-        if (currentUser == null)
-        {
-            return View("Error");
-        }
-
-        var userViewModel = new AppUser();
-        currentUser.MapTo(userViewModel);
-      
-        return View(userViewModel);
+        return View(userViewModel.Data);
     }
 
     [HttpGet]
     public async Task<IActionResult> Detail(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var userViewModel = await _userService.GetInfoUserById(id);
 
-        if (user == null)
-        {
-            TempData.TempDataMessage("Error", "This user does not exist.");
-            // edit path
-            return RedirectToAction("Index", "Home");
-        }
-        
-        var userViewModel = new AppUser();
-        user.MapTo(userViewModel);
-
-        return View(userViewModel);
+        return View(userViewModel.Data);
     }
 
     [HttpGet]
