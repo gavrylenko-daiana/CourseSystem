@@ -100,8 +100,49 @@ public class UserService : GenericService<AppUser>, IUserService
         }
         else
         {
-            return new Result<bool>(false, $"Failed to get {nameof(result.Data)}");
+            return new Result<bool>(false, $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
         }
+    }
+
+    public async Task<Result<bool>> CheckPasswordAsync(ClaimsPrincipal currentUser, string currentPassword, string newPassword)
+    {
+        var result = await GetCurrentUser(currentUser);
+
+        if (result.IsSuccessful)
+        {
+            var user = result.Data;
+
+            var checkPassword = await _userManager.CheckPasswordAsync(user, currentPassword);
+
+            if (checkPassword)
+            {
+                user.PasswordHash =
+                    _userManager.PasswordHasher.HashPassword(user, newPassword);
+                await _userManager.UpdateAsync(user);
+
+                return new Result<bool>(true);
+            }
+            else
+            {
+                return new Result<bool>(false, $"Failed to check password - Message: {result.Message}");
+            }
+        }
+        else
+        {
+            return new Result<bool>(false, $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+        }
+    }
+
+    public async Task<Result<AppUser>> FindByIdAsync(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+        {
+            return new Result<AppUser>(false, $"Failed to get {nameof(user)}");
+        }
+        
+        return new Result<AppUser>(true, user);
     }
 
     public async Task<Result<AppUser>> GetCurrentUser(ClaimsPrincipal user)

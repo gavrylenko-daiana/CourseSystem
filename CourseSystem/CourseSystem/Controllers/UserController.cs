@@ -13,49 +13,66 @@ namespace UI.Controllers;
 [Authorize]
 public class UserController : Controller
 {
-    private readonly UserManager<AppUser> _userManager;
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
 
-    public UserController(IEmailService emailService, IUserService userService, UserManager<AppUser> userManager)
+    public UserController(IEmailService emailService, IUserService userService)
     {
         _emailService = emailService;
         _userService = userService;
-        _userManager = userManager;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var userViewModel = await _userService.GetInfoUserByCurrentUserAsync(User);
+        var result = await _userService.GetInfoUserByCurrentUserAsync(User);
 
-        return View(userViewModel.Data);
+        if (result.IsSuccessful)
+        {
+            return View(result.Data);
+        }
+        else
+        {
+            TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+            return RedirectToAction("Login", "Account");
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> Detail(string id)
     {
-        var userViewModel = await _userService.GetInfoUserByIdAsync(id);
+        var result = await _userService.GetInfoUserByIdAsync(id);
 
-        return View(userViewModel.Data);
+        if (result.IsSuccessful)
+        {
+            return View(result.Data);
+        }
+        else
+        {
+            TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+            return RedirectToAction("Index", "User");
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> Edit()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var result = await _userService.GetCurrentUser(User);
 
-        if (user == null)
+        if (result.IsSuccessful)
         {
-            return View("Error");
-        }
-        
-        var editUserViewModel = new EditUserViewModel();
-        user.MapTo(editUserViewModel);
+            var editUserViewModel = new EditUserViewModel();
+            result.Data.MapTo(editUserViewModel);
 
-        return View(editUserViewModel);
+            return View(editUserViewModel);
+        }
+        else
+        {
+            TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+            return RedirectToAction("Index", "User");
+        }
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Edit(EditUserViewModel editUserViewModel)
     {
@@ -65,40 +82,36 @@ public class UserController : Controller
             return View("Edit", editUserViewModel);
         }
 
-        var user = await _userManager.GetUserAsync(User);
-
-        if (user == null)
-        {
-            return View("Error");
-        }
-
         var userViewModel = new AppUser();
         editUserViewModel.MapTo(userViewModel);
 
-        var result = await _userService.EditUserAsync(user, userViewModel);
+        var result = await _userService.EditUserAsync(User, userViewModel);
 
         if (!result.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "edit is not successful. Please try again!");
+            TempData.TempDataMessage("Error", $"Edit is not successful. Please try again! - Message: {result.Message}");
             return View("Edit", editUserViewModel);
         }
 
-        return RedirectToAction("Index", "User", new { userViewModel.Id });
+        return RedirectToAction("Index", "User");
     }
 
     [HttpGet]
     public async Task<IActionResult> EditPassword()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var result = await _userService.GetCurrentUser(User);
 
-        if (user == null)
+        if (result.IsSuccessful)
         {
-            return View("Error");
+            var editUserPasswordViewModel = new EditUserPasswordViewModel();
+
+            return View(editUserPasswordViewModel);
         }
-
-        var editUserPasswordViewModel = new EditUserPasswordViewModel();
-
-        return View(editUserPasswordViewModel);
+        else
+        {
+            TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+            return RedirectToAction("Index", "User");
+        }
     }
 
     [HttpPost]
@@ -111,23 +124,12 @@ public class UserController : Controller
             return View("EditPassword", editUserPasswordViewModel);
         }
 
-        var user = await _userManager.GetUserAsync(User);
+        var resultCheckPassword = await _userService.CheckPasswordAsync(User, editUserPasswordViewModel.CurrentPassword, editUserPasswordViewModel.NewPassword);
 
-        if (user == null)
+        if (resultCheckPassword.IsSuccessful)
         {
-            return View("Error");
-        }
-
-        var checkPassword = await _userManager.CheckPasswordAsync(user, editUserPasswordViewModel.CurrentPassword);
-
-        if (checkPassword)
-        {
-            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, editUserPasswordViewModel.NewPassword);
-            await _userManager.UpdateAsync(user);
-
             TempData.TempDataMessage("SuccessMessage", "password has been successfully changed.");
-
-            return RedirectToAction("Index", "User", new { user.Id });
+            return RedirectToAction("Index", "User");
         }
         else
         {
@@ -135,62 +137,74 @@ public class UserController : Controller
             return View("EditPassword", editUserPasswordViewModel);
         }
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Delete()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var result = await _userService.GetCurrentUser(User);
 
-        if (user == null)
+        if (result.IsSuccessful)
         {
-            return View("Error");
+            var user = result.Data;
+
+            //Comes to the e-mail Admin, he or she have to confirm the deletion of the account
+            var callbackUrl = Url.Action(
+                "ConfirmUserDeletion",
+                "User",
+                new { userId = user.Id },
+                protocol: HttpContext.Request.Scheme);
+
+            var deletionSendingResult =
+                await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByAdmin, user, callbackUrl);
+
+            if (!deletionSendingResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", deletionSendingResult.Message);
+            }
+
+            TempData.TempDataMessage("Error", "Wait for confirmation of account deletion from the admin");
+            return RedirectToAction("Login", "Account");
         }
-
-        //Comes to the e-mail Admin, he or she have to confirm the deletion of the account
-        var callbackUrl = Url.Action(
-            "ConfirmUserDeletion",
-            "User",
-            new { userId = user.Id },
-            protocol: HttpContext.Request.Scheme);
-
-        var deletionSendingResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByAdmin, user, callbackUrl);
-
-        if (!deletionSendingResult.IsSuccessful)
+        else
         {
-            TempData.TempDataMessage("Error", deletionSendingResult.Message);
+            TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+            return RedirectToAction("Index", "User");
         }
-
-        TempData.TempDataMessage("Error", "Wait for confirmation of account deletion from the admin");
-        return RedirectToAction("Login", "Account");
     }
 
     [HttpGet]
     public async Task<IActionResult> ConfirmUserDeletion(string userId)
     {
-        if (userId == null)
+        if (string.IsNullOrWhiteSpace(userId))
         {
-            return View("Error");
+            TempData.TempDataMessage("Error", $"Failed to get user by id");
+            return RedirectToAction("Index", "User");
         }
 
-        var user = await _userManager.FindByIdAsync(userId);
+        var result = await _userService.FindByIdAsync(userId);
 
-        if (user == null)
+        if (result.IsSuccessful)
         {
-            return View("Error");
+            var user = result.Data;
+
+            //send message to user to delete his or her account
+            var actionLink = Url.Action(
+                "Delete",
+                "Account",
+                new { userId = userId },
+                protocol: HttpContext.Request.Scheme);
+
+            await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByUser, user, actionLink);
+
+            var confirmDeleteVM = new ConfirmUserDeleteViewModel();
+            user.MapTo(confirmDeleteVM);
+
+            return View(confirmDeleteVM); //You succesfully confirmed user deletion
         }
-
-        //send message to user to delete his or her account
-        var actionLink = Url.Action(
-            "Delete",
-            "Account",
-            new { userId = userId },
-            protocol: HttpContext.Request.Scheme);
-
-        await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByUser, user, actionLink);
-        
-        var confirmDeleteVM = new ConfirmUserDeleteViewModel();
-        user.MapTo(confirmDeleteVM);
-
-        return View(confirmDeleteVM); //You succesfully confirmed user deletion
+        else
+        {
+            TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+            return RedirectToAction("Index", "User");
+        }
     }
 }
