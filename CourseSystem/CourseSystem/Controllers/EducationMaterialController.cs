@@ -28,10 +28,10 @@ public class EducationMaterialController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> CreateInGroup(int groupId)
+    public async Task<IActionResult> Create(int groupId)
     {
         var group = await _groupService.GetById(groupId);
-        
+
         var materialViewModel = new CreateEducationMaterialViewModel
         {
             CourseId = group.CourseId,
@@ -42,7 +42,7 @@ public class EducationMaterialController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateInGroup(CreateEducationMaterialViewModel viewModel)
+    public async Task<IActionResult> Create(CreateEducationMaterialViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -50,10 +50,22 @@ public class EducationMaterialController : Controller
 
             return View(viewModel);
         }
-        
+
         UploadResult uploadResult = await _educationMaterialService.AddFileAsync(viewModel.UploadFile);
 
-        await _educationMaterialService.AddToGroup(viewModel.UploadFile, viewModel.GroupId, uploadResult.Url.ToString());
+        switch (viewModel.MaterialAccess)
+        {
+            case MaterialAccess.Group:
+                await _educationMaterialService.AddToGroup(viewModel.UploadFile, viewModel.GroupId,
+                    uploadResult.Url.ToString());
+                break;
+            case MaterialAccess.Course:
+                break;
+            case MaterialAccess.General:
+                break;
+            default:
+                break;
+        }
         
         return RedirectToAction("Index", "Course");
     }
@@ -67,7 +79,7 @@ public class EducationMaterialController : Controller
 
         return View(material);
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
@@ -77,17 +89,18 @@ public class EducationMaterialController : Controller
         {
             return NotFound();
         }
-        
+
         var access = fileToDelete.MaterialAccess;
 
         switch (access)
         {
             case MaterialAccess.Group:
+                // await _educationMaterialService.DeleteGroup(fileToDelete);
                 await _educationMaterialService.DeleteFileAsync(fileToDelete.Url);
                 await _educationMaterialService.DeleteUploadFileAsync(fileToDelete);
-                
+
                 var group = fileToDelete.Group;
-                
+
                 if (group != null)
                 {
                     group.EducationMaterials.Remove(fileToDelete);
@@ -95,10 +108,10 @@ public class EducationMaterialController : Controller
                 }
                 break;
             case MaterialAccess.Course:
-                
+
                 break;
             case MaterialAccess.General:
-                
+
                 break;
             default:
                 break;
