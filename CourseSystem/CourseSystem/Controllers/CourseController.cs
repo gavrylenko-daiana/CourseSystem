@@ -65,8 +65,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
-            TempData.TempDataMessage("Error", "User not found");
-            return View(courseViewModel);
+            return RedirectToAction("Login", "Account");
         }
 
         var course = new Course()
