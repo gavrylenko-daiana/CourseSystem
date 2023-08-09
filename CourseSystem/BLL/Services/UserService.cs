@@ -12,12 +12,12 @@ public class UserService : GenericService<AppUser>, IUserService
 {
     private readonly UserManager<AppUser> _userManager;
     
-    protected UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) : base(unitOfWork, unitOfWork.UserRepository)
+    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) : base(unitOfWork, unitOfWork.UserRepository)
     {
         _userManager = userManager;
     }
     
-    public async Task<Result<AppUser>> GetInfoUserByCurrentUser(ClaimsPrincipal user)
+    public async Task<Result<AppUser>> GetInfoUserByCurrentUserAsync(ClaimsPrincipal user)
     {
         if (user == null)
         {
