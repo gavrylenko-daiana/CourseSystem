@@ -65,7 +65,8 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
-            return RedirectToAction("Login", "Account");
+            TempData.TempDataMessage("Error", "User not found");
+            return View(courseViewModel);
         }
 
         var course = new Course()
@@ -86,7 +87,7 @@ public class CourseController : Controller
         if (course == null)
         {
             ViewData.ViewDataMessage("Error", "Course not found");
-            return View("Index");
+            return View("Error");
         }
 
         return View(course);
@@ -97,7 +98,7 @@ public class CourseController : Controller
     {
         await _courseService.UpdateName(newCourse.Id, newCourse.Name);
 
-        return View(newCourse);
+        return RedirectToAction("Index");
     }
 
     [HttpGet]
@@ -108,7 +109,7 @@ public class CourseController : Controller
         if (course == null)
         {
             ViewData.ViewDataMessage("Error", "Course not found");
-            return View("Index");
+            return View("Error");
         }
 
         var courseViewModel = new CourseViewModel()
@@ -119,7 +120,7 @@ public class CourseController : Controller
         return View(courseViewModel);
     }
 
-    [HttpPost]
+    [HttpPost, ActionName("Delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var course = await _courseService.GetById(id);
@@ -127,7 +128,7 @@ public class CourseController : Controller
         if (course == null)
         {
             ViewData.ViewDataMessage("Error", "Course not found");
-            return View("Delete");
+            return View("Error");
         }
 
         await _courseService.DeleteCourse(course.Id);
@@ -149,8 +150,7 @@ public class CourseController : Controller
 
         if (course == null)
         {
-            ViewData.ViewDataMessage("Error", "Course not found");
-            return View("Index");
+            return NotFound();
         }
 
         var currentGroups = course.Groups
@@ -241,16 +241,14 @@ public class CourseController : Controller
 
         if (currentUser == null || course == null)
         {
-            ViewData.ViewDataMessage("Error", "Course or currentUser not found");
-            return View("Index");
+            return NotFound();
         }
 
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);
 
         if (!result.Succeeded)
         {
-            ViewData.ViewDataMessage("Error", "Confirm email is not successful");
-            return View("Index");
+            return View("Error");
         }
 
         await _userCourseService.AddTeacherToCourse(course, currentUser);
