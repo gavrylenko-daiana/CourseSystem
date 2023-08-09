@@ -10,6 +10,7 @@ using UI.ViewModels;
 
 namespace UI.Controllers;
 
+[Authorize]
 public class CourseController : Controller
 {
     private readonly ICourseService _courseService;
@@ -17,7 +18,7 @@ public class CourseController : Controller
     private readonly IEmailService _emailService;
     private readonly IUserCourseService _userCourseService;
 
-    public CourseController(ICourseService courseService, 
+    public CourseController(ICourseService courseService,
         UserManager<AppUser> userManager,
         IEmailService emailService,
         IUserCourseService userCourseService)
@@ -27,7 +28,7 @@ public class CourseController : Controller
         _emailService = emailService;
         _userCourseService = userCourseService;
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -56,7 +57,7 @@ public class CourseController : Controller
     {
         return View();
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Create(CourseViewModel courseViewModel)
     {
@@ -66,12 +67,12 @@ public class CourseController : Controller
         {
             return RedirectToAction("Login", "Account");
         }
-            
+        
         var course = new Course()
         {
             Name = courseViewModel.Name
         };
-
+        
         var createResult = await _courseService.CreateCourse(course, currentUser);
             
         if (!createResult.IsSuccessful)
@@ -82,12 +83,12 @@ public class CourseController : Controller
 
         return RedirectToAction("Index");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
         var course = await _courseService.GetById(id);
-            
+
         if (course == null)
         {
             ViewData.ViewDataMessage("Error", "Course not found");
@@ -96,7 +97,7 @@ public class CourseController : Controller
 
         return View(course);
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Edit(Course newCourse)
     {
@@ -110,7 +111,7 @@ public class CourseController : Controller
             
         return RedirectToAction("Index");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
@@ -138,7 +139,7 @@ public class CourseController : Controller
             
         return RedirectToAction("Index");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
@@ -148,7 +149,7 @@ public class CourseController : Controller
         {
             return RedirectToAction("Login", "Account");
         }
-        
+
         var course = await _courseService.GetById(id);
         
         if (course == null)
@@ -156,16 +157,16 @@ public class CourseController : Controller
             ViewData.ViewDataMessage("Error", "Course not found");
             return View("Index");
         }
-        
+
         var currentGroups = course.Groups
             .Where(group => group.UserGroups.Any(ug => ug.AppUserId == currentUser.Id))
             .ToList();
-        
+
         var courseViewModel = new CourseViewModel();
         course.MapTo(courseViewModel);
         courseViewModel.CurrentUser = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException();
         courseViewModel.CurrentGroups = currentGroups;
-        
+
         TempData["CourseId"] = id;
 
         return View(courseViewModel);
@@ -176,7 +177,7 @@ public class CourseController : Controller
     {
         var courseId = (int)(TempData["CourseId"] ?? throw new InvalidOperationException());
         var course = await _courseService.GetById(courseId);
-        
+
         if (course == null)
         {
             ViewData.ViewDataMessage("Error", "Course not found");
@@ -213,12 +214,13 @@ public class CourseController : Controller
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacher);
         var callbackUrl = Url.Action(
-           "ConfirmTeacherForCourse",
+            "ConfirmTeacherForCourse",
             "Course",
-           new { courseId = courseId, code = code },
-           protocol: HttpContext.Request.Scheme);
+            new { courseId = courseId, code = code },
+            protocol: HttpContext.Request.Scheme);
 
         var sendResult = await _emailService.SendToTeacherCourseInventation(teacher, course, callbackUrl);
+
         if (!sendResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", sendResult.Message);
@@ -226,7 +228,7 @@ public class CourseController : Controller
         }
 
         TempData["CourseId"] = course.Id;
-        
+
         return RedirectToAction("Index");
     }
 
@@ -265,6 +267,8 @@ public class CourseController : Controller
             ViewData.ViewDataMessage("Error", $"{addTeacherToCourseResult.Message}");
             return View("Index");
         }
+
+        await _userCourseService.AddTeacherToCourse(course, currentUser);
 
         return View();
     }
