@@ -7,5 +7,5 @@ public interface IUserService
 {
     Task<Result<AppUser>> GetInfoUserByCurrentUser(ClaimsPrincipal user);
     
-    
+    Task<Result<AppUser>> GetInfoUserById(string id);
 }

@@ -35,6 +35,25 @@ public class UserService : GenericService<AppUser>, IUserService
 
         return new Result<AppUser>(true, appUser);
     }
+    
+    public async Task<Result<AppUser>> GetInfoUserById(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return new Result<AppUser>(false, $"{nameof(id)} does not exist");
+        }
+        
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+        {
+            return new Result<AppUser>(false, $"{nameof(user)} does not exist");
+        }
+        
+        var appUser = await GetUserAfterMapping(user);
+
+        return new Result<AppUser>(true, appUser);
+    }
 
     private async Task<AppUser> GetUserAfterMapping(AppUser currentUser)
     {
@@ -43,5 +62,4 @@ public class UserService : GenericService<AppUser>, IUserService
 
         return user;
     }
-
 }
