@@ -44,7 +44,7 @@
                             @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
                             {
                                 <div class="d-inline-block">
-                                    <a asp-controller="Assignment" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    <a href="@Url.Action("Edit", "Assignment", new { id = @Model.Id })" class="btn btn-primary">
                                         Edit
                                     </a>
                                     <a href="@Url.Action("DeleteAssignment", "Assignment", new { assignmentId = @Model.Id })" class="btn btn-primary">
@@ -72,7 +72,7 @@
                                         }
                                         else if (Model.AssignmentAccess == AssignmentAccess.InProgress)
                                         {
-                                            <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@Model.Id" class="btn btn-primary">
+                                            <a href="@Url.Action("Create", "AssignmentAnswer", new { id = Model.Id})" class="btn btn-primary">
                                                 Add answer
                                             </a>
                                         }

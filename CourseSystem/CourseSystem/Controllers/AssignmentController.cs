@@ -198,7 +198,7 @@ namespace UI.Controllers
             if(!ModelState.IsValid)
             {
                 TempData.TempDataMessage("Error", "Invalid data input");
-                return View(editAssignmentVM.Id);
+                return View(editAssignmentVM);
             }
            
             var assignment = new Assignment();

@@ -31,6 +31,6 @@ namespace UI.ViewModels.AssignmentViewModels
         public int GroupId { get; set; }
         public List<FileCheckBoxViewModel> AttachedFilesCheckBoxes { get; set; } = new List<FileCheckBoxViewModel>();
         public List<string>? AttachedFilesUrls { get; set; }
-        public List<IFormFile> NewAddedFiles { get; set; }
+        public List<IFormFile>? NewAddedFiles { get; set; }
     }
 }

@@ -34,9 +34,9 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        [Route("CreateAnswer/{id}")]
+        //[Route("CreateAnswer/{id}")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> CreateAnswer(int id)
+        public async Task<IActionResult> Create(int id)
         {
             try
             {
@@ -54,7 +54,6 @@ namespace UI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Student")]
         public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
         {
             if(!ModelState.IsValid)
@@ -84,7 +83,7 @@ namespace UI.Controllers
                 return RedirectToAction("CreateAnswer", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
             }
 
-            return RedirectToAction("Details", "Assignment", new {id = assignmnet.Id});
+            return RedirectToAction("Details", "Assignment", new { assignmentId = assignmnet.Id});
         }
 
         [HttpGet]
@@ -102,7 +101,7 @@ namespace UI.Controllers
             if(!deleteResult.IsSuccessful)
                 TempData.TempDataMessage("Error", deleteResult.Message);
 
-            return RedirectToAction("Details", "Assignment", new { id = asignmentId });
+            return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
         }
 
         [HttpGet]
