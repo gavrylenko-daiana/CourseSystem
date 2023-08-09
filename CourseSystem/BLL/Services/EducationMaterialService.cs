@@ -15,8 +15,11 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 {
     private readonly Cloudinary _cloudinary;
     private readonly ICourseService _courseService;
-    
-    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<CloudinarySettings> config, ICourseService courseService) : base(unitOfWork)
+    private readonly IGroupService _groupService;
+
+    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<CloudinarySettings> config,
+        ICourseService courseService, IGroupService groupService) : base(unitOfWork,
+        unitOfWork.EducationMaterialRepository)
     {
         var acc = new Account(
             config.Value.CloudName,
@@ -25,6 +28,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         );
         _cloudinary = new Cloudinary(acc);
         _courseService = courseService;
+        _groupService = groupService;
     }
 
     public async Task<UploadResult> AddFileAsync(IFormFile file)
@@ -65,11 +69,11 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
 
-    public async Task AddToGroup(IFormFile material, int? groupId, string url)
+    public async Task AddToGroup(IFormFile material, int groupId, string url)
     {
-        // var group = await _groupService.GetById(groupId);
-        //
-        // if (group == null) throw new Exception("failed to get group by groupId");
+        var group = await _groupService.GetById(groupId);
+
+        if (group == null) throw new Exception("failed to get group by groupId");
 
         var materialFile = new EducationMaterial()
         {
@@ -77,20 +81,22 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
             Url = url,
             FileExtension = Path.GetExtension(material.FileName),
             MaterialAccess = MaterialAccess.Group,
-            // GroupId = group.Id
+            GroupId = group.Id,
+            CourseId = group.CourseId
         };
-        
-        await Add(materialFile);
-        // await group.EducationMaterials.Add(materialFile);
+
+        await _repository.AddAsync(materialFile);
+        await _unitOfWork.Save();
+        // await _groupService.Add(materialFile);
     }
 
     public async Task<List<EducationMaterial>> GetAllMaterialAsync()
     {
-        var materials = await GetAll();
+        var materials = await _repository.GetAllAsync();
 
         return materials;
     }
-    
+
     public async Task<EducationMaterial> GetByIdMaterialAsync(int id)
     {
         var material = await GetById(id);

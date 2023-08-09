@@ -12,7 +12,7 @@ public interface IEducationMaterialService
 
     Task<List<EducationMaterial>> GetAllMaterialAsync();
 
-    Task AddToGroup(IFormFile material, int? groupId, string url);
+    Task AddToGroup(IFormFile material, int groupId, string url);
 
     Task<EducationMaterial> GetByIdMaterialAsync(int id);
 }
