@@ -118,7 +118,7 @@ public class AssignmentAnswerController : Controller
 
         if (assignmentAnswer == null)
         {
-            return RedirectToAction("Details", "Assignment", new { assignmentId = assignmnet.Id});
+            return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
         }
 
         var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
@@ -126,7 +126,7 @@ public class AssignmentAnswerController : Controller
         if (!deleteResult.IsSuccessful)
                 TempData.TempDataMessage("Error", deleteResult.Message);
                 
-            return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
+        return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
     }
 
 
