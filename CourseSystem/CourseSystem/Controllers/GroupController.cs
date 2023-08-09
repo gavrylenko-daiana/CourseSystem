@@ -370,6 +370,9 @@ public class GroupController : Controller
 
         var currentTeacher = await _userManager.GetUserAsync(User);
 
+        if (currentTeacher == null)
+            return RedirectToAction("Login", "Account");
+
         var callbackUrl = Url.Action( 
             "AdminApprove",
             "Group",
@@ -416,6 +419,10 @@ public class GroupController : Controller
     public async Task<IActionResult> ApprovedGroup(int groupId, string code)
     {
         var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+            return RedirectToAction("Login", "Account");
+
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);
 
         if (!result.Succeeded)

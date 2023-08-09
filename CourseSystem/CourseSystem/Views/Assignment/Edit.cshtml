@@ -38,7 +38,7 @@
                 <div class="row flex-md-row card card-md">
                     <div class="card-body bg-light">
                         <div class="text-center mb-5">
-                            <h1 class="h2 mb-2">Create assignment</h1>
+                            <h1 class="h2 mb-2">Edit assignment</h1>
                         </div>
 
                         <!-- Assignment Creation Form -->
@@ -56,9 +56,8 @@
                                         </div>
                                         <div class="col mb-3">
                                             <label asp-for="Description" class="control-label"></label>
-                                            <input asp-for="Description" class="form-control">
+                                            <textarea asp-for="Description" class="form-control custom-textarea" rows="5"></textarea>
                                             <span asp-validation-for="Description" class="text-danger"></span>
-
                                         </div>
                                     </div>
                                      <div class="form-row form-group">

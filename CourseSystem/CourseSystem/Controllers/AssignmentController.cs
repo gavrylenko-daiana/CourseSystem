@@ -122,7 +122,7 @@ namespace UI.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Group");
         }
 
         [HttpGet]
@@ -213,7 +213,7 @@ namespace UI.Controllers
                 return View(editAssignmentVM);
             }
 
-            return RedirectToAction("Index", "Assignment", new {editAssignmentVM.GroupId });
+            return RedirectToAction("Details", "Assignment", new { assignmentId = editAssignmentVM.Id });
         }
     }
 }

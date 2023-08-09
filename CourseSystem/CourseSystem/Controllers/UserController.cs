@@ -190,7 +190,7 @@ public class UserController : Controller
 
         if (user == null)
         {
-            return View("Error");
+            return RedirectToAction("Login", "Account");
         }
 
         //send messege to user to delete his or her account
