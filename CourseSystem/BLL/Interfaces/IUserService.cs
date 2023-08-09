@@ -5,7 +5,9 @@ namespace BLL.Interfaces;
 
 public interface IUserService
 {
-    Task<Result<AppUser>> GetInfoUserByCurrentUser(ClaimsPrincipal user);
+    Task<Result<AppUser>> GetInfoUserByCurrentUserAsync(ClaimsPrincipal user);
     
-    Task<Result<AppUser>> GetInfoUserById(string id);
+    Task<Result<AppUser>> GetInfoUserByIdAsync(string id);
+
+    Task<Result<bool>> EditUserAsync(AppUser user, AppUser editUserViewModel);
 }

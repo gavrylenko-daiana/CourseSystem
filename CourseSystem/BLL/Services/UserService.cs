@@ -36,7 +36,7 @@ public class UserService : GenericService<AppUser>, IUserService
         return new Result<AppUser>(true, appUser);
     }
     
-    public async Task<Result<AppUser>> GetInfoUserById(string id)
+    public async Task<Result<AppUser>> GetInfoUserByIdAsync(string id)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -55,11 +55,37 @@ public class UserService : GenericService<AppUser>, IUserService
         return new Result<AppUser>(true, appUser);
     }
 
-    private async Task<AppUser> GetUserAfterMapping(AppUser currentUser)
+    private Task<AppUser> GetUserAfterMapping(AppUser currentUser)
     {
         var user = new AppUser();
         currentUser.MapTo(user);
 
-        return user;
+        return Task.FromResult(user);
+    }
+
+    public async Task<Result<bool>> EditUserAsync(AppUser user, AppUser editUserViewModel)
+    {
+        if (user == null)
+        {
+            return new Result<bool>(false, $"{nameof(user)} does not exist");
+        }
+        
+        if (editUserViewModel == null)
+        {
+            return new Result<bool>(false, $"{nameof(editUserViewModel)} does not exist");
+        }
+        
+        user.UserName = editUserViewModel.FirstName + editUserViewModel.LastName;
+        user.FirstName = editUserViewModel.FirstName;
+        user.LastName = editUserViewModel.LastName;
+        user.BirthDate = editUserViewModel.BirthDate!;
+        user.University = editUserViewModel.University!;
+        user.Telegram = editUserViewModel.Telegram!;
+        user.GitHub = editUserViewModel.GitHub!;
+        user.Email = editUserViewModel.Email;
+
+        await _userManager.UpdateAsync(user);
+
+        return new Result<bool>(true);
     }
 }

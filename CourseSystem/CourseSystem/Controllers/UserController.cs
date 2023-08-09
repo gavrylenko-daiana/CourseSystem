@@ -13,19 +13,21 @@ namespace UI.Controllers;
 [Authorize]
 public class UserController : Controller
 {
+    private readonly UserManager<AppUser> _userManager;
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
 
-    public UserController(IEmailService emailService, IUserService userService)
+    public UserController(IEmailService emailService, IUserService userService, UserManager<AppUser> userManager)
     {
         _emailService = emailService;
         _userService = userService;
+        _userManager = userManager;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var userViewModel = await _userService.GetInfoUserByCurrentUser(User);
+        var userViewModel = await _userService.GetInfoUserByCurrentUserAsync(User);
 
         return View(userViewModel.Data);
     }
@@ -33,7 +35,7 @@ public class UserController : Controller
     [HttpGet]
     public async Task<IActionResult> Detail(string id)
     {
-        var userViewModel = await _userService.GetInfoUserById(id);
+        var userViewModel = await _userService.GetInfoUserByIdAsync(id);
 
         return View(userViewModel.Data);
     }
@@ -52,6 +54,36 @@ public class UserController : Controller
         user.MapTo(editUserViewModel);
 
         return View(editUserViewModel);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Edit(EditUserViewModel editUserViewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData.TempDataMessage("Error", "Failed to edit profile");
+            return View("Edit", editUserViewModel);
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+        {
+            return View("Error");
+        }
+
+        var userViewModel = new AppUser();
+        editUserViewModel.MapTo(userViewModel);
+
+        var result = await _userService.EditUserAsync(user, userViewModel);
+
+        if (!result.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", "edit is not successful. Please try again!");
+            return View("Edit", editUserViewModel);
+        }
+
+        return RedirectToAction("Index", "User", new { userViewModel.Id });
     }
 
     [HttpGet]
@@ -95,8 +127,7 @@ public class UserController : Controller
 
             TempData.TempDataMessage("SuccessMessage", "password has been successfully changed.");
 
-            return View("EditPassword", editUserPasswordViewModel);
-            // return RedirectToAction("Index", "User", new { user.Id });
+            return RedirectToAction("Index", "User", new { user.Id });
         }
         else
         {
@@ -104,37 +135,7 @@ public class UserController : Controller
             return View("EditPassword", editUserPasswordViewModel);
         }
     }
-
-    [HttpPost]
-    public async Task<IActionResult> Edit(EditUserViewModel editUserViewModel)
-    {
-        if (!ModelState.IsValid)
-        {
-            TempData.TempDataMessage("Error", "Failed to edit profile");
-            return View("Edit", editUserViewModel);
-        }
-
-        var user = await _userManager.GetUserAsync(User);
-
-        if (user == null)
-        {
-            return View("Error");
-        }
-        
-        user.UserName = editUserViewModel.FirstName + editUserViewModel.LastName;
-        user.FirstName = editUserViewModel.FirstName;
-        user.LastName = editUserViewModel.LastName;
-        user.BirthDate = editUserViewModel.BirthDate;
-        user.University = editUserViewModel.University!;
-        user.Telegram = editUserViewModel.Telegram!;
-        user.GitHub = editUserViewModel.GitHub!;
-        user.Email = editUserViewModel.Email;
-
-        await _userManager.UpdateAsync(user);
-
-        return RedirectToAction("Index", "User", new { user.Id });
-    }
-
+    
     [HttpGet]
     public async Task<IActionResult> Delete()
     {
