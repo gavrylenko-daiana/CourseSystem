@@ -5,6 +5,12 @@
         <div class="card-header">
             Select Teachers
         </div>
+        @if (TempData["Error"] != null)
+        {
+            <div class="col-md-12 alert alert-danger">
+                <span><b>Sorry!</b> - @TempData["Error"]</span>
+            </div>
+        }
         <div class="card-body">
             <ul>
                 @foreach (var teacher in Model)
@@ -18,8 +24,8 @@
                         else
                         {
                             <form asp-action="SendInvitation" asp-controller="Course" method="post">
-                                <input type="hidden" name="teacherId" value="@teacher.Id" />
-                                <input type="hidden" name="courseId" value="@TempData["CourseId"]" />
+                                <input type="hidden" name="teacherId" value="@teacher.Id"/>
+                                <input type="hidden" name="courseId" value="@TempData["CourseId"]"/>
                                 <button type="submit" class="btn btn-primary btn-sm">Send Invitation</button>
                             </form>
                         }
@@ -28,10 +34,4 @@
             </ul>
         </div>
     </div>
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
-        </div>
-    }
 </div>

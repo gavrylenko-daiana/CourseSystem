@@ -14,6 +14,16 @@
                 <div class="card-header text-center">
                     <h4>User Profile</h4>
                 </div>
+                @if (TempData["Error"] != null)
+                {
+                    <div class="col-md-12 alert alert-danger">
+                        <span><b>Sorry!</b> - @TempData["Error"]</span>
+                    </div>
+                }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <p class="text-success">@TempData["SuccessMessage"]</p>
+                }
                 <div class="card-body">
                     <div class="form-group py-2">
                         <label asp-for="FirstName" class="control-label"></label>
