@@ -5,5 +5,7 @@ namespace BLL.Interfaces;
 
 public interface IUserService
 {
+    Task<Result<AppUser>> GetInfoUserByCurrentUser(ClaimsPrincipal user);
+    
     
 }
