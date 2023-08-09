@@ -1,110 +1,236 @@
 @using Core.Enums
 @model UI.ViewModels.CourseViewModel
 
-<style>
-    .group-card {
-        transition: box-shadow 0.3s ease;
-    }
 
-    .group-card:hover {
-        box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+            
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
 
-    .selected-group-card {
-        border: 2px solid #ff0000;
-    }
-</style>
-
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            Course Details
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">@Model.Name</h5>
-
-             @if (Model.CurrentUser.Role != AppUserRoles.Student)
-             {
-                 <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
-             }
-
-            @if (Model.CurrentGroups != null && Model.CurrentGroups.Count > 0)
-            {
-                <h6>Groups:</h6>
-                <div class="row">
-                    @foreach (var group in Model.CurrentGroups)
-                    {
-                        <div class="col-md-4 mb-3">
-                            <div class="card group-card">
-                                <div class="card-body">
-                                    <h6 class="card-title">@group.Name</h6>
-                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-outline-info btn-sm">Details</a>
+    </style>
+</head>
+<body>
+    <div class="ui container mt-4">
+        <div class="ui centered raised card" style="width: 90%;">
+            <div class="content">
+                <div class="header">
+                    Course Details
+                </div>
+            </div>
+            <div class="content">
+                <h4 class="ui header">@Model.Name</h4>
+    
+                @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                {
+                    <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
+                }
+    
+                @if (Model.CurrentGroups != null && Model.CurrentGroups.Count > 0)
+                {
+                    <h5 class="ui header">Groups:</h5>
+                    <div class="ui two stackable cards">
+                        @foreach (var group in Model.CurrentGroups)
+                        {
+                            <div class="ui card group-card cover-card">
+                                <div class="content">
+                                    <div class="header">@group.Name</div>
+                                </div>
+                                <div class="extra content ui center aligned">
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="ui primary button">Details</a>
                                     @if (Model.CurrentUser.Role != AppUserRoles.Student)
                                     {
-                                        <a href="@Url.Action("Edit", "Group", new { id = group.Id })" class="btn btn-outline-warning btn-sm">Edit</a>
-                                        <a href="@Url.Action("Delete", "Group", new { id = group.Id })" class="btn btn-outline-danger btn-sm">Delete</a>
+                                        <div class="ui buttons">
+                                            <a href="@Url.Action("Edit", "Group", new { id = group.Id })" class="ui yellow button">Edit</a>
+                                            <div class="or"></div>
+                                            <a href="@Url.Action("Delete", "Group", new { id = group.Id })" class="ui red button">Delete</a>
+                                        </div>
                                     }
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <p>No groups found for this course.</p>
-            }
-
-            @if (Model.EducationMaterials != null && Model.EducationMaterials.Count > 0)
-            {
-                <h6>Education Materials:</h6>
-                <ul>
-                    @foreach (var material in Model.EducationMaterials)
-                    {
-                        <li>@material.Name</li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No education materials found for this course.</p>
-            }
-
-            @if (Model.CurrentUser.Role == AppUserRoles.Admin)
-            {
-                <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="btn btn-primary mb-3">Add teachers</a>
-            }
-            
-            @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
-            {
-                <h6>Users:</h6>
-                <ul>
-                    @foreach (var userCourse in Model.UserCourses)
-                    {
-                        <li>@userCourse.AppUser.FirstName</li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No user courses found for this course.</p>
-            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="ui warning message">
+                        <p>No groups found for this course.</p>
+                    </div>
+                }
+                
+                @if (Model.EducationMaterials != null && Model.EducationMaterials.Count > 0)
+                {
+                    <div class="ui segment">
+                        <h4 class="ui header">Education Materials:</h4>
+                        <ul class="ui list">
+                            @foreach (var material in Model.EducationMaterials)
+                            {
+                                <li>@material.Name</li>
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="ui warning message">
+                        <p>No education materials found for this course.</p>
+                    </div>
+                }
+                
+                @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                {
+                    <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="ui primary basic button">Add teachers</a>
+                }
+                
+                @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
+                {
+                    <div class="ui segment">
+                        <h4 class="ui header">Users:</h4>
+                        <ul class="ui list">
+                            @foreach (var userCourse in Model.UserCourses)
+                            {
+                                <li>
+                                    @userCourse.AppUser.FirstName
+                                    <a href="@Url.Action("Detail", "User", new { id = userCourse.AppUser.Id })" class="ui teal basic button">View Profile</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="ui warning message">
+                        <p>No user courses found for this course.</p>
+                    </div>
+                }
+            </div>
         </div>
     </div>
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
-        </div>
-    }
-</div>
+</body>
+</html>
 
 <script>
     document.querySelectorAll('.group-card').forEach(groupCard => {
         groupCard.addEventListener('click', function () {
-            window.location.href = this.querySelector('.btn-outline-info').href;
+            window.location.href = this.querySelector('.ui.primary.button').href;
         });
     });
 </script>
+
+@* <style> *@
+@*     .group-card { *@
+@*         transition: box-shadow 0.3s ease; *@
+@*     } *@
+@* *@
+@*     .group-card:hover { *@
+@*         box-shadow: 0 0 8px rgba(0, 0, 0, 0.3); *@
+@*     } *@
+@* *@
+@*     .selected-group-card { *@
+@*         border: 2px solid #ff0000; *@
+@*     } *@
+@* </style> *@
+@* *@
+@* <div class="container mt-4"> *@
+@*     <div class="card"> *@
+@*         <div class="card-header"> *@
+@*             Course Details *@
+@*         </div> *@
+@*         <div class="card-body"> *@
+@*             <h5 class="card-title">@Model.Name</h5> *@
+@* *@
+@*              @if (Model.CurrentUser.Role != AppUserRoles.Student) *@
+@*              { *@
+@*                  <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a> *@
+@*              } *@
+@* *@
+@*             @if (Model.CurrentGroups != null && Model.CurrentGroups.Count > 0) *@
+@*             { *@
+@*                 <h6>Groups:</h6> *@
+@*                 <div class="row"> *@
+@*                     @foreach (var group in Model.CurrentGroups) *@
+@*                     { *@
+@*                         <div class="col-md-4 mb-3"> *@
+@*                             <div class="card group-card"> *@
+@*                                 <div class="card-body"> *@
+@*                                     <h6 class="card-title">@group.Name</h6> *@
+@*                                     <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-outline-info btn-sm">Details</a> *@
+@*                                     @if (Model.CurrentUser.Role != AppUserRoles.Student) *@
+@*                                     { *@
+@*                                         <a href="@Url.Action("Edit", "Group", new { id = group.Id })" class="btn btn-outline-warning btn-sm">Edit</a> *@
+@*                                         <a href="@Url.Action("Delete", "Group", new { id = group.Id })" class="btn btn-outline-danger btn-sm">Delete</a> *@
+@*                                     } *@
+@*                                 </div> *@
+@*                             </div> *@
+@*                         </div> *@
+@*                     } *@
+@*                 </div> *@
+@*             } *@
+@*             else *@
+@*             { *@
+@*                 <p>No groups found for this course.</p> *@
+@*             } *@
+@* *@
+@*             @if (Model.EducationMaterials != null && Model.EducationMaterials.Count > 0) *@
+@*             { *@
+@*                 <h6>Education Materials:</h6> *@
+@*                 <ul> *@
+@*                     @foreach (var material in Model.EducationMaterials) *@
+@*                     { *@
+@*                         <li>@material.Name</li> *@
+@*                     } *@
+@*                 </ul> *@
+@*             } *@
+@*             else *@
+@*             { *@
+@*                 <p>No education materials found for this course.</p> *@
+@*             } *@
+@* *@
+@*             @if (Model.CurrentUser.Role == AppUserRoles.Admin) *@
+@*             { *@
+@*                 <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="btn btn-primary mb-3">Add teachers</a> *@
+@*             } *@
+@* *@
+@*             @if (Model.UserCourses != null && Model.UserCourses.Count > 0) *@
+@*             { *@
+@*                 <h6>Users:</h6> *@
+@*                 <ul> *@
+@*                     @foreach (var userCourse in Model.UserCourses) *@
+@*                     { *@
+@*                         <li>@userCourse.AppUser.FirstName</li> *@
+@*                     } *@
+@*                 </ul> *@
+@*             } *@
+@*             else *@
+@*             { *@
+@*                 <p>No user courses found for this course.</p> *@
+@*             } *@
+@*         </div> *@
+@*     </div> *@
+@*     @if (TempData["Error"] != null) *@
+@*     { *@
+@*         <div class="col-md-12 alert alert-danger"> *@
+@*             <span><b>Sorry!</b> - @TempData["Error"]</span> *@
+@*         </div> *@
+@*     } *@
+@* </div> *@
+@* *@
+@* <script> *@
+@*     document.querySelectorAll('.group-card').forEach(groupCard => { *@
+@*         groupCard.addEventListener('click', function () { *@
+@*             window.location.href = this.querySelector('.btn-outline-info').href; *@
+@*         }); *@
+@*     }); *@
+@* </script> *@
 
 
