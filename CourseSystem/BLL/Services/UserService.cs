@@ -11,45 +11,49 @@ namespace BLL.Services;
 public class UserService : GenericService<AppUser>, IUserService
 {
     private readonly UserManager<AppUser> _userManager;
-    
-    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) : base(unitOfWork, unitOfWork.UserRepository)
+
+    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) : base(unitOfWork,
+        unitOfWork.UserRepository)
     {
         _userManager = userManager;
     }
-    
-    public async Task<Result<AppUser>> GetInfoUserByCurrentUserAsync(ClaimsPrincipal user)
-    {
-        if (user == null)
-        {
-            return new Result<AppUser>(false, $"{nameof(user)} does not exist");
-        }
-        
-        var currentUser = await _userManager.GetUserAsync(user);
 
+    public async Task<Result<AppUser>> GetInfoUserByCurrentUserAsync(ClaimsPrincipal currentUser)
+    {
         if (currentUser == null)
         {
             return new Result<AppUser>(false, $"{nameof(currentUser)} does not exist");
         }
 
-        var appUser = await GetUserAfterMapping(currentUser);
+        var result = await GetCurrentUser(currentUser);
 
-        return new Result<AppUser>(true, appUser);
+        if (result.IsSuccessful)
+        {
+            var user = result.Data;
+            var appUser = await GetUserAfterMapping(user);
+
+            return new Result<AppUser>(true, appUser);
+        }
+        else
+        {
+            return new Result<AppUser>(false, $"{nameof(currentUser)} does not exist");
+        }
     }
-    
+
     public async Task<Result<AppUser>> GetInfoUserByIdAsync(string id)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
             return new Result<AppUser>(false, $"{nameof(id)} does not exist");
         }
-        
+
         var user = await _userManager.FindByIdAsync(id);
 
         if (user == null)
         {
             return new Result<AppUser>(false, $"{nameof(user)} does not exist");
         }
-        
+
         var appUser = await GetUserAfterMapping(user);
 
         return new Result<AppUser>(true, appUser);
@@ -63,29 +67,52 @@ public class UserService : GenericService<AppUser>, IUserService
         return Task.FromResult(user);
     }
 
-    public async Task<Result<bool>> EditUserAsync(AppUser user, AppUser editUserViewModel)
+    public async Task<Result<bool>> EditUserAsync(ClaimsPrincipal currentUser, AppUser editUserViewModel)
     {
-        if (user == null)
-        {
-            return new Result<bool>(false, $"{nameof(user)} does not exist");
-        }
-        
         if (editUserViewModel == null)
         {
             return new Result<bool>(false, $"{nameof(editUserViewModel)} does not exist");
         }
-        
-        user.UserName = editUserViewModel.FirstName + editUserViewModel.LastName;
-        user.FirstName = editUserViewModel.FirstName;
-        user.LastName = editUserViewModel.LastName;
-        user.BirthDate = editUserViewModel.BirthDate!;
-        user.University = editUserViewModel.University!;
-        user.Telegram = editUserViewModel.Telegram!;
-        user.GitHub = editUserViewModel.GitHub!;
-        user.Email = editUserViewModel.Email;
 
-        await _userManager.UpdateAsync(user);
+        if (currentUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(currentUser)} does not exist");
+        }
 
-        return new Result<bool>(true);
+        var result = await GetCurrentUser(currentUser);
+
+        if (result.IsSuccessful)
+        {
+            var user = result.Data;
+
+            user.UserName = editUserViewModel.FirstName + editUserViewModel.LastName;
+            user.FirstName = editUserViewModel.FirstName;
+            user.LastName = editUserViewModel.LastName;
+            user.BirthDate = editUserViewModel.BirthDate!;
+            user.University = editUserViewModel.University!;
+            user.Telegram = editUserViewModel.Telegram!;
+            user.GitHub = editUserViewModel.GitHub!;
+            user.Email = editUserViewModel.Email;
+
+            await _userManager.UpdateAsync(user);
+
+            return new Result<bool>(true);
+        }
+        else
+        {
+            return new Result<bool>(false, $"Failed to get {nameof(result.Data)}");
+        }
+    }
+
+    public async Task<Result<AppUser>> GetCurrentUser(ClaimsPrincipal user)
+    {
+        var appUser = await _userManager.GetUserAsync(user);
+
+        if (appUser == null)
+        {
+            return new Result<AppUser>(false, $"{nameof(appUser)} does not exist");
+        }
+
+        return new Result<AppUser>(true, appUser);
     }
 }

@@ -9,5 +9,7 @@ public interface IUserService
     
     Task<Result<AppUser>> GetInfoUserByIdAsync(string id);
 
-    Task<Result<bool>> EditUserAsync(AppUser user, AppUser editUserViewModel);
+    Task<Result<bool>> EditUserAsync(ClaimsPrincipal user, AppUser editUserViewModel);
+
+    Task<Result<AppUser>> GetCurrentUser(ClaimsPrincipal user);
 }
