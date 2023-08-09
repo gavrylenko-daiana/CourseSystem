@@ -239,7 +239,9 @@ public class CourseController : Controller
         var currentUser = await _userManager.GetUserAsync(User);
 
         if (currentUser == null)
+        {
             return RedirectToAction("Login", "Account");
+        }         
 
         var course = await _courseService.GetById(courseId);
         var courseTecahers = course.UserCourses.Select(c => c.AppUserId).ToList();

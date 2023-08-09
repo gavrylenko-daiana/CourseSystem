@@ -385,14 +385,19 @@ public class GroupController : Controller
     {
         //send email to admin for getting approve
         var group = await _groupService.GetById(id);
+
         if (group == null)
+        {
             return View("Error");
+        }            
 
         var currentTeacher = await _userManager.GetUserAsync(User);
 
         if (currentTeacher == null)
+        {
             return RedirectToAction("Login", "Account");
-
+        }
+            
         var callbackUrl = Url.Action( 
             "AdminApprove",
             "Group",
@@ -419,8 +424,10 @@ public class GroupController : Controller
         var group = await _groupService.GetById(groupId);
         var teacher = await _userManager.FindByIdAsync(teacherId);
         if (group == null || teacher == null)
+        {
             return View("Error");
-
+        }
+            
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacher);
         var callbackUrl = Url.Action( 
            "ApprovedGroup",
@@ -441,17 +448,23 @@ public class GroupController : Controller
         var currentUser = await _userManager.GetUserAsync(User);
 
         if (currentUser == null)
+        {
             return RedirectToAction("Login", "Account");
-
+        }
+           
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);
 
         if (!result.Succeeded)
+        {
             return View("Error");
-
+        }
+            
         var group = await _groupService.GetById(groupId);
 
         if (group == null)
+        {
             return View("Error");
+        }          
 
         return RedirectToAction("SelectStudent", "Group", new { id = groupId, approved = true });
     }

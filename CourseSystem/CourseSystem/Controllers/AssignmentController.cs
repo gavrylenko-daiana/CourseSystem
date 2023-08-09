@@ -147,10 +147,14 @@ public class AssignmentController : Controller
         assignentDetailsVM.UserAssignment = userAssignmnet;
 
         if (userAssignmnet?.AssignmentAnswers == null)
+        {
             assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
+        }
         else
+        {
             assignentDetailsVM.AssignmentAnswers = userAssignmnet.AssignmentAnswers;
-
+        }
+            
         //logic for getting assignmnet files 
         assignentDetailsVM.AttachedFiles = new List<IFormFile>();
 
@@ -194,7 +198,10 @@ public class AssignmentController : Controller
     public async Task<IActionResult> Edit(EditAssignmentViewModel editAssignmentVM)
     {
           if (editAssignmentVM == null)
-              return View("Error");
+          {
+            return View("Error");
+          }
+              
 
           if(!ModelState.IsValid)
           {
