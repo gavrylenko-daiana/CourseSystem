@@ -35,7 +35,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
-            RedirectToAction("Login", "Account");
+            return RedirectToAction("Login", "Account");
         }
 
         var courses = await _courseService.GetByPredicate(course =>
