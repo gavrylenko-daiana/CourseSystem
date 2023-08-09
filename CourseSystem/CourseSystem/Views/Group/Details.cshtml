@@ -5,6 +5,12 @@
     .object-list li {
         margin-top: 10px;
     }
+    
+    .ui.progress {
+        width: 100%;
+        height: 10px;
+        margin-top: 5px;
+    }
 </style>
 
 <div class="container mt-4">
@@ -16,7 +22,10 @@
             <h5 class="card-title">@Model.Group.Name</h5>
             <p><strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")</p>
             <p><strong>End Date:</strong> @Model.Group.EndDate.ToString("dd/MM/yyyy")</p>
-             <p><strong>Progress:</strong> @Model.Progress%</p>
+            <div><strong>Progress:</strong> 
+                @Model.Progress%
+                <progress class="ui progress" max="100" value="@Model.Progress"></progress>
+            </div>
 
             @if (Model.Group.EducationMaterials != null && Model.Group.EducationMaterials.Count > 0)
             {
