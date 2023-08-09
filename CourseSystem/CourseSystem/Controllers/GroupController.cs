@@ -117,6 +117,7 @@ public class GroupController : Controller
         var userGroupVM = new UserGroupViewModel()
         {
             Group = group,
+            UserGroupsWithoutAdmins = group.UserGroups.Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList(),
             CurrentUser = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException()
         };
 
