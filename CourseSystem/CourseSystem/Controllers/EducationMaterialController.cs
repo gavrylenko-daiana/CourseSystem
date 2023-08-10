@@ -1,8 +1,8 @@
 using BLL.Interfaces;
-using CloudinaryDotNet.Actions;
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
+using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
 
@@ -51,13 +51,13 @@ public class EducationMaterialController : Controller
             return View(viewModel);
         }
 
-        UploadResult uploadResult = await _educationMaterialService.AddFileAsync(viewModel.UploadFile);
+        var fullPath = await _educationMaterialService.AddFileAsync(viewModel.UploadFile);
 
         switch (viewModel.MaterialAccess)
         {
             case MaterialAccess.Group:
                 await _educationMaterialService.AddToGroup(viewModel.UploadFile, viewModel.GroupId,
-                    uploadResult.Url.ToString());
+                    fullPath);
                 break;
             case MaterialAccess.Course:
                 break;
@@ -79,7 +79,7 @@ public class EducationMaterialController : Controller
 
         return View(material);
     }
-
+    
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
@@ -96,9 +96,9 @@ public class EducationMaterialController : Controller
         {
             case MaterialAccess.Group:
                 // await _educationMaterialService.DeleteGroup(fileToDelete);
-                await _educationMaterialService.DeleteFileAsync(fileToDelete.Url);
+                await _educationMaterialService.DeleteFileAsync(fileToDelete.Name);
                 await _educationMaterialService.DeleteUploadFileAsync(fileToDelete);
-
+            
                 var group = fileToDelete.Group;
 
                 if (group != null)
@@ -106,13 +106,10 @@ public class EducationMaterialController : Controller
                     group.EducationMaterials.Remove(fileToDelete);
                     await _groupService.UpdateGroup(group);
                 }
-
                 break;
             case MaterialAccess.Course:
-
                 break;
             case MaterialAccess.General:
-
                 break;
             default:
                 break;
@@ -120,5 +117,4 @@ public class EducationMaterialController : Controller
 
         return RedirectToAction("Index", "Course");
     }
-
 }

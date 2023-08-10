@@ -1,12 +1,12 @@
 using System.Net;
 using BLL.Interfaces;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 using Core.Configuration;
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
 using DAL.Repository;
+using Dropbox.Api;
+using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -14,41 +14,41 @@ namespace BLL.Services;
 
 public class EducationMaterialService : GenericService<EducationMaterial>, IEducationMaterialService
 {
-    private readonly Cloudinary _cloudinary;
+    private readonly DropboxClient _dropboxClient;
     private readonly ICourseService _courseService;
     private readonly IGroupService _groupService;
 
-    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<CloudinarySettings> config,
+    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config,
         ICourseService courseService, IGroupService groupService) : base(unitOfWork,
         unitOfWork.EducationMaterialRepository)
     {
-        var acc = new Account(
-            config.Value.CloudName,
-            config.Value.ApiKey,
-            config.Value.ApiSecret
-        );
-        _cloudinary = new Cloudinary(acc);
+        _dropboxClient = new DropboxClient(config.Value.AccessToken);
         _courseService = courseService;
         _groupService = groupService;
     }
-
-    public async Task<UploadResult> AddFileAsync(IFormFile file)
+    
+    public async Task<string> AddFileAsync(IFormFile file)
     {
         try
         {
-            var uploadResult = new RawUploadResult();
+            using var stream = file.OpenReadStream();
+            var uploadResult = await _dropboxClient.Files.UploadAsync("/" + file.FileName, WriteMode.Overwrite.Instance, body: stream);
 
-            if (file.Length > 0)
+            var sharedLink = await _dropboxClient.Sharing.CreateSharedLinkWithSettingsAsync(uploadResult.PathDisplay);
+            
+            string link = sharedLink.Url;
+
+            if (file.ContentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+                file.ContentType == "application/msword")
             {
-                using var stream = file.OpenReadStream();
-                var uploadParams = new RawUploadParams
-                {
-                    File = new FileDescription(file.FileName, stream)
-                };
-                uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                return link;
             }
-
-            return uploadResult;
+            else
+            {
+                link = link.Replace("dl=0", "raw=1");
+                
+                return link;
+            }
         }
         catch (Exception e)
         {
@@ -56,13 +56,11 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
 
-    public async Task<DeletionResult> DeleteFileAsync(string url)
+    public async Task DeleteFileAsync(string filePath)
     {
         try
         {
-            var deleteParams = new DeletionParams(url);
-
-            return await _cloudinary.DestroyAsync(deleteParams);
+            await _dropboxClient.Files.DeleteV2Async("/" + filePath);
         }
         catch (Exception e)
         {
@@ -91,17 +89,6 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         
         group.EducationMaterials.Add(materialFile);
         await _groupService.UpdateGroup(group);
-    }
-    
-    public bool CloudinaryFileExists(string publicUrl)
-    {
-        var uri = new Uri(publicUrl);
-        var path = uri.AbsolutePath;
-        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
-
-        var result = _cloudinary.GetResource(fileNameWithoutExtension);
-
-        return result.StatusCode == HttpStatusCode.OK;
     }
 
     public async Task<List<EducationMaterial>> GetAllMaterialAsync()

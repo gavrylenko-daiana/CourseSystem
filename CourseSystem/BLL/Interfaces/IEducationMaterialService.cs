@@ -1,20 +1,19 @@
-using CloudinaryDotNet.Actions;
+using Dropbox.Api;
 using Core.Models;
+using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Http;
 
 namespace BLL.Interfaces;
 
 public interface IEducationMaterialService
 {
-    Task<UploadResult> AddFileAsync(IFormFile file);
+    Task<string> AddFileAsync(IFormFile file);
 
-    Task<DeletionResult> DeleteFileAsync(string publicId);
+    Task DeleteFileAsync(string publicId);
 
     Task<List<EducationMaterial>> GetAllMaterialAsync();
 
     Task AddToGroup(IFormFile material, int groupId, string url);
-
-    bool CloudinaryFileExists(string publicUrl);
 
     Task<EducationMaterial> GetByIdMaterialAsync(int id);
 
