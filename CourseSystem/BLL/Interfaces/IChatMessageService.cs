@@ -9,6 +9,6 @@ namespace BLL.Interfaces
 {
     public interface IChatMessageService : IGenericService<ChatMessage>
     {
-        Task<ChatMessage> CreateChatMessage(AppUser appUser, Assignment assignment, string text);
+        Task<Result<ChatMessage>> CreateChatMessage(AppUser appUser, Assignment assignment, string text);
     }
 }
