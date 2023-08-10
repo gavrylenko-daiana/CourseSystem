@@ -27,7 +27,13 @@
             </p>
             @if (TempData["Error"] != null)
             {
-                <p class="text-danger">@TempData["Error"]</p>
+                <div class="col-md-12 alert alert-danger">
+                    <span><b>Sorry!</b> - @TempData["Error"]</span>
+                </div>
+            }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <p class="text-success">@TempData["SuccessMessage"]</p>
             }
             <div class="py-2">
                 <form asp-action="Register">
@@ -43,9 +49,9 @@
                         <span asp-validation-for="LastName" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <label asp-for="EmailAddress" class="control-label"></label>
-                        <input asp-for="EmailAddress" class="form-control">
-                        <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email" class="form-control">
+                        <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="Password" class="control-label"></label>
@@ -56,24 +62,6 @@
                         <label asp-for="ConfirmPassword" class="control-label"></label>
                         <input asp-for="ConfirmPassword" class="form-control"/>
                         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="BirthDate" class="control-label"></label>
-                        <input asp-for="BirthDate" class="form-control" placeholder="BirthDate" type="date" min="@DateTime.Now.AddYears(-80).ToString("yyyy-MM-dd")" max="@DateTime.Now.AddYears(-6).ToString("yyyy-MM-dd")">
-                        <span asp-validation-for="BirthDate" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="University" class="control-label"></label>
-                        <input asp-for="University" class="form-control">
-                        <span asp-validation-for="University" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Telegram" class="control-label"></label>
-                        <input asp-for="Telegram" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="GitHub" class="control-label"></label>
-                        <input asp-for="GitHub" class="form-control">
                     </div>
                     <div class="form-group">
                         <label asp-for="Role" class="control-label"></label>
@@ -92,7 +80,6 @@
                                 {
                                     <option value="@AppUserRoles.Admin">@AppUserRoles.Admin</option>
                                 }
-
                         </select>
                         <span asp-validation-for="Role" class="text-danger"></span>
                     </div>

@@ -70,6 +70,11 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Login()
     {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Logout", "Account");
+        }
+        
         var login = new LoginViewModel();
 
         return View(login);
@@ -146,7 +151,7 @@ public class AccountController : Controller
             return View(registerViewModel);
         }
 
-        var user = await _userManager.FindByEmailAsync(registerViewModel.EmailAddress);
+        var user = await _userManager.FindByEmailAsync(registerViewModel.Email);
 
         if (user != null)
         {
@@ -154,26 +159,10 @@ public class AccountController : Controller
             return View(registerViewModel);
         }
 
-        var newUser = new AppUser()
-        {
-            UserName = registerViewModel.FirstName + registerViewModel.LastName,
-            Email = registerViewModel.EmailAddress,
-            FirstName = registerViewModel.FirstName,
-            LastName = registerViewModel.LastName,
-            BirthDate = registerViewModel.BirthDate,
-            University = registerViewModel.University,
-            Role = registerViewModel.Role
-        };
-
-        if (registerViewModel.Telegram != null)
-        {
-            newUser.Telegram = registerViewModel.Telegram;
-        }
-
-        if (registerViewModel.GitHub != null)
-        {
-            newUser.GitHub = registerViewModel.GitHub;
-        }
+        var newUser = new AppUser();
+        registerViewModel.MapTo(newUser);
+        
+        newUser.UserName = registerViewModel.FirstName + registerViewModel.LastName;
 
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 

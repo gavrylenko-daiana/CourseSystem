@@ -16,7 +16,7 @@ public class RegisterViewModel
     [Required(ErrorMessage = "Email Address is required")]
     [Display(Name = "* Email Address")]
     [DataType(DataType.EmailAddress)]
-    public string EmailAddress { get; set; }
+    public string Email { get; set; }
 
     [Required(ErrorMessage = "Password is required")]
     [Display(Name = "* Password")]
@@ -32,18 +32,4 @@ public class RegisterViewModel
     [Required(ErrorMessage = "Role is required")]
     [Display(Name = "* Role")]
     public AppUserRoles Role { get; set; }
-    
-    [Required(ErrorMessage = "Date of Birthday is required")]
-    [Display(Name = "* Date of Birthday")]
-    [DataType(DataType.Date)]
-    public DateTime BirthDate { get; set; }
-    
-    [Display(Name = "University")]
-    public string? University { get; set; }
-    
-    [Display(Name = "Telegram")]
-    public string? Telegram { get; set; }
-    
-    [Display(Name = "GitHub")]
-    public string? GitHub { get; set; }
 }
