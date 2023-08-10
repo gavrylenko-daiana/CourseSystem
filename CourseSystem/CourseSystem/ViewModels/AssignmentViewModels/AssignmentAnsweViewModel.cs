@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UI.ViewModels
+
+namespace UI.ViewModels.AssignmentViewModels
 {
     public class AssignmentAnsweViewModel
     {

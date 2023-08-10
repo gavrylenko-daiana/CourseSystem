@@ -38,7 +38,7 @@ namespace BLL.Services
             try
             {
                 var subjectAndBody = EmailTemplate.GetEmailSubjectAndBody(EmailType.CodeVerification, 
-                    new Dictionary<string, object>() { { @"{randomCode}", randomCode } });
+                    new Dictionary<string, object>() { { @"{randomcode}", randomCode } });
                 
                 var emailData = new EmailData(
                     new List<string>() { email},

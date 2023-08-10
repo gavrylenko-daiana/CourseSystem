@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
+using UI.ViewModels.AssignmentViewModels;
 
 namespace UI.Controllers;
 
@@ -47,42 +48,66 @@ public class AssignmentAnswerController : Controller
         return View(assignmnetAnsweVM);
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Student")]
-    public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
-    {
-        if (!ModelState.IsValid)
+        [HttpGet]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> Create(int id)
         {
-            return View(assignmentAnswerVM);
+            var assignmnetAnsweVM = new AssignmentAnsweViewModel()
+            {
+                AssignmentId = id
+            };
+
+            return View(assignmnetAnsweVM);
         }
 
-        var assignmnetAnswer = new AssignmentAnswer();
-        assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmnetAnswer);
-
-        if (!assignmentAnswerVM.AssignmentAnswerFiles.IsNullOrEmpty())
+        [HttpPost]
+        public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
         {
-            //logic for files
-            //set the name of file to model
-        }
+            if (!ModelState.IsValid)
+            {
+                TempData.TempDataMessage("Error", "Fail to create assignment answer");
+                return View(assignmentAnswerVM);
+            }
+               
+            var assignmnetAnswer = new AssignmentAnswer();
+            assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmnetAnswer);
 
-        assignmnetAnswer.Name = "Some file name";
-        assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
-        assignmnetAnswer.Url = "Some URL";
+            if (!assignmentAnswerVM.AssignmentAnswerFiles.IsNullOrEmpty())
+            {
+                //logic for files
+                //set the name of file to model
+            }
 
-        var assignmnet = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
-        var currentUser = await _userManager.GetUserAsync(User);
+            assignmnetAnswer.Name = "Some file name";
+            assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
+            assignmnetAnswer.Url = "Some URL";
 
-        var answerResult =
-            await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnet, currentUser);
+            var assignmnet = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
 
-        if (!answerResult.IsSuccessful)
-        {
-            TempData.TempDataMessage("Error", "Fail to save assignmnet answer");
-            return RedirectToAction("CreateAnswer", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
-        }
+            if(assignmnet == null)
+            {
+                TempData.TempDataMessage("Error", "Fail to create assignment answer");
+                return View(assignmentAnswerVM);
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if(currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var answerResult = await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnet, currentUser);
+
+            if (!answerResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", "Fail to save assignmnet answer");
+                return RedirectToAction("CreateAnswer", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
+            }
 
         return RedirectToAction("Details", "Assignment", new { id = assignmnet.Id });
     }
+
 
     [HttpGet]
     [Authorize(Roles = "Student")]
@@ -93,18 +118,17 @@ public class AssignmentAnswerController : Controller
 
         if (assignmentAnswer == null)
         {
-            return NotFound();
+            return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
         }
 
         var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
 
         if (!deleteResult.IsSuccessful)
-        {
-            TempData.TempDataMessage("Error", deleteResult.Message);
-        }
-
-        return RedirectToAction("Details", "Assignment", new { id = asignmentId });
+                TempData.TempDataMessage("Error", deleteResult.Message);
+                
+        return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
     }
+
 
     [HttpGet]
     [Authorize(Roles = "Teacher")]
@@ -180,12 +204,12 @@ public class AssignmentAnswerController : Controller
             return NotFound();
         }
 
+
         var updateResult = await _userAssignmentService.ChangeUserAssignmentGrade(userAssignment, grade);
 
         if (!updateResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", updateResult.Message);
-
             return RedirectToAction("CheckAnswer", "AssignmentAnswer",
                 new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
         }

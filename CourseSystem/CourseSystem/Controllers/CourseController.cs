@@ -237,6 +237,12 @@ public class CourseController : Controller
     public async Task<IActionResult> ConfirmTeacherForCourse(int courseId, string code)
     {
         var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }         
+
         var course = await _courseService.GetById(courseId);
         var courseTecahers = course.UserCourses.Select(c => c.AppUserId).ToList();
 

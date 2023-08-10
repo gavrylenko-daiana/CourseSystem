@@ -2,7 +2,8 @@
 using Core.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace UI.ViewModels
+
+namespace UI.ViewModels.AssignmentViewModels
 {
     public class CreateAssignmentViewModel //add property for markdown text
     {
