@@ -16,6 +16,7 @@
         .cover-card:hover {
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
         }
 
         .ui.container {
@@ -26,6 +27,10 @@
             margin-top: 20px;
             text-align: center;
         }
+        
+        .cover-card {
+            height: 200px; 
+        }             
     </style>
 </head>
 <body>
@@ -49,11 +54,14 @@
                                 <div class="header">@course.Name</div>
                             </div>
                             <div class="extra content">
-                                <a href="@Url.Action("Details", new { id = course.Id })" class="ui primary button">Details</a>
+                                <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
                                 @if (Model.CurrentUser.Role == AppUserRoles.Admin)
                                 {
-                                    <a href="@Url.Action("Edit", new { id = course.Id })" class="ui yellow button">Edit</a>
-                                    <a href="@Url.Action("Delete", new { id = course.Id })" class="ui red button">Delete</a>
+                                    <div class="ui buttons">
+                                        <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
+                                        <div class="or"></div>
+                                        <a href="@Url.Action("Delete", new { id = course.Id })" class="ui delete-button button">Delete</a>
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -66,7 +74,7 @@
     @if (Model.CurrentUser.Role == AppUserRoles.Admin)
     {
         <div class="ui container add-course-button">
-            <a asp-action="Create" class="ui primary basic button">Add New Course</a>
+            <a asp-action="Create" class="ui basic black button">Add New Course</a>
         </div>
     }
     
@@ -84,7 +92,7 @@
 <script>
     document.querySelectorAll('.ui.card').forEach(card => {
         card.addEventListener('click', function () {
-            window.location.href = this.querySelector('.ui.primary.button').href;
+            window.location.href = this.querySelector('.ui.details-button.button').href;
         });
     });
 </script>
