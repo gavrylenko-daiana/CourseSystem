@@ -225,7 +225,7 @@ public class AccountController : Controller
 
         if (user == null)
         {
-            return View("Error");
+            return RedirectToAction("Login", "Account");
         }
 
         var result = await _userManager.ConfirmEmailAsync(user, code);

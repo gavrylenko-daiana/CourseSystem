@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
+using UI.ViewModels.AssignmentViewModels;
+
 
 namespace UI.Controllers;
 
@@ -23,9 +25,9 @@ public class AssignmentController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int assignmentId) //here is passing group id
+    public async Task<IActionResult> Index(int groupId) 
     {
-        var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(assignmentId);
+        var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId);
 
         if (!groupAssignmentsResult.IsSuccessful)
         {
@@ -47,7 +49,7 @@ public class AssignmentController : Controller
             });
         }
 
-        ViewBag.GroupId = assignmentId;
+        ViewBag.GroupId = groupId;
         return View(assignmentsVM);
     }
 
@@ -61,7 +63,7 @@ public class AssignmentController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAssignment(CreateAssignmentViewModel assignmentVM) //MARCDOWN for description
+    public async Task<IActionResult> Create(CreateAssignmentViewModel assignmentVM) //MARCDOWN for description
     {
         if (assignmentVM == null)
         {
@@ -93,7 +95,7 @@ public class AssignmentController : Controller
             return View(assignmentVM);
         }
 
-        return RedirectToAction("Index", "Assignment", new { assignmentId = assignmentVM.GroupId });
+        return RedirectToAction("Index", "Assignment", new { groupId = assignmentVM.GroupId });
     }
 
     [HttpGet]
@@ -101,18 +103,18 @@ public class AssignmentController : Controller
     public async Task<IActionResult> DeleteAssignment(int assignmentId)
     {
         var assignment = await _assignmentService.GetById(assignmentId);
-
-        var assignentDeleteVM = new DeleteAssignmentViewModel();
-
-        if (assignentDeleteVM == null)
+        
+        if(assignment == null)
         {
-            throw new ArgumentNullException(nameof(assignentDeleteVM));
+            TempData.TempDataMessage("Error", "Fail delete assignment");
+            return RedirectToAction("Index", "Group");
         }
 
+        var assignentDeleteVM = new DeleteAssignmentViewModel();
         assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
 
-        return View(assignentDeleteVM);
-    }
+        return View(assignentDeleteVM);                    
+      }
 
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
@@ -125,24 +127,23 @@ public class AssignmentController : Controller
             return View();
         }
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Group");
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(int id)
+    public async Task<IActionResult> Details(int assignmentId)
     {
-        var assignment = await _assignmentService.GetById(id);
+        var assignment = await _assignmentService.GetById(assignmentId);
 
-        var assignentDetailsVM = new DetailsAssignmentViewModel();
-
-        if (assignentDetailsVM == null)
+        if (assignment == null)
         {
-            throw new ArgumentNullException(nameof(assignentDetailsVM));
+            TempData.TempDataMessage("Error", "Failt to get assignment data");
+            return RedirectToAction("Index", "Group");
         }
 
+        var assignentDetailsVM = new DetailsAssignmentViewModel();
         assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
         var userAssignmnet = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
-        //var assignmentAnswers = userAssignmnets.Select(ua => ua.AssignmentAnswers).ToList();
         assignentDetailsVM.UserAssignment = userAssignmnet;
 
         if (userAssignmnet?.AssignmentAnswers == null)
@@ -153,25 +154,26 @@ public class AssignmentController : Controller
         {
             assignentDetailsVM.AssignmentAnswers = userAssignmnet.AssignmentAnswers;
         }
-
+            
         //logic for getting assignmnet files 
         assignentDetailsVM.AttachedFiles = new List<IFormFile>();
 
-        return View(assignentDetailsVM);
-    }
+        return View(assignentDetailsVM);          
+      }
 
     [HttpGet]
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> Edit(int id)
     {
         var assignment = await _assignmentService.GetById(id);
-        var assigmentVM = new EditAssignmentViewModel();
 
-        if (assigmentVM == null)
+        if (assignment == null)
         {
-            throw new ArgumentNullException(nameof(assigmentVM));
+            TempData.TempDataMessage("Error", "Fail to get edit page");
+            return RedirectToAction("Details", "Assignment", new { assignmentId = id });
         }
 
+        var assigmentVM = new EditAssignmentViewModel();
         assignment.MapTo<Assignment, EditAssignmentViewModel>(assigmentVM);
 
         var fileCheckBoxes = new List<FileCheckBoxViewModel>();
@@ -195,33 +197,33 @@ public class AssignmentController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(EditAssignmentViewModel editAssignmentVM)
     {
-        if (editAssignmentVM == null)
-        {
+          if (editAssignmentVM == null)
+          {
             return View("Error");
-        }
+          }
+              
 
-        if (!ModelState.IsValid)
-        {
-            TempData.TempDataMessage("Error", "Invalid data input");
-            return View(editAssignmentVM.Id);
-        }
+          if(!ModelState.IsValid)
+          {
+              TempData.TempDataMessage("Error", "Invalid data input");
+              return View(editAssignmentVM);
+          }
 
-        var assignment = new Assignment();
-        editAssignmentVM.MapTo<EditAssignmentViewModel, Assignment>(assignment);
+          var assignment = new Assignment();
+          editAssignmentVM.MapTo<EditAssignmentViewModel, Assignment>(assignment);
 
-        //AssignmentFiles Part
-        //logic for check if the checkbox files was in the assignmnet before
+          //AssignmentFiles Part
+          //logic for check if the checkbox files was in the assignmnet before
 
-        //logic fore saving new attached files
+          //logic fore saving new attached files
+          var updateAssignmnetResult = await _assignmentService.UpdateAssignment(assignment);
 
-        var updateAssignmnetResult = await _assignmentService.UpdateAssignment(assignment);
+            if (!updateAssignmnetResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", updateAssignmnetResult.Message);
+                return View(editAssignmentVM);
+            }
 
-        if (!updateAssignmnetResult.IsSuccessful)
-        {
-            TempData.TempDataMessage("Error", updateAssignmnetResult.Message);
-            return View(editAssignmentVM.Id);
-        }
-
-        return RedirectToAction("Index", "Assignment", new { editAssignmentVM.GroupId });
+            return RedirectToAction("Details", "Assignment", new { assignmentId = editAssignmentVM.Id });
     }
 }

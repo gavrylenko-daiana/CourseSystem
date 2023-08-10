@@ -1,4 +1,4 @@
-﻿@using UI.ViewModels
+﻿@using UI.ViewModels.AssignmentViewModels
 @using Core.Enums
 
 @model IEnumerable<AssignmentViewModel>
@@ -15,6 +15,13 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span>@TempData["Error"]</span>
+        </div>
+    }
     <div class="position-relative m-5 text-center bg-light">
         <div class="col-md-5 p-lg-5 mx-auto my-5">
             <h3 class="font-weight-normal pb-2">Available group assignmnets</h3>
@@ -33,11 +40,10 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">@assignment.Name</h4>
-                        @*<p class="card-text">@assignment.Description</p>*@
 
-                        <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="btn btn-primary">
-                            Details
-                        </a>
+                            <a href="@Url.Action("Details", "Assignment", new { assignmentId = assignment.Id })" class="btn btn-primary">
+                                Details
+                            </a>
                       
                     </div>
                     <div class="card-footer text-muted">Start Date: @assignment.StartDate.ToString("d")</div>
