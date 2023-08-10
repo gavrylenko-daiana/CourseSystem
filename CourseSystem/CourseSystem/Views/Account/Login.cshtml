@@ -19,7 +19,9 @@
             <div class="py-2">
                 @if (ViewData["Error"] != null)
                 {
-                    <p class="text-danger">@ViewData["Error"]</p>
+                    <div class="col-md-12 alert alert-danger">
+                        <span><b>Sorry!</b> - @ViewData["Error"]</span>
+                    </div>
                 }
                 @if (TempData["Error"] != null)
                 {

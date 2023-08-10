@@ -85,6 +85,7 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData.TempDataMessage("Error", "Values must not be empty. Please try again.");
             return View(loginViewModel);
         }
 
