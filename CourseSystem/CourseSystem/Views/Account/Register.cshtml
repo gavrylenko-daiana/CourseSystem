@@ -131,6 +131,16 @@
                           <p>@TempData["Error"]</p>
                       </div>
                   }
+                  @if (ViewData["Error"] != null)
+                  {
+                      <div class="ui negative message">
+                          <i class="close icon"></i>
+                          <div class="header">
+                              Sorry!
+                          </div>
+                          <p>@ViewData["Error"]</p>
+                      </div>
+                  }                  
                   
                   <input class="ui fluid large teal submit button" type="submit" value="Register"/>
               </div>
