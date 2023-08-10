@@ -85,6 +85,7 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData.TempDataMessage("Error", "Values must not be empty. Please try again.");
             return View(loginViewModel);
         }
 
@@ -93,6 +94,12 @@ public class AccountController : Controller
         if (user == null)
         {
             ViewData.ViewDataMessage("Error", "Entered incorrect email or password. Please try again.");
+            return View(loginViewModel);
+        }
+
+        if (!ValidationHelpers.IsValidEmail(loginViewModel.EmailAddress))
+        {
+            ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
             return View(loginViewModel);
         }
 
@@ -158,6 +165,12 @@ public class AccountController : Controller
             TempData.TempDataMessage("Error", "This email is already in use");
             return View(registerViewModel);
         }
+        
+        if (!ValidationHelpers.IsValidEmail(registerViewModel.Email))
+        {
+            ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
+            return View(registerViewModel);
+        }
 
         var newUser = new AppUser();
         registerViewModel.MapTo(newUser);
@@ -207,8 +220,13 @@ public class AccountController : Controller
         }
         else
         {
-            TempData.TempDataMessage("Error",
-                "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)");
+            var errorMessages = string.Empty;
+            foreach (var error in newUserResponse.Errors)
+            {
+                errorMessages += $"{error.Description}{Environment.NewLine}";
+            }
+            
+            TempData.TempDataMessage("Error", errorMessages);
             return View(registerViewModel);
         }
     }
