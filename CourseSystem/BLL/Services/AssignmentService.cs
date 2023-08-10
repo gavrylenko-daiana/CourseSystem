@@ -110,7 +110,7 @@ namespace BLL.Services
                     assignment.AssignmentAccess = AssignmentAccess.Planned;
                 }
 
-                if(assignment.StartDate < DateTime.Now || assignment.EndDate > DateTime.Now)
+                if(assignment.StartDate < DateTime.Now)
                 {
                     assignment.AssignmentAccess = AssignmentAccess.InProgress;
                 }

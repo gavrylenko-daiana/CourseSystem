@@ -18,6 +18,12 @@
         <div class="card-header">
             Group Details
         </div>
+        @if (TempData["Error"] != null)
+        {
+            <div class="col-md-12 alert alert-danger">
+                <span><b>Sorry!</b> - @TempData["Error"]</span>
+            </div>
+        }
         <div class="card-body">
             <h5 class="card-title">@Model.Group.Name</h5>
             <p><strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")</p>
@@ -41,7 +47,7 @@
             {
                 <p>No education materials found for this group.</p>
             }
-            
+
             @if (Model.CurrentUser.Role != AppUserRoles.Student)
             {
                 <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="btn btn-outline-primary">Edit Group</a>
@@ -78,7 +84,7 @@
         </div>
     }
     <div class="card-footer"> 
-        <a href="@Url.Action("Index", "Assignment", new { id = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
+        <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
     </div>
 
     @if (Model.Group.UserGroups != null && Model.Group.UserGroups.Count > 0)
@@ -111,23 +117,17 @@
             </div>
         </div>
     }
-    
-      @if (Model.CurrentUser.Role != AppUserRoles.Student)
-      {
-          <div class="card-footer">
-              <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
-          </div>
-          @if (Model.CurrentUser.Role == AppUserRoles.Admin)
-          {
-              <div class="card-footer">
-                  <a href="@Url.Action("SelectTeachers", "Group", new { courseId = Model.Group.CourseId, groupId = Model.Group.Id })" class="btn btn-primary">Add teacher in group</a>
-              </div>
-          }
-      }
-</div>
-    @if (TempData["Error"] != null)
+
+    @if (Model.CurrentUser.Role != AppUserRoles.Student)
     {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        <div class="card-footer">
+            <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
         </div>
-    }  
+        @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+        {
+            <div class="card-footer">
+                <a href="@Url.Action("SelectTeachers", "Group", new { courseId = Model.Group.CourseId, groupId = Model.Group.Id })" class="btn btn-primary">Add teacher in group</a>
+            </div>
+        }
+    }
+</div>
