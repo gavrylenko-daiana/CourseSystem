@@ -25,7 +25,7 @@
             </div>
             <div class="extra content">
                 <form class="ui form" asp-action="DeleteConfirmed" asp-controller="Course" asp-route-id="@Model.Id" method="post">
-                    <button type="submit" class="ui red button">Delete</button>
+                    <button type="submit" class="ui delete-button button">Delete</button>
                     <a href="@Url.Action("Index", "Course")" class="ui button">Cancel</a>
                 </form>
             </div>
