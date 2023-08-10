@@ -6,56 +6,89 @@
 }
 
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI."
+    />
+    <meta name="keywords" content="Semantic-UI, Theme, Design, Template" />
+    <meta name="author" content="PPType" />
+    <meta name="theme-color" content="#ffffff" />
     <title>Login</title>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+        type="text/css"
+    />
+    <style type="text/css">
+      body {
+        background-color: #1ee8c7;
+        -webkit-font-smoothing: antialiased;
+        -moz-font-smoothing: grayscale;
+      }
+
+      body > .ui.grid {
+        height: 100%;
+      }
+
+      .column {
+        max-width: 450px;
+      }
+    </style>    
 </head>
 <body>
-<div class="container">
-    <div class="py-4">
-        <div class="col-md-6">
-            <h1>@ViewData["Title"]</h1>
-            <div class="py-2">
-                @if (ViewData["Error"] != null)
-                {
-                    <p class="text-danger">@ViewData["Error"]</p>
-                }
-                @if (TempData["Error"] != null)
-                {
-                    <div class="col-md-12 alert alert-danger">
-                        <span><b>Sorry!</b> - @TempData["Error"]</span>
-                    </div>
-                }
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <p class="text-success">@TempData["SuccessMessage"]</p>
-                }
-                <form asp-action="Login">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="form-group">
-                        <label asp-for="EmailAddress" class="control-label"></label>
-                        <input asp-for="EmailAddress" class="form-control">
-                        <span asp-validation-for="EmailAddress" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Password" class="control-label"></label>
-                        <input asp-for="Password" class="form-control"/>
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                    </div>
-                    <div class="py-2">
-                        <div class="form-group d-flex justify-content-between">
-                            <div>
-                                <input class="btn btn-outline-primary" type="submit" value="Login"/>
-                                <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Register">Register</a>
-                            </div>
-                            <a class="btn btn-outline-danger" asp-controller="Account" asp-action="ForgotPassword">Forgot password</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <div class="ui middle aligned center aligned grid">
+      <div class="column">
+        <h2 class="ui teal center aligned header">
+          <h1 class="text-black">Log-in to your
+          account</h1>
+        </h2>
+          <form class="ui large form" asp-action="Login">
+              <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+              <div class="ui stacked segment">
+                  <div class="field">
+                      <label asp-for="EmailAddress" class="control-label"></label>
+                      <div class="ui left icon input">
+                          <i class="user icon"></i>
+                          <input asp-for="EmailAddress" class="form-control" placeholder="E-mail address" type="text">
+                      </div>
+                      <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                  </div>
+                  <div class="field">
+                      <label asp-for="Password" class="control-label"></label>
+                      <div class="ui left icon input">
+                          <i class="lock icon"></i>
+                          <input asp-for="Password" class="form-control" placeholder="Password" type="password">
+                      </div>
+                      <span asp-validation-for="Password" class="text-danger"></span>
+                  </div>
+                  @if (TempData["Error"] != null)
+                  {
+                      <div class="ui negative message">
+                          <i class="close icon"></i>
+                          <div class="header">
+                              Sorry!
+                          </div>
+                          <p>@TempData["Error"]</p>
+                      </div>
+                  }
+                  <input class="ui fluid large teal submit button" type="submit" value="Login"/>
+                  @* <div class="ui fluid large teal submit button">Login</div> *@
+              </div>
+              <div class="ui error message"></div>
+          </form>
+          <div class="ui message">New to us?<a asp-controller="Account" asp-action="Register"> Sign Up</a></div>
+          <div class="ui message">Forgot password?<a asp-controller="Account" asp-action="ForgotPassword"> Change password</a></div>
+      </div>
     </div>
-</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
 </body>
 </html>
