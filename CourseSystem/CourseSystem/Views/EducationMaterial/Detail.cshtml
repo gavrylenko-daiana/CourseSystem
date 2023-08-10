@@ -71,8 +71,8 @@ else if (supportedWordExtensions.Contains(fileExtension))
 }
 else if (supportedArchiveExtensions.Contains(fileExtension))
 {
-    <p>This is an archive file. You can download it using the button below:</p>
-    <a href="@url" class="btn btn-primary" download>Download</a>
+    <p>This is an archive file. You can <a href="@url">download file here</a>.</p>
+    @* <a href="@url" class="btn btn-primary" download>Download</a> *@
 }
 else
 {
