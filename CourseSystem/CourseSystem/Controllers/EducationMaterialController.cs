@@ -66,7 +66,7 @@ public class EducationMaterialController : Controller
             default:
                 break;
         }
-        
+
         return RedirectToAction("Index", "Course");
     }
 
@@ -106,6 +106,7 @@ public class EducationMaterialController : Controller
                     group.EducationMaterials.Remove(fileToDelete);
                     await _groupService.UpdateGroup(group);
                 }
+
                 break;
             case MaterialAccess.Course:
 
@@ -119,4 +120,5 @@ public class EducationMaterialController : Controller
 
         return RedirectToAction("Index", "Course");
     }
+
 }

@@ -1,3 +1,4 @@
+using System.Net;
 using BLL.Interfaces;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
@@ -91,6 +92,17 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         group.EducationMaterials.Add(materialFile);
         await _groupService.UpdateGroup(group);
     }
+    
+    public bool CloudinaryFileExists(string publicUrl)
+    {
+        var uri = new Uri(publicUrl);
+        var path = uri.AbsolutePath;
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
+
+        var result = _cloudinary.GetResource(fileNameWithoutExtension);
+
+        return result.StatusCode == HttpStatusCode.OK;
+    }
 
     public async Task<List<EducationMaterial>> GetAllMaterialAsync()
     {
@@ -111,4 +123,5 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         await _repository.DeleteAsync(material);
         await _unitOfWork.Save();
     }
+
 }

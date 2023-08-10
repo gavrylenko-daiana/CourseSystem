@@ -70,7 +70,9 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        return View();
+        var groupViewModel = new GroupViewModel();
+        
+        return View(groupViewModel);
     }
     
     [HttpPost]

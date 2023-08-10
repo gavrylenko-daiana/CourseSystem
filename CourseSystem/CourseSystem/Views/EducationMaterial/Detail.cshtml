@@ -5,9 +5,10 @@
     string url = (string)TempData["UploadResult"]!;
     var fileExtension = Model.FileExtension.ToLower();
     var supportedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".heic" };
-    var supportedVideoExtensions = new[] { ".mp4", ".avi", ".mkv", ".mov", "." };
+    var supportedVideoExtensions = new[] { ".mp4", ".avi", ".mkv", ".mov" };
     var supportedPdfExtensions = new[] { ".pdf" };
     var supportedWordExtensions = new[] { ".doc", ".docx" };
+    var supportedArchiveExtensions = new[] { ".zip", ".rar" };
 }
 
 <!DOCTYPE html>
@@ -41,15 +42,18 @@ else if (supportedWordExtensions.Contains(fileExtension))
 {
     <iframe src="https://view.officeapps.live.com/op/view.aspx?src=@url" style="width: 100%; height: 600px;"></iframe>
 }
+else if (supportedArchiveExtensions.Contains(fileExtension))
+{
+    <p>This is an archive file. You can download it using the button below:</p>
+}
 else
 {
     <p>Unsupported file format: @fileExtension</p>
 }
 
 <div class="mt-3">
-    <!-- Add a button to download the file. Then change with a path to Download method -->
-    <a href="@url" class="btn btn-primary" download>Download</a>
-    <a type="button" class="btn btn-outline-danger" asp-controller="EducationMaterial" asp-action="Delete" asp-route-id="@Model.Id">Delete material</a>
+    <button type="submit" class="btn btn-primary">Download</button>
+    <a type="button" class="btn btn-outline-danger" asp-controller="EducationMaterial" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
 </div>
 </body>
 </html>

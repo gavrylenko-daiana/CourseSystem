@@ -14,6 +14,8 @@ public interface IEducationMaterialService
 
     Task AddToGroup(IFormFile material, int groupId, string url);
 
+    bool CloudinaryFileExists(string publicUrl);
+
     Task<EducationMaterial> GetByIdMaterialAsync(int id);
 
     Task DeleteUploadFileAsync(EducationMaterial material);

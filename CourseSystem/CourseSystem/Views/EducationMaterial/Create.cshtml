@@ -9,7 +9,7 @@
 <body>
 <div class="container py-4">
     <h1>Upload File to Task</h1>
-    <form method="post" asp-controller="EducationMaterial" asp-action="CreateInGroup" enctype="multipart/form-data">
+    <form method="post" asp-controller="EducationMaterial" asp-action="Create" enctype="multipart/form-data">
         <input type="hidden" asp-for="CourseId"/>
         <input type="hidden" asp-for="GroupId"/>
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
