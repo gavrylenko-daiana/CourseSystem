@@ -20,3 +20,24 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.details-button {
+  background-color: #35DE9C !important;
+  color: white !important;
+}
+
+.edit-button {
+  background-color: #4682B4 !important;
+  color: white !important;
+}
+
+.delete-button {
+  background-color: #FF8093 !important;
+  color: black !important;
+}
+
+.details-button:hover,
+.edit-button:hover,
+.delete-button:hover {
+  filter: brightness(85%) !important;
+}   
