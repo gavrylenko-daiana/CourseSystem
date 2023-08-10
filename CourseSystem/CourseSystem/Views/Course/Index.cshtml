@@ -2,69 +2,98 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model UI.ViewModels.UserCoursesViewModel
 
-
-@if (TempData["Error"] != null)
-{
-    <div class="col-md-12 alert alert-danger">
-        <span>@TempData["Error"]</span>
-    </div>
-}
-<style>
-    .card {
-        transition: box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-        box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .selected-card {
-        border: 2px solid #ff0000;
-    }
-</style>
-
-<div class="container mt-4">
-    <h3>Courses</h3>
-    <hr />
-    <div class="row">
-        @if (Model.Courses.Count == 0)
-        {
-            <div class="col">
-                <div class="alert alert-warning">No courses found.</div>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Page Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
         }
-        else
-        {
-            @foreach (var course in Model.Courses)
+
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
+
+        .ui.container {
+            margin-top: 20px;
+        }
+
+        .add-course-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .cover-card {
+            height: 200px; 
+        }             
+    </style>
+</head>
+<body>
+    <div class="ui container">
+        <h3 class="ui header">Courses</h3>
+        <hr class="ui divider">
+        <div class="ui stackable three column grid">
+            @if (Model.Courses.Count == 0)
             {
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">@course.Name</h5>
-                            <a href="@Url.Action("Details", new { id = course.Id })" class="btn btn-outline-primary">Details</a>
-                            @if (Model.CurrentUser.Role == AppUserRoles.Admin)
-                            {
-                                <a href="@Url.Action("Edit", new { id = course.Id })" class="btn btn-outline-warning">Edit</a>
-                                <a href="@Url.Action("Delete", new { id = course.Id })" class="btn btn-outline-danger">Delete</a>
-                            }
-                        </div>
-                    </div>
+                <div class="column">
+                    <div class="ui warning message">No courses found.</div>
                 </div>
             }
-        }
+            else
+            {
+                @foreach (var course in Model.Courses)
+                {
+                    <div class="column">
+                        <div class="ui card cover-card">
+                            <div class="content">
+                                <div class="header">@course.Name</div>
+                            </div>
+                            <div class="extra content">
+                                <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
+                                @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                                {
+                                    <div class="ui buttons">
+                                        <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
+                                        <div class="or"></div>
+                                        <a href="@Url.Action("Delete", new { id = course.Id })" class="ui delete-button button">Delete</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
     </div>
-</div>
- @if (Model.CurrentUser.Role == AppUserRoles.Admin)
- {
-     <p>
-         <a asp-action="Create" class="btn btn-primary">Create New Course</a>
-     </p>
- }
+
+    @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+    {
+        <div class="ui container add-course-button">
+            <a asp-action="Create" class="ui basic black button">Add New Course</a>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui container">
+            <div class="ui negative message">
+                <span>@TempData["Error"]</span>
+            </div>
+        </div>
+    }
+</body>
+</html>
 
 <script>
-    document.querySelectorAll('.card').forEach(card => {
+    document.querySelectorAll('.ui.card').forEach(card => {
         card.addEventListener('click', function () {
-            window.location.href = this.querySelector('.btn-outline-primary').href;
+            window.location.href = this.querySelector('.ui.details-button.button').href;
         });
     });
 </script>
+
