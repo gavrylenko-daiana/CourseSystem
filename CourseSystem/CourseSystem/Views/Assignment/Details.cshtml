@@ -47,7 +47,7 @@
                                     <a href="@Url.Action("Edit", "Assignment", new { id = @Model.Id })" class="btn btn-primary">
                                         Edit
                                     </a>
-                                    <a href="@Url.Action("Delete", "Assignment", new { id = @Model.Id })" class="btn btn-primary">
+                                    <a href="@Url.Action("Delete", "Assignment", new { assignmentId = @Model.Id })" class="btn btn-primary">
                                         Delete
                                     </a>
                                     <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = Model.Id})" class="btn btn-primary">

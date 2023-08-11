@@ -107,7 +107,7 @@ public class AssignmentController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int assignmentId)
     {
         var assignmentResult = await _assignmentService.GetById(assignmentId);
         
@@ -117,14 +117,10 @@ public class AssignmentController : Controller
             return RedirectToAction("Index", "Group");
         }
 
-        var assignentDeleteVM = new DeleteAssignmentViewModel();
-        assignmentResult.Data.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
-
-        return View(assignentDeleteVM);                    
+        return View(assignmentResult.Data);                    
       }
 
     [HttpPost]
-    [ActionName("Delete")]
     public async Task<IActionResult> DeleteAssignment(int id)
     {
         var deleteResult = await _assignmentService.DeleteAssignment(id);

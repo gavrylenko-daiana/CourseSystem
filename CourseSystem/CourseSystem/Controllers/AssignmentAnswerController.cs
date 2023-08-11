@@ -63,11 +63,12 @@ public class AssignmentAnswerController : Controller
         assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
         assignmnetAnswer.Url = "Some URL";
 
-        var assignmnet = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
+        var assignmnetResult = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
 
-        if (assignmnet == null)
+
+        if (!assignmnetResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "Fail to create assignment answer");
+            TempData.TempDataMessage("Error", assignmnetResult.Message);
             return View(assignmentAnswerVM);
         }
 
@@ -79,7 +80,7 @@ public class AssignmentAnswerController : Controller
         }
 
         var answerResult =
-            await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnet, currentUser);
+            await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnetResult.Data, currentUser);
 
         if (!answerResult.IsSuccessful)
         {
@@ -87,7 +88,7 @@ public class AssignmentAnswerController : Controller
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
         }
 
-        return RedirectToAction("Details", "Assignment", new { id = assignmentResult.Data.Id });
+        return RedirectToAction("Details", "Assignment", new { id = assignmnetResult.Data.Id });
     }
 
 

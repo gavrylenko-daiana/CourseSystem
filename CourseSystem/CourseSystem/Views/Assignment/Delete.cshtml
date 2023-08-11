@@ -14,7 +14,7 @@
                 Are you sure that do you want to delete assigment (@Model.Name)?
             </h4>
             <div class="form-group">
-                <form asp-controller="Assignment" asp-action="Delete" method="post">
+                <form asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@Model.Id"  method="post">
                     <input type="submit" value="Confirm" class="btn btn-outline-danger" for="danger-outlined"/>
                     <a class="btn btn-outline-success" for="success-outlined" asp-controller="Assignment" asp-action="Index">Cancel</a>
                 </form>
