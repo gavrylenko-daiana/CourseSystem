@@ -82,12 +82,12 @@ public class AssignmentAnswerController : Controller
             assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
             assignmnetAnswer.Url = "Some URL";
 
-            var assignmnet = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
+            var assignmentResult = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
 
-            if(assignmnet == null)
+            if(!assignmentResult.IsSuccessful)
             {
-                TempData.TempDataMessage("Error", "Fail to create assignment answer");
-                return View(assignmentAnswerVM);
+                TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+                return RedirectToAction("Index", "Group");
             }
 
             var currentUser = await _userManager.GetUserAsync(User);
@@ -97,7 +97,7 @@ public class AssignmentAnswerController : Controller
                 return RedirectToAction("Login", "Account");
             }
 
-            var answerResult = await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnet, currentUser);
+            var answerResult = await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmentResult.Data, currentUser);
 
             if (!answerResult.IsSuccessful)
             {
@@ -105,7 +105,7 @@ public class AssignmentAnswerController : Controller
                 return RedirectToAction("CreateAnswer", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
             }
 
-        return RedirectToAction("Details", "Assignment", new { id = assignmnet.Id });
+        return RedirectToAction("Details", "Assignment", new { id = assignmentResult.Data.Id });
     }
 
 
@@ -113,15 +113,16 @@ public class AssignmentAnswerController : Controller
     [Authorize(Roles = "Student")]
     public async Task<IActionResult> Delete(int assignmentAnswerId)
     {
-        var assignmentAnswer = await _assignmentAnswerService.GetById(assignmentAnswerId);
-        var asignmentId = assignmentAnswer.UserAssignment.AssignmentId;
+        var assignmentAnswerResult = await _assignmentAnswerService.GetById(assignmentAnswerId);
+        var asignmentId = assignmentAnswerResult.Data.UserAssignment.AssignmentId;
 
-        if (assignmentAnswer == null)
+        if(!assignmentAnswerResult.IsSuccessful)
         {
-            return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
+            TempData.TempDataMessage("Error", $"{assignmentAnswerResult.Data}");
+            return RedirectToAction("Index", "Group");
         }
 
-        var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
+        var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswerResult.Data);
 
         if (!deleteResult.IsSuccessful)
                 TempData.TempDataMessage("Error", deleteResult.Message);
@@ -134,16 +135,17 @@ public class AssignmentAnswerController : Controller
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> SeeStudentAnswers(int assignmentId)
     {
-        var assignment = await _assignmentService.GetById(assignmentId);
+        var assignmentResult = await _assignmentService.GetById(assignmentId);
 
-        if (assignment == null)
+        if(!assignmentResult.IsSuccessful)
         {
-            return NotFound();
+            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            return RedirectToAction("Index", "Group");
         }
 
         var userAssignmentVMs = new List<UserAssignmentViewModel>();
 
-        foreach (var userAssignment in assignment.UserAssignments)
+        foreach (var userAssignment in assignmentResult.Data.UserAssignments)
         {
             var userAssignmentVM = new UserAssignmentViewModel();
             userAssignment.MapTo<UserAssignments, UserAssignmentViewModel>(userAssignmentVM);
@@ -165,8 +167,15 @@ public class AssignmentAnswerController : Controller
             return NotFound();
         }
 
-        var assignment = await _assignmentService.GetById(assignmentId);
-        var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId == student.Id);
+        var assignmentResult = await _assignmentService.GetById(assignmentId);
+        
+        if(!assignmentResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            return RedirectToAction("Index", "Group");
+        }
+        
+        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(a => a.AppUserId == student.Id);
 
         if (userAssignment == null)
         {
@@ -196,8 +205,15 @@ public class AssignmentAnswerController : Controller
                 new { assignmentId = assignmentId, studentId = studentId });
         }
 
-        var assignment = await _assignmentService.GetById(assignmentId);
-        var userAssignment = assignment.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
+        var assignmentResult = await _assignmentService.GetById(assignmentId);
+        
+        if(!assignmentResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            return RedirectToAction("Index", "Group");
+        }
+        
+        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
 
         if (userAssignment == null)
         {
