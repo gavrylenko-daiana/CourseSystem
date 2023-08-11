@@ -22,14 +22,19 @@
             </p>
             <p><strong>Progress:</strong> @Model.Progress%</p>
 
-            @if (Model.Group.EducationMaterials != null && Model.Group.EducationMaterials.Count > 0)
+            @{
+                var materialsGroup = Model.Group.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
+            }
+            @if (materialsGroup != null && materialsGroup.Any())
             {
                 <h6>Education Materials:</h6>
                 <ul>
-                    @foreach (var material in Model.Group.EducationMaterials)
+                    @foreach (var material in materialsGroup)
                     {
-                        <li>@material.Name</li>
-                        <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
+                        <div class="justify-content-start">
+                            <li>@material.Name</li>
+                            <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
+                        </div>
                     }
                 </ul>
             }
@@ -121,7 +126,7 @@
         }
     }
     <div class="py-2">
-        <a class="nav-link text-dark btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="Create" asp-route-groupId="@Model.Group.Id">Upload education material</a>
+        <a class="nav-link text-dark btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
     </div>
 </div>
 @if (TempData["Error"] != null)

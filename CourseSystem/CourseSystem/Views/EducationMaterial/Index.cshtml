@@ -22,7 +22,7 @@
                             @if (User.Identity.IsAuthenticated && User.IsInRole(AppUserRoles.Admin.ToString()))
                             {
                                 <div class="mx-2">
-                                    @* <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="Delete" asp-route-id="@file.Id">Delete</a> *@
+                                    <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="Delete" asp-route-id="@file.Id">Delete</a>
                                 </div>
                             }
                             <div class="mx-2">

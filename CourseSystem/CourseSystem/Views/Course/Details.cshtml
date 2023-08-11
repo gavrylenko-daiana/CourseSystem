@@ -23,10 +23,10 @@
         <div class="card-body">
             <h5 class="card-title">@Model.Name</h5>
 
-             @if (Model.CurrentUser.Role != AppUserRoles.Student)
-             {
-                 <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
-             }
+            @if (Model.CurrentUser.Role != AppUserRoles.Student)
+            {
+                <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="btn btn-primary mb-3">Create Group</a>
+            }
 
             @if (Model.CurrentGroups != null && Model.CurrentGroups.Count > 0)
             {
@@ -55,13 +55,19 @@
                 <p>No groups found for this course.</p>
             }
 
-            @if (Model.EducationMaterials != null && Model.EducationMaterials.Count > 0)
+            @{
+                var materialsGroup = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+            }
+            @if (materialsGroup != null && materialsGroup.Any())
             {
                 <h6>Education Materials:</h6>
                 <ul>
-                    @foreach (var material in Model.EducationMaterials)
+                    @foreach (var material in materialsGroup)
                     {
-                        <li>@material.Name</li>
+                        <div class="justify-content-start">
+                            <li>@material.Name</li>
+                            <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
+                        </div>
                     }
                 </ul>
             }
@@ -74,7 +80,7 @@
             {
                 <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="btn btn-primary mb-3">Add teachers</a>
             }
-            
+
             @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
             {
                 <h6>Users:</h6>
@@ -91,6 +97,9 @@
             }
         </div>
     </div>
+    <div class="py-2">
+        <a class="nav-link text-dark btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="CreateInCourse" asp-route-courseId="@Model.Id">Upload education material</a>
+    </div>
     @if (TempData["Error"] != null)
     {
         <div class="col-md-12 alert alert-danger">
@@ -106,5 +115,3 @@
         });
     });
 </script>
-
-
