@@ -29,81 +29,63 @@ public class AssignmentAnswerController : Controller
         _userAssignmentService = userAssignmentService;
     }
 
-    public IActionResult Index()
-    {
-        return View();
-    }
-
     [HttpGet]
     [Authorize(Roles = "Student")]
-    public async Task<IActionResult> CreateAnswer(int id)
+    public async Task<IActionResult> Create(int id)
     {
         var assignmnetAnsweVM = new AssignmentAnsweViewModel()
         {
             AssignmentId = id
         };
-        
-        if (assignmnetAnsweVM == null) throw new ArgumentNullException(nameof(assignmnetAnsweVM));
 
         return View(assignmnetAnsweVM);
     }
 
-        [HttpGet]
-        [Authorize(Roles = "Student")]
-        public async Task<IActionResult> Create(int id)
+    [HttpPost]
+    public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
+    {
+        if (!ModelState.IsValid)
         {
-            var assignmnetAnsweVM = new AssignmentAnsweViewModel()
-            {
-                AssignmentId = id
-            };
-
-            return View(assignmnetAnsweVM);
+            TempData.TempDataMessage("Error", "Fail to create assignment answer");
+            return View(assignmentAnswerVM);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(AssignmentAnsweViewModel assignmentAnswerVM)
+        var assignmnetAnswer = new AssignmentAnswer();
+        assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmnetAnswer);
+
+        if (!assignmentAnswerVM.AssignmentAnswerFiles.IsNullOrEmpty())
         {
-            if (!ModelState.IsValid)
-            {
-                TempData.TempDataMessage("Error", "Fail to create assignment answer");
-                return View(assignmentAnswerVM);
-            }
-               
-            var assignmnetAnswer = new AssignmentAnswer();
-            assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmnetAnswer);
+            //logic for files
+            //set the name of file to model
+        }
 
-            if (!assignmentAnswerVM.AssignmentAnswerFiles.IsNullOrEmpty())
-            {
-                //logic for files
-                //set the name of file to model
-            }
+        assignmnetAnswer.Name = "Some file name";
+        assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
+        assignmnetAnswer.Url = "Some URL";
 
-            assignmnetAnswer.Name = "Some file name";
-            assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
-            assignmnetAnswer.Url = "Some URL";
+        var assignmnet = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
 
-            var assignmnet = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
+        if (assignmnet == null)
+        {
+            TempData.TempDataMessage("Error", "Fail to create assignment answer");
+            return View(assignmentAnswerVM);
+        }
 
-            if(assignmnet == null)
-            {
-                TempData.TempDataMessage("Error", "Fail to create assignment answer");
-                return View(assignmentAnswerVM);
-            }
+        var currentUser = await _userManager.GetUserAsync(User);
 
-            var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
 
-            if(currentUser == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
+        var answerResult =
+            await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnet, currentUser);
 
-            var answerResult = await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnet, currentUser);
-
-            if (!answerResult.IsSuccessful)
-            {
-                TempData.TempDataMessage("Error", "Fail to save assignmnet answer");
-                return RedirectToAction("CreateAnswer", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
-            }
+        if (!answerResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", "Fail to save assignmnet answer");
+            return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
+        }
 
         return RedirectToAction("Details", "Assignment", new { id = assignmnet.Id });
     }
@@ -124,8 +106,8 @@ public class AssignmentAnswerController : Controller
         var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
 
         if (!deleteResult.IsSuccessful)
-                TempData.TempDataMessage("Error", deleteResult.Message);
-                
+            TempData.TempDataMessage("Error", deleteResult.Message);
+
         return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
     }
 

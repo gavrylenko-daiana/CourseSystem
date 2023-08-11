@@ -117,6 +117,7 @@ public class AssignmentController : Controller
       }
 
     [HttpGet]
+    [ActionName("DeleteAssignment")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleteResult = await _assignmentService.DeleteAssignment(id);
