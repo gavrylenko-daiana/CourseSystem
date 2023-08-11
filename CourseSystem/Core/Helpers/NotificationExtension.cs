@@ -13,7 +13,7 @@ namespace Core.Helpers
         {
             if (list == null)
             {
-                return new Result<List<Notification>>(false, "List was null");
+                return new Result<List<Notification>>(false, nameof(list));
             }
 
             return new Result<List<Notification>>(true, 
@@ -25,7 +25,7 @@ namespace Core.Helpers
         {
             if (list == null)
             {
-                return new Result<List<Notification>>(false, "List was null");
+                return new Result<List<Notification>>(false, nameof(list));
             }
 
             return new Result<List<Notification>>(true,
