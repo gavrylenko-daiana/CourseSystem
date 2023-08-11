@@ -17,15 +17,13 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 {
     private readonly DropboxClient _dropboxClient;
     private readonly ICourseService _courseService;
-    private readonly IGroupService _groupService;
 
     public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config,
-        ICourseService courseService, IGroupService groupService) : base(unitOfWork,
+        ICourseService courseService) : base(unitOfWork,
         unitOfWork.EducationMaterialRepository)
     {
         _dropboxClient = new DropboxClient(config.Value.AccessToken);
         _courseService = courseService;
-        _groupService = groupService;
     }
 
     public async Task<Result<string>> AddFileAsync(IFormFile file)
@@ -72,15 +70,8 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
 
-    public async Task<Result<bool>> AddToGroup(IFormFile material, string url, int groupId)
+    public async Task<Result<Group>> AddToGroup(IFormFile material, string url, Group group)
     {
-        var group = await _groupService.GetById(groupId);
-
-        if (group == null)
-        {
-            return new Result<bool>(false, $"Failed to get {nameof(group)} by id {groupId}");
-        }
-
         var materialFile = new EducationMaterial()
         {
             Name = material.FileName,
@@ -95,9 +86,8 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         await _unitOfWork.Save();
 
         group.EducationMaterials.Add(materialFile);
-        await _groupService.UpdateGroup(group);
 
-        return new Result<bool>(true);
+        return new Result<Group>(true);
     }
 
     public async Task<Result<bool>> AddToCourse(IFormFile material, string url, int courseId)
@@ -128,20 +118,20 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         return new Result<bool>(true);
     }
 
-    public async Task<Result<bool>> DeleteFileFromGroup(EducationMaterial material)
+    public async Task<Result<Group>> DeleteFileFromGroup(EducationMaterial material)
     {
         var resultDeleteEducationMaterial = await DeleteFileAsync(material.Name);
 
         if (!resultDeleteEducationMaterial.IsSuccessful)
         {
-            return new Result<bool>(false, $"Failed delete {nameof(material)}");
+            return new Result<Group>(false, $"Failed delete {nameof(material)}");
         }
 
         var resultDeleteFromDropBox = await DeleteUploadFileAsync(material);
 
         if (!resultDeleteFromDropBox.IsSuccessful)
         {
-            return new Result<bool>(false, $"Failed delete {nameof(material)}");
+            return new Result<Group>(false, $"Failed delete {nameof(material)}");
         }
 
         var group = material.Group;
@@ -149,10 +139,9 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         if (group != null)
         {
             group.EducationMaterials.Remove(material);
-            await _groupService.UpdateGroup(group);
         }
 
-        return new Result<bool>(true);
+        return new Result<Group>(true, group);
     }
 
     public async Task<Result<List<EducationMaterial>>> GetAllMaterialAsync()
@@ -190,6 +179,21 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         catch (Exception e)
         {
             return new Result<bool>(false, "Failed to delete material");
+        }
+    }
+
+    public async Task<Result<bool>> UpdateMaterial(EducationMaterial material)
+    {
+        try
+        {
+            await _repository.UpdateAsync(material);
+            await _unitOfWork.Save();
+
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false, $"Failed to update material by id {material.Id}. Exception: {ex.Message}");
         }
     }
 }

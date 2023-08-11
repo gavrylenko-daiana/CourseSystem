@@ -1,5 +1,5 @@
-using Dropbox.Api;
 using Core.Models;
+using Dropbox.Api;
 using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Http;
 
@@ -13,13 +13,15 @@ public interface IEducationMaterialService
 
     Task<Result<List<EducationMaterial>>> GetAllMaterialAsync();
 
-    Task<Result<bool>> AddToGroup(IFormFile material, string url, int groupId);
+    Task<Result<Group>> AddToGroup(IFormFile material, string url, Group group);
     
     Task<Result<bool>> AddToCourse(IFormFile material, string url, int courseId);
-
+ 
     Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id);
 
     Task<Result<bool>> DeleteUploadFileAsync(EducationMaterial material);
 
-    Task<Result<bool>> DeleteFileFromGroup(EducationMaterial material);
+    Task<Result<Group>> DeleteFileFromGroup(EducationMaterial material);
+
+    Task<Result<bool>> UpdateMaterial(EducationMaterial material);
 }

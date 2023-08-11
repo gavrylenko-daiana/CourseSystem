@@ -11,13 +11,15 @@ public class GroupService : GenericService<Group>, IGroupService
 {
     private readonly IUserGroupService _userGroupService;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IEducationMaterialService _educationMaterial;
     
     public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService,
-        UserManager<AppUser> userManager) 
+        UserManager<AppUser> userManager, IEducationMaterialService educationMaterial) 
             : base(unitOfWork, unitOfWork.GroupRepository)
     {
         _userGroupService = userGroupService;
         _userManager = userManager;
+        _educationMaterial = educationMaterial;
     }
 
     public async Task<Result<bool>> CreateGroup(Group group, AppUser currentUser)
@@ -69,7 +71,7 @@ public class GroupService : GenericService<Group>, IGroupService
     public async Task<Result<bool>> DeleteGroup(int groupId)
     {
         var group = await _repository.GetByIdAsync(groupId);
-            
+        
         if (group == null)
         {
             return new Result<bool>(false, $"Group by id {groupId} not found");
@@ -77,9 +79,19 @@ public class GroupService : GenericService<Group>, IGroupService
         
         try
         {
+            if (group.EducationMaterials.Any())
+            {
+                var educationMaterialsCopy = group.EducationMaterials.ToList();
+
+                foreach (var material in educationMaterialsCopy)
+                {
+                    await _educationMaterial.DeleteFileFromGroup(material);
+                }
+            }
+            
             await _repository.DeleteAsync(group);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception ex)
