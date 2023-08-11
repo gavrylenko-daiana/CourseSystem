@@ -4,7 +4,7 @@ using Core.Models;
 
 namespace UI.ViewModels;
 
-public class CreateInCourseEducationMaterialViewModel
+public class CreateInGeneralEducationMaterialViewModel
 {
     [Required(ErrorMessage = "Uploaded file is required")]
     [Display(Name = "Upload File")]
@@ -14,8 +14,9 @@ public class CreateInCourseEducationMaterialViewModel
     [Display(Name = "Material access")]
     public MaterialAccess MaterialAccess { get; set; }
     
-    public Course Course { get; set; }
+    public List<Course>? Courses { get; set; }
+    
+    public int SelectedCourseId { get; set; }
     public List<Group>? Groups { get; set; }
     public int SelectedGroupId { get; set; }
-    public int CourseId { get; set; }
 }

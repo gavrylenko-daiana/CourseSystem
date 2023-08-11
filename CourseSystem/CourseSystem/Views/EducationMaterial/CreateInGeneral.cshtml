@@ -1,7 +1,7 @@
 @using UI.ViewModels;
 @using Core.Enums
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model CreateInCourseEducationMaterialViewModel
+@model CreateInGeneralEducationMaterialViewModel
 
 <!DOCTYPE html>
 
@@ -9,8 +9,7 @@
 <body>
 <div class="container py-4">
     <h1>Upload File to Task</h1>
-    <form method="post" asp-controller="EducationMaterial" asp-action="CreateInCourse" enctype="multipart/form-data">
-        <input type="hidden" asp-for="CourseId"/>
+    <form method="post" asp-controller="EducationMaterial" asp-action="CreateInGeneral" enctype="multipart/form-data">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             <label asp-for="UploadFile" class="control-label"></label>
@@ -30,19 +29,22 @@
         <div class="form-group" id="groupDropdown" style="display:none;">
             <label asp-for="SelectedGroupId" class="control-label">Select Group</label>
             <select asp-for="SelectedGroupId" class="form-control">
-                @if (Model.Groups.Any())
+                @foreach (var group in Model.Groups)
                 {
-                    foreach (var group in Model.Groups)
-                    {
-                        <option value="@group.Id">@group.Name</option>
-                    }
-                }
-                else
-                {
-                    <option value="" disabled>No groups available</option>
+                    <option value="@group.Id">@group.Name</option>
                 }
             </select>
             <span asp-validation-for="SelectedGroupId" class="text-danger"></span>
+        </div>
+        <div class="form-group" id="courseDropdown" style="display:none;">
+            <label asp-for="SelectedCourseId" class="control-label">Select Course</label>
+            <select asp-for="SelectedCourseId" class="form-control">
+                @foreach (var course in Model.Courses)
+                {
+                    <option value="@course.Id">@course.Name</option>
+                }
+            </select>
+            <span asp-validation-for="SelectedCourseId" class="text-danger"></span>
         </div>
         <div class="py-2">
             <div class="form-group">
@@ -56,15 +58,22 @@
 <script>
     const materialAccessSelect = document.querySelector("#materialAccessSelect");
     const groupDropdown = document.querySelector("#groupDropdown");
+    const courseDropdown = document.querySelector("#courseDropdown");
 
     materialAccessSelect.addEventListener("change", function () {
         if (materialAccessSelect.value === "Group") {
             groupDropdown.style.display = "block";
+            courseDropdown.style.display = "none";
+        } else if (materialAccessSelect.value === "Course") {
+            groupDropdown.style.display = "none";
+            courseDropdown.style.display = "block";
         } else {
             groupDropdown.style.display = "none";
+            courseDropdown.style.display = "none";
         }
     });
 </script>
 
 </body>
 </html>
+
