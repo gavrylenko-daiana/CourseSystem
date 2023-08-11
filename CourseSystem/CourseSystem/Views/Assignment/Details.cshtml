@@ -36,9 +36,9 @@
                     <div class="card-body">
                         <div class="mb-3 d-flex justify-content-between">
                             <div>
-                                <div class="me-3">Start Date: @Model.StartDate.ToString("d")</div>
+                                <div class="me-3">Start Date: @Model.StartDate.ToString("dddd, dd MMMM yyyy HH:mm:ss")</div>
                                 <hr>
-                                <div class="me-3">End Date: @Model.EndDate.ToString("d")</div>
+                                <div class="me-3">End Date: @Model.EndDate.ToString("dddd, dd MMMM yyyy HH:mm:ss")</div>
                                 <hr>
                             </div>
                             @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
