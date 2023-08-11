@@ -12,10 +12,9 @@ public class EditUserViewModel
     [Display(Name = "LastName")]
     public string LastName { get; set; }
     
-    [Required(ErrorMessage = "Date of Birthday is required")]
     [Display(Name = "Date of Birthday")]
     [DataType(DataType.Date)]
-    public DateTime BirthDate { get; set; }
+    public DateTime? BirthDate { get; set; }
 
     [Required(ErrorMessage = "Email Address is required")]
     [Display(Name = "Email Address")]

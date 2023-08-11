@@ -42,17 +42,17 @@ public class NotificationController : Controller
     [HttpGet]
     public async Task<IActionResult> NotificationDetails(int id)
     {
-        var notification = await _notificationService.GetById(id);
+        var notificationResult = await _notificationService.GetById(id);
 
-        await _notificationService.MarkAsRead(notification);
-
-        if (notification == null)
+        if (!notificationResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "This notification does not exist.");
+            TempData.TempDataMessage("Error", $"{notificationResult.Message}");
             // edit path
             return RedirectToAction("Index", "Home");
         }
+        
+        await _notificationService.MarkAsRead(notificationResult.Data);
 
-        return View(notification);
+        return View(notificationResult.Data);
     }
 }

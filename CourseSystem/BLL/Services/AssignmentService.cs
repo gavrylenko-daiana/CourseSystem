@@ -26,7 +26,9 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, "Invalid assignment data");
             }
-               
+
+            SetAssignmentStatus(assignment);
+
             try
             {
                 await _repository.AddAsync(assignment);
@@ -64,21 +66,41 @@ namespace BLL.Services
 
         public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId)
         {
-            var group = await _groupService.GetById(groupId); 
+            var groupResult = await _groupService.GetById(groupId); 
 
-            if (group == null)
+            if (!groupResult.IsSuccessful)
             {
-                return new Result<List<Assignment>>(false, "Fail to get group");
+                return new Result<List<Assignment>>(false, $"{groupResult.Message}");
             }
                 
-            if (group.Assignments.IsNullOrEmpty())
+            if (groupResult.Data.Assignments.IsNullOrEmpty())
             {
                 return new Result<List<Assignment>>(true, "No assignment in group");
             }
                 
-            var groupAssignments = await ChechStartAndEndAssignmnetDate(group.Assignments);
+            var groupAssignments = await ChechStartAndEndAssignmnetDate(groupResult.Data.Assignments);
 
             return new Result<List<Assignment>>(true, groupAssignments);
+        }
+
+        public Result<bool> ValidateTimeInput(DateTime? startDate, DateTime? endDate)
+        {
+            if(startDate == null)
+            {
+                startDate = DateTime.MinValue;
+            }
+
+            if(endDate == null)
+            {
+                endDate = DateTime.MaxValue;
+            }
+
+            if(startDate > endDate)
+            {
+                return new Result<bool>(false, "End date can't be less than start date");
+            }
+
+            return new Result<bool>(true);
         }
 
         public async Task<Result<bool>> UpdateAssignment(Assignment assignment)
@@ -105,20 +127,7 @@ namespace BLL.Services
         {
             foreach(var assignment in assignments)
             {
-                if(assignment.StartDate > DateTime.Now)
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.Planned;
-                }
-
-                if(assignment.StartDate < DateTime.Now || assignment.EndDate > DateTime.Now)
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.InProgress;
-                }
-
-                if(assignment.EndDate < DateTime.Now) 
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.AwaitingApproval;
-                }
+                SetAssignmentStatus(assignment);
 
                 await _repository.UpdateAsync(assignment);
             }
@@ -126,6 +135,24 @@ namespace BLL.Services
             await _unitOfWork.Save();
 
             return assignments;
+        }
+
+        private void SetAssignmentStatus(Assignment assignment)
+        {
+            if(assignment.StartDate > DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.Planned;
+            }
+
+            if(assignment.StartDate <= DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.InProgress;
+            }
+
+            if (assignment.EndDate < DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.Completed;
+            }
         }
     }
 }

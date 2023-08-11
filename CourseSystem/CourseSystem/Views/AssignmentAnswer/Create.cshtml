@@ -1,4 +1,4 @@
-﻿@using UI.ViewModels
+﻿@using UI.ViewModels.AssignmentViewModels
 @model AssignmentAnsweViewModel
 
 <!DOCTYPE html>
@@ -44,7 +44,8 @@
                                             <label asp-for="AnswerDescription" class="control-label"></label>
                                             <textarea asp-for="AnswerDescription" class="form-control custom-textarea" rows="5" id="AnswerDescription" placeholder="Enter your answer description"></textarea>
                                             <span asp-validation-for="AnswerDescription" class="text-danger"></span>
-                                        </div>                                   
+                                        </div>     
+                                    </div>
                                     <!-- File Upload Input -->
                                     <h4>Your assignmnet answer:</h4>
                                     <div class="form-group mb-3">

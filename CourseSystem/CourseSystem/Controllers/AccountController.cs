@@ -18,14 +18,16 @@ public class AccountController : Controller
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IEmailService _emailService;
+    private readonly IUserService _userService;
 
     public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-        RoleManager<IdentityRole> roleManager, IEmailService emailService)
+        RoleManager<IdentityRole> roleManager, IEmailService emailService, IUserService userService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
         _emailService = emailService;
+        _userService = userService;
     }
 
     private async Task CreateAppUserRoles()
@@ -70,6 +72,11 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Login()
     {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Logout", "Account");
+        }
+        
         var login = new LoginViewModel();
 
         return View(login);
@@ -80,14 +87,23 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData.TempDataMessage("Error", "Values must not be empty. Please try again.");
             return View(loginViewModel);
         }
 
-        var user = await _userManager.FindByEmailAsync(loginViewModel.EmailAddress);
+        var userResult = await _userService.GetUserByEmailAsync(loginViewModel.EmailAddress);
 
-        if (user == null)
+        if (!userResult.IsSuccessful)
         {
             ViewData.ViewDataMessage("Error", "Entered incorrect email or password. Please try again.");
+            return View(loginViewModel);
+        }
+
+        var user = userResult.Data;
+
+        if (!ValidationHelpers.IsValidEmail(loginViewModel.EmailAddress))
+        {
+            ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
             return View(loginViewModel);
         }
 
@@ -121,8 +137,7 @@ public class AccountController : Controller
 
             if (singInAttempt.Succeeded)
             {
-                // return RedirectToAction(); Authorize user
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "User");
             }
         }
 
@@ -146,34 +161,24 @@ public class AccountController : Controller
             return View(registerViewModel);
         }
 
-        var user = await _userManager.FindByEmailAsync(registerViewModel.EmailAddress);
+        var userResult = await _userService.GetUserByEmailAsync(registerViewModel.Email);
 
-        if (user != null)
+        if (userResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", "This email is already in use");
             return View(registerViewModel);
         }
-
-        var newUser = new AppUser()
+        
+        if (!ValidationHelpers.IsValidEmail(registerViewModel.Email))
         {
-            UserName = registerViewModel.FirstName + registerViewModel.LastName,
-            Email = registerViewModel.EmailAddress,
-            FirstName = registerViewModel.FirstName,
-            LastName = registerViewModel.LastName,
-            BirthDate = registerViewModel.BirthDate,
-            University = registerViewModel.University,
-            Role = registerViewModel.Role
-        };
-
-        if (registerViewModel.Telegram != null)
-        {
-            newUser.Telegram = registerViewModel.Telegram;
+            ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
+            return View(registerViewModel);
         }
 
-        if (registerViewModel.GitHub != null)
-        {
-            newUser.GitHub = registerViewModel.GitHub;
-        }
+        var newUser = new AppUser();
+        registerViewModel.MapTo(newUser);
+        
+        newUser.UserName = registerViewModel.FirstName + registerViewModel.LastName;
 
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 
@@ -197,7 +202,6 @@ public class AccountController : Controller
                 await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, newUser, callbackUrl);
 
                 TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
-
                 return View(registerViewModel);
             }
             else
@@ -218,8 +222,14 @@ public class AccountController : Controller
         }
         else
         {
-            TempData.TempDataMessage("Error",
-                "Your password must have at least 6 characters. Must have at least 1 capital letter character, 1 digit and 1 symbol to choose from (!@#$%^&*()_+=\\[{]};:<>|./?,-)");
+            var errorMessages = string.Empty;
+            
+            foreach (var error in newUserResponse.Errors)
+            {
+                errorMessages += $"{error.Description}{Environment.NewLine}";
+            }
+            
+            TempData.TempDataMessage("Error", errorMessages);
             return View(registerViewModel);
         }
     }
@@ -232,13 +242,14 @@ public class AccountController : Controller
             return View("Error");
         }
 
-        var user = await _userManager.FindByIdAsync(userId);
+        var userResult = await _userService.FindByIdAsync(userId);
 
-        if (user == null)
+        if (!userResult.IsSuccessful)
         {
-            return View("Error");
+            return RedirectToAction("Login", "Account");
         }
 
+        var user = userResult.Data;
         var result = await _userManager.ConfirmEmailAsync(user, code);
 
         if (result.Succeeded)
@@ -269,11 +280,11 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var userResult = await _userService.FindByIdAsync(userId);
 
-        if (user != null)
+        if (userResult.IsSuccessful)
         {
-            await _signInManager.UserManager.DeleteAsync(user);
+            await _signInManager.UserManager.DeleteAsync(userResult.Data);
         }
 
         return View();
@@ -296,9 +307,9 @@ public class AccountController : Controller
             return View(forgotPasswordBeforeEnteringViewModel);
         }
 
-        var user = await _userManager.FindByEmailAsync(forgotPasswordBeforeEnteringViewModel.Email);
+        var userResult = await _userService.GetUserByEmailAsync(forgotPasswordBeforeEnteringViewModel.Email);
 
-        if (user == null)
+        if (!userResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", "You wrote an incorrect email. Try again!");
             return View(forgotPasswordBeforeEnteringViewModel);
@@ -315,17 +326,17 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> SendCodeUser()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var userResult = await _userService.GetCurrentUser(User);
 
-        if (user == null)
+        if (!userResult.IsSuccessful)
         {
-            return View("Error");
+            return RedirectToAction("Login", "Account");
         }
 
-        var emailCode = await _emailService.SendCodeToUser(user.Email!);
+        var emailCode = await _emailService.SendCodeToUser(userResult.Data.Email!);
 
         return RedirectToAction("CheckEmailCode",
-            new { code = emailCode, email = user.Email });
+            new { code = emailCode, email = userResult.Data.Email });
     }
 
     [HttpGet]
@@ -380,12 +391,14 @@ public class AccountController : Controller
         {
             return View(newPasswordViewModel);
         }
+      
+        var result = await _userService.UpdatePasswordAsync(newPasswordViewModel.Email, newPasswordViewModel.NewPassword);
 
-        var user = await _userManager.FindByEmailAsync(newPasswordViewModel.Email);
-        user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, newPasswordViewModel.NewPassword);
-        await _userManager.UpdateAsync(user);
-        await _signInManager.SignOutAsync();
-
-        return RedirectToAction("Login");
+        if (!result.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", "Failed to reset password.");
+        }
+        
+        return RedirectToAction("Login", "Account");
     }
 }

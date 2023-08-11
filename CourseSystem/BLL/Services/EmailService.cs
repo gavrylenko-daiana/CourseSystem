@@ -38,7 +38,7 @@ namespace BLL.Services
             try
             {
                 var subjectAndBody = EmailTemplate.GetEmailSubjectAndBody(EmailType.CodeVerification, 
-                    new Dictionary<string, object>() { { @"{randomCode}", randomCode } });
+                    new Dictionary<string, object>() { { @"{randomcode}", randomCode } });
                 
                 var emailData = new EmailData(
                     new List<string>() { email},
@@ -177,7 +177,6 @@ namespace BLL.Services
                     {
                         {@"{firstname}", appUser.FirstName },
                         {@"{lastname}", appUser.LastName },
-                        {@"{birthdate}", appUser.BirthDate },
                         {@"{email}", appUser.Email },
                         {@"{userrole}", appUser.Role},
                         {@"{callbackurl}", callBackUrl }
@@ -201,7 +200,6 @@ namespace BLL.Services
                     {
                         {@"{firstname}", appUser.FirstName },
                         {@"{lastname}", appUser.LastName },
-                        {@"{birthdate}", appUser.BirthDate },
                         {@"{email}", appUser.Email },
                         {@"{userrole}", appUser.Role},
                         {@"{callbackurl}", callBackUrl }

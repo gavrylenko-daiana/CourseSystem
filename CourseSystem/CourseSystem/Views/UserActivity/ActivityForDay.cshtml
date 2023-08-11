@@ -8,46 +8,52 @@
     <title>User activity</title>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6 offset-md-3">
-                <div class="card w-100 pb-0">
-                    <div class="card-header text-center">
-                        <h4>Activity for @(date.ToString("D"))</h4>
-                        @{
-                            var thisDay = date.AddDays(-1);
-                        }
-                        @Html.ActionLink(
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card w-100 pb-0">
+                <div class="card-header text-center">
+                    <h4>Activity for @(date.ToString("D"))</h4>
+                    @{
+                        var thisDay = date.AddDays(-1);
+                    }
+                    @Html.ActionLink(
                         thisDay.DayOfWeek.ToString(),
                         "ActivityForDay",
                         new { thisDay },
-                        new { @class="link-secondary", @style="margin-right:35%" }
+                        new { @class = "link-secondary", @style = "margin-right:35%" }
                         )
-                        @{
-                            thisDay = date.AddDays(1);
-                        }
-                        @Html.ActionLink(
+                    @{
+                        thisDay = date.AddDays(1);
+                    }
+                    @Html.ActionLink(
                         thisDay.DayOfWeek.ToString(),
                         "ActivityForDay",
                         new { thisDay },
-                        new { @class="link-secondary", @style="margin-left:35%" }
+                        new { @class = "link-secondary", @style = "margin-left:35%" }
                         )
+                </div>
+                @if (TempData["Error"] != null)
+                {
+                    <div class="col-md-12 alert alert-danger">
+                        <span><b>Sorry!</b> - @TempData["Error"]</span>
                     </div>
-                    <div class="card-body">
-                        @foreach (var activity in Model)
-                        {
-                            @Html.ActionLink(
+                }
+                <div class="card-body">
+                    @foreach (var activity in Model)
+                    {
+                        @Html.ActionLink(
                             activity.Name,
                             "ActivityDetails",
                             new { activity.Id },
-                            new { @class="list-group-item" }
-                        )
-                        }
-                    </div>
+                            new { @class = "list-group-item" }
+                            )
+                    }
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 </body>
 </html>

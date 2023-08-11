@@ -1,9 +1,6 @@
-﻿@using UI.ViewModels
+﻿@using UI.ViewModels.AssignmentViewModels
 @using Core.Enums
 @model CreateAssignmentViewModel
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -44,7 +41,7 @@
                         <!-- Assignment Creation Form -->
                         <div class="row justify-content-center">
                             <div class="col-12 col-lg-6">
-                                <form method="post" asp-action="CreateAssignment" enctype="multipart/form-data">
+                                <form method="post" asp-action="Create" enctype="multipart/form-data">
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <input type="hidden" id="GroupId" name="GroupId" value="@Model.GroupId" />
                                     <!-- Assignment Details Inputs -->
@@ -64,24 +61,13 @@
                                     <div class="form-row form-group">
                                         <div class="col mb-3">
                                             <label asp-for="StartDate" class="control-label"></label>
-                                            <input asp-for="StartDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                                            <input asp-for="StartDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
                                             <span asp-validation-for="StartDate" class="text-danger"></span>
                                         </div>
                                         <div class="col mb-3">
                                             <label asp-for="EndDate" class="control-label"></label>
-                                            <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                                            <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
                                             <span asp-validation-for="EndDate" class="text-danger"></span>
-                                        </div>
-                                    </div>
-                                    <div class="form-row form-group">
-                                        <div class="col mb-3">
-                                            <label asp-for="AssignmentAccess" class="control-label"></label>
-                                            <select asp-for="AssignmentAccess" class="form-control form-control-lg">
-                                                <option value="@AssignmentAccess.Planned">@AssignmentAccess.Planned</option>
-                                                <option value="@AssignmentAccess.InProgress">@AssignmentAccess.InProgress</option>
-                                                <option value="@AssignmentAccess.Completed">@AssignmentAccess.Completed</option>
-                                            </select>
-                                            <span asp-validation-for="AssignmentAccess" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <!-- File Upload Input -->
