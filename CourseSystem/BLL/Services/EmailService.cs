@@ -164,7 +164,8 @@ namespace BLL.Services
 
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null) 
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null,
+            string tempPassword = null) 
         {
             if(appUser == null)
                 return (String.Empty, String.Empty);
@@ -210,6 +211,16 @@ namespace BLL.Services
                     {
                         {@"{firstname}", appUser.FirstName },
                         {@"{callbackurl}", callBackUrl }
+                    };
+                    break;
+                case EmailType.GetTempPasswordToAdmin:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{lastname}", appUser.LastName },
+                        {@"{email}", appUser.Email },
+                        {@"{userrole}", appUser.Role},
+                        {@"{temppassword}", tempPassword},
                     };
                     break;
                 default:
@@ -264,16 +275,6 @@ namespace BLL.Services
                         {@"{callbackurl}", callBackUrl }
                     };
                     break;
-                case EmailType.GetTempPasswordToAdmin:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        {@"{firstname}", appUser.FirstName },
-                        {@"{lastname}", appUser.LastName },
-                        {@"{email}", appUser.Email },
-                        {@"{userrole}", appUser.Role},
-                        {@"{temppassword}", tempPassword},
-                    };
-                    break;
                 default:
                     return (String.Empty, String.Empty);
             }
@@ -281,12 +282,12 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null)
+        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
         {
             if (appUser == null)
                 return new Result<bool>(false, "Fail to send email");
 
-            var emailContent = GetEmailSubjectAndBody(emailType, appUser, callBackUrl);
+            var emailContent = GetEmailSubjectAndBody(emailType, appUser, callBackUrl, tempPassword);
 
             var toEmail = new List<string>();
             var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
