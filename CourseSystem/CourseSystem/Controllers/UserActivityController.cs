@@ -50,15 +50,15 @@ public class UserActivityController : Controller
     [HttpGet]
     public async Task<IActionResult> ActivityDetails(int id)
     {
-        var activity = await _activityService.GetById(id);
+        var activityResult = await _activityService.GetById(id);
 
-        if (activity == null)
+        if (!activityResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "This activity does not exist.");
+            TempData.TempDataMessage("Error", $"{activityResult.Message}");
             // edit path
             return RedirectToAction("Index", "Home");
         }
 
-        return View(activity);
+        return View(activityResult.Data);
     }
 }
