@@ -93,29 +93,103 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
         await _repository.AddAsync(materialFile);
         await _unitOfWork.Save();
-        
+
         group.EducationMaterials.Add(materialFile);
         await _groupService.UpdateGroup(group);
+
+        return new Result<bool>(true);
     }
 
-    public async Task<List<EducationMaterial>> GetAllMaterialAsync()
+    public async Task<Result<bool>> AddToCourse(IFormFile material, string url, int courseId)
+    {
+        var course = await _courseService.GetById(courseId);
+
+        if (course == null)
+        {
+            return new Result<bool>(false, $"Failed to get {nameof(course)} by id {courseId}");
+        }
+
+        var materialFile = new EducationMaterial()
+        {
+            Name = material.FileName,
+            Url = url,
+            FileExtension = Path.GetExtension(material.FileName),
+            MaterialAccess = MaterialAccess.Course,
+            CourseId = course.Id,
+            Course = course
+        };
+
+        await _repository.AddAsync(materialFile);
+        await _unitOfWork.Save();
+
+        course.EducationMaterials.Add(materialFile);
+        await _courseService.UpdateCourse(course);
+
+        return new Result<bool>(true);
+    }
+
+    public async Task<Result<bool>> DeleteFileFromGroup(EducationMaterial material)
+    {
+        var resultDeleteEducationMaterial = await DeleteFileAsync(material.Name);
+
+        if (!resultDeleteEducationMaterial.IsSuccessful)
+        {
+            return new Result<bool>(false, $"Failed delete {nameof(material)}");
+        }
+
+        var resultDeleteFromDropBox = await DeleteUploadFileAsync(material);
+
+        if (!resultDeleteFromDropBox.IsSuccessful)
+        {
+            return new Result<bool>(false, $"Failed delete {nameof(material)}");
+        }
+
+        var group = material.Group;
+
+        if (group != null)
+        {
+            group.EducationMaterials.Remove(material);
+            await _groupService.UpdateGroup(group);
+        }
+
+        return new Result<bool>(true);
+    }
+
+    public async Task<Result<List<EducationMaterial>>> GetAllMaterialAsync()
     {
         var materials = await _repository.GetAllAsync();
 
-        return materials;
+        if (!materials.Any())
+        {
+            return new Result<List<EducationMaterial>>(false, "Material list is empty");
+        }
+
+        return new Result<List<EducationMaterial>>(true, materials);
     }
 
-    public async Task<EducationMaterial> GetByIdMaterialAsync(int id)
+    public async Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id)
     {
         var material = await GetById(id);
 
-        return material;
+        if (material == null)
+        {
+            return new Result<EducationMaterial>(false, $"{material} with id {id} does not exist");
+        }
+
+        return new Result<EducationMaterial>(true, material);
     }
 
-    public async Task DeleteUploadFileAsync(EducationMaterial material)
+    public async Task<Result<bool>> DeleteUploadFileAsync(EducationMaterial material)
     {
-        await _repository.DeleteAsync(material);
-        await _unitOfWork.Save();
+        try
+        {
+            await _repository.DeleteAsync(material);
+            await _unitOfWork.Save();
+            return new Result<bool>(true);
+        }
+        catch (Exception e)
+        {
+            return new Result<bool>(false, "Failed to delete material");
+        }
     }
-
 }
