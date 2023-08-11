@@ -1,6 +1,8 @@
 ﻿@using UI.ViewModels
 @model AssignmentChatViewModel
 
+<div id="errorMessage"></div>
+
     <div id="inputForm">
         <input type="hidden" id="assignmentId" value=@Model.Id />
         <input type="text" id="message" />
@@ -37,6 +39,8 @@
 
         hubConnection.on("Receive", function (message, userName, created) {
 
+            document.getElementById("errorMessage").innerText = null;
+
             const userNameElem = document.createElement("b");
             userNameElem.textContent = `${userName} : `;
 
@@ -51,6 +55,10 @@
             const firstElem = document.getElementById("chatroom").firstChild;
             document.getElementById("chatroom").insertBefore(elem, firstElem);
         });
+
+    hubConnection.on("Error", function (message) {
+        document.getElementById("errorMessage").innerText = message;
+    });
 
         hubConnection.start()
             .then(function () {
