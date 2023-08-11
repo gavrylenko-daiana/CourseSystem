@@ -36,18 +36,22 @@
     {
         @foreach (var assignment in Model)
         {
-            <div class="col-sm-6  mb-3">
-                <div class="card">
-                    <div class="card-body">
+                <div class="col-sm-6  mb-3">
+                    <div class="card">
+                        @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+                        {
+                            <div class="card-header bg-transparent border-success">
+                                @assignment.AssignmentAccess.ToString()
+                            </div>
+                        }
+                   <div class="card-body">
                         <h4 class="card-title">@assignment.Name</h4>
-
                             <a href="@Url.Action("Details", "Assignment", new { assignmentId = assignment.Id })" class="btn btn-primary">
                                 Details
-                            </a>
-                      
+                            </a>                      
                     </div>
-                        <div class="card-footer text-muted">Start Date: @assignment.StartDate.ToString("dddd, dd MMMM yyyy HH:mm:ss")</div>
-                        <div class="card-footer text-muted">End date: @assignment.EndDate.ToString("dddd, dd MMMM yyyy HH:mm:ss")</div>
+                        <div class="card-footer text-muted">Start Date: @assignment.StartDate.ToString("dddd, dd MMMM yyyy HH:mm")</div>
+                        <div class="card-footer text-muted">End date: @assignment.EndDate.ToString("dddd, dd MMMM yyyy HH:mm")</div>
                 </div>
             </div>
         }

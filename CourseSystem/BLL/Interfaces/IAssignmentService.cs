@@ -13,6 +13,6 @@ namespace BLL.Interfaces
         Task<Result<List<Assignment>>> GetGroupAssignments(int groupId);
         Task<Result<bool>> DeleteAssignment(int assignmentId);
         Task<Result<bool>> UpdateAssignment(Assignment assignment);
-        Result<bool> ValidateTimeInput(DateTime startDate, DateTime endDate);
+        Result<bool> ValidateTimeInput(DateTime? startDate, DateTime? endDate);
     }
 }

@@ -83,8 +83,18 @@ namespace BLL.Services
             return new Result<List<Assignment>>(true, groupAssignments);
         }
 
-        public Result<bool> ValidateTimeInput(DateTime startDate, DateTime endDate)
+        public Result<bool> ValidateTimeInput(DateTime? startDate, DateTime? endDate)
         {
+            if(startDate == null)
+            {
+                startDate = DateTime.MinValue;
+            }
+
+            if(endDate == null)
+            {
+                endDate = DateTime.MaxValue;
+            }
+
             if(startDate > endDate)
             {
                 return new Result<bool>(false, "End date can't be less than start date");

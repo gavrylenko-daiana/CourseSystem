@@ -12,11 +12,8 @@ namespace UI.ViewModels.AssignmentViewModels
         [Display(Name = "* Assignment name")]
         public string Name { get; set; }
         public string? Description { get; set; }
-
-        [Required(ErrorMessage = "Start date is required")]
         [Display(Name = "* Start date")]
-        [DataType(DataType.Date)]
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
         [Required(ErrorMessage = "End date is required")]
         [Display(Name = "* End date")]
