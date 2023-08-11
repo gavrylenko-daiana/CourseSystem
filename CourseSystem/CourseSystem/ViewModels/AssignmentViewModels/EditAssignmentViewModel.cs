@@ -10,7 +10,7 @@ namespace UI.ViewModels.AssignmentViewModels
 
         [Required(ErrorMessage = "Assignment name is required")]
         [Display(Name = "* Assignment name")]
-        public string Name { get; set; }]
+        public string Name { get; set; }
         public string? Description { get; set; }
 
         [Required(ErrorMessage = "Start date is required")]
