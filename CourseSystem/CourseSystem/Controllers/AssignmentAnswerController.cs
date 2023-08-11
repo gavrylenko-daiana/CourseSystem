@@ -106,7 +106,9 @@ public class AssignmentAnswerController : Controller
         var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswer);
 
         if (!deleteResult.IsSuccessful)
+        {
             TempData.TempDataMessage("Error", deleteResult.Message);
+        }
 
         return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
     }
