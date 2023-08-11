@@ -129,7 +129,7 @@ public class UserService : GenericService<AppUser>, IUserService
         }
         else
         {
-            return new Result<bool>(false, $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+            return new Result<bool>(false, $"Message: {result.Message}");
         }
     }
 
@@ -154,7 +154,7 @@ public class UserService : GenericService<AppUser>, IUserService
 
         if (user == null)
         {
-            return new Result<AppUser>(false, $"Failed to get {nameof(user)}");
+            return new Result<AppUser>(false);
         }
         
         return new Result<AppUser>(true, user);
@@ -166,7 +166,7 @@ public class UserService : GenericService<AppUser>, IUserService
 
         if (user == null)
         {
-            return new Result<AppUser>(false, $"Failed to get {nameof(user)}");
+            return new Result<AppUser>(false, $"{nameof(user)} does not exist");
         }
         
         return new Result<AppUser>(true, user);
