@@ -102,16 +102,16 @@ public class AssignmentController : Controller
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteAssignment(int assignmentId)
     {
-        var assignment = await _assignmentService.GetById(assignmentId);
+        var assignmentResult = await _assignmentService.GetById(assignmentId);
         
-        if(assignment == null)
+        if(!assignmentResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "Fail delete assignment");
+            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
             return RedirectToAction("Index", "Group");
         }
 
         var assignentDeleteVM = new DeleteAssignmentViewModel();
-        assignment.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
+        assignmentResult.Data.MapTo<Assignment, DeleteAssignmentViewModel>(assignentDeleteVM);
 
         return View(assignentDeleteVM);                    
       }
@@ -133,17 +133,17 @@ public class AssignmentController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(int assignmentId)
     {
-        var assignment = await _assignmentService.GetById(assignmentId);
+        var assignmentResult = await _assignmentService.GetById(assignmentId);
 
-        if (assignment == null)
+        if(!assignmentResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "Failt to get assignment data");
+            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
             return RedirectToAction("Index", "Group");
         }
 
         var assignentDetailsVM = new DetailsAssignmentViewModel();
-        assignment.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
-        var userAssignmnet = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
+        assignmentResult.Data.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
+        var userAssignmnet = assignmentResult.Data.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignmentResult.Data.Id);
         assignentDetailsVM.UserAssignment = userAssignmnet;
 
         if (userAssignmnet?.AssignmentAnswers == null)
@@ -165,19 +165,19 @@ public class AssignmentController : Controller
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> Edit(int id)
     {
-        var assignment = await _assignmentService.GetById(id);
+        var assignmentResult = await _assignmentService.GetById(id);
 
-        if (assignment == null)
+        if(!assignmentResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "Fail to get edit page");
+            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
             return RedirectToAction("Details", "Assignment", new { assignmentId = id });
         }
 
         var assigmentVM = new EditAssignmentViewModel();
-        assignment.MapTo<Assignment, EditAssignmentViewModel>(assigmentVM);
+        assignmentResult.Data.MapTo<Assignment, EditAssignmentViewModel>(assigmentVM);
 
         var fileCheckBoxes = new List<FileCheckBoxViewModel>();
-        foreach (var assignmentFile in assignment.AssignmentFiles)
+        foreach (var assignmentFile in assignmentResult.Data.AssignmentFiles)
         {
             var checkbox = new FileCheckBoxViewModel
             {
