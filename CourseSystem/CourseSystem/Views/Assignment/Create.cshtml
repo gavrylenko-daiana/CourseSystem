@@ -2,9 +2,6 @@
 @using Core.Enums
 @model CreateAssignmentViewModel
 
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,17 +68,6 @@
                                             <label asp-for="EndDate" class="control-label"></label>
                                             <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-dd")">
                                             <span asp-validation-for="EndDate" class="text-danger"></span>
-                                        </div>
-                                    </div>
-                                    <div class="form-row form-group">
-                                        <div class="col mb-3">
-                                            <label asp-for="AssignmentAccess" class="control-label"></label>
-                                            <select asp-for="AssignmentAccess" class="form-control form-control-lg">
-                                                <option value="@AssignmentAccess.Planned">@AssignmentAccess.Planned</option>
-                                                <option value="@AssignmentAccess.InProgress">@AssignmentAccess.InProgress</option>
-                                                <option value="@AssignmentAccess.Completed">@AssignmentAccess.Completed</option>
-                                            </select>
-                                            <span asp-validation-for="AssignmentAccess" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <!-- File Upload Input -->

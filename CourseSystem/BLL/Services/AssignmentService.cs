@@ -26,7 +26,9 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, "Invalid assignment data");
             }
-               
+
+            SetAssignmentStatus(assignment);
+
             try
             {
                 await _repository.AddAsync(assignment);
@@ -105,20 +107,7 @@ namespace BLL.Services
         {
             foreach(var assignment in assignments)
             {
-                if(assignment.StartDate > DateTime.Now)
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.Planned;
-                }
-
-                if(assignment.StartDate < DateTime.Now)
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.InProgress;
-                }
-
-                if(assignment.EndDate < DateTime.Now) 
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.AwaitingApproval;
-                }
+                SetAssignmentStatus(assignment);
 
                 await _repository.UpdateAsync(assignment);
             }
@@ -126,6 +115,24 @@ namespace BLL.Services
             await _unitOfWork.Save();
 
             return assignments;
+        }
+
+        private void SetAssignmentStatus(Assignment assignment)
+        {
+            if(assignment.StartDate > DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.Planned;
+            }
+
+            if(assignment.StartDate <= DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.InProgress;
+            }
+
+            if (assignment.EndDate < DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.Completed;
+            }
         }
     }
 }
