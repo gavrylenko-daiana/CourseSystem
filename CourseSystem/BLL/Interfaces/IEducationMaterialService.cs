@@ -7,15 +7,19 @@ namespace BLL.Interfaces;
 
 public interface IEducationMaterialService
 {
-    Task<string> AddFileAsync(IFormFile file);
+    Task<Result<string>> AddFileAsync(IFormFile file);
+    
+    Task<Result<bool>> DeleteFileAsync(string filePath);
 
-    Task DeleteFileAsync(string publicId);
+    Task<Result<List<EducationMaterial>>> GetAllMaterialAsync();
 
-    Task<List<EducationMaterial>> GetAllMaterialAsync();
+    Task<Result<bool>> AddToGroup(IFormFile material, string url, int groupId);
+    
+    Task<Result<bool>> AddToCourse(IFormFile material, string url, int courseId);
 
-    Task AddToGroup(IFormFile material, int groupId, string url);
+    Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id);
 
-    Task<EducationMaterial> GetByIdMaterialAsync(int id);
+    Task<Result<bool>> DeleteUploadFileAsync(EducationMaterial material);
 
-    Task DeleteUploadFileAsync(EducationMaterial material);
+    Task<Result<bool>> DeleteFileFromGroup(EducationMaterial material);
 }

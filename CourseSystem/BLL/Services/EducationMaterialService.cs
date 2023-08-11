@@ -7,6 +7,7 @@ using Core.Models;
 using DAL.Repository;
 using Dropbox.Api;
 using Dropbox.Api.Files;
+using Dropbox.Api.Team;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -26,53 +27,59 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         _courseService = courseService;
         _groupService = groupService;
     }
-    
-    public async Task<string> AddFileAsync(IFormFile file)
+
+    public async Task<Result<string>> AddFileAsync(IFormFile file)
     {
         try
         {
             using var stream = file.OpenReadStream();
-            var uploadResult = await _dropboxClient.Files.UploadAsync("/" + file.FileName, WriteMode.Overwrite.Instance, body: stream);
+            var uploadResult =
+                await _dropboxClient.Files.UploadAsync("/" + file.FileName, WriteMode.Overwrite.Instance, body: stream);
 
             var sharedLink = await _dropboxClient.Sharing.CreateSharedLinkWithSettingsAsync(uploadResult.PathDisplay);
-            
+
             string link = sharedLink.Url;
 
             if (file.ContentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
                 file.ContentType == "application/msword")
             {
-                return link;
+                return new Result<string>(true, link);
             }
             else
             {
                 link = link.Replace("dl=0", "raw=1");
-                
-                return link;
+
+                return new Result<string>(true, link);
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            throw new Exception($"File could not be loaded. ErrorMessage: {e.Message}");
+            return new Result<string>(false, $"File could not be loaded. ErrorMessage: {ex.Message}");
         }
     }
 
-    public async Task DeleteFileAsync(string filePath)
+    public async Task<Result<bool>> DeleteFileAsync(string filePath)
     {
         try
         {
             await _dropboxClient.Files.DeleteV2Async("/" + filePath);
+
+            return new Result<bool>(true);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            throw new Exception($"File could not be deleted. ErrorMessage: {e.Message}");
+            return new Result<bool>(false, $"ErrorMessage: {ex.Message}");
         }
     }
 
-    public async Task AddToGroup(IFormFile material, int groupId, string url)
+    public async Task<Result<bool>> AddToGroup(IFormFile material, string url, int groupId)
     {
         var group = await _groupService.GetById(groupId);
 
-        if (group == null) throw new Exception("failed to get group by groupId");
+        if (group == null)
+        {
+            return new Result<bool>(false, $"Failed to get {nameof(group)} by id {groupId}");
+        }
 
         var materialFile = new EducationMaterial()
         {
