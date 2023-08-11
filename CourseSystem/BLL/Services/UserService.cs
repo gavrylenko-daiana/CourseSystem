@@ -133,6 +133,33 @@ public class UserService : GenericService<AppUser>, IUserService
         }
     }
 
+    public async Task<Result<bool>> UpdatePasswordAsync(string email, string newPassword)
+    {
+        var userResult = await GetUserByEmailAsync(email);
+
+        if (!userResult.IsSuccessful)
+        {
+            return new Result<bool>(false, userResult.Message);
+        }
+        
+        userResult.Data.PasswordHash = _userManager.PasswordHasher.HashPassword(userResult.Data, newPassword);
+        await _userManager.UpdateAsync(userResult.Data);
+
+        return new Result<bool>(true);
+    }
+
+    public async Task<Result<AppUser>> GetUserByEmailAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            return new Result<AppUser>(false, $"Failed to get {nameof(user)}");
+        }
+        
+        return new Result<AppUser>(true, user);
+    }
+
     public async Task<Result<AppUser>> FindByIdAsync(string id)
     {
         var user = await _userManager.FindByIdAsync(id);
