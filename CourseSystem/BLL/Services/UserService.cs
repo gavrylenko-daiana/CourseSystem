@@ -148,6 +148,21 @@ public class UserService : GenericService<AppUser>, IUserService
         return new Result<bool>(true);
     }
 
+    public async Task<Result<bool>> UpdateEmailAsync(string email, string newEmail)
+    {
+        var userResult = await GetUserByEmailAsync(email);
+
+        if (!userResult.IsSuccessful)
+        {
+            return new Result<bool>(false, userResult.Message);
+        }
+
+        userResult.Data.Email = newEmail;
+        await _userManager.UpdateAsync(userResult.Data);
+
+        return new Result<bool>(true);
+    }
+
     public async Task<Result<AppUser>> GetUserByEmailAsync(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);

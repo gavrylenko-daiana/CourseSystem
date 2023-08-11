@@ -14,6 +14,8 @@ public interface IUserService
     Task<Result<bool>> CheckPasswordAsync(ClaimsPrincipal currentUser, string currentPassword, string newPassword);
 
     Task<Result<bool>> UpdatePasswordAsync(string email, string newPassword); 
+    
+    Task<Result<bool>> UpdateEmailAsync(string email, string newEmail); 
 
     Task<Result<AppUser>> GetUserByEmailAsync(string email);
     
