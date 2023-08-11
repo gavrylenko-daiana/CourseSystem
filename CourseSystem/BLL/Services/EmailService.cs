@@ -264,6 +264,16 @@ namespace BLL.Services
                         {@"{callbackurl}", callBackUrl }
                     };
                     break;
+                case EmailType.GetTempPasswordToAdmin:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{lastname}", appUser.LastName },
+                        {@"{email}", appUser.Email },
+                        {@"{userrole}", appUser.Role},
+                        {@"{temppassword}", tempPassword},
+                    };
+                    break;
                 default:
                     return (String.Empty, String.Empty);
             }
