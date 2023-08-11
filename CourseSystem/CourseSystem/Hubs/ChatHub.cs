@@ -35,14 +35,14 @@ namespace UI.Hubs
                 await Clients.Group(assignmentId).SendAsync("Error", "Unknowm user");
             }
 
-            var assignment = await _assignmentService.GetById(int.Parse(assignmentId));
+            var assignmentResult = await _assignmentService.GetById(int.Parse(assignmentId));
 
-            if (assignment == null)
+            if (!assignmentResult.IsSuccessful)
             {
                 await Clients.Group(assignmentId).SendAsync("Error", "Unknowm assignment");
             }
 
-            var message = await _chatMessageService.CreateChatMessage(user, assignment, text);
+            var message = await _chatMessageService.CreateChatMessage(user, assignmentResult.Data, text);
 
             if (!message.IsSuccessful)
             {
