@@ -21,12 +21,14 @@ public class GroupController : Controller
     private readonly IUserGroupService _userGroupService;
     private readonly IUserCourseService _userCourseService;
     private readonly UserManager<AppUser> _userManager;
+    private readonly ILogger<GroupController> _logger;
 
     public GroupController(IGroupService groupService, ICourseService courseService,
         UserManager<AppUser> userManager,
         IEmailService emailService,
         IUserGroupService userGroupService,
-        IUserCourseService userCourseService)
+        IUserCourseService userCourseService,
+        ILogger<GroupController> logger)
     {
         _groupService = groupService;
         _courseService = courseService;
@@ -34,6 +36,7 @@ public class GroupController : Controller
         _userManager = userManager;
         _userGroupService = userGroupService;
         _userCourseService = userCourseService;
+        _logger = logger;
     }
     
     [HttpGet]
@@ -43,6 +46,7 @@ public class GroupController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogWarning("Unouthirized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -51,6 +55,7 @@ public class GroupController : Controller
         
         if (!groupsResult.IsSuccessful)
         {
+            _logger.LogError("Groups fail for user {userId}! Error: {errorMessage}", currentUser.Id, groupsResult.Message);
             TempData.TempDataMessage("Error", $"{groupsResult.Message}");
             return View("Index");
         }
@@ -87,6 +92,7 @@ public class GroupController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogError("Unouthirized user");
             TempData.TempDataMessage("Error", "User not found");
             return View(groupViewModel);
         }
@@ -99,6 +105,7 @@ public class GroupController : Controller
 
         if (!createResult.IsSuccessful)
         {
+            _logger.LogError("Group creation fail for user {userId}! Error: {errorMessage}", currentUser.Id, createResult.Message);
             TempData["CourseId"] = courseId;
             TempData.TempDataMessage("Error", $"{createResult.Message}");
             return View(groupViewModel);
@@ -114,6 +121,7 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", id, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
@@ -136,6 +144,7 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", id, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
@@ -156,6 +165,7 @@ public class GroupController : Controller
         
         if (!updateResult.IsSuccessful)
         {
+            _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}", newGroupViewModel.Id, updateResult.Message);
             TempData.TempDataMessage("Error", $"{updateResult.Message}");
             return View(newGroupViewModel);
         }
@@ -170,6 +180,7 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", id, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
@@ -184,6 +195,7 @@ public class GroupController : Controller
         
         if (!deleteResult.IsSuccessful)
         {
+            _logger.LogError("Failed to delete group by Id {groupId}! Error: {errorMessage}", id, deleteResult.Message);
             TempData.TempDataMessage("Error", $"{deleteResult.Message}");
             return View("Delete");
         }
@@ -199,6 +211,7 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", id, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
@@ -229,12 +242,14 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", groupId, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
 
         if (selectedStudents.Count > 20)
         {
+            _logger.LogInformation("More than 20 students added to group {groupId}!", groupId);
             TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation");
             return View("GetApprove", groupId);
         }
@@ -262,6 +277,7 @@ public class GroupController : Controller
 
             if (!result.IsSuccessful)
             {
+                _logger.LogError("Failed to send emails with invitation to group {groupId}! Error: {errorMessage}", groupResult.Data.Id, result.Message);
                 TempData.TempDataMessage("Error", result.Message);
             }
         }
@@ -277,12 +293,14 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", groupId, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
         
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}", courseId, courseResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
@@ -314,6 +332,7 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", groupId, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
@@ -343,6 +362,7 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", groupId, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
@@ -369,6 +389,7 @@ public class GroupController : Controller
 
         if (!result.IsSuccessful)
         {
+            _logger.LogError("Failed to send emails with invitation to group {groupId}! Error: {errorMessage}", groupResult.Data.Id, result.Message);
             TempData.TempDataMessage("Error", result.Message);
         }
 
@@ -380,10 +401,18 @@ public class GroupController : Controller
     public async Task<IActionResult> InventationToGroup(int groupId, string code)
     {
         var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+        {
+            _logger.LogWarning("Unouthirized user");
+            return RedirectToAction("Login", "Account");
+        }
+
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);
 
         if (!result.Succeeded)
         {
+            _logger.LogError("Failed to confirm email with invitation to group {groupId} for user {userId}! Errors: {errorMessages}", groupId, currentUser.Id, result.Errors);
             return View("Error");
         }
 
@@ -391,6 +420,7 @@ public class GroupController : Controller
 
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", groupId, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
@@ -405,6 +435,7 @@ public class GroupController : Controller
             
         if (!addStudentToGroupAndCourseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to add student {studentId} to group {groupId}! Error: {errorMessage}", userGroup.AppUserId, userGroup.AppUserId, addStudentToGroupAndCourseResult.Message);
             TempData.TempDataMessage("Error", addStudentToGroupAndCourseResult.Message);
             return RedirectToAction("Index", "Home");
         }
@@ -424,6 +455,7 @@ public class GroupController : Controller
 
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", id, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }           
@@ -432,6 +464,7 @@ public class GroupController : Controller
 
         if (currentTeacher == null)
         {
+            _logger.LogWarning("Unausorized user!");
             return RedirectToAction("Login", "Account");
         }
             
@@ -445,6 +478,7 @@ public class GroupController : Controller
 
         if (!sendEmailResult.IsSuccessful)
         {
+            _logger.LogError("Failed to send emails with confirmation of group {groupId}! Error: {errorMessage}", groupResult.Data.Id, sendEmailResult.Message);
             TempData.TempDataMessage("Error", sendEmailResult.Message);
             return RedirectToAction("Index", "Home");
         }
@@ -455,7 +489,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    [Authorize(Roles ="Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AdminApprove(int groupId, string teacherId)
     {
         var groupResult = await _groupService.GetById(groupId);
@@ -463,12 +497,14 @@ public class GroupController : Controller
         
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", groupId, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
         
         if (teacher == null)
         {
+            _logger.LogError("Failed to get user by Id {userId}!", teacherId);
             return View("Error");
         }
             
@@ -479,7 +515,12 @@ public class GroupController : Controller
            new { groupId = groupId, code = code},
            protocol: HttpContext.Request.Scheme);
 
-        await _emailService.SendEmailGroups(EmailType.ApprovedGroupCreation, groupResult.Data, callbackUrl, teacher);
+        var sendEmailResult = await _emailService.SendEmailGroups(EmailType.ApprovedGroupCreation, groupResult.Data, callbackUrl, teacher);
+
+        if (!sendEmailResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to send emails with approvement of group {groupId}! Error: {errorMessage}", groupResult.Data.Id, sendEmailResult.Message);
+        }
 
         return View();
     }
@@ -493,6 +534,7 @@ public class GroupController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogWarning("Unouthirized user");
             return RedirectToAction("Login", "Account");
         }
            
@@ -500,6 +542,7 @@ public class GroupController : Controller
 
         if (!result.Succeeded)
         {
+            _logger.LogError("Failed to confirm email for user {userId} with code {userCode}! Errors: {errorMessages}", currentUser.Id, code, result.Errors);
             return View("Error");
         }
             
@@ -507,6 +550,7 @@ public class GroupController : Controller
 
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}", groupId, groupResult.Message);
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }         
