@@ -18,27 +18,39 @@ namespace UI.Hubs
         }
         public async Task Send(string text, string assignmentId)
         {
-            try
+            if (String.IsNullOrWhiteSpace(text))
             {
-                if (String.IsNullOrWhiteSpace(text))
-                {
-                    return;
-                }
-
-                if(assignmentId == null)
-                {
-                    throw new ArgumentNullException(nameof(assignmentId));
-                }
-
-                var user = await _userManager.GetUserAsync(Context.User);
-                var assignment = await _assignmentService.GetById(int.Parse(assignmentId));
-
-                var message = await _chatMessageService.CreateChatMessage(user, assignment, text);
-                await Clients.Group(message.AssignmentId.ToString()).SendAsync("Receive", message.Text, $"{user.FirstName} {user.LastName}", message.Created.ToString("g"));
+                await Clients.Group(assignmentId).SendAsync("Error", "Empty message");
             }
-            catch (Exception ex)
+
+            if (assignmentId == null)
             {
-                throw new Exception($"Chat failure! Exception: {ex.Message}");
+                return;
+            }
+
+            var user = await _userManager.GetUserAsync(Context.User);
+
+            if (user == null)
+            {
+                await Clients.Group(assignmentId).SendAsync("Error", "Unknowm user");
+            }
+
+            var assignment = await _assignmentService.GetById(int.Parse(assignmentId));
+
+            if (assignment == null)
+            {
+                await Clients.Group(assignmentId).SendAsync("Error", "Unknowm assignment");
+            }
+
+            var message = await _chatMessageService.CreateChatMessage(user, assignment, text);
+
+            if (!message.IsSuccessful)
+            {
+                await Clients.Group(assignmentId).SendAsync("Error", message.Message);
+            }
+            else
+            {
+                await Clients.Group(message.Data.AssignmentId.ToString()).SendAsync("Receive", message.Data.Text, $"{user.FirstName} {user.LastName}", message.Data.Created.ToString("g"));
             }
         }
 

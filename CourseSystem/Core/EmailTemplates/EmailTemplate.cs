@@ -29,7 +29,6 @@ namespace Core.EmailTemplates
             {EmailType.AccountApproveByAdmin,  @"<h4>User data overview</h4>" + "<hr/>" +
                     "<p>User first name: {firstname}</p>" +
                     "<p>User last name: {lastname}</p>" +
-                    "<p>Date of birth: {birthdate}</p>" +
                     "<p>User email: {email}</p>" +
                     "<p>User role: {userrole}</p>"+
                     "<h4>Confirm registration of {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4>"
@@ -43,7 +42,6 @@ namespace Core.EmailTemplates
                     "<hr/>" +
                     "<p>User first name: {firstname}</p>" +
                     "<p>User last name: {lastname}</p>" +
-                    "<p>Date of birth: {birthdate}</p>" +
                     "<p>User email: {email}</p>" +
                     "<p>User role: {userrole}</p>"+
                     "<h4>Confirm deletion of {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4>" },

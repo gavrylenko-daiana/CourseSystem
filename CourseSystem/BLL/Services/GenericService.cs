@@ -55,4 +55,6 @@ public class GenericService<T>: IGenericService<T> where T : class
             return new Result<List<T>>(false, $"Failed to get {typeof(T).Name} by predicate. Exception: {ex.Message}");
         }
     }
+    
+    
 }

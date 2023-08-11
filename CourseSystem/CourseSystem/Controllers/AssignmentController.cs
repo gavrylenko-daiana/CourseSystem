@@ -100,7 +100,7 @@ public class AssignmentController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> DeleteAssignment(int assignmentId)
+    public async Task<IActionResult> Delete(int id)
     {
         var assignmentResult = await _assignmentService.GetById(assignmentId);
         
@@ -116,15 +116,16 @@ public class AssignmentController : Controller
         return View(assignentDeleteVM);                    
       }
 
-    [HttpGet]
-    public async Task<IActionResult> Delete(int id)
+    [HttpPost]
+    [ActionName("Delete")]
+    public async Task<IActionResult> DeleteAssignment(int id)
     {
         var deleteResult = await _assignmentService.DeleteAssignment(id);
 
         if (!deleteResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", deleteResult.Message);
-            return View();
+            return RedirectToAction("Delete", "Assignment", new { assignmentId = id });
         }
 
         return RedirectToAction("Index", "Group");

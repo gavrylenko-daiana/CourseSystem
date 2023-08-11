@@ -177,7 +177,6 @@ namespace BLL.Services
                     {
                         {@"{firstname}", appUser.FirstName },
                         {@"{lastname}", appUser.LastName },
-                        {@"{birthdate}", appUser.BirthDate },
                         {@"{email}", appUser.Email },
                         {@"{userrole}", appUser.Role},
                         {@"{callbackurl}", callBackUrl }
@@ -201,7 +200,6 @@ namespace BLL.Services
                     {
                         {@"{firstname}", appUser.FirstName },
                         {@"{lastname}", appUser.LastName },
-                        {@"{birthdate}", appUser.BirthDate },
                         {@"{email}", appUser.Email },
                         {@"{userrole}", appUser.Role},
                         {@"{callbackurl}", callBackUrl }
