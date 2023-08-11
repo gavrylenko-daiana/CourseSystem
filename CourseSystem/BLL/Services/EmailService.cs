@@ -19,13 +19,15 @@ namespace BLL.Services
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly EmailSettings _emailSettings;
-
+        private readonly IUserService _userService;
 
         public EmailService(UserManager<AppUser> userManager,
-            IOptions<EmailSettings> settings)
+            IOptions<EmailSettings> settings,
+            IUserService userService)
         {
             _userManager = userManager;
             _emailSettings = settings.Value;
+            _userService = userService;
         }
               
         public async Task<int> SendCodeToUser(string email)
@@ -59,6 +61,31 @@ namespace BLL.Services
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<Result<bool>> SendTempPasswordToUser(EmailType emailType, AppUser appUser)
+        {
+            if (appUser == null)
+            {
+                return new Result<bool>(false, $"{nameof(appUser)} not found");
+            }
+            
+            var tempPassword = _userService.GenerateTemporaryPassword();
+            var updateResult = await _userService.UpdatePasswordAsync(appUser.Email, tempPassword);
+
+            if (!updateResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"{updateResult.Message}");
+            }
+            
+            var sendResult = await SendEmailToAppUsers(emailType, appUser, tempPassword: tempPassword);
+
+            if (!sendResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"{sendResult.Message}");
+            }
+            
+            return new Result<bool>(true, $"{updateResult.Message}");
         }
 
         private async Task<Result<bool>> SendEmailAsync(EmailData emailData)
