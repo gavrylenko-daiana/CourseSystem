@@ -117,7 +117,6 @@ public class AssignmentController : Controller
       }
 
     [HttpGet]
-    [ActionName("DeleteAssignment")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleteResult = await _assignmentService.DeleteAssignment(id);
@@ -125,7 +124,7 @@ public class AssignmentController : Controller
         if (!deleteResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", deleteResult.Message);
-            return View();
+            return RedirectToAction("DeleteAssignment", "Assignment", new { assignmentId = id });
         }
 
         return RedirectToAction("Index", "Group");
