@@ -137,46 +137,36 @@ public class EducationMaterialController : Controller
     {
         var material = await _educationMaterialService.GetByIdMaterialAsync(id);
 
-        TempData["UploadResult"] = material.Url;
+        if (!material.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Message: {material.Message}");
+            return RedirectToAction("Index", "Course");
+        }
 
-        return View(material);
+        TempData["UploadResult"] = material.Data.Url;
+
+        return View(material.Data);
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
         var fileToDelete = await _educationMaterialService.GetByIdMaterialAsync(id);
 
-        if (fileToDelete == null)
+        if (!fileToDelete.IsSuccessful)
         {
-            return NotFound();
+            TempData.TempDataMessage("Error", $"Message: {fileToDelete.Message}");
+            return RedirectToAction("Detail", "EducationMaterial", new { id = id });
         }
 
-        var access = fileToDelete.MaterialAccess;
+        var deleteResult = await _educationMaterialService.DeleteFileFromGroup(fileToDelete.Data);
 
-        switch (access)
+        if (!deleteResult.IsSuccessful)
         {
-            case MaterialAccess.Group:
-                // await _educationMaterialService.DeleteGroup(fileToDelete);
-                await _educationMaterialService.DeleteFileAsync(fileToDelete.Name);
-                await _educationMaterialService.DeleteUploadFileAsync(fileToDelete);
-            
-                var group = fileToDelete.Group;
-
-                if (group != null)
-                {
-                    group.EducationMaterials.Remove(fileToDelete);
-                    await _groupService.UpdateGroup(group);
-                }
-                break;
-            case MaterialAccess.Course:
-                break;
-            case MaterialAccess.General:
-                break;
-            default:
-                break;
+            TempData.TempDataMessage("Error", $"Message: {deleteResult.Message}");
+            return RedirectToAction("Detail", "EducationMaterial", new { id = id });
         }
-
+        
         return RedirectToAction("Index", "Course");
     }
 }
