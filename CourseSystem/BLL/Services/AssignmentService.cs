@@ -83,6 +83,16 @@ namespace BLL.Services
             return new Result<List<Assignment>>(true, groupAssignments);
         }
 
+        public Result<bool> ValidateTimeInput(DateTime startDate, DateTime endDate)
+        {
+            if(startDate > endDate)
+            {
+                return new Result<bool>(false, "End date can't be less than start date");
+            }
+
+            return new Result<bool>(true);
+        }
+
         public async Task<Result<bool>> UpdateAssignment(Assignment assignment)
         {
             if (assignment == null)
