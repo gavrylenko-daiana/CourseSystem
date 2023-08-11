@@ -64,19 +64,19 @@ namespace BLL.Services
 
         public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId)
         {
-            var group = await _groupService.GetById(groupId); 
+            var groupResult = await _groupService.GetById(groupId); 
 
-            if (group == null)
+            if (!groupResult.IsSuccessful)
             {
-                return new Result<List<Assignment>>(false, "Fail to get group");
+                return new Result<List<Assignment>>(false, $"{groupResult.Message}");
             }
                 
-            if (group.Assignments.IsNullOrEmpty())
+            if (groupResult.Data.Assignments.IsNullOrEmpty())
             {
                 return new Result<List<Assignment>>(true, "No assignment in group");
             }
                 
-            var groupAssignments = await ChechStartAndEndAssignmnetDate(group.Assignments);
+            var groupAssignments = await ChechStartAndEndAssignmnetDate(groupResult.Data.Assignments);
 
             return new Result<List<Assignment>>(true, groupAssignments);
         }
