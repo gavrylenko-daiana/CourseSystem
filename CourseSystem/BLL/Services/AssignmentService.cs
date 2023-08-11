@@ -26,7 +26,9 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, "Invalid assignment data");
             }
-               
+
+            SetAssignmentStatus(assignment);
+
             try
             {
                 await _repository.AddAsync(assignment);
@@ -81,6 +83,26 @@ namespace BLL.Services
             return new Result<List<Assignment>>(true, groupAssignments);
         }
 
+        public Result<bool> ValidateTimeInput(DateTime? startDate, DateTime? endDate)
+        {
+            if(startDate == null)
+            {
+                startDate = DateTime.MinValue;
+            }
+
+            if(endDate == null)
+            {
+                endDate = DateTime.MaxValue;
+            }
+
+            if(startDate > endDate)
+            {
+                return new Result<bool>(false, "End date can't be less than start date");
+            }
+
+            return new Result<bool>(true);
+        }
+
         public async Task<Result<bool>> UpdateAssignment(Assignment assignment)
         {
             if (assignment == null)
@@ -105,20 +127,7 @@ namespace BLL.Services
         {
             foreach(var assignment in assignments)
             {
-                if(assignment.StartDate > DateTime.Now)
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.Planned;
-                }
-
-                if(assignment.StartDate < DateTime.Now)
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.InProgress;
-                }
-
-                if(assignment.EndDate < DateTime.Now) 
-                {
-                    assignment.AssignmentAccess = AssignmentAccess.AwaitingApproval;
-                }
+                SetAssignmentStatus(assignment);
 
                 await _repository.UpdateAsync(assignment);
             }
@@ -126,6 +135,24 @@ namespace BLL.Services
             await _unitOfWork.Save();
 
             return assignments;
+        }
+
+        private void SetAssignmentStatus(Assignment assignment)
+        {
+            if(assignment.StartDate > DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.Planned;
+            }
+
+            if(assignment.StartDate <= DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.InProgress;
+            }
+
+            if (assignment.EndDate < DateTime.Now)
+            {
+                assignment.AssignmentAccess = AssignmentAccess.Completed;
+            }
         }
     }
 }

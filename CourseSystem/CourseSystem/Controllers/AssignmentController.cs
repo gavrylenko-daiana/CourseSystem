@@ -63,7 +63,7 @@ public class AssignmentController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateAssignmentViewModel assignmentVM) //MARCDOWN for description
+    public async Task<IActionResult> Create(CreateAssignmentViewModel assignmentVM)
     {
         if (assignmentVM == null)
         {
@@ -73,6 +73,13 @@ public class AssignmentController : Controller
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Invalid input data");
+            return View(assignmentVM);
+        }
+
+        var checkTimeResult = _assignmentService.ValidateTimeInput(assignmentVM.StartDate, assignmentVM.EndDate);
+        if (!checkTimeResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error",checkTimeResult.Message);
             return View(assignmentVM);
         }
 
@@ -200,14 +207,19 @@ public class AssignmentController : Controller
             return View("Error");
           }
               
-
           if(!ModelState.IsValid)
           {
               TempData.TempDataMessage("Error", "Invalid data input");
               return View(editAssignmentVM);
           }
 
-          var assignment = new Assignment();
+        var checkTimeResult = _assignmentService.ValidateTimeInput(editAssignmentVM.StartDate, editAssignmentVM.EndDate);
+        if (!checkTimeResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", checkTimeResult.Message);
+            return View(editAssignmentVM);
+        }
+        var assignment = new Assignment();
           editAssignmentVM.MapTo<EditAssignmentViewModel, Assignment>(assignment);
 
           //AssignmentFiles Part
