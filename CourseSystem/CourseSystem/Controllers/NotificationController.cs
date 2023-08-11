@@ -12,11 +12,13 @@ public class NotificationController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly INotificationService _notificationService;
+    private readonly ILogger<NotificationController> _logger;
 
-    public NotificationController(UserManager<AppUser> userManager, INotificationService notificationService)
+    public NotificationController(UserManager<AppUser> userManager, INotificationService notificationService, ILogger<NotificationController> logger)
     {
         _userManager = userManager;
         _notificationService = notificationService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -24,9 +26,22 @@ public class NotificationController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        var notifications = currentUser.Notifications.NotRead().OrderByDate() ?? throw new ArgumentNullException("currentUser.Notifications.NotRead().OrderByDate()");
+        if (currentUser == null)
+        {
+            _logger.LogWarning("Unouthirized user");
+            return RedirectToAction("Login", "Account");
+        }
 
-        return View(notifications);
+        var notificationsResult = currentUser.Notifications.NotReadByDate();
+
+        if (!notificationsResult.IsSuccessful)
+        {
+            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", currentUser.Id, notificationsResult.Message);
+            TempData.TempDataMessage("Error", notificationsResult.Message);
+            return RedirectToAction("Index", "Home");
+        }
+
+        return View(notificationsResult.Data);
     }
 
     [HttpGet]
@@ -34,9 +49,22 @@ public class NotificationController : Controller
     {
         var currentUser = await _userManager.GetUserAsync(User);
 
-        var notifications = currentUser.Notifications.OrderByDate() ?? throw new ArgumentNullException("currentUser.Notifications.OrderByDate()");
+        if (currentUser == null)
+        {
+            _logger.LogWarning("Unouthirized user");
+            return RedirectToAction("Login", "Account");
+        }
 
-        return View(notifications);
+        var notificationsResult = currentUser.Notifications.OrderByDate();
+
+        if (!notificationsResult.IsSuccessful)
+        {
+            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", currentUser.Id, notificationsResult.Message);
+            TempData.TempDataMessage("Error", notificationsResult.Message);
+            return RedirectToAction("Index", "Home");
+        }
+
+        return View(notificationsResult.Data);
     }
 
     [HttpGet]
@@ -46,9 +74,9 @@ public class NotificationController : Controller
 
         if (!notificationResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", $"{notificationResult.Message}");
-            // edit path
-            return RedirectToAction("Index", "Home");
+            _logger.LogError("Failed to get notification by Id {notificationId}! Error: {errorMessage}", id, notificationResult.Message);
+            TempData.TempDataMessage("Error", notificationResult.Message);
+            return RedirectToAction("ViewAll");
         }
         
         await _notificationService.MarkAsRead(notificationResult.Data);
