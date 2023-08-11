@@ -4,14 +4,15 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Models;
 
 namespace BLL.Interfaces
 {
     public interface IGenericService<T> where T : class
     {
-        Task<T> GetById(int id);
+        Task<Result<T>> GetById(int id);
 
-        Task<List<T>> GetByPredicate(Expression<Func<T, bool>> filter = null,
+        Task<Result<List<T>>> GetByPredicate(Expression<Func<T, bool>> filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null);
     }
 }
