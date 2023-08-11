@@ -77,6 +77,26 @@ public class CourseService : GenericService<Course>, ICourseService
         }
     }
 
+    public async Task<Result<bool>> UpdateCourse(Course course)
+    {
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} was not found");
+        }
+        
+        try
+        {
+            await _repository.UpdateAsync(course);
+            await _unitOfWork.Save();
+            
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false,$"Failed to update {nameof(course)}. Exception: {ex.Message}");
+        }
+    }
+
     public async Task<Result<bool>> UpdateName(int courseId, string newName)
     {
         var course = await _repository.GetByIdAsync(courseId);
