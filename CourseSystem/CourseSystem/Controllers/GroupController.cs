@@ -171,6 +171,7 @@ public class GroupController : Controller
     }
 
     [HttpPost]
+    [ActionName("Delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var deleteResult = await _groupService.DeleteGroup(id);

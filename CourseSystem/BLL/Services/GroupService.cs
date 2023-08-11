@@ -133,4 +133,16 @@ public class GroupService : GenericService<Group>, IGroupService
         var groupProgress = (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
         return groupProgress;
     }
+    
+    public async Task<Result<List<Group>>> GetAllGroupsAsync()
+    {
+        var groups = await _repository.GetAllAsync();
+
+        if (!groups.Any())
+        {
+            return new Result<List<Group>>(false, "Group list is empty");
+        }
+
+        return new Result<List<Group>>(true, groups);
+    }
 }

@@ -120,4 +120,16 @@ public class CourseService : GenericService<Course>, ICourseService
             return new Result<bool>(false,$"Failed to update {nameof(course)} by {courseId} with {newName}. Exception: {ex.Message}");
         }
     }
+
+    public async Task<Result<List<Course>>> GetAllCoursesAsync()
+    {
+        var courses = await _repository.GetAllAsync();
+
+        if (!courses.Any())
+        {
+            return new Result<List<Course>>(false, "Course list is empty");
+        }
+
+        return new Result<List<Course>>(true, courses);
+    }
 }
