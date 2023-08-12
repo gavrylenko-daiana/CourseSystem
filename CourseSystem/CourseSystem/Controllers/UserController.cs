@@ -2,6 +2,7 @@ using BLL.Interfaces;
 using Core.Helpers;
 using Core.Models;
 using Core.EmailTemplates;
+using Core.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -135,6 +136,22 @@ public class UserController : Controller
         {
             TempData.TempDataMessage("Error", "You entered incorrect password");
             return View("EditPassword", editUserPasswordViewModel);
+        }
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> EditEmail()
+    {
+        var result = await _userService.GetCurrentUser(User);
+
+        if (result.IsSuccessful)
+        {
+            return RedirectToAction("SendCodeUser", "Account",new { forgotEntity = ForgotEntity.Email });
+        }
+        else
+        {
+            TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+            return RedirectToAction("Index", "User");
         }
     }
 

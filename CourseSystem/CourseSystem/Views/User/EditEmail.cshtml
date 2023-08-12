@@ -1,0 +1,43 @@
+
+
+<html>
+<head>
+    <title>Edit User Password</title>
+</head>
+<body>
+<div class="container py-4">
+    <h1>Edit your Password</h1>
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <p class="text-success">@TempData["SuccessMessage"]</p>
+    }
+    <form method="post" asp-controller="User" asp-action="EditEmail" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="CurrentEmail" class="control-label"></label>
+            <input asp-for="CurrentEmail" class="form-control">
+            <span asp-validation-for="CurrentEmail" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="NewEmail" class="control-label"></label>
+            <input asp-for="NewEmail" class="form-control">
+            <span asp-validation-for="NewEmail" class="text-danger"></span>
+        </div>
+        <div class="py-2">
+            <div class="form-group d-flex justify-content-between">
+                <div>
+                    <input class="btn btn-outline-primary" type="submit" value="Save"/>
+                    <a class="btn btn-outline-dark" asp-controller="User" asp-action="Edit">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

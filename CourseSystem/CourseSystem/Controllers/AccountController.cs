@@ -296,14 +296,14 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult ForgotPassword()
     {
-        var forgotPasswordViewModel = new ForgotPasswordViewModel();
+        var forgotPasswordViewModel = new ForgotViewModel();
 
         return View(forgotPasswordViewModel);
     }
 
     [HttpPost]
     public async Task<IActionResult> ForgotPassword(
-        ForgotPasswordViewModel forgotPasswordBeforeEnteringViewModel)
+        ForgotViewModel forgotPasswordBeforeEnteringViewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -327,7 +327,7 @@ public class AccountController : Controller
 
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> SendCodeUser()
+    public async Task<IActionResult> SendCodeUser(ForgotEntity forgotEntity)
     {
         var userResult = await _userService.GetCurrentUser(User);
 
@@ -339,33 +339,41 @@ public class AccountController : Controller
         var emailCode = await _emailService.SendCodeToUser(userResult.Data.Email!);
 
         return RedirectToAction("CheckEmailCode",
-            new { code = emailCode, email = userResult.Data.Email });
+            new { code = emailCode, email = userResult.Data.Email, forgotEntity});
     }
 
     [HttpGet]
-    public IActionResult CheckEmailCode(int code, string email)
+    public IActionResult CheckEmailCode(int code, string email, ForgotEntity forgotEntity)
     {
-        var forgotPasswordCodeViewModel = new ForgotPasswordViewModel()
+        var forgotViewModel = new ForgotViewModel()
         {
             Email = email,
+            ForgotEntity = forgotEntity
         };
 
         TempData["Code"] = code;
-        return View(forgotPasswordCodeViewModel);
+        return View(forgotViewModel);
     }
 
     [HttpPost]
     public async Task<IActionResult> CheckEmailCode(int code,
-        ForgotPasswordViewModel forgotPasswordCodeViewModel)
+        ForgotViewModel forgotViewModel)
     {
         if (!ModelState.IsValid)
         {
-            return View(forgotPasswordCodeViewModel);
+            return View(forgotViewModel);
         }
 
-        if (code == forgotPasswordCodeViewModel.EmailCode)
+        TempData["ForgotEntity"] = forgotViewModel.ForgotEntity;
+        
+        if (code == forgotViewModel.EmailCode)
         {
-            return RedirectToAction("ResetPassword", new { email = forgotPasswordCodeViewModel.Email });
+            if (forgotViewModel.ForgotEntity == ForgotEntity.Password)
+            {
+                return RedirectToAction("ResetPassword", new { email = forgotViewModel.Email });
+            }
+            
+            return RedirectToAction("ResetEmail", new { email = forgotViewModel.Email });
         }
         else
         {
@@ -444,5 +452,93 @@ public class AccountController : Controller
         }
         
         return RedirectToAction("Index", "User");
+    }
+    
+    [HttpGet]
+    public IActionResult ResetEmail(string email)
+    {
+        TempData.TempDataMessage("SuccessMessage", "Code is valid. You can reset your email.");
+
+        var resetEmail = new NewEmailViewModel()
+        {
+            Email = email
+        };
+
+        return View(resetEmail);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResetEmail(NewEmailViewModel newEmailViewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(newEmailViewModel);
+        }
+
+        var currentUser = await _userManager.GetUserAsync(User);
+        
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login");
+        }
+
+        var user = await _userManager.FindByEmailAsync(newEmailViewModel.NewEmail);
+        
+        if (user != null)
+        {
+            TempData.TempDataMessage("Error", $"This email already exist");
+            return View(newEmailViewModel);
+        }
+        
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(currentUser);
+
+        var callbackUrl =
+            CreateCallBackUrl(code, "Account", "ConfirmedResetEmail", new { userId = currentUser.Id, code = code, currentEmail = newEmailViewModel.Email, newEmail = newEmailViewModel.NewEmail});
+
+        currentUser.Email = newEmailViewModel.NewEmail;
+        
+        await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUser, callbackUrl);
+
+        TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
+        
+        return RedirectToAction("Index", "Home");
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> ConfirmedResetEmail(string userId, string code, string currentEmail, string newEmail)
+    {
+        if (userId == null || code == null)
+        {
+            return View("Error");
+        }
+
+        var userResult = await _userService.FindByIdAsync(userId);
+        
+        if (!userResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{userResult.Message}");
+            return RedirectToAction("Login", "Account");
+        }
+        
+        var user = userResult.Data;
+        var result = await _userManager.ConfirmEmailAsync(user, code);
+
+        if (result.Succeeded)
+        {
+            var updateResult = await _userService.UpdateEmailAsync(currentEmail, newEmail);
+
+            if (!updateResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"{updateResult.Message}");
+                return View("Login");
+            }
+
+            return RedirectToAction("Logout");
+        }
+        else
+        {
+            TempData.TempDataMessage("Error", $"Failed to confirm email");
+            return View("Error");
+        }
     }
 }

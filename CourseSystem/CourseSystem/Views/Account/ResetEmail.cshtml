@@ -1,17 +1,17 @@
-@using UI.ViewModels
-@model ForgotViewModel
+@model UI.ViewModels.NewEmailViewModel
 
 <!DOCTYPE html>
-
 <html>
 <head>
-    <title>Check Code</title>
+    <title>Reset Email</title>
 </head>
 <body>
 <div class="container">
     <div class="py-4">
         <div class="col-md-6">
-            <h1>Enter the code came to your email</h1>
+            <p>
+                <h1>Write in the mail the code will come to</h1>
+            </p>
             <div class="py-2">
                 @if (TempData["Error"] != null)
                 {
@@ -23,21 +23,19 @@
                 {
                     <p class="text-success">@TempData["SuccessMessage"]</p>
                 }
-                <form method="post" asp-controller="Account" asp-action="CheckEmailCode" >
+                <form method="post" asp-controller="Account" asp-action="ResetEmail">
                     <input type="hidden" asp-for="Email" value="@Model.Email"/>
-                    <input type="hidden" asp-for="ForgotEntity" value="@Model.ForgotEntity"/>
-                    <input type="hidden" name="code" value="@TempData["Code"]"/>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
-                        <label asp-for="EmailCode" class="control-label"></label>
-                        <input asp-for="EmailCode" name="emailCode" class="form-control" placeholder="Enter code" value=""/>
-                        <span asp-validation-for="EmailCode" class="text-danger" style="visibility: hidden;"></span>
+                        <label asp-for="NewEmail" class="control-label"></label>
+                        <input asp-for="NewEmail" class="form-control">
+                        <span asp-validation-for="NewEmail" class="text-danger"></span>
                     </div>
                     @if (!User.Identity.IsAuthenticated)
                     {
                         <div class="py-2">
                             <div class="form-group">
-                                <input class="btn btn-outline-primary" type="submit" value="Confirm"/>
+                                <input class="btn btn-outline-primary" type="submit" value="Update email"/>
                                 <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Login">Cancel</a>
                             </div>
                         </div>
@@ -46,7 +44,7 @@
                     {
                         <div class="py-2">
                             <div class="form-group">
-                                <input class="btn btn-outline-primary" type="submit" value="Confirm"/>
+                                <input class="btn btn-outline-primary" type="submit" value="Update password"/>
                                 <a class="btn btn-outline-dark" asp-controller="User" asp-action="Index">Cancel</a>
                             </div>
                         </div>
