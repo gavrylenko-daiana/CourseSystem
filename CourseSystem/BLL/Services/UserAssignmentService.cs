@@ -48,14 +48,14 @@ namespace BLL.Services
                 
             try
             {
-                var chechUserAssignmnet = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
+                var checkUserAssignment = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
 
-                if (chechUserAssignmnet.Any())
+                if (checkUserAssignment.Any())
                 {
-                    return new Result<UserAssignments>(true, chechUserAssignmnet.FirstOrDefault());
+                    return new Result<UserAssignments>(true, checkUserAssignment.FirstOrDefault());
                 }
                    
-                var userAssignmnet = new UserAssignments()
+                var userAssignment = new UserAssignments()
                 {
                     Assignment = assignment,
                     AssignmentId = assignment.Id,
@@ -63,10 +63,10 @@ namespace BLL.Services
                     AppUserId = appUser.Id,
                 };
 
-                await _repository.AddAsync(userAssignmnet);
+                await _repository.AddAsync(userAssignment);
                 await _unitOfWork.Save();
 
-                return new Result<UserAssignments>(true, userAssignmnet);
+                return new Result<UserAssignments>(true, userAssignment);
             }
             catch(Exception ex)
             {

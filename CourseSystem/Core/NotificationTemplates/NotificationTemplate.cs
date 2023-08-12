@@ -46,19 +46,19 @@ namespace Core.NotificationTemplates
                 "Assignment activity starts on {2:dddd, dd MMMM yyyy}, at {2:HH:mm}. " +
                 "It ends on {3:dddd, dd MMMM yyyy}, at {3:HH:mm}. " +
                 "While assignment is active your students will be able to attach their solutions to it for you to grade." },
-            {NotificationType.SubmittedAssignmentForStudent, "You subbmited a solution for assignment \"{0}\". " +
+            {NotificationType.SubmittedAssignmentForStudent, "You submitted a solution for assignment \"{0}\". " +
                 "Please, wait till your teacher marks it - you will receive corresponding notification as soon as it happens." },
-            {NotificationType.SubmittedAssignmentForTeacher, "{0} {1} subbmited a solution for your assignment \"{2}\". " +
+            {NotificationType.SubmittedAssignmentForTeacher, "{0} {1} submitted a solution for your assignment \"{2}\". " +
                 "Please, check and mark it." },
-            {NotificationType.MarkedAssignmentForTeacher, "You marked the solution {0} {1} submited for assignment \"{2}\". " +
+            {NotificationType.MarkedAssignmentForTeacher, "You marked the solution {0} {1} submitted for assignment \"{2}\". " +
                 "His/her grade: {3}/100." },
             {NotificationType.MarkedAssignmentForStudent, "The solution you submitted for assignment \"{0}\" was marked. " +
                 "Your grade: {1}/100." },
             {NotificationType.AssignmentIsOpenForTeacher, "Your assignment \"{0}\" for group \"{1}\" is open for submitting solutions. " +
-                "It will be open untill {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
+                "It will be open until {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
                 "After that your students won't be able to submit their solutions, but you will still be able to grade them." },
             {NotificationType.AssignmentIsOpenForStudent, "Assignment \"{0}\" in group \"{1}\" is open for submitting solutions. " +
-                "It will be open untill {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
+                "It will be open until {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
                 "After that you won't be able to submit your solutions." },
             {NotificationType.AssignmentIsClosedForTeacher, "Your assignment \"{0}\" for group \"{1}\" is closed for submitting solutions. " +
                 "Now your students are unable to submit new solutions, but you can still grade them if you haven't done so yet." },

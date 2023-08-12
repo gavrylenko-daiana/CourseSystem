@@ -21,7 +21,7 @@ namespace Core.EmailTemplates
             {EmailType.CourseInvitation, "Course Invitation" },
             {EmailType.GroupConfirmationByAdmin,  "Group confirmation" },
             {EmailType.ApprovedGroupCreation,  "Group confirmation"},
-            {EmailType.GroupInvitationToStudent, "Group inventation" },
+            {EmailType.GroupInvitationToStudent, "Group invitation" },
             {EmailType.GetTempPasswordToAdmin, "Login with temporary password" },
         };
 
@@ -51,12 +51,12 @@ namespace Core.EmailTemplates
             {EmailType.ConfirmDeletionByUser, @"<h4>Dear {firstname}, your deletion was successfully approved by admin</h4>"+
                 @"<h4>Confirm your deletion, follow the link: <a href='{callbackurl}'>link</a></h4>"},
             {EmailType.CourseInvitation, @"<h4>Dear {firstname}, you were invited to the course {coursename}</h4>"+
-                "<h5>Сourse data overview</h5>"+
+                "<h5>Course data overview</h5>"+
                 @"<p>Course name: {coursename}</p>"+
-                @"<h4>Сonfirm your participation in the course, follow the link: <a href='{callbackurl}'>link</a></h4>"},
+                @"<h4>Confirm your participation in the course, follow the link: <a href='{callbackurl}'>link</a></h4>"},
             {EmailType.GroupConfirmationByAdmin,  @"<h4>Confirm the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>"},
             {EmailType.ApprovedGroupCreation, @"<h4>You get approve fot the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>" },
-            {EmailType.GroupInvitationToStudent, @"<h4>You get inventation to the group {groupname}"+
+            {EmailType.GroupInvitationToStudent, @"<h4>You get invitation to the group {groupname}"+
                 ", follow the link: <a href='{callbackurl}'>link</a></h4>"},     
             {EmailType.GetTempPasswordToAdmin, @"<h4>You get information about your account</h4>" +
                                                "<hr/>" +
@@ -68,14 +68,14 @@ namespace Core.EmailTemplates
                                                "<h3>You need to change password at the first visit</h3>"}, 
         };
 
-        public static (string, string) GetEmailSubjectAndBody(EmailType emailType, Dictionary<string, object> placeholderNamesandValues)
+        public static (string, string) GetEmailSubjectAndBody(EmailType emailType, Dictionary<string, object> placeholderNameSandValues)
         {           
             if(!SubjectGetter.ContainsKey(emailType) || !BodyGetter.ContainsKey(emailType))
             {
                 return (String.Empty, String.Empty);
             }
 
-            var parameters = FillParameters(placeholderNamesandValues);
+            var parameters = FillParameters(placeholderNameSandValues);
 
             var subject = SubjectGetter[emailType];
             var body = BodyGetter[emailType];
@@ -84,15 +84,17 @@ namespace Core.EmailTemplates
             return (subject, resultBody);
         }
 
-        private static Dictionary<string, string> FillParameters(Dictionary<string, object> placeholderNamesandValues)
+        private static Dictionary<string, string> FillParameters(Dictionary<string, object> placeholderNameSandValues)
         {
             var parameters = new Dictionary<string, string>();
-            foreach (var parameter in placeholderNamesandValues)
+            foreach (var parameter in placeholderNameSandValues)
             {
                 var parameterName = parameter.Key;
 
                 if (parameterName.Equals(String.Empty))
+                {
                     break;
+                }
 
                 var value = parameter.Value;
 

@@ -251,7 +251,7 @@ public class GroupController : Controller
                 var student = await _userManager.FindByIdAsync(studentId);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(student);
                 var callbackUrl = Url.Action(
-                "InventationToGroup",
+                    "InvitationToGroup",
                 "Group",
                 new { groupId = groupId, code = code },
                 protocol: HttpContext.Request.Scheme);
@@ -260,7 +260,7 @@ public class GroupController : Controller
                 studentsData.Add(student.Email, callbackUrl);
             }
 
-            var result = await _emailService.SendInventationToStudents(studentsData, groupResult.Data);
+            var result = await _emailService.SendInvitationToStudents(studentsData, groupResult.Data);
 
             if (!result.IsSuccessful)
             {
@@ -358,7 +358,7 @@ public class GroupController : Controller
             var student = await _userManager.FindByIdAsync(studentId);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(student);
             var callbackUrl = Url.Action(
-            "InventationToGroup",
+                "InvitationToGroup",
             "Group",
             new { groupId = groupId, code = code },
             protocol: HttpContext.Request.Scheme);
@@ -367,7 +367,7 @@ public class GroupController : Controller
             studentsData.Add(student.Email, code);
         }
 
-        var result = await _emailService.SendInventationToStudents(studentsData, groupResult.Data);
+        var result = await _emailService.SendInvitationToStudents(studentsData, groupResult.Data);
 
         if (!result.IsSuccessful)
         {
@@ -379,7 +379,7 @@ public class GroupController : Controller
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> InventationToGroup(int groupId, string code)
+    public async Task<IActionResult> InvitationToGroup(int groupId, string code)
     {
         var currentUser = await _userManager.GetUserAsync(User);
         var result = await _userManager.ConfirmEmailAsync(currentUser, code);

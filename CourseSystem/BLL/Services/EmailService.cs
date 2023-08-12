@@ -136,7 +136,7 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Result<bool>> SendToTeacherCourseInventation(AppUser teacher, Course course, string inventationUrl)
+        public async Task<Result<bool>> SendToTeacherCourseInvitation(AppUser teacher, Course course, string invitationUrl)
         {
             if (teacher == null || course == null)
                 return new Result<bool>(false, $"Fail to send email inventation to the techer");
@@ -146,7 +146,7 @@ namespace BLL.Services
             return await CreateAndSendEmail(new List<string> { teacher.Email }, emailContent.Item1, emailContent.Item2);
         }
 
-        public async Task<Result<bool>> SendInventationToStudents(Dictionary<string, string> studentsData, Group group)
+        public async Task<Result<bool>> SendInvitationToStudents(Dictionary<string, string> studentsData, Group group)
         {
             try
             {
