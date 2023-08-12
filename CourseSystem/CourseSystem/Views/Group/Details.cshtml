@@ -62,7 +62,7 @@
         </div>
     </div>
 
-    @if (Model.Group.Assignments != null && Model.Group.Assignments.Count > 0)
+    @if (Model.Group.Assignments != null && Model.Group.Assignments.Any())
     {
         <div class="card mb-4">
             <div class="card-header">
@@ -93,7 +93,7 @@
         <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
     </div>
 
-    @if (Model.UserGroupsWithoutAdmins != null && Model.UserGroupsWithoutAdmins.Count > 0)
+    @if (Model.UserGroupsWithoutAdmins != null && Model.UserGroupsWithoutAdmins.Any())
     {
         <div class="card">
             <div class="card-header">

@@ -97,6 +97,7 @@ public class GroupController : Controller
         var group = new Group();
         groupViewModel.MapTo(group);
         group.Course = course.Data;
+        group.CourseId = course.Data.Id;
 
         var createResult = await _groupService.CreateGroup(group, currentUser);
 

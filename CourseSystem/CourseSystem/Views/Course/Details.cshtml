@@ -62,7 +62,7 @@
                     <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
                 }
     
-                @if (Model.CurrentGroups != null && Model.CurrentGroups.Count > 0)
+                @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())
                 {
                     <h5 class="ui header">Groups:</h5>
                     <div class="ui two stackable cards">
@@ -122,7 +122,7 @@
                     <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="ui black basic button">Add teachers</a>
                 }
                 
-                @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
+                @if (Model.UserCourses != null && Model.UserCourses.Any())
                 {
                     <div class="ui segment">
                         <h4 class="ui header">Users:</h4>

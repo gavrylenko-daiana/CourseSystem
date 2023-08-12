@@ -50,18 +50,21 @@ public class GroupService : GenericService<Group>, IGroupService
             {
                 return new Result<bool>(false, $"{addAdminsResult.Message}");
             }
-            
-            var userGroup = new UserGroups()
-            {
-                Group = group,
-                AppUser = currentUser
-            };
-            
-            var createUserGroupResult = await CreateUserGroup(userGroup);
 
-            if (!createUserGroupResult.IsSuccessful)
+            if (currentUser.Role == AppUserRoles.Teacher)
             {
-                return new Result<bool>(false, $"{createUserGroupResult.Message}");
+                var userGroup = new UserGroups()
+                {
+                    Group = group,
+                    AppUser = currentUser
+                };
+            
+                var createUserGroupResult = await CreateUserGroup(userGroup);
+
+                if (!createUserGroupResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, $"{createUserGroupResult.Message}");
+                }
             }
 
             return new Result<bool>(true);
