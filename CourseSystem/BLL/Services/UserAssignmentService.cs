@@ -20,7 +20,7 @@ namespace BLL.Services
         {
             if (userAssignment == null)
             {
-                return new Result<bool>(false, "Fail to get user assignment");
+                return new Result<bool>(false, $"Fail to get {nameof(userAssignment)}");
             }
                
             try
@@ -43,7 +43,7 @@ namespace BLL.Services
         {
             if(assignment == null || appUser == null)
             {
-                return new Result<UserAssignments>(false, "Invalid input assignmnet and user data");
+                return new Result<UserAssignments>(false, $"Invalid input {nameof(assignment)} and {nameof(appUser)} data");
             }
                 
             try
@@ -70,7 +70,7 @@ namespace BLL.Services
             }
             catch(Exception ex)
             {
-                return new Result<UserAssignments>(false, "Fail to create user assignmnet");
+                return new Result<UserAssignments>(false, $"Fail to create {nameof(appUser)} {nameof(assignment)}");
             }
         }
     }
