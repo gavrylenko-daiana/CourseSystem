@@ -17,16 +17,22 @@ public class AssignmentAnswerController : Controller
     private readonly IAssignmentService _assignmentService;
     private readonly IAssignmentAnswerService _assignmentAnswerService;
     private readonly IUserAssignmentService _userAssignmentService;
+    private readonly IUserService _userService;
+    private readonly ILogger<AssignmentAnswerController> _logger;
 
     public AssignmentAnswerController(UserManager<AppUser> userManager,
         IAssignmentService assignmentService,
         IAssignmentAnswerService assignmentAnswerService,
-        IUserAssignmentService userAssignmentService)
+        IUserAssignmentService userAssignmentService,
+        IUserService userService,
+        ILogger<AssignmentAnswerController> logger)
     {
         _userManager = userManager;
         _assignmentService = assignmentService;
         _assignmentAnswerService = assignmentAnswerService;
         _userAssignmentService = userAssignmentService;
+        _userService = userService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -46,6 +52,12 @@ public class AssignmentAnswerController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogError("Failed to create assignment answer!");
+            foreach(var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             TempData.TempDataMessage("Error", "Fail to create assignment answer");
             return View(assignmentAnswerVM);
         }
@@ -68,7 +80,10 @@ public class AssignmentAnswerController : Controller
 
         if (!assignmentResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", assignmentResult.Message);
+            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}", 
+                assignmentAnswerVM.AssignmentId, assignmnetResult.Message);
+
+            TempData.TempDataMessage("Error", assignmnetResult.Message);
             return View(assignmentAnswerVM);
         }
 
@@ -76,6 +91,7 @@ public class AssignmentAnswerController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogWarning("Unouthirized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -84,7 +100,10 @@ public class AssignmentAnswerController : Controller
 
         if (!answerResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "Fail to save assignment answer");
+            _logger.LogError("Failed to save assignment answer for user {userId}! Errors: {errorMessage}",
+                currentUser.Id, answerResult.Message);
+
+            TempData.TempDataMessage("Error", "Fail to save assignmnet answer");
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
         }
 
@@ -101,6 +120,9 @@ public class AssignmentAnswerController : Controller
 
         if(!assignmentAnswerResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get assignment answer by Id {assignmentAnswerId}! Error: {errorMessage}",
+                assignmentAnswerId, assignmentAnswerResult.Message);
+
             TempData.TempDataMessage("Error", $"{assignmentAnswerResult.Data}");
             return RedirectToAction("Index", "Group");
         }
@@ -109,6 +131,9 @@ public class AssignmentAnswerController : Controller
 
         if (!deleteResult.IsSuccessful)
         {
+            _logger.LogError("Failed to delete assignment answer by Id {assignmentAnswerId}! Error: {errorMessage}", 
+                assignmentAnswerResult.Data.Id, deleteResult.Message);
+
             TempData.TempDataMessage("Error", deleteResult.Message);
         }
 
@@ -124,6 +149,9 @@ public class AssignmentAnswerController : Controller
 
         if(!assignmentResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}", 
+                assignmentId, assignmentResult.Message);
+
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
             return RedirectToAction("Index", "Group");
         }
@@ -145,10 +173,13 @@ public class AssignmentAnswerController : Controller
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> CheckAnswer(int assignmentId, string studentId)
     {
-        var student = await _userManager.FindByIdAsync(studentId);
+        var studentResult = await _userService.FindByIdAsync(studentId);
 
-        if (student == null)
+        if (!studentResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}",
+                studentId, studentResult.Message);
+
             return NotFound();
         }
 
@@ -156,14 +187,20 @@ public class AssignmentAnswerController : Controller
         
         if(!assignmentResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
+                assignmentId, assignmentResult.Message);
+
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
             return RedirectToAction("Index", "Group");
         }
         
-        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(a => a.AppUserId == student.Id);
+        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(a => a.AppUserId == studentResult.Data.Id);
 
         if (userAssignment == null)
         {
+            _logger.LogError("Failed to get assignment answer for assignment {assignmentId} by student {studentId}!",
+                assignmentResult.Data.Id, studentResult.Data.Id);
+
             return NotFound();
         }
 
@@ -185,6 +222,9 @@ public class AssignmentAnswerController : Controller
 
         if (grade < 0 || grade > 100)
         {
+            _logger.LogInformation("Teacher tried to grade assignment {assignmentId} for student {studentId} with unacceptable grade {grade}",
+                assignmentId, studentId, grade);
+
             TempData.TempDataMessage("Error", "Grade can't be more than 100 or less than 0");
             return RedirectToAction("CheckAnswer", "AssignmentAnswer",
                 new { assignmentId = assignmentId, studentId = studentId });
@@ -194,6 +234,9 @@ public class AssignmentAnswerController : Controller
         
         if(!assignmentResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
+                assignmentId, assignmentResult.Message);
+
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
             return RedirectToAction("Index", "Group");
         }
@@ -202,6 +245,9 @@ public class AssignmentAnswerController : Controller
 
         if (userAssignment == null)
         {
+            _logger.LogError("Failed to get assignment {assignmentId} for user {userId}!",
+                assignmentResult.Data.Id, studentId);
+
             return NotFound();
         }
 
@@ -209,6 +255,9 @@ public class AssignmentAnswerController : Controller
 
         if (!updateResult.IsSuccessful)
         {
+            _logger.LogError("Failed to update grade to {grade} for userAssignment by Id {userAssignmentId}! Error: {errorMessage}",
+                grade, userAssignment.Id, updateResult.Message);
+
             TempData.TempDataMessage("Error", updateResult.Message);
             return RedirectToAction("CheckAnswer", "AssignmentAnswer",
                 new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });

@@ -9,16 +9,29 @@ namespace Core.Helpers
 {
     public static class NotificationExtension
     {
-        public static List<Notification> OrderByDate(this List<Notification> list)
+        public static Result<List<Notification>> OrderByDate(this List<Notification> list)
         {
-            return list.OrderByDescending(a => a.Created)
-                        .ToList();
+            if (list == null)
+            {
+                return new Result<List<Notification>>(false, nameof(list));
+            }
+
+            return new Result<List<Notification>>(true, 
+                list.OrderByDescending(a => a.Created)
+                    .ToList());
         }
 
-        public static List<Notification> NotRead(this List<Notification> list)
+        public static Result<List<Notification>> NotReadByDate(this List<Notification> list)
         {
-            return list.Where(n => !n.IsRead)
-                        .ToList();
+            if (list == null)
+            {
+                return new Result<List<Notification>>(false, nameof(list));
+            }
+
+            return new Result<List<Notification>>(true,
+                list.Where(n => !n.IsRead)
+                    .OrderByDescending(a => a.Created)
+                        .ToList());
         }
     }
 }

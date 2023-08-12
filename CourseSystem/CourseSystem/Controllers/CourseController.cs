@@ -3,6 +3,7 @@ using Core.Enums;
 using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
@@ -17,16 +18,22 @@ public class CourseController : Controller
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly IUserCourseService _userCourseService;
+    private readonly IUserService _userService;
+    private readonly ILogger<CourseController> _logger;
 
     public CourseController(ICourseService courseService,
         UserManager<AppUser> userManager,
         IEmailService emailService,
-        IUserCourseService userCourseService)
+        IUserCourseService userCourseService,
+        IUserService userService,
+        ILogger<CourseController> logger)
     {
         _courseService = courseService;
         _userManager = userManager;
         _emailService = emailService;
         _userCourseService = userCourseService;
+        _userService = userService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -36,6 +43,8 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogWarning("Unauthirized user");
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -45,6 +54,9 @@ public class CourseController : Controller
 
         if (!coursesResult.IsSuccessful)
         {
+            _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}",
+                currentUser.Id, coursesResult.Message);
+
             TempData.TempDataMessage("Error", $"{coursesResult.Message}");
             return View("Index");
         }
@@ -71,6 +83,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogWarning("Unauthirized user");
             return RedirectToAction("Login", "Account");
         }
         
@@ -83,6 +96,9 @@ public class CourseController : Controller
             
         if (!createResult.IsSuccessful)
         {
+            _logger.LogError("Failed to create course! Error: {errorMessage}",
+                createResult.Message);
+
             TempData.TempDataMessage("Error", $"{createResult.Message}");
             return View(courseViewModel);
         }
@@ -97,6 +113,9 @@ public class CourseController : Controller
 
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                id, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -111,6 +130,9 @@ public class CourseController : Controller
 
         if (!updateResult.IsSuccessful)
         {
+            _logger.LogError("Failed to update course by Id {courseId}! Error: {errorMessage}",
+                newCourse.Id, updateResult.Message);
+
             TempData.TempDataMessage("Error", $"{updateResult.Message}");
             return View(newCourse);
         }
@@ -125,6 +147,9 @@ public class CourseController : Controller
         
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                id, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -139,6 +164,9 @@ public class CourseController : Controller
 
         if (!deleteResult.IsSuccessful)
         {
+            _logger.LogError("Failed to delete course by Id {courseId}! Error: {errorMessage}",
+                id, deleteResult.Message);
+
             TempData.TempDataMessage("Error", $"{deleteResult.Message}");
             return View("Delete");
         }
@@ -153,6 +181,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogWarning("Unauthirized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -160,6 +189,9 @@ public class CourseController : Controller
         
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                id, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -170,7 +202,14 @@ public class CourseController : Controller
 
         var courseViewModel = new CourseViewModel();
         courseResult.Data.MapTo(courseViewModel);
-        courseViewModel.CurrentUser = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException();
+        courseViewModel.CurrentUser = await _userManager.GetUserAsync(User);
+
+        if (courseViewModel.CurrentUser == null)
+        {
+            _logger.LogError("Unauthirized user");
+            return RedirectToAction("Login", "Account");
+        }
+
         courseViewModel.CurrentGroups = currentGroups;
 
         TempData["CourseId"] = id;
@@ -181,11 +220,22 @@ public class CourseController : Controller
     [HttpGet]
     public async Task<IActionResult> SelectTeachers()
     {
-        var courseId = (int)(TempData["CourseId"] ?? throw new InvalidOperationException());
+        if (TempData["CourseId"] == null)
+        {
+            _logger.LogError("Course Id wasn't given");
+            ViewData.ViewDataMessage("Error", "Course Id wasn't given");
+            return View("Index");
+        }
+
+        var courseId = (int)TempData["CourseId"];
+
         var courseResult = await _courseService.GetById(courseId);
 
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -209,32 +259,41 @@ public class CourseController : Controller
     [HttpPost]
     public async Task<IActionResult> SendInvitation(string teacherId, int courseId)
     {
-        var teacher = await _userManager.FindByIdAsync(teacherId);
+        var teacherResult = await _userService.FindByIdAsync(teacherId);
         var courseResult = await _courseService.GetById(courseId);
 
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
         
-        if (teacher == null)
+        if (!teacherResult.IsSuccessful)
         {
-            ViewData.ViewDataMessage("Error", "Teacher not found");
+            _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}",
+                teacherId, teacherResult.Message);
+
+            ViewData.ViewDataMessage("Error", $"{teacherResult.Message}");
             return View("Index");
         }
 
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacher);
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacherResult.Data);
         var callbackUrl = Url.Action(
             "ConfirmTeacherForCourse",
             "Course",
             new { courseId = courseId, code = code },
             protocol: HttpContext.Request.Scheme);
 
-        var sendResult = await _emailService.SendToTeacherCourseInvitation(teacher, courseResult.Data, callbackUrl);
+        var sendResult = await _emailService.SendToTeacherCourseInventation(teacherResult.Data, courseResult.Data, callbackUrl);
 
         if (!sendResult.IsSuccessful)
         {
+            _logger.LogError("Failed to send email with invitation to course {courseId} to teacher {teacherId}! Error: {errorMessage}",
+                courseResult.Data.Id, teacherResult.Data.Id, sendResult.Message);
+
             TempData.TempDataMessage("Error", sendResult.Message);
             return View("SelectTeachers");
         }
@@ -252,6 +311,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogWarning("Unauthirized user");
             return RedirectToAction("Login", "Account");
         }         
 
@@ -259,6 +319,9 @@ public class CourseController : Controller
         
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -273,6 +336,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
+            _logger.LogError("Unauthirized user");
             ViewData.ViewDataMessage("Error", "CurrentUser not found");
             return View("Index");
         }
@@ -281,6 +345,13 @@ public class CourseController : Controller
 
         if (!result.Succeeded)
         {
+            _logger.LogError("Failed to confirm email for user {userId} with code {userCode}!",
+                currentUser.Id, code);
+            foreach (var error in result.Errors)
+            {
+                _logger.LogError("Error: {errorMessage}", error.Description);
+            }
+
             ViewData.ViewDataMessage("Error", "Confirm email is not successful");
             return View("Index");
         }
@@ -289,6 +360,9 @@ public class CourseController : Controller
         
         if (!addTeacherToCourseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to add teacher {teacherId} to course {courseId}! Error: {errorMessages}",
+                currentUser.Id, courseResult.Data.Id, addTeacherToCourseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{addTeacherToCourseResult.Message}");
             return View("Index");
         }

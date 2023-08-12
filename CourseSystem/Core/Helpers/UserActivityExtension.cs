@@ -9,20 +9,40 @@ namespace Core.Helpers
 {
     public static class UserActivityExtension
     {
-        public static List<UserActivity> ForMonth(this List<UserActivity> activities, DateTime month)
+        public static Result<List<UserActivity>> ForMonth(this List<UserActivity> activities, DateTime month)
         {
-            return activities
-                .Where(a => a.Created.Month == month.Month)
+            if (activities == null)
+            {
+                return new Result<List<UserActivity>>(false, nameof(activities));
+            }
+
+            if (month == DateTime.MinValue)
+            {
+                return new Result<List<UserActivity>>(false, nameof(month));
+            }
+
+            return new Result<List<UserActivity>>(true,
+                activities.Where(a => a.Created.Month == month.Month)
                     .OrderByDescending(a => a.Created)
-                        .ToList();
+                        .ToList());
         }
 
-        public static List<UserActivity> ForDate(this List<UserActivity> activities, DateTime date)
+        public static Result<List<UserActivity>> ForDate(this List<UserActivity> activities, DateTime date)
         {
-            return activities
-                .Where(a => a.Created.Date == date.Date)
+            if (activities == null)
+            {
+                return new Result<List<UserActivity>>(false, nameof(activities));
+            }
+
+            if (date == DateTime.MinValue)
+            {
+                return new Result<List<UserActivity>>(false, nameof(date));
+            }
+
+            return new Result<List<UserActivity>>(true,
+                activities.Where(a => a.Created.Date == date.Date)
                     .OrderByDescending(a => a.Created)
-                        .ToList();
+                        .ToList());
         }
     }
 }
