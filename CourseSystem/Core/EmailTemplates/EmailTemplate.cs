@@ -13,6 +13,7 @@ namespace Core.EmailTemplates
         {
             {EmailType.CodeVerification, "Verify code for update password."},
             {EmailType.AccountApproveByAdmin, "Confirm user account" },
+            {EmailType.AccountApproveByUser, "Confirm user account" },
             {EmailType.UserRegistration,  "Successful registration"},
             {EmailType.ConfirmAdminRegistration, "Confirm your account" },
             {EmailType.ConfirmDeletionByAdmin,  "Confirm deletion of user account"},
@@ -33,6 +34,7 @@ namespace Core.EmailTemplates
                     "<p>User role: {userrole}</p>"+
                     "<h4>Confirm registration of {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4>"
             },
+            {EmailType.AccountApproveByUser,  @"<h4>Confirm that you are {firstname} {lastname} and it is your new email, follow the link: <a href='{callbackurl}'>link</a></h4>"},
             {EmailType.UserRegistration, @"<h4>Dear {firstname}, you have been successfully registered into system</h4>"+
                 "<form action=\"{callbackurl}\">\r\n   " +
                 " <input type=\"submit\" style=\"color: red\" " +

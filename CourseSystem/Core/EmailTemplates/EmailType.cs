@@ -10,6 +10,7 @@ namespace Core.EmailTemplates
     {
         CodeVerification,
         AccountApproveByAdmin,
+        AccountApproveByUser,
         ApprovedGroupCreation,
         UserRegistration,
         ConfirmAdminRegistration,

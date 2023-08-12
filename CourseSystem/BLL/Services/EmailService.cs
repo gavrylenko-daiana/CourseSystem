@@ -212,6 +212,14 @@ namespace BLL.Services
                         {@"{callbackurl}", callBackUrl }
                     };
                     break;
+                case EmailType.AccountApproveByUser:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{lastname}", appUser.LastName },
+                        {@"{callbackurl}", callBackUrl }
+                    };
+                    break;
                 default:
                     return (String.Empty, String.Empty);
             }
