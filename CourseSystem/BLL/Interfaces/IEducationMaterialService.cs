@@ -15,7 +15,7 @@ public interface IEducationMaterialService
 
     Task<Result<Group>> AddToGroup(IFormFile material, string url, Group group);
     
-    Task<Result<bool>> AddToCourse(IFormFile material, string url, int courseId);
+    Task<Result<bool>> AddToCourse(IFormFile material, string url, Course course);
  
     Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id);
 

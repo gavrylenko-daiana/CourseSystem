@@ -136,8 +136,18 @@ public class EducationMaterialController : Controller
         }
         else
         {
+            var course = await _courseService.GetById(viewModel.CourseId);
+
+            if (course == null)
+            {
+                TempData.TempDataMessage("Error", $"Failed to get {nameof(course)} by id {viewModel.CourseId}");
+                return RedirectToAction("Index", "Course");
+            }
+
             var addToCourseResult = await _educationMaterialService.AddToCourse(viewModel.UploadFile,
-                fullPath.Message, viewModel.CourseId);
+                fullPath.Message, course);
+            
+            await _courseService.UpdateCourse(course);
             
             if (!addToCourseResult.IsSuccessful)
             {

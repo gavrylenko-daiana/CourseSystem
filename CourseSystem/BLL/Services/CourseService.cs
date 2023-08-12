@@ -9,11 +9,13 @@ namespace BLL.Services;
 public class CourseService : GenericService<Course>, ICourseService
 {
     private readonly IUserCourseService _userCourseService;
+    private readonly IEducationMaterialService _educationMaterial;
     
-    public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService) 
+    public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService, IEducationMaterialService educationMaterial) 
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
+        _educationMaterial = educationMaterial;
     }
 
     public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)
@@ -66,6 +68,16 @@ public class CourseService : GenericService<Course>, ICourseService
         
         try
         {
+            if (course.EducationMaterials.Any())
+            {
+                var educationMaterialsCopy = course.EducationMaterials.ToList();
+
+                foreach (var material in educationMaterialsCopy)
+                {
+                    await _educationMaterial.DeleteFileFromGroup(material);
+                }
+            }
+            
             await _repository.DeleteAsync(course);
             await _unitOfWork.Save();
             

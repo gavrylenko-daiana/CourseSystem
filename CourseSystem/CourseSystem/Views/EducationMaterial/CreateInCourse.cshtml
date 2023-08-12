@@ -11,6 +11,8 @@
     <h1>Upload File to Task</h1>
     <form method="post" asp-controller="EducationMaterial" asp-action="CreateInCourse" enctype="multipart/form-data">
         <input type="hidden" asp-for="CourseId"/>
+        <input type="hidden" asp-for="Course"/>
+        <input type="hidden" asp-for="Groups"/>
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             <label asp-for="UploadFile" class="control-label"></label>

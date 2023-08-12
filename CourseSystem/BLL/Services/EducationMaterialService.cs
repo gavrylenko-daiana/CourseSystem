@@ -16,14 +16,11 @@ namespace BLL.Services;
 public class EducationMaterialService : GenericService<EducationMaterial>, IEducationMaterialService
 {
     private readonly DropboxClient _dropboxClient;
-    private readonly ICourseService _courseService;
 
-    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config,
-        ICourseService courseService) : base(unitOfWork,
+    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config) : base(unitOfWork,
         unitOfWork.EducationMaterialRepository)
     {
         _dropboxClient = new DropboxClient(config.Value.AccessToken);
-        _courseService = courseService;
     }
 
     public async Task<Result<string>> AddFileAsync(IFormFile file)
@@ -90,15 +87,8 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         return new Result<Group>(true);
     }
 
-    public async Task<Result<bool>> AddToCourse(IFormFile material, string url, int courseId)
+    public async Task<Result<bool>> AddToCourse(IFormFile material, string url, Course course)
     {
-        var course = await _courseService.GetById(courseId);
-
-        if (course == null)
-        {
-            return new Result<bool>(false, $"Failed to get {nameof(course)} by id {courseId}");
-        }
-
         var materialFile = new EducationMaterial()
         {
             Name = material.FileName,
@@ -113,7 +103,6 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         await _unitOfWork.Save();
 
         course.EducationMaterials.Add(materialFile);
-        await _courseService.UpdateCourse(course);
 
         return new Result<bool>(true);
     }
