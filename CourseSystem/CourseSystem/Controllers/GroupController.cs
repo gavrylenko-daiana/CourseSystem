@@ -94,7 +94,7 @@ public class GroupController : Controller
 
         var group = new Group();
         groupViewModel.MapTo(group);
-        group.Course = course;
+        group.Course = course.Data;
 
         var createResult = await _groupService.CreateGroup(group, currentUser);
 
@@ -124,7 +124,7 @@ public class GroupController : Controller
         var userGroupVM = new UserGroupViewModel()
         {
             Group = groupResult.Data,
-            UserGroupsWithoutAdmins = group.UserGroups.Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList(),
+            UserGroupsWithoutAdmins = groupResult.Data.UserGroups.Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList(),
             CurrentUser = await _userManager.GetUserAsync(User) ?? throw new InvalidOperationException()
         };
 
