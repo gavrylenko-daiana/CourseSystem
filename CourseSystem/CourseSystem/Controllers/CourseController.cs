@@ -18,18 +18,21 @@ public class CourseController : Controller
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly IUserCourseService _userCourseService;
+    private readonly IUserService _userService;
     private readonly ILogger<CourseController> _logger;
 
     public CourseController(ICourseService courseService,
         UserManager<AppUser> userManager,
         IEmailService emailService,
         IUserCourseService userCourseService,
+        IUserService userService,
         ILogger<CourseController> logger)
     {
         _courseService = courseService;
         _userManager = userManager;
         _emailService = emailService;
         _userCourseService = userCourseService;
+        _userService = userService;
         _logger = logger;
     }
 
@@ -41,6 +44,7 @@ public class CourseController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthirized user");
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -50,7 +54,9 @@ public class CourseController : Controller
 
         if (!coursesResult.IsSuccessful)
         {
-            _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}", currentUser.Id, coursesResult.Message);
+            _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}",
+                currentUser.Id, coursesResult.Message);
+
             TempData.TempDataMessage("Error", $"{coursesResult.Message}");
             return View("Index");
         }
@@ -90,7 +96,9 @@ public class CourseController : Controller
             
         if (!createResult.IsSuccessful)
         {
-            _logger.LogError("Failed to create course! Error: {errorMessage}", createResult.Message);
+            _logger.LogError("Failed to create course! Error: {errorMessage}",
+                createResult.Message);
+
             TempData.TempDataMessage("Error", $"{createResult.Message}");
             return View(courseViewModel);
         }
@@ -105,7 +113,9 @@ public class CourseController : Controller
 
         if (!courseResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}", id, courseResult.Message);
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                id, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -120,7 +130,9 @@ public class CourseController : Controller
 
         if (!updateResult.IsSuccessful)
         {
-            _logger.LogError("Failed to update course by Id {courseId}! Error: {errorMessage}", newCourse.Id, updateResult.Message);
+            _logger.LogError("Failed to update course by Id {courseId}! Error: {errorMessage}",
+                newCourse.Id, updateResult.Message);
+
             TempData.TempDataMessage("Error", $"{updateResult.Message}");
             return View(newCourse);
         }
@@ -135,7 +147,9 @@ public class CourseController : Controller
         
         if (!courseResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}", id, courseResult.Message);
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                id, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -150,7 +164,9 @@ public class CourseController : Controller
 
         if (!deleteResult.IsSuccessful)
         {
-            _logger.LogError("Failed to delete course by Id {courseId}! Error: {errorMessage}", id, deleteResult.Message);
+            _logger.LogError("Failed to delete course by Id {courseId}! Error: {errorMessage}",
+                id, deleteResult.Message);
+
             TempData.TempDataMessage("Error", $"{deleteResult.Message}");
             return View("Delete");
         }
@@ -173,7 +189,9 @@ public class CourseController : Controller
         
         if (!courseResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}", id, courseResult.Message);
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                id, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -215,7 +233,9 @@ public class CourseController : Controller
 
         if (!courseResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}", courseId, courseResult.Message);
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -239,35 +259,41 @@ public class CourseController : Controller
     [HttpPost]
     public async Task<IActionResult> SendInvitation(string teacherId, int courseId)
     {
-        var teacher = await _userManager.FindByIdAsync(teacherId);
+        var teacherResult = await _userService.FindByIdAsync(teacherId);
         var courseResult = await _courseService.GetById(courseId);
 
         if (!courseResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}", courseId, courseResult.Message);
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
         
-        if (teacher == null)
+        if (!teacherResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}", teacherId, courseResult.Message);
-            ViewData.ViewDataMessage("Error", "Teacher not found");
+            _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}",
+                teacherId, teacherResult.Message);
+
+            ViewData.ViewDataMessage("Error", $"{teacherResult.Message}");
             return View("Index");
         }
 
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacher);
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacherResult.Data);
         var callbackUrl = Url.Action(
             "ConfirmTeacherForCourse",
             "Course",
             new { courseId = courseId, code = code },
             protocol: HttpContext.Request.Scheme);
 
-        var sendResult = await _emailService.SendToTeacherCourseInventation(teacher, courseResult.Data, callbackUrl);
+        var sendResult = await _emailService.SendToTeacherCourseInventation(teacherResult.Data, courseResult.Data, callbackUrl);
 
         if (!sendResult.IsSuccessful)
         {
-            _logger.LogError("Failed to send email with invitation to course {courseId} to teacher {teacherId}! Error: {errorMessage}", courseResult.Data.Id, sendResult.Message);
+            _logger.LogError("Failed to send email with invitation to course {courseId} to teacher {teacherId}! Error: {errorMessage}",
+                courseResult.Data.Id, teacherResult.Data.Id, sendResult.Message);
+
             TempData.TempDataMessage("Error", sendResult.Message);
             return View("SelectTeachers");
         }
@@ -293,7 +319,9 @@ public class CourseController : Controller
         
         if (!courseResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}", courseId, courseResult.Message);
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
@@ -317,7 +345,13 @@ public class CourseController : Controller
 
         if (!result.Succeeded)
         {
-            _logger.LogError("Failed to confirm email for user {userId} with code {userCode}! Errors: {errorMessages}", currentUser.Id, code, result.Errors);
+            _logger.LogError("Failed to confirm email for user {userId} with code {userCode}!",
+                currentUser.Id, code);
+            foreach (var error in result.Errors)
+            {
+                _logger.LogError("Error: {errorMessage}", error.Description);
+            }
+
             ViewData.ViewDataMessage("Error", "Confirm email is not successful");
             return View("Index");
         }
@@ -326,7 +360,9 @@ public class CourseController : Controller
         
         if (!addTeacherToCourseResult.IsSuccessful)
         {
-            _logger.LogError("Failed to add teacher {teacherId} to course {courseId}! Errors: {errorMessages}", currentUser.Id, courseResult.Data.Id, addTeacherToCourseResult.Message);
+            _logger.LogError("Failed to add teacher {teacherId} to course {courseId}! Error: {errorMessages}",
+                currentUser.Id, courseResult.Data.Id, addTeacherToCourseResult.Message);
+
             ViewData.ViewDataMessage("Error", $"{addTeacherToCourseResult.Message}");
             return View("Index");
         }
