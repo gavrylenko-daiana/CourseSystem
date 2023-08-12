@@ -30,11 +30,11 @@ namespace BLL.Services
             _userService = userService;
         }
               
-        public async Task<int> SendCodeToUser(string email)
+        public async Task<Result<int>> SendCodeToUser(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
             {
-                throw new ArgumentNullException(nameof(email));
+                return new Result<int>(false, "Fail to generate code for email");
             }
             
             int randomCode = new Random().Next(1000, 9999);
@@ -54,14 +54,14 @@ namespace BLL.Services
 
                 if(!result.IsSuccessful)
                 {
-                    return 0;
+                    return new Result<int>(false, 0);
                 }
 
-                return randomCode;
+                return new Result<int>(true, randomCode);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return new Result<int>(false, "Fail to generate code for email");
             }
         }
 

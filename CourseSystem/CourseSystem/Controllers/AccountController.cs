@@ -319,10 +319,16 @@ public class AccountController : Controller
         }
 
         // Email
-        var emailCode = await _emailService.SendCodeToUser(forgotPasswordBeforeEnteringViewModel.Email);
+        var emailCodeResult = await _emailService.SendCodeToUser(forgotPasswordBeforeEnteringViewModel.Email);
+
+        if (!emailCodeResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", emailCodeResult.Message);
+            return View(forgotPasswordBeforeEnteringViewModel);
+        }
 
         return RedirectToAction("CheckEmailCode",
-            new { code = emailCode, email = forgotPasswordBeforeEnteringViewModel.Email });
+            new { code = emailCodeResult.Data, email = forgotPasswordBeforeEnteringViewModel.Email });
     }
 
     [Authorize]
@@ -336,10 +342,16 @@ public class AccountController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var emailCode = await _emailService.SendCodeToUser(userResult.Data.Email!);
+        var emailCodeResult = await _emailService.SendCodeToUser(userResult.Data.Email!);
+
+        if (!emailCodeResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", emailCodeResult.Message);
+            return RedirectToAction("Login", "Account");
+        }
 
         return RedirectToAction("CheckEmailCode",
-            new { code = emailCode, email = userResult.Data.Email, forgotEntity});
+            new { code = emailCodeResult.Data, email = userResult.Data.Email, forgotEntity});
     }
 
     [HttpGet]
