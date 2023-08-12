@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text;
 using BLL.Interfaces;
 using Core.Helpers;
 using Core.Models;
@@ -148,6 +149,21 @@ public class UserService : GenericService<AppUser>, IUserService
         return new Result<bool>(true);
     }
 
+    public async Task<Result<bool>> UpdateEmailAsync(string email, string newEmail)
+    {
+        var userResult = await GetUserByEmailAsync(email);
+
+        if (!userResult.IsSuccessful)
+        {
+            return new Result<bool>(false, userResult.Message);
+        }
+
+        userResult.Data.Email = newEmail;
+        await _userManager.UpdateAsync(userResult.Data);
+
+        return new Result<bool>(true);
+    }
+
     public async Task<Result<AppUser>> GetUserByEmailAsync(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);
@@ -182,5 +198,32 @@ public class UserService : GenericService<AppUser>, IUserService
         }
 
         return new Result<AppUser>(true, appUser);
+    }
+    
+    public string GenerateTemporaryPassword()
+    {
+        const string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*";
+        const string upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lowerChars = "abcdefghijklmnopqrstuvwxyz";
+        const string digitChars = "1234567890";
+        const string specialChars = "!@#$%^&*";
+
+        var random = new Random();
+        var password = new StringBuilder();
+
+        password.Append(upperChars[random.Next(upperChars.Length)]);
+        password.Append(lowerChars[random.Next(lowerChars.Length)]);
+        password.Append(digitChars[random.Next(digitChars.Length)]);
+        password.Append(specialChars[random.Next(specialChars.Length)]);
+
+        var remainingChars = allowedChars + upperChars + lowerChars + digitChars + specialChars;
+        for (int i = 0; i < 8; i++) 
+        {
+            password.Append(remainingChars[random.Next(remainingChars.Length)]);
+        }
+
+        var shuffledPassword = new string(password.ToString().OrderBy(c => random.Next()).ToArray());
+
+        return shuffledPassword;
     }
 }
