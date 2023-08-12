@@ -4,7 +4,6 @@ using Core.Models;
 using System.Diagnostics;
 using CourseSystem.Models;
 using Microsoft.AspNetCore.Mvc;
-using CourseSystem.Models;
 
 namespace UI.Controllers
 {

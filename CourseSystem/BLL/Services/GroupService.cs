@@ -11,13 +11,15 @@ public class GroupService : GenericService<Group>, IGroupService
 {
     private readonly IUserGroupService _userGroupService;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IEducationMaterialService _educationMaterial;
     
     public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService,
-        UserManager<AppUser> userManager) 
+        UserManager<AppUser> userManager, IEducationMaterialService educationMaterial) 
             : base(unitOfWork, unitOfWork.GroupRepository)
     {
         _userGroupService = userGroupService;
         _userManager = userManager;
+        _educationMaterial = educationMaterial;
     }
 
     public async Task<Result<bool>> CreateGroup(Group group, AppUser currentUser)
@@ -48,18 +50,21 @@ public class GroupService : GenericService<Group>, IGroupService
             {
                 return new Result<bool>(false, $"{addAdminsResult.Message}");
             }
-            
-            var userGroup = new UserGroups()
-            {
-                Group = group,
-                AppUser = currentUser
-            };
-            
-            var createUserGroupResult = await CreateUserGroup(userGroup);
 
-            if (!createUserGroupResult.IsSuccessful)
+            if (currentUser.Role == AppUserRoles.Teacher)
             {
-                return new Result<bool>(false, $"{createUserGroupResult.Message}");
+                var userGroup = new UserGroups()
+                {
+                    Group = group,
+                    AppUser = currentUser
+                };
+            
+                var createUserGroupResult = await CreateUserGroup(userGroup);
+
+                if (!createUserGroupResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, $"{createUserGroupResult.Message}");
+                }
             }
 
             return new Result<bool>(true);
@@ -73,7 +78,7 @@ public class GroupService : GenericService<Group>, IGroupService
     public async Task<Result<bool>> DeleteGroup(int groupId)
     {
         var group = await _repository.GetByIdAsync(groupId);
-            
+        
         if (group == null)
         {
             return new Result<bool>(false, $"Group by id {groupId} not found");
@@ -81,9 +86,19 @@ public class GroupService : GenericService<Group>, IGroupService
         
         try
         {
+            if (group.EducationMaterials.Any())
+            {
+                var educationMaterialsCopy = group.EducationMaterials.ToList();
+
+                foreach (var material in educationMaterialsCopy)
+                {
+                    await _educationMaterial.DeleteFileFromGroup(material);
+                }
+            }
+            
             await _repository.DeleteAsync(group);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception ex)
@@ -138,6 +153,18 @@ public class GroupService : GenericService<Group>, IGroupService
         return groupProgress;
     }
     
+    public async Task<Result<List<Group>>> GetAllGroupsAsync()
+    {
+        var groups = await _repository.GetAllAsync();
+
+        if (!groups.Any())
+        {
+            return new Result<List<Group>>(false, "Group list is empty");
+        }
+
+        return new Result<List<Group>>(true, groups);
+    }
+
     private async Task<Result<bool>> AddAllAdminsAtGroup(Group group)
     {
         if (group.Course.UserCourses.Any())

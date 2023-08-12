@@ -1,0 +1,39 @@
+@using Core.Models;
+@using Core.Enums
+@model List<EducationMaterial>
+
+<!DOCTYPE html>
+
+<html>
+<body>
+@if (Model != null && Model.Count > 0)
+{
+    <h5>Uploaded Files:</h5>
+    <div class="container py-4">
+        <div class="list-group">
+            @foreach (var file in Model)
+            {
+                <div class="list-group-item list-group-item-action my-2">
+                    <div class="row">
+                        <div class="col-7">
+                            <h5 class="mb-0">@file.Name</h5>
+                        </div>
+                        <div class="col-2 d-flex justify-content-end" style="white-space: nowrap;">
+                            @if (User.Identity.IsAuthenticated && User.IsInRole(AppUserRoles.Admin.ToString()))
+                            {
+                                <div class="mx-2">
+                                    <a type="button" class="btn btn-outline-danger" asp-controller="EducationMaterial" asp-action="Delete" asp-route-id="@file.Id">Delete</a>
+                                </div>
+                            }
+                            <div class="mx-2">
+                                <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@file.Id">Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+</body>
+</html>

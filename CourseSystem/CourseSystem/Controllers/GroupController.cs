@@ -76,7 +76,9 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        return View();
+        var groupViewModel = new GroupViewModel();
+        
+        return View(groupViewModel);
     }
     
     [HttpPost]
@@ -95,6 +97,7 @@ public class GroupController : Controller
         var group = new Group();
         groupViewModel.MapTo(group);
         group.Course = course.Data;
+        group.CourseId = course.Data.Id;
 
         var createResult = await _groupService.CreateGroup(group, currentUser);
 
@@ -180,6 +183,7 @@ public class GroupController : Controller
     }
 
     [HttpPost]
+    [ActionName("Delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var deleteResult = await _groupService.DeleteGroup(id);

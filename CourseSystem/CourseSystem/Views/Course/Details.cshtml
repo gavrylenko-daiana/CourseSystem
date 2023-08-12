@@ -62,7 +62,7 @@
                     <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
                 }
     
-                @if (Model.CurrentGroups != null && Model.CurrentGroups.Count > 0)
+                @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())
                 {
                     <h5 class="ui header">Groups:</h5>
                     <div class="ui two stackable cards">
@@ -93,15 +93,19 @@
                         <p>No groups found for this course.</p>
                     </div>
                 }
-                
-                @if (Model.EducationMaterials != null && Model.EducationMaterials.Count > 0)
+  
+                @{
+                var materialsGroup = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+                }
+                @if (materialsGroup != null && materialsGroup.Any())
                 {
                     <div class="ui segment">
                         <h4 class="ui header">Education Materials:</h4>
                         <ul class="ui list">
-                            @foreach (var material in Model.EducationMaterials)
+                            @foreach (var material in materialsGroup)
                             {
-                                <li>@material.Name</li>
+                              <li>@material.Name</li>
+                              <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
                             }
                         </ul>
                     </div>
@@ -118,7 +122,7 @@
                     <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="ui black basic button">Add teachers</a>
                 }
                 
-                @if (Model.UserCourses != null && Model.UserCourses.Count > 0)
+                @if (Model.UserCourses != null && Model.UserCourses.Any())
                 {
                     <div class="ui segment">
                         <h4 class="ui header">Users:</h4>
