@@ -21,7 +21,8 @@ namespace Core.EmailTemplates
             {EmailType.CourseInvitation, "Course Invitation" },
             {EmailType.GroupConfirmationByAdmin,  "Group confirmation" },
             {EmailType.ApprovedGroupCreation,  "Group confirmation"},
-            {EmailType.GroupInvitationToStudent, "Group inventation" }
+            {EmailType.GroupInvitationToStudent, "Group inventation" },
+            {EmailType.GetTempPasswordToAdmin, "Login with temporary password" },
         };
 
         private static Dictionary<EmailType, string> BodyGetter = new()
@@ -56,7 +57,15 @@ namespace Core.EmailTemplates
             {EmailType.GroupConfirmationByAdmin,  @"<h4>Confirm the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>"},
             {EmailType.ApprovedGroupCreation, @"<h4>You get approve fot the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>" },
             {EmailType.GroupInvitationToStudent, @"<h4>You get inventation to the group {groupname}"+
-                ", follow the link: <a href='{callbackurl}'>link</a></h4>"},           
+                ", follow the link: <a href='{callbackurl}'>link</a></h4>"},     
+            {EmailType.GetTempPasswordToAdmin, @"<h4>You get information about your account</h4>" +
+                                               "<hr/>" +
+                                               "<p>First name: {firstname}</p>" +
+                                               "<p>Last name: {lastname}</p>" +
+                                               "<p>Email: {email}</p>" +
+                                               "<p>Role: {userrole}</p>" +
+                                               "<bolt>Temporary Password: {temppassword}</bolt>" + 
+                                               "<h3>You need to change password at the first visit</h3>"}, 
         };
 
         public static (string, string) GetEmailSubjectAndBody(EmailType emailType, Dictionary<string, object> placeholderNamesandValues)

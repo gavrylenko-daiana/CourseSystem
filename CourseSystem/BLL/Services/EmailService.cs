@@ -19,13 +19,15 @@ namespace BLL.Services
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly EmailSettings _emailSettings;
-
+        private readonly IUserService _userService;
 
         public EmailService(UserManager<AppUser> userManager,
-            IOptions<EmailSettings> settings)
+            IOptions<EmailSettings> settings,
+            IUserService userService)
         {
             _userManager = userManager;
             _emailSettings = settings.Value;
+            _userService = userService;
         }
               
         public async Task<int> SendCodeToUser(string email)
@@ -59,6 +61,31 @@ namespace BLL.Services
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<Result<bool>> SendTempPasswordToUser(EmailType emailType, AppUser appUser)
+        {
+            if (appUser == null)
+            {
+                return new Result<bool>(false, $"{nameof(appUser)} not found");
+            }
+            
+            var tempPassword = _userService.GenerateTemporaryPassword();
+            var updateResult = await _userService.UpdatePasswordAsync(appUser.Email, tempPassword);
+
+            if (!updateResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"{updateResult.Message}");
+            }
+            
+            var sendResult = await SendEmailToAppUsers(emailType, appUser, tempPassword: tempPassword);
+
+            if (!sendResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"{sendResult.Message}");
+            }
+            
+            return new Result<bool>(true, $"{updateResult.Message}");
         }
 
         private async Task<Result<bool>> SendEmailAsync(EmailData emailData)
@@ -164,7 +191,8 @@ namespace BLL.Services
 
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null) 
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null,
+            string tempPassword = null) 
         {
             if(appUser == null)
                 return (String.Empty, String.Empty);
@@ -218,6 +246,16 @@ namespace BLL.Services
                         {@"{firstname}", appUser.FirstName },
                         {@"{lastname}", appUser.LastName },
                         {@"{callbackurl}", callBackUrl }
+                    };
+                    break;                  
+                case EmailType.GetTempPasswordToAdmin:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        {@"{firstname}", appUser.FirstName },
+                        {@"{lastname}", appUser.LastName },
+                        {@"{email}", appUser.Email },
+                        {@"{userrole}", appUser.Role},
+                        {@"{temppassword}", tempPassword},
                     };
                     break;
                 default:
@@ -279,12 +317,12 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null)
+        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
         {
             if (appUser == null)
                 return new Result<bool>(false, "Fail to send email");
 
-            var emailContent = GetEmailSubjectAndBody(emailType, appUser, callBackUrl);
+            var emailContent = GetEmailSubjectAndBody(emailType, appUser, callBackUrl, tempPassword);
 
             var toEmail = new List<string>();
             var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());

@@ -18,6 +18,7 @@ namespace Core.EmailTemplates
         ConfirmDeletionByUser,
         CourseInvitation,
         GroupConfirmationByAdmin,
-        GroupInvitationToStudent
+        GroupInvitationToStudent,
+        GetTempPasswordToAdmin
     }
 }

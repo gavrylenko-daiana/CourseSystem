@@ -107,26 +107,29 @@ public class AccountController : Controller
             return View(loginViewModel);
         }
 
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-        if (!await _userManager.IsEmailConfirmedAsync(user))
+        if (user.Role != AppUserRoles.Admin)
         {
-            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
-
-            if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
+            if (!await _userManager.IsEmailConfirmedAsync(user))
             {
-                await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
-                TempData.TempDataMessage("Error",
-                    "Your ADMIN account is not verified, we sent email for confirmation again");
-            }
-            else
-            {
-                await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
-                TempData.TempDataMessage("Error",
-                    "Admin hasn't verified your email yet, we sent email for confirmation again");
-            }
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            return View(loginViewModel);
+                var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
+
+                if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
+                {
+                    await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
+                    TempData.TempDataMessage("Error",
+                        "Your ADMIN account is not verified, we sent email for confirmation again");
+                }
+                else
+                {
+                    await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
+                    TempData.TempDataMessage("Error",
+                        "Admin hasn't verified your email yet, we sent email for confirmation again");
+                }
+
+                return View(loginViewModel);
+            }
         }
 
         var checkPassword = await _userManager.CheckPasswordAsync(user, loginViewModel.Password);
@@ -408,6 +411,47 @@ public class AccountController : Controller
         }
         
         return RedirectToAction("Login", "Account");
+    }
+
+    [HttpGet]
+    public IActionResult RegisterNewAdmin()
+    {
+        return View();
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> RegisterNewAdmin(RegisterAdminViewModel registerAdminViewModel)
+    {
+        var user = await _userManager.FindByEmailAsync(registerAdminViewModel.Email);
+
+        if (user != null)
+        {
+            TempData.TempDataMessage("Error", $"This email already exist");
+            return View(registerAdminViewModel);
+        }
+        
+        var newAdmin = new AppUser();
+        registerAdminViewModel.MapTo(newAdmin);
+        newAdmin.UserName = newAdmin.FirstName + newAdmin.LastName;
+
+        var newUserResponse = await _userManager.CreateAsync(newAdmin, _userService.GenerateTemporaryPassword());
+
+        if (!newUserResponse.Succeeded)
+        {
+            TempData.TempDataMessage("Error", "Failed to add new admin");
+            return View(registerAdminViewModel);
+        }
+        
+        var sendResult = await _emailService.SendTempPasswordToUser(EmailType.GetTempPasswordToAdmin, newAdmin);
+        
+        if (!sendResult.IsSuccessful)
+        {
+            await _userManager.DeleteAsync(newAdmin);
+            TempData.TempDataMessage("Error", $"{sendResult.Message}");
+            return View(registerAdminViewModel);
+        }
+        
+        return RedirectToAction("Index", "User");
     }
     
     [HttpGet]

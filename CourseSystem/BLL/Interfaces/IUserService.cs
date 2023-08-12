@@ -22,4 +22,6 @@ public interface IUserService
     Task<Result<AppUser>> FindByIdAsync(string id);
 
     Task<Result<AppUser>> GetCurrentUser(ClaimsPrincipal user);
+
+    string GenerateTemporaryPassword();
 }
