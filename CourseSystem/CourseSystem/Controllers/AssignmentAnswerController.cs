@@ -88,7 +88,7 @@ public class AssignmentAnswerController : Controller
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
         }
 
-        return RedirectToAction("Details", "Assignment", new { id = assignmentResult.Data.Id });
+        return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentResult.Data.Id });
     }
 
 
