@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Core.Enums;
 
 namespace UI.ViewModels;
 
@@ -14,6 +15,5 @@ public class NewPasswordViewModel
     [DataType(DataType.Password)]
     [Compare("NewPassword", ErrorMessage = "Password do not match")]
     public string ConfirmNewPassword { get; set; }
-    
     public string Email { get; set; }
 }

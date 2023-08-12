@@ -1,4 +1,6 @@
 @using Core.Models
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Core.Enums
 @model AppUser
 
 <!DOCTYPE html>
@@ -105,6 +107,17 @@
                                 }
                             </ul>
                         </div>
+                    }
+                    @if (User.IsInRole(AppUserRoles.Admin.ToString()))
+                    {
+                        <div class="form-group py-2">
+                            <label>Your Functions:</label>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <a class="nav-link text-dark btn btn-outline-primary" asp-controller="Account" asp-action="RegisterNewAdmin">Add new Admin</a>
+                                </li>
+                            </ul>
+                        </div>                          
                     }
                     <div class="py-2">
                         <a class="nav-link text-dark btn btn-outline-primary" asp-controller="User" asp-action="Edit">Edit</a>
