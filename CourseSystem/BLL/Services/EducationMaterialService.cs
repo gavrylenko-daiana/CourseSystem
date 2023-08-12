@@ -147,14 +147,14 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
     public async Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id)
     {
-        var material = await GetById(id);
+        var materialResult = await GetById(id);
 
-        if (material == null)
+        if (!materialResult.IsSuccessful)
         {
-            return new Result<EducationMaterial>(false, $"{material} with id {id} does not exist");
+            return new Result<EducationMaterial>(false, $"{nameof(materialResult)} with id {id} does not exist. Message - {materialResult.Message}");
         }
 
-        return new Result<EducationMaterial>(true, material);
+        return new Result<EducationMaterial>(true, materialResult.Data);
     }
 
     public async Task<Result<bool>> DeleteUploadFileAsync(EducationMaterial material)
@@ -163,6 +163,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         {
             await _repository.DeleteAsync(material);
             await _unitOfWork.Save();
+            
             return new Result<bool>(true);
         }
         catch (Exception e)

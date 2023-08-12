@@ -38,15 +38,20 @@ public class EducationMaterialController : Controller
     [HttpGet]
     public async Task<IActionResult> CreateInGroup(int groupId)
     {
-        // check result
-        var group = await _groupService.GetById(groupId);
+        var groupResult = await _groupService.GetById(groupId);
 
+        if (!groupResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
+            return RedirectToAction("Index", "Group");
+        }
+        
         var materialViewModel = new CreateInGroupEducationMaterialViewModel
         {
-            Group = group,
-            GroupId = group.Id
+            Group = groupResult.Data,
+            GroupId = groupResult.Data.Id
         };
-
+        
         return View(materialViewModel);
     }
 
@@ -67,16 +72,16 @@ public class EducationMaterialController : Controller
             return View(viewModel);
         }
         
-        var group = await _groupService.GetById(viewModel.GroupId);
+        var groupResult = await _groupService.GetById(viewModel.GroupId);
 
-        if (group == null)
+        if (!groupResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", $"Failed to get {nameof(group)} by id {viewModel.GroupId}");
-            return RedirectToAction("Index", "Course");
+            TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
+            return RedirectToAction("Index", "Group");
         }
 
         var addResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile,
-            fullPath.Message, group);
+            fullPath.Message, groupResult.Data);
         await _groupService.UpdateGroup(addResult.Data);
 
         if (!addResult.IsSuccessful)
@@ -91,14 +96,19 @@ public class EducationMaterialController : Controller
     [HttpGet]
     public async Task<IActionResult> CreateInCourse(int courseId)
     {
-        // check result
-        var course = await _courseService.GetById(courseId);
+        var courseResult = await _courseService.GetById(courseId);
+        
+        if (!courseResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
+            return RedirectToAction("Index", "Course");
+        }
     
         var materialViewModel = new CreateInCourseEducationMaterialViewModel
         {
-            Course = course,
-            CourseId = course.Id,
-            Groups = course.Groups
+            Course = courseResult.Data,
+            CourseId = courseResult.Data.Id,
+            Groups = courseResult.Data.Groups
         };
     
         return View(materialViewModel);
@@ -115,18 +125,18 @@ public class EducationMaterialController : Controller
             return View(viewModel);
         }
         
-        var group = await _groupService.GetById(viewModel.SelectedGroupId);
+        var groupResult = await _groupService.GetById(viewModel.SelectedGroupId);
 
-        if (group == null)
+        if (!groupResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", $"Failed to get {nameof(group)} by id {viewModel.SelectedGroupId}");
-            return RedirectToAction("Index", "Course");
+            TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
+            return RedirectToAction("Index", "Group");
         }
 
         if (viewModel.MaterialAccess == MaterialAccess.Group)
         {
             var addToGroupResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile,
-                fullPath.Message, group);
+                fullPath.Message, groupResult.Data);
             
             if (!addToGroupResult.IsSuccessful)
             {
@@ -136,18 +146,17 @@ public class EducationMaterialController : Controller
         }
         else
         {
-            var course = await _courseService.GetById(viewModel.CourseId);
-
-            if (course == null)
+            var courseResult = await _courseService.GetById(viewModel.CourseId);
+            
+            if (!courseResult.IsSuccessful)
             {
-                TempData.TempDataMessage("Error", $"Failed to get {nameof(course)} by id {viewModel.CourseId}");
+                TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
                 return RedirectToAction("Index", "Course");
             }
 
             var addToCourseResult = await _educationMaterialService.AddToCourse(viewModel.UploadFile,
-                fullPath.Message, course);
-            
-            await _courseService.UpdateCourse(course);
+                fullPath.Message, courseResult.Data);
+            await _courseService.UpdateCourse(courseResult.Data);
             
             if (!addToCourseResult.IsSuccessful)
             {
