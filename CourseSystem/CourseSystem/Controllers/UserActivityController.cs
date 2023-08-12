@@ -31,7 +31,7 @@ public class UserActivityController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -58,7 +58,7 @@ public class UserActivityController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 

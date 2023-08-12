@@ -24,12 +24,12 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (assignment == null)
             {
-                return new Result<bool>(false, "Invalid assignment");
+                return new Result<bool>(false, $"Invalid {nameof(assignment)}");
             }  
 
             var activity = new UserActivity()
@@ -48,13 +48,13 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (course == null)
             {
-                return new Result<bool>(false, "Invalid course");
-            }
+                return new Result<bool>(false, $"Invalid {nameof(course)}");
+            }  
 
             var activity = new UserActivity()
             {
@@ -71,13 +71,13 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (group == null)
             {
-                return new Result<bool>(false, "Invalid group");
-            }
+                return new Result<bool>(false, $"Invalid {nameof(group)}");
+            } 
 
             var activity = new UserActivity()
             {
@@ -95,13 +95,13 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (course == null)
             {
-                return new Result<bool>(false, "Invalid course");
-            }
+                return new Result<bool>(false, $"Invalid {nameof(course)}");
+            } 
 
             var activity = new UserActivity()
             {
@@ -118,12 +118,12 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (group == null)
             {
-                return new Result<bool>(false, "Invalid group");
+                return new Result<bool>(false, $"Invalid {nameof(group)}");
             }
 
             var activity = new UserActivity()
@@ -142,12 +142,12 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (userAssignment == null)
             {
-                return new Result<bool>(false, "Invalid userAssignment");
+                return new Result<bool>(false, $"Invalid {nameof(userAssignment)}");
             }
 
             var activity = new UserActivity()
@@ -166,12 +166,12 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (assignment == null)
             {
-                return new Result<bool>(false, "Invalid assignment");
+                return new Result<bool>(false, $"Invalid {nameof(assignment)}");
             }
 
             var activity = new UserActivity()
@@ -189,12 +189,12 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (course == null)
             {
-                return new Result<bool>(false, "Invalid course");
+                return new Result<bool>(false, $"Invalid {nameof(course)}");
             }
 
             var activity = new UserActivity()
@@ -212,12 +212,12 @@ namespace BLL.Services
         {
             if (user == null)
             {
-                return new Result<bool>(false, "Invalid user");
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (group == null)
             {
-                return new Result<bool>(false, "Invalid group");
+                return new Result<bool>(false, $"Invalid {nameof(group)}");
             }
 
             var activity = new UserActivity()

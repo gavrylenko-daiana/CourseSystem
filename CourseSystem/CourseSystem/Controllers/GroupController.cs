@@ -105,7 +105,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -157,7 +157,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -484,7 +484,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -552,7 +552,7 @@ public class GroupController : Controller
 
         if (!currentTeacherResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
             
@@ -627,7 +627,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
            

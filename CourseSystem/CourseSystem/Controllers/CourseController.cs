@@ -43,7 +43,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unauthirized user");
+            _logger.LogWarning("Unauthorized user");
 
             return RedirectToAction("Login", "Account");
         }
@@ -83,7 +83,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unauthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
         
@@ -181,7 +181,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unauthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -206,7 +206,7 @@ public class CourseController : Controller
 
         if (courseViewModel.CurrentUser == null)
         {
-            _logger.LogError("Unauthirized user");
+            _logger.LogError("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -287,7 +287,7 @@ public class CourseController : Controller
             new { courseId = courseId, code = code },
             protocol: HttpContext.Request.Scheme);
 
-        var sendResult = await _emailService.SendToTeacherCourseInventation(teacherResult.Data, courseResult.Data, callbackUrl);
+        var sendResult = await _emailService.SendToTeacherCourseInvitation(teacherResult.Data, courseResult.Data, callbackUrl);
 
         if (!sendResult.IsSuccessful)
         {
@@ -311,7 +311,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unauthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }         
 
@@ -336,7 +336,7 @@ public class CourseController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogError("Unauthirized user");
+            _logger.LogError("Unauthorized user");
             ViewData.ViewDataMessage("Error", "CurrentUser not found");
             return View("Index");
         }
