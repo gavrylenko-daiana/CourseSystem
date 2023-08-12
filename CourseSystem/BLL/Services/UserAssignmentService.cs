@@ -20,7 +20,7 @@ namespace BLL.Services
         {
             if (userAssignment == null)
             {
-                return new Result<bool>(false, "Fail to get user assignment");
+                return new Result<bool>(false, $"Fail to get {nameof(userAssignment)}");
             }
                
             try
@@ -43,19 +43,19 @@ namespace BLL.Services
         {
             if(assignment == null || appUser == null)
             {
-                return new Result<UserAssignments>(false, "Invalid input assignmnet and user data");
+                return new Result<UserAssignments>(false, $"Invalid input {nameof(assignment)} and {nameof(appUser)} data");
             }
                 
             try
             {
-                var chechUserAssignmnet = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
+                var checkUserAssignment = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
 
-                if (chechUserAssignmnet.Any())
+                if (checkUserAssignment.Any())
                 {
-                    return new Result<UserAssignments>(true, chechUserAssignmnet.FirstOrDefault());
+                    return new Result<UserAssignments>(true, checkUserAssignment.FirstOrDefault());
                 }
                    
-                var userAssignmnet = new UserAssignments()
+                var userAssignment = new UserAssignments()
                 {
                     Assignment = assignment,
                     AssignmentId = assignment.Id,
@@ -63,14 +63,14 @@ namespace BLL.Services
                     AppUserId = appUser.Id,
                 };
 
-                await _repository.AddAsync(userAssignmnet);
+                await _repository.AddAsync(userAssignment);
                 await _unitOfWork.Save();
 
-                return new Result<UserAssignments>(true, userAssignmnet);
+                return new Result<UserAssignments>(true, userAssignment);
             }
             catch(Exception ex)
             {
-                return new Result<UserAssignments>(false, "Fail to create user assignmnet");
+                return new Result<UserAssignments>(false, $"Fail to create {nameof(appUser)} {nameof(assignment)}");
             }
         }
     }

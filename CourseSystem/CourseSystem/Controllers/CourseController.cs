@@ -326,9 +326,9 @@ public class CourseController : Controller
             return View("Index");
         }
         
-        var courseTecahers = courseResult.Data.UserCourses.Select(c => c.AppUserId).ToList();
+        var courseTeachers = courseResult.Data.UserCourses.Select(c => c.AppUserId).ToList();
 
-        if (courseTecahers.Contains(currentUser.Id))
+        if (courseTeachers.Contains(currentUser.Id))
         {
             TempData.TempDataMessage("Error", "You are already registered for the course");
             return RedirectToAction("Index");

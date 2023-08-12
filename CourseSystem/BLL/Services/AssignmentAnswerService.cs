@@ -17,19 +17,19 @@ namespace BLL.Services
         {
             if (assignmentAnswer == null)
             {
-                return new Result<bool>(false, "Invalid assignmnet answer");
+                return new Result<bool>(false, "Invalid assignment answer");
             }              
 
-            var userAssignmnetResult = await _userAssignmentService.CreateUserAssignment(assignment, appUser);
+            var userAssignmentResult = await _userAssignmentService.CreateUserAssignment(assignment, appUser);
 
-            if (!userAssignmnetResult.IsSuccessful)
+            if (!userAssignmentResult.IsSuccessful)
             {
-                return new Result<bool>(false, "Failt to create user assignment");
+                return new Result<bool>(false, "Failed to create user assignment");
             }
                             
             try
             {
-                assignmentAnswer.UserAssignment = userAssignmnetResult.Data;
+                assignmentAnswer.UserAssignment = userAssignmentResult.Data;
                 await _repository.AddAsync(assignmentAnswer);
                 await _unitOfWork.Save();
 

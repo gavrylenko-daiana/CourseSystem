@@ -84,7 +84,9 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        return View();
+        var groupViewModel = new GroupViewModel();
+        
+        return View(groupViewModel);
     }
     
     [HttpPost]
@@ -118,6 +120,7 @@ public class GroupController : Controller
         var group = new Group();
         groupViewModel.MapTo(group);
         group.Course = courseResult.Data;
+        group.CourseId = courseResult.Data.Id;
 
         var createResult = await _groupService.CreateGroup(group, currentUserResult.Data);
 
@@ -226,6 +229,7 @@ public class GroupController : Controller
     }
 
     [HttpPost]
+    [ActionName("Delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var deleteResult = await _groupService.DeleteGroup(id);
@@ -318,7 +322,7 @@ public class GroupController : Controller
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(studentResult.Data);
                 var callbackUrl = Url.Action(
-                "InventationToGroup",
+                    "InvitationToGroup",
                 "Group",
                 new { groupId = groupId, code = code },
                 protocol: HttpContext.Request.Scheme);
@@ -327,7 +331,7 @@ public class GroupController : Controller
                 studentsData.Add(studentResult.Data.Email, callbackUrl);
             }
 
-            var result = await _emailService.SendInventationToStudents(studentsData, groupResult.Data);
+            var result = await _emailService.SendInvitationToStudents(studentsData, groupResult.Data);
 
             if (!result.IsSuccessful)
             {
@@ -450,7 +454,7 @@ public class GroupController : Controller
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(studentResult.Data);
             var callbackUrl = Url.Action(
-            "InventationToGroup",
+                "InvitationToGroup",
             "Group",
             new { groupId = groupId, code = code },
             protocol: HttpContext.Request.Scheme);
@@ -459,7 +463,7 @@ public class GroupController : Controller
             studentsData.Add(studentResult.Data.Email, code);
         }
 
-        var result = await _emailService.SendInventationToStudents(studentsData, groupResult.Data);
+        var result = await _emailService.SendInvitationToStudents(studentsData, groupResult.Data);
 
         if (!result.IsSuccessful)
         {
@@ -474,7 +478,7 @@ public class GroupController : Controller
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> InventationToGroup(int groupId, string code)
+    public async Task<IActionResult> InvitationToGroup(int groupId, string code)
     {
         var currentUserResult = await _userService.GetCurrentUser(User);
 

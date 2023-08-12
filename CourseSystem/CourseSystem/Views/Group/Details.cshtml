@@ -33,13 +33,19 @@
                 <progress class="ui progress" max="100" value="@Model.Progress"></progress>
             </div>
 
-            @if (Model.Group.EducationMaterials != null && Model.Group.EducationMaterials.Count > 0)
+            @{
+                var materialsGroup = Model.Group.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
+            }
+            @if (materialsGroup != null && materialsGroup.Any())
             {
                 <h6>Education Materials:</h6>
                 <ul>
-                    @foreach (var material in Model.Group.EducationMaterials)
+                    @foreach (var material in materialsGroup)
                     {
-                        <li>@material.Name</li>
+                        <div class="justify-content-start">
+                            <li>@material.Name</li>
+                            <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
+                        </div>
                     }
                 </ul>
             }
@@ -56,7 +62,7 @@
         </div>
     </div>
 
-    @if (Model.Group.Assignments != null && Model.Group.Assignments.Count > 0)
+    @if (Model.Group.Assignments != null && Model.Group.Assignments.Any())
     {
         <div class="card mb-4">
             <div class="card-header">
@@ -87,7 +93,7 @@
         <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
     </div>
 
-    @if (Model.UserGroupsWithoutAdmins != null && Model.UserGroupsWithoutAdmins.Count > 0)
+    @if (Model.UserGroupsWithoutAdmins != null && Model.UserGroupsWithoutAdmins.Any())
     {
         <div class="card">
             <div class="card-header">
@@ -130,4 +136,13 @@
             </div>
         }
     }
+    <div class="py-2">
+        <a class="nav-link text-dark btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
+    </div>
 </div>
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span><b>Sorry!</b> - @TempData["Error"]</span>
+    </div>
+}

@@ -11,6 +11,7 @@ namespace Core.Models
         public bool IsSuccessful { get; }
         public string Message { get; }
         public T Data { get; }
+        
         public Result()
         {
 

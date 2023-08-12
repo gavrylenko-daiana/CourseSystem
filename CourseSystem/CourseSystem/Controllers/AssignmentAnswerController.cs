@@ -62,8 +62,8 @@ public class AssignmentAnswerController : Controller
             return View(assignmentAnswerVM);
         }
 
-        var assignmnetAnswer = new AssignmentAnswer();
-        assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmnetAnswer);
+        var assignmentAnswer = new AssignmentAnswer();
+        assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmentAnswer);
 
         if (!assignmentAnswerVM.AssignmentAnswerFiles.IsNullOrEmpty())
         {
@@ -71,14 +71,14 @@ public class AssignmentAnswerController : Controller
             //set the name of file to model
         }
 
-        assignmnetAnswer.Name = "Some file name";
-        assignmnetAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
-        assignmnetAnswer.Url = "Some URL";
+        assignmentAnswer.Name = "Some file name";
+        assignmentAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
+        assignmentAnswer.Url = "Some URL";
 
-        var assignmnetResult = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
+        var assignmentResult = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
 
 
-        if (!assignmnetResult.IsSuccessful)
+        if (!assignmentResult.IsSuccessful)
         {
             _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}", 
                 assignmentAnswerVM.AssignmentId, assignmnetResult.Message);
@@ -96,7 +96,7 @@ public class AssignmentAnswerController : Controller
         }
 
         var answerResult =
-            await _assignmentAnswerService.CreateAssignmentAnswer(assignmnetAnswer, assignmnetResult.Data, currentUser);
+            await _assignmentAnswerService.CreateAssignmentAnswer(assignmentAnswer, assignmentResult.Data, currentUser);
 
         if (!answerResult.IsSuccessful)
         {
@@ -107,7 +107,7 @@ public class AssignmentAnswerController : Controller
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
         }
 
-        return RedirectToAction("Details", "Assignment", new { id = assignmnetResult.Data.Id });
+        return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentResult.Data.Id });
     }
 
 
@@ -116,7 +116,7 @@ public class AssignmentAnswerController : Controller
     public async Task<IActionResult> Delete(int assignmentAnswerId)
     {
         var assignmentAnswerResult = await _assignmentAnswerService.GetById(assignmentAnswerId);
-        var asignmentId = assignmentAnswerResult.Data.UserAssignment.AssignmentId;
+        var assignmentId = assignmentAnswerResult.Data.UserAssignment.AssignmentId;
 
         if(!assignmentAnswerResult.IsSuccessful)
         {
@@ -137,7 +137,7 @@ public class AssignmentAnswerController : Controller
             TempData.TempDataMessage("Error", deleteResult.Message);
         }
 
-        return RedirectToAction("Details", "Assignment", new { assignmentId = asignmentId });
+        return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentId });
     }
 
 
@@ -250,7 +250,6 @@ public class AssignmentAnswerController : Controller
 
             return NotFound();
         }
-
 
         var updateResult = await _userAssignmentService.ChangeUserAssignmentGrade(userAssignment, grade);
 

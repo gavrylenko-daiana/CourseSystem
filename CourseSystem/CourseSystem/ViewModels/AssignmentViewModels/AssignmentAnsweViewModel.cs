@@ -10,6 +10,5 @@ namespace UI.ViewModels.AssignmentViewModels
         [Display(Name = "Answer description")]
         public string? AnswerDescription { get; set; }
         public List<IFormFile>? AssignmentAnswerFiles { get; set; }
-
     }
 }

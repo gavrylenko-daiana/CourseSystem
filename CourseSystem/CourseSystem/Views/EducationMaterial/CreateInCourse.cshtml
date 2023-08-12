@@ -1,0 +1,72 @@
+@using UI.ViewModels;
+@using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model CreateInCourseEducationMaterialViewModel
+
+<!DOCTYPE html>
+
+<html>
+<body>
+<div class="container py-4">
+    <h1>Upload File to Task</h1>
+    <form method="post" asp-controller="EducationMaterial" asp-action="CreateInCourse" enctype="multipart/form-data">
+        <input type="hidden" asp-for="CourseId"/>
+        <input type="hidden" asp-for="Course"/>
+        <input type="hidden" asp-for="Groups"/>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="UploadFile" class="control-label"></label>
+            <input asp-for="UploadFile" type="file" class="form-control">
+            <span asp-validation-for="UploadFile" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="MaterialAccess" class="control-label"></label>
+            <select id="materialAccessSelect" asp-for="MaterialAccess" class="form-control">
+                @foreach (var accessValue in Enum.GetValues(typeof(MaterialAccess)))
+                {
+                    <option value="@accessValue">@accessValue</option>
+                }
+            </select>
+            <span asp-validation-for="MaterialAccess" class="text-danger"></span>
+        </div>
+        <div class="form-group" id="groupDropdown" style="display:none;">
+            <label asp-for="SelectedGroupId" class="control-label">Select Group</label>
+            <select asp-for="SelectedGroupId" class="form-control">
+                @if (Model.Groups.Any())
+                {
+                    foreach (var group in Model.Groups)
+                    {
+                        <option value="@group.Id">@group.Name</option>
+                    }
+                }
+                else
+                {
+                    <option value="" disabled>No groups available</option>
+                }
+            </select>
+            <span asp-validation-for="SelectedGroupId" class="text-danger"></span>
+        </div>
+        <div class="py-2">
+            <div class="form-group">
+                <input class="btn btn-outline-primary" type="submit" value="Save"/>
+                <a class="btn btn-outline-dark" asp-controller="Course" asp-action="Index">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    const materialAccessSelect = document.querySelector("#materialAccessSelect");
+    const groupDropdown = document.querySelector("#groupDropdown");
+
+    materialAccessSelect.addEventListener("change", function () {
+        if (materialAccessSelect.value === "Group") {
+            groupDropdown.style.display = "block";
+        } else {
+            groupDropdown.style.display = "none";
+        }
+    });
+</script>
+
+</body>
+</html>
