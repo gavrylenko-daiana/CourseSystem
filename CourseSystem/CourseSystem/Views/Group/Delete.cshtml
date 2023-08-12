@@ -5,6 +5,12 @@
         <div class="card-header">
             Delete Group
         </div>
+        @if (TempData["Error"] != null)
+        {
+            <div class="col-md-12 alert alert-danger">
+                <span><b>Sorry!</b> - @TempData["Error"]</span>
+            </div>
+        }
         <div class="card-body">
             <h5 class="card-title">Are you sure you want to delete the group '@Model.Name'?</h5>
             <form asp-action="Delete" asp-controller="Group" asp-route-id="@Model.Id" method="post">
@@ -14,9 +20,3 @@
         </div>
     </div>
 </div>
-@if (TempData["Error"] != null)
-{
-    <div class="col-md-12 alert alert-danger">
-        <span><b>Sorry!</b> - @TempData["Error"]</span>
-    </div>
-}  

@@ -2,7 +2,13 @@
 
 <div class="container mt-4">
     <h3>Create Group</h3>
-    <hr />
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }
+    <hr/>
     @using (Html.BeginForm("Create", "Group", FormMethod.Post))
     {
         <div class="form-group">
@@ -16,7 +22,7 @@
             @Html.TextBoxFor(model => model.StartDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), required = "required" })
             @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
         </div>
-        
+
         <div class="form-group">
             @Html.LabelFor(model => model.EndDate)
             @Html.TextBoxFor(model => model.EndDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), required = "required" })
@@ -26,11 +32,4 @@
         <button type="submit" class="btn btn-primary">Create</button>
         <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
     }
-    
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
-        </div>
-    }    
 </div>

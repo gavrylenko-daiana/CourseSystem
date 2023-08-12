@@ -18,27 +18,43 @@ public class GenericService<T>: IGenericService<T> where T : class
         _repository = repository;
     }
 
-    public async Task<T> GetById(int id)
+    public async Task<Result<T>> GetById(int id)
     {
         try
         {
-            return await _repository.GetByIdAsync(id);
+            var entity = await _repository.GetByIdAsync(id);
+
+            if (entity == null)
+            {
+                return new Result<T>(false, $"{typeof(T).Name} by Id {id} not found");
+            }
+            
+            return new Result<T>(true, entity);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to get {typeof(T).Name} by Id {id}. Exception: {ex.Message}");
+            return new Result<T>(false, $"Failed to get {typeof(T).Name} by Id {id}. Exception: {ex.Message}");
         }
     }
 
-    public async Task<List<T>> GetByPredicate(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null)
+    public async Task<Result<List<T>>> GetByPredicate(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null)
     {
         try
         {
-            return await _repository.GetAsync(filter, orderBy);
+            var entityList = await _repository.GetAsync(filter, orderBy);
+
+            if (entityList == null)
+            {
+                return new Result<List<T>>(false, $"{typeof(T).Name} by predicate not found");
+            }
+            
+            return new Result<List<T>>(true, entityList);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to get {typeof(T).Name} by predicate. Exception: {ex.Message}", ex);
+            return new Result<List<T>>(false, $"Failed to get {typeof(T).Name} by predicate. Exception: {ex.Message}");
         }
     }
+    
+    
 }

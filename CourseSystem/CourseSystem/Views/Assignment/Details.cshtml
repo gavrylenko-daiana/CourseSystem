@@ -1,6 +1,7 @@
 ﻿@using UI.ViewModels
 @using Core.Enums
 @using Westwind.AspNetCore.Markdown;
+@using UI.ViewModels.AssignmentViewModels;
 @model DetailsAssignmentViewModel
 
 <!DOCTYPE html>
@@ -35,18 +36,18 @@
                     <div class="card-body">
                         <div class="mb-3 d-flex justify-content-between">
                             <div>
-                                <div class="me-3">Start Date: @Model.StartDate.ToString("d")</div>
+                                <div class="me-3">Start Date: @Model.StartDate.ToString("dddd, dd MMMM yyyy HH:mm")</div>
                                 <hr>
-                                <div class="me-3">End Date: @Model.EndDate.ToString("d")</div>
+                                <div class="me-3">End Date: @Model.EndDate.ToString("dddd, dd MMMM yyyy HH:mm")</div>
                                 <hr>
                             </div>
                             @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
                             {
                                 <div class="d-inline-block">
-                                    <a asp-controller="Assignment" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    <a href="@Url.Action("Edit", "Assignment", new { id = @Model.Id })" class="btn btn-primary">
                                         Edit
                                     </a>
-                                    <a href="@Url.Action("DeleteAssignment", "Assignment", new { assignmentId = @Model.Id })" class="btn btn-primary">
+                                    <a href="@Url.Action("Delete", "Assignment", new { assignmentId = @Model.Id })" class="btn btn-primary">
                                         Delete
                                     </a>
                                     <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = Model.Id})" class="btn btn-primary">
@@ -66,12 +67,12 @@
                                         @if (Model.AssignmentAccess == AssignmentAccess.Planned)
                                         {
                                             <div class="inline-icon">
-                                                <i class="fa fa-times" aria-hidden="true"></i>Access denied
+                                                <i class="fa fa-times" aria-hidden="true"></i> Access denied
                                             </div>
                                         }
                                         else if (Model.AssignmentAccess == AssignmentAccess.InProgress)
                                         {
-                                            <a asp-controller="AssignmentAnswer" asp-action="CreateAnswer" asp-route-id="@Model.Id" class="btn btn-primary">
+                                            <a href="@Url.Action("Create", "AssignmentAnswer", new { id = Model.Id})" class="btn btn-primary">
                                                 Add answer
                                             </a>
                                         }
@@ -95,9 +96,8 @@
                                 </div>
                             </div>
                         }
-                        
                         <hr/>                       
-                        @if (Model.AttachedFiles.Any()) //fro files
+                        @if (Model.AttachedFiles.Any()) 
                         {
                             <h4>Attached files for assignmnet: </h4>
                             <table class="table table-borderless">

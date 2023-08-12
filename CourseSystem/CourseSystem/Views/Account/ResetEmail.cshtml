@@ -1,0 +1,58 @@
+@model UI.ViewModels.NewEmailViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reset Email</title>
+</head>
+<body>
+<div class="container">
+    <div class="py-4">
+        <div class="col-md-6">
+            <p>
+                <h1>Write in the mail the code will come to</h1>
+            </p>
+            <div class="py-2">
+                @if (TempData["Error"] != null)
+                {
+                    <div class="col-md-12 alert alert-danger">
+                        <span><b>Sorry!</b> - @TempData["Error"]</span>
+                    </div>
+                }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <p class="text-success">@TempData["SuccessMessage"]</p>
+                }
+                <form method="post" asp-controller="Account" asp-action="ResetEmail">
+                    <input type="hidden" asp-for="Email" value="@Model.Email"/>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="NewEmail" class="control-label"></label>
+                        <input asp-for="NewEmail" class="form-control">
+                        <span asp-validation-for="NewEmail" class="text-danger"></span>
+                    </div>
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <div class="py-2">
+                            <div class="form-group">
+                                <input class="btn btn-outline-primary" type="submit" value="Update email"/>
+                                <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Login">Cancel</a>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="py-2">
+                            <div class="form-group">
+                                <input class="btn btn-outline-primary" type="submit" value="Update password"/>
+                                <a class="btn btn-outline-dark" asp-controller="User" asp-action="Index">Cancel</a>
+                            </div>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

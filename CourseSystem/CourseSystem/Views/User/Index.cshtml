@@ -1,4 +1,6 @@
 @using Core.Models
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Core.Enums
 @model AppUser
 
 <!DOCTYPE html>
@@ -14,6 +16,16 @@
                 <div class="card-header text-center">
                     <h4>User Profile</h4>
                 </div>
+                @if (TempData["Error"] != null)
+                {
+                    <div class="col-md-12 alert alert-danger">
+                        <span><b>Sorry!</b> - @TempData["Error"]</span>
+                    </div>
+                }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <p class="text-success">@TempData["SuccessMessage"]</p>
+                }
                 <div class="card-body">
                     <div class="form-group py-2">
                         <label asp-for="FirstName" class="control-label"></label>
@@ -27,10 +39,13 @@
                         <label asp-for="Email" class="control-label"></label>
                         <input asp-for="Email" class="form-control" id="Email" value="@Model.Email" readonly>
                     </div>
-                    <div class="form-group py-2">
-                        <label asp-for="BirthDate" class="control-label"></label>
-                        <input asp-for="BirthDate" class="form-control" id="BirthDate" type="date" readonly>
-                    </div>
+                    @if (Model.BirthDate.HasValue)
+                    {
+                        <div class="form-group py-2">
+                            <label asp-for="BirthDate" class="control-label"></label>
+                            <input asp-for="BirthDate" class="form-control" id="BirthDate" type="date" readonly>
+                        </div>
+                    }
                     @if (Model.University != null)
                     {
                         <div class="form-group py-2">
@@ -92,6 +107,17 @@
                                 }
                             </ul>
                         </div>
+                    }
+                    @if (User.IsInRole(AppUserRoles.Admin.ToString()))
+                    {
+                        <div class="form-group py-2">
+                            <label>Your Functions:</label>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <a class="nav-link text-dark btn btn-outline-primary" asp-controller="Account" asp-action="RegisterNewAdmin">Add new Admin</a>
+                                </li>
+                            </ul>
+                        </div>                          
                     }
                     <div class="py-2">
                         <a class="nav-link text-dark btn btn-outline-primary" asp-controller="User" asp-action="Edit">Edit</a>

@@ -44,19 +44,23 @@ public class GroupService : GenericService<Group>, IGroupService
             await _repository.AddAsync(group);
             await _unitOfWork.Save();
 
+            var addAdminsResult = await AddAllAdminsAtGroup(group);
+            
+            if (!addAdminsResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"{addAdminsResult.Message}");
+            }
+            
             var userGroup = new UserGroups()
             {
                 Group = group,
                 AppUser = currentUser
             };
             
-            var createUserGroupResult = await _userGroupService.CreateUserGroups(userGroup);
+            var createUserGroupResult = await CreateUserGroup(userGroup);
 
             if (!createUserGroupResult.IsSuccessful)
             {
-                await _repository.DeleteAsync(group);
-                await _unitOfWork.Save();
-                
                 return new Result<bool>(false, $"{createUserGroupResult.Message}");
             }
 
@@ -156,5 +160,47 @@ public class GroupService : GenericService<Group>, IGroupService
         }
 
         return new Result<List<Group>>(true, groups);
+    }
+
+    private async Task<Result<bool>> AddAllAdminsAtGroup(Group group)
+    {
+        if (group.Course.UserCourses.Any())
+        {
+            foreach (var userCourse in group.Course.UserCourses)
+            {
+                if (userCourse.AppUser.Role == AppUserRoles.Admin)
+                {
+                    var userGroup = new UserGroups()
+                    {
+                        Group = group,
+                        AppUser = userCourse.AppUser
+                    };
+
+                    var createUserGroupResult = await CreateUserGroup(userGroup);
+
+                    if (!createUserGroupResult.IsSuccessful)
+                    {
+                        return new Result<bool>(false, $"{createUserGroupResult.Message}");
+                    }
+                }
+            }
+        }
+
+        return new Result<bool>(true);
+    }
+    
+    private async Task<Result<bool>> CreateUserGroup(UserGroups userGroups)
+    {
+        var createUserGroupResult = await _userGroupService.CreateUserGroups(userGroups);
+
+        if (!createUserGroupResult.IsSuccessful)
+        {
+            await _repository.DeleteAsync(userGroups.Group);
+            await _unitOfWork.Save();
+                
+            return new Result<bool>(false, $"{createUserGroupResult.Message}");
+        }
+        
+        return new Result<bool>(true);
     }
 }

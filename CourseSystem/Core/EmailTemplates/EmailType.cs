@@ -10,6 +10,7 @@ namespace Core.EmailTemplates
     {
         CodeVerification,
         AccountApproveByAdmin,
+        AccountApproveByUser,
         ApprovedGroupCreation,
         UserRegistration,
         ConfirmAdminRegistration,
@@ -17,6 +18,7 @@ namespace Core.EmailTemplates
         ConfirmDeletionByUser,
         CourseInvitation,
         GroupConfirmationByAdmin,
-        GroupInvitationToStudent
+        GroupInvitationToStudent,
+        GetTempPasswordToAdmin
     }
 }

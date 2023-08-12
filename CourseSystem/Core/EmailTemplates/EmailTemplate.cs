@@ -13,6 +13,7 @@ namespace Core.EmailTemplates
         {
             {EmailType.CodeVerification, "Verify code for update password."},
             {EmailType.AccountApproveByAdmin, "Confirm user account" },
+            {EmailType.AccountApproveByUser, "Confirm user account" },
             {EmailType.UserRegistration,  "Successful registration"},
             {EmailType.ConfirmAdminRegistration, "Confirm your account" },
             {EmailType.ConfirmDeletionByAdmin,  "Confirm deletion of user account"},
@@ -20,7 +21,8 @@ namespace Core.EmailTemplates
             {EmailType.CourseInvitation, "Course Invitation" },
             {EmailType.GroupConfirmationByAdmin,  "Group confirmation" },
             {EmailType.ApprovedGroupCreation,  "Group confirmation"},
-            {EmailType.GroupInvitationToStudent, "Group inventation" }
+            {EmailType.GroupInvitationToStudent, "Group inventation" },
+            {EmailType.GetTempPasswordToAdmin, "Login with temporary password" },
         };
 
         private static Dictionary<EmailType, string> BodyGetter = new()
@@ -29,11 +31,11 @@ namespace Core.EmailTemplates
             {EmailType.AccountApproveByAdmin,  @"<h4>User data overview</h4>" + "<hr/>" +
                     "<p>User first name: {firstname}</p>" +
                     "<p>User last name: {lastname}</p>" +
-                    "<p>Date of birth: {birthdate}</p>" +
                     "<p>User email: {email}</p>" +
                     "<p>User role: {userrole}</p>"+
                     "<h4>Confirm registration of {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4>"
             },
+            {EmailType.AccountApproveByUser,  @"<h4>Confirm that you are {firstname} {lastname} and it is your new email, follow the link: <a href='{callbackurl}'>link</a></h4>"},
             {EmailType.UserRegistration, @"<h4>Dear {firstname}, you have been successfully registered into system</h4>"+
                 "<form action=\"{callbackurl}\">\r\n   " +
                 " <input type=\"submit\" style=\"color: red\" " +
@@ -43,7 +45,6 @@ namespace Core.EmailTemplates
                     "<hr/>" +
                     "<p>User first name: {firstname}</p>" +
                     "<p>User last name: {lastname}</p>" +
-                    "<p>Date of birth: {birthdate}</p>" +
                     "<p>User email: {email}</p>" +
                     "<p>User role: {userrole}</p>"+
                     "<h4>Confirm deletion of {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4>" },
@@ -56,7 +57,15 @@ namespace Core.EmailTemplates
             {EmailType.GroupConfirmationByAdmin,  @"<h4>Confirm the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>"},
             {EmailType.ApprovedGroupCreation, @"<h4>You get approve fot the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>" },
             {EmailType.GroupInvitationToStudent, @"<h4>You get inventation to the group {groupname}"+
-                ", follow the link: <a href='{callbackurl}'>link</a></h4>"},           
+                ", follow the link: <a href='{callbackurl}'>link</a></h4>"},     
+            {EmailType.GetTempPasswordToAdmin, @"<h4>You get information about your account</h4>" +
+                                               "<hr/>" +
+                                               "<p>First name: {firstname}</p>" +
+                                               "<p>Last name: {lastname}</p>" +
+                                               "<p>Email: {email}</p>" +
+                                               "<p>Role: {userrole}</p>" +
+                                               "<bolt>Temporary Password: {temppassword}</bolt>" + 
+                                               "<h3>You need to change password at the first visit</h3>"}, 
         };
 
         public static (string, string) GetEmailSubjectAndBody(EmailType emailType, Dictionary<string, object> placeholderNamesandValues)
