@@ -81,9 +81,9 @@ public class AssignmentAnswerController : Controller
         if (!assignmentResult.IsSuccessful)
         {
             _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}", 
-                assignmentAnswerVM.AssignmentId, assignmnetResult.Message);
+                assignmentAnswerVM.AssignmentId, assignmentResult.Message);
 
-            TempData.TempDataMessage("Error", assignmnetResult.Message);
+            TempData.TempDataMessage("Error", assignmentResult.Message);
             return View(assignmentAnswerVM);
         }
 
@@ -91,7 +91,7 @@ public class AssignmentAnswerController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -103,7 +103,7 @@ public class AssignmentAnswerController : Controller
             _logger.LogError("Failed to save assignment answer for user {userId}! Errors: {errorMessage}",
                 currentUser.Id, answerResult.Message);
 
-            TempData.TempDataMessage("Error", "Fail to save assignmnet answer");
+            TempData.TempDataMessage("Error", "Fail to save assignment answer");
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
         }
 

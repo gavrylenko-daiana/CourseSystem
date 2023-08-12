@@ -29,6 +29,7 @@ public class GroupController : Controller
         IEmailService emailService,
         IUserGroupService userGroupService,
         IUserCourseService userCourseService,
+        IUserService userService,
         ILogger<GroupController> logger)
     {
         _groupService = groupService;
@@ -37,6 +38,7 @@ public class GroupController : Controller
         _userManager = userManager;
         _userGroupService = userGroupService;
         _userCourseService = userCourseService;
+        _userService = userService;
         _logger = logger;
     }
     
@@ -47,7 +49,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -105,7 +107,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -157,7 +159,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -484,7 +486,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -552,7 +554,7 @@ public class GroupController : Controller
 
         if (!currentTeacherResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
             
@@ -627,7 +629,7 @@ public class GroupController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
            

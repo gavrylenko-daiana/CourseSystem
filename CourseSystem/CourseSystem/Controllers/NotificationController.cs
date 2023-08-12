@@ -28,7 +28,7 @@ public class NotificationController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
@@ -51,7 +51,7 @@ public class NotificationController : Controller
 
         if (currentUser == null)
         {
-            _logger.LogWarning("Unouthirized user");
+            _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
         }
 
