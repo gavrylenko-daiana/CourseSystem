@@ -35,9 +35,9 @@ namespace Core.ActivityTemplates
             {ActivityType.CreatedAssignment, "You created a new assignment \"{0}\" for group \"{1}\". " +
                 "Assignment activity starts on {2:dddd, dd MMMM yyyy}, at {2:HH:mm}." +
                 "It ends on {3:dddd, dd MMMM yyyy}, at {3:HH:mm}." },
-            {ActivityType.MarkedAssignment, "You marked the solution {0} {1} submited for assignment \"{2}\"." +
+            {ActivityType.MarkedAssignment, "You marked the solution {0} {1} submitted for assignment \"{2}\"." +
                 "His/her grade: {3}/100.\"" },
-            {ActivityType.SubmittedAssignment, "You subbmited a solution for assignment \"{0}\"." },
+            {ActivityType.SubmittedAssignment, "You submitted a solution for assignment \"{0}\"." },
             {ActivityType.AttachedEducationalMaterialForGroup, "You attached a new educational material for group \"{0}\"." },
             {ActivityType.AttachedEducationalMaterialForCourse, "You attached a new educational material for course \"{0}\"." }
         };

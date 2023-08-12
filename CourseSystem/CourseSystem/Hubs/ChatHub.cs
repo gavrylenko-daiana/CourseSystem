@@ -32,14 +32,14 @@ namespace UI.Hubs
 
             if (user == null)
             {
-                await Clients.Group(assignmentId).SendAsync("Error", "Unknowm user");
+                await Clients.Group(assignmentId).SendAsync("Error", "Unknown user");
             }
 
             var assignmentResult = await _assignmentService.GetById(int.Parse(assignmentId));
 
             if (!assignmentResult.IsSuccessful)
             {
-                await Clients.Group(assignmentId).SendAsync("Error", "Unknowm assignment");
+                await Clients.Group(assignmentId).SendAsync("Error", "Unknown assignment");
             }
 
             var message = await _chatMessageService.CreateChatMessage(user, assignmentResult.Data, text);
@@ -67,7 +67,7 @@ namespace UI.Hubs
             }
             catch(Exception ex)
             {
-                throw new Exception($"User wasn`t added to chat! Exception:{ex.Message}");
+                throw new Exception($"User was not added to chat! Exception:{ex.Message}");
             }
         }
     }

@@ -77,8 +77,8 @@ namespace BLL.Services
             {
                 return new Result<List<Assignment>>(true, "No assignment in group");
             }
-                
-            var groupAssignments = await ChechStartAndEndAssignmnetDate(groupResult.Data.Assignments);
+            
+            var groupAssignments = await CheckStartAndEndAssignmentDate(groupResult.Data.Assignments);
 
             return new Result<List<Assignment>>(true, groupAssignments);
         }
@@ -123,7 +123,7 @@ namespace BLL.Services
             }
         }
 
-        private async Task<List<Assignment>> ChechStartAndEndAssignmnetDate(List<Assignment> assignments)
+        private async Task<List<Assignment>> CheckStartAndEndAssignmentDate(List<Assignment> assignments)
         {
             foreach(var assignment in assignments)
             {

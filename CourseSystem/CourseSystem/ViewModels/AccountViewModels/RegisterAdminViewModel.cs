@@ -17,6 +17,5 @@ public class RegisterAdminViewModel
     [Display(Name = "• Email Address •")]
     [DataType(DataType.EmailAddress)]
     public string Email { get; set; }
-
     public AppUserRoles Role { get; set; } = AppUserRoles.Admin;
 }

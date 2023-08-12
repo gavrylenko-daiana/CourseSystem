@@ -24,7 +24,7 @@ namespace DAL
             builder.SetBasePath(Directory.GetCurrentDirectory());
             builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
             var config = builder.Build();
-            string connectionString = config.GetConnectionString("DefaultConnection");
+            var connectionString = config.GetConnectionString("DefaultConnection");
 
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
             optionsBuilder.UseSqlServer(connectionString);

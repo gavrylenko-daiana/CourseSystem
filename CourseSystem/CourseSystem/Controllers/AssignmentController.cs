@@ -111,7 +111,7 @@ public class AssignmentController : Controller
     {
         var assignmentResult = await _assignmentService.GetById(assignmentId);
         
-        if(!assignmentResult.IsSuccessful)
+        if (!assignmentResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
             return RedirectToAction("Index", "Group");
@@ -139,7 +139,7 @@ public class AssignmentController : Controller
     {
         var assignmentResult = await _assignmentService.GetById(assignmentId);
 
-        if(!assignmentResult.IsSuccessful)
+        if (!assignmentResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
             return RedirectToAction("Index", "Group");
@@ -147,19 +147,19 @@ public class AssignmentController : Controller
 
         var assignentDetailsVM = new DetailsAssignmentViewModel();
         assignmentResult.Data.MapTo<Assignment, DetailsAssignmentViewModel>(assignentDetailsVM);
-        var userAssignmnet = assignmentResult.Data.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignmentResult.Data.Id);
-        assignentDetailsVM.UserAssignment = userAssignmnet;
+        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignmentResult.Data.Id);
+        assignentDetailsVM.UserAssignment = userAssignment;
 
-        if (userAssignmnet?.AssignmentAnswers == null)
+        if (userAssignment?.AssignmentAnswers == null)
         {
             assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
         }
         else
         {
-            assignentDetailsVM.AssignmentAnswers = userAssignmnet.AssignmentAnswers;
+            assignentDetailsVM.AssignmentAnswers = userAssignment.AssignmentAnswers;
         }
             
-        //logic for getting assignmnet files 
+        //logic for getting assignment files 
         assignentDetailsVM.AttachedFiles = new List<IFormFile>();
 
         return View(assignentDetailsVM);          
@@ -212,24 +212,25 @@ public class AssignmentController : Controller
               return View(editAssignmentVM);
           }
 
-        var checkTimeResult = _assignmentService.ValidateTimeInput(editAssignmentVM.StartDate, editAssignmentVM.EndDate);
-        if (!checkTimeResult.IsSuccessful)
-        {
-            TempData.TempDataMessage("Error", checkTimeResult.Message);
-            return View(editAssignmentVM);
-        }
-        var assignment = new Assignment();
+          var checkTimeResult = _assignmentService.ValidateTimeInput(editAssignmentVM.StartDate, editAssignmentVM.EndDate);
+          if (!checkTimeResult.IsSuccessful)
+          {
+              TempData.TempDataMessage("Error", checkTimeResult.Message);
+              return View(editAssignmentVM);
+          }
+          
+          var assignment = new Assignment();
           editAssignmentVM.MapTo<EditAssignmentViewModel, Assignment>(assignment);
 
           //AssignmentFiles Part
           //logic for check if the checkbox files was in the assignmnet before
 
           //logic fore saving new attached files
-          var updateAssignmnetResult = await _assignmentService.UpdateAssignment(assignment);
+          var updateAssignmentResult = await _assignmentService.UpdateAssignment(assignment);
 
-            if (!updateAssignmnetResult.IsSuccessful)
+            if (!updateAssignmentResult.IsSuccessful)
             {
-                TempData.TempDataMessage("Error", updateAssignmnetResult.Message);
+                TempData.TempDataMessage("Error", updateAssignmentResult.Message);
                 return View(editAssignmentVM);
             }
 
