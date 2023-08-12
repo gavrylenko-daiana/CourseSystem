@@ -32,9 +32,11 @@ namespace BLL.Services
               
         public async Task<int> SendCodeToUser(string email)
         {
-            if (string.IsNullOrWhiteSpace(email)) 
+            if (string.IsNullOrWhiteSpace(email))
+            {
                 throw new ArgumentNullException(nameof(email));
-
+            }
+            
             int randomCode = new Random().Next(1000, 9999);
 
             try
@@ -96,8 +98,10 @@ namespace BLL.Services
 
                 emailMessage.From.Add(new MailboxAddress(_emailSettings.DisplayName, _emailSettings.From));
 
-                foreach (string emailToAdress in emailData.To)
-                    emailMessage.To.Add(MailboxAddress.Parse(emailToAdress));
+                foreach (string emailToAddress in emailData.To)
+                {
+                    emailMessage.To.Add(MailboxAddress.Parse(emailToAddress));
+                }
 
                 #region Content
 
@@ -139,9 +143,11 @@ namespace BLL.Services
         public async Task<Result<bool>> SendToTeacherCourseInvitation(AppUser teacher, Course course, string invitationUrl)
         {
             if (teacher == null || course == null)
-                return new Result<bool>(false, $"Fail to send email inventation to the techer");
-
-            var emailContent = GetEmailSubjectAndBody(EmailType.CourseInvitation, teacher, course, inventationUrl);
+            {
+                return new Result<bool>(false, $"Fail to send email invitation to the teacher");
+            }
+            
+            var emailContent = GetEmailSubjectAndBody(EmailType.CourseInvitation, teacher, course, invitationUrl);
 
             return await CreateAndSendEmail(new List<string> { teacher.Email }, emailContent.Item1, emailContent.Item2);
         }
@@ -171,7 +177,9 @@ namespace BLL.Services
         private async Task<Result<bool>> CreateAndSendEmail(List<string> toEmails, string subject, string body = null, string displayName = null)
         {
             if (toEmails.IsNullOrEmpty())
+            {
                 return new Result<bool>(false, "No emails to send data");
+            }
 
             var emailData = new EmailData(toEmails, subject, body, displayName);
 
@@ -180,8 +188,10 @@ namespace BLL.Services
                 var result = await SendEmailAsync(emailData);
 
                 if (!result.IsSuccessful)
+                {
                     return new Result<bool>(false, result.Message);
-
+                }
+                
                 return new Result<bool>(true);
             }
             catch (Exception ex)
@@ -194,8 +204,10 @@ namespace BLL.Services
         private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null,
             string tempPassword = null) 
         {
-            if(appUser == null)
+            if (appUser == null)
+            {
                 return (String.Empty, String.Empty);
+            }
 
             var parameters = new Dictionary<string, object>();
             switch(emailType)
@@ -268,7 +280,9 @@ namespace BLL.Services
         private (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
         {
             if (group == null)
+            {
                 return (String.Empty, String.Empty);
+            }
 
             var parameters = new Dictionary<string, object>();
             var groupEmailTypes = new List<EmailType>() {
@@ -294,14 +308,18 @@ namespace BLL.Services
         private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course, string callBackUrl = null)
         {
             if (appUser == null || course == null)
+            {
                 return (String.Empty, String.Empty);
-
+            }
+            
             var parameters = new Dictionary<string, object>();
             switch (emailType)
             {
                 case EmailType.CourseInvitation:
                     if (course == null)
+                    {
                         break;
+                    }
 
                     parameters = new Dictionary<string, object>()
                     {
@@ -320,7 +338,9 @@ namespace BLL.Services
         public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
         {
             if (appUser == null)
+            {
                 return new Result<bool>(false, "Fail to send email");
+            }
 
             var emailContent = GetEmailSubjectAndBody(emailType, appUser, callBackUrl, tempPassword);
 
@@ -346,7 +366,9 @@ namespace BLL.Services
         public async Task<Result<bool>> SendEmailGroups(EmailType emailType,Group group, string callBackUrl = null, AppUser appUser = null)
         {
             if (group == null)
+            {
                 return new Result<bool>(false, "Fail to send email");
+            }
 
             var emailContent = GetEmailSubjectAndBody(emailType, group, callBackUrl, appUser);
 
