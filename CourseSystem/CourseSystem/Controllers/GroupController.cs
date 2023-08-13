@@ -84,25 +84,35 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Create(int courseId)
     {
-        var groupViewModel = new GroupViewModel();
+        var courseResult = await _courseService.GetById(courseId);
         
+        if (!courseResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{courseResult.Message}");
+            return View("Index");
+        }
+        
+        var groupViewModel = new GroupViewModel
+        {
+            CourseId = courseResult.Data.Id,
+        };
+
         return View(groupViewModel);
     }
     
     [HttpPost]
     public async Task<IActionResult> Create(GroupViewModel groupViewModel)
     {
-        if (TempData["CourseId"] == null)
+        var courseResult = await _courseService.GetById(groupViewModel.CourseId);
+        
+        if (!courseResult.IsSuccessful)
         {
-            _logger.LogError("Course Id wasn't given");
-            ViewData.ViewDataMessage("Error", "Course Id wasn't given");
+            TempData.TempDataMessage("Error", $"{courseResult.Message}");
             return View("Index");
         }
 
-        var courseId = (int)TempData["CourseId"];
-        var courseResult = await _courseService.GetById(courseId);
         var currentUserResult = await _userService.GetCurrentUser(User);
 
         if (!currentUserResult.IsSuccessful)
@@ -111,18 +121,10 @@ public class GroupController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        if (!courseResult.IsSuccessful)
-        {
-            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
-                courseId, courseResult.Message);
-            TempData.TempDataMessage("Error", "Course not found");
-            return View(groupViewModel);
-        }
-
         var group = new Group();
         groupViewModel.MapTo(group);
         group.Course = courseResult.Data;
-        group.CourseId = courseResult.Data.Id;
+        group.CourseId = groupViewModel.CourseId;
 
         var createResult = await _groupService.CreateGroup(group, currentUserResult.Data);
 
@@ -130,8 +132,7 @@ public class GroupController : Controller
         {
             _logger.LogError("Group creation fail for user {userId}! Error: {errorMessage}",
                 currentUserResult.Data.Id, createResult.Message);
-
-            TempData["CourseId"] = courseId;
+            
             TempData.TempDataMessage("Error", $"{createResult.Message}");
             return View(groupViewModel);
         }
@@ -153,6 +154,7 @@ public class GroupController : Controller
             return View("Index");
         }
         
+        //delete
         TempData["GroupId"] = id;
 
         var currentUserResult = await _userService.GetCurrentUser(User);
@@ -251,6 +253,7 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> SelectStudent(int id, bool approved = false)
     {
+        // delete
         var groupId = (int)(TempData["GroupId"] ?? id);
         var groupResult = await _groupService.GetById(groupId);
         
