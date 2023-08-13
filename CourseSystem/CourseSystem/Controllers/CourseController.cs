@@ -15,10 +15,10 @@ namespace UI.Controllers;
 public class CourseController : Controller
 {
     private readonly ICourseService _courseService;
-    private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly IUserCourseService _userCourseService;
     private readonly IUserService _userService;
+    private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<CourseController> _logger;
 
     public CourseController(ICourseService courseService,
@@ -39,9 +39,9 @@ public class CourseController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
 
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
 
@@ -49,13 +49,13 @@ public class CourseController : Controller
         }
 
         var coursesResult = await _courseService.GetByPredicate(course =>
-            course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
+            course.UserCourses.Any(uc => uc.AppUser.Id == currentUserResult.Data.Id)
         );
 
         if (!coursesResult.IsSuccessful)
         {
             _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}",
-                currentUser.Id, coursesResult.Message);
+                currentUserResult.Data.Id, coursesResult.Message);
 
             TempData.TempDataMessage("Error", $"{coursesResult.Message}");
             return View("Index");
@@ -63,7 +63,7 @@ public class CourseController : Controller
         
         var userCoursesViewModel = new UserCoursesViewModel()
         {
-            CurrentUser = currentUser,
+            CurrentUser = currentUserResult.Data,
             Courses = coursesResult.Data
         };
 
@@ -79,9 +79,9 @@ public class CourseController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(CourseViewModel courseViewModel)
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
 
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
@@ -92,7 +92,7 @@ public class CourseController : Controller
             Name = courseViewModel.Name
         };
         
-        var createResult = await _courseService.CreateCourse(course, currentUser);
+        var createResult = await _courseService.CreateCourse(course, currentUserResult.Data);
             
         if (!createResult.IsSuccessful)
         {
@@ -177,9 +177,9 @@ public class CourseController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
 
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
@@ -197,12 +197,13 @@ public class CourseController : Controller
         }
 
         var currentGroups = courseResult.Data.Groups
-            .Where(group => group.UserGroups.Any(ug => ug.AppUserId == currentUser.Id))
+            .Where(group => group.UserGroups.Any(ug => ug.AppUserId == currentUserResult.Data.Id))
             .ToList();
 
         var courseViewModel = new CourseViewModel();
         courseResult.Data.MapTo(courseViewModel);
-        courseViewModel.CurrentUser = await _userManager.GetUserAsync(User);
+
+        courseViewModel.CurrentUser = currentUserResult.Data;
 
         if (courseViewModel.CurrentUser == null)
         {
@@ -307,14 +308,15 @@ public class CourseController : Controller
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> ConfirmTeacherForCourse(int courseId, string code)
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
 
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
             return RedirectToAction("Login", "Account");
-        }         
+        }
 
+        var currentUser = currentUserResult.Data;
         var courseResult = await _courseService.GetById(courseId);
         
         if (!courseResult.IsSuccessful)
