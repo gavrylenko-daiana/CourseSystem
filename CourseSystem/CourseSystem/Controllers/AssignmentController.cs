@@ -32,6 +32,7 @@ public class AssignmentController : Controller
         if (!groupAssignmentsResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", groupAssignmentsResult.Message);
+            
             return RedirectToAction("Index", "Home");
         }
 
@@ -50,6 +51,7 @@ public class AssignmentController : Controller
         }
 
         ViewBag.GroupId = groupId;
+        
         return View(assignmentsVM);
     }
 
@@ -73,6 +75,7 @@ public class AssignmentController : Controller
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Invalid input data");
+            
             return View(assignmentVM);
         }
 
@@ -80,6 +83,7 @@ public class AssignmentController : Controller
         if (!checkTimeResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error",checkTimeResult.Message);
+            
             return View(assignmentVM);
         }
 
@@ -91,6 +95,7 @@ public class AssignmentController : Controller
             //logic for loading files to the cloud or this logic can be inside assignmentService
 
             TempData.TempDataMessage("Error", "Files uploaded successfully");
+            
             return View(assignmentVM);
         }
 
@@ -99,6 +104,7 @@ public class AssignmentController : Controller
         if (!createResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", createResult.Message);
+            
             return View(assignmentVM);
         }
 
@@ -114,6 +120,7 @@ public class AssignmentController : Controller
         if (!assignmentResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            
             return RedirectToAction("Index", "Group");
         }
 
@@ -128,6 +135,7 @@ public class AssignmentController : Controller
         if (!deleteResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", deleteResult.Message);
+            
             return RedirectToAction("Delete", "Assignment", new { assignmentId = id });
         }
 
@@ -142,6 +150,7 @@ public class AssignmentController : Controller
         if (!assignmentResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            
             return RedirectToAction("Index", "Group");
         }
 
@@ -174,6 +183,7 @@ public class AssignmentController : Controller
         if(!assignmentResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            
             return RedirectToAction("Details", "Assignment", new { assignmentId = id });
         }
 
@@ -209,6 +219,7 @@ public class AssignmentController : Controller
           if(!ModelState.IsValid)
           {
               TempData.TempDataMessage("Error", "Invalid data input");
+              
               return View(editAssignmentVM);
           }
 
@@ -216,6 +227,7 @@ public class AssignmentController : Controller
           if (!checkTimeResult.IsSuccessful)
           {
               TempData.TempDataMessage("Error", checkTimeResult.Message);
+              
               return View(editAssignmentVM);
           }
           
@@ -231,6 +243,7 @@ public class AssignmentController : Controller
             if (!updateAssignmentResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", updateAssignmentResult.Message);
+                
                 return View(editAssignmentVM);
             }
 

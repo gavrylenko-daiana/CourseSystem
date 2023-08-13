@@ -88,6 +88,7 @@ public class AccountController : Controller
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Values must not be empty. Please try again.");
+            
             return View(loginViewModel);
         }
 
@@ -96,6 +97,7 @@ public class AccountController : Controller
         if (!userResult.IsSuccessful)
         {
             ViewData.ViewDataMessage("Error", "Entered incorrect email or password. Please try again.");
+            
             return View(loginViewModel);
         }
 
@@ -104,6 +106,7 @@ public class AccountController : Controller
         if (!ValidationHelpers.IsValidEmail(loginViewModel.EmailAddress))
         {
             ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
+            
             return View(loginViewModel);
         }
 
@@ -145,6 +148,7 @@ public class AccountController : Controller
         }
 
         TempData.TempDataMessage("Error", "Entered incorrect email or password. Please try again.");
+        
         return View(loginViewModel);
     }
 
@@ -169,12 +173,14 @@ public class AccountController : Controller
         if (userResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", "This email is already in use");
+            
             return View(registerViewModel);
         }
         
         if (!ValidationHelpers.IsValidEmail(registerViewModel.Email))
         {
             ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
+            
             return View(registerViewModel);
         }
 
@@ -205,6 +211,7 @@ public class AccountController : Controller
                 await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, newUser, callbackUrl);
 
                 TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
+                
                 return View(registerViewModel);
             }
             else
@@ -220,6 +227,7 @@ public class AccountController : Controller
 
                 TempData.TempDataMessage("Error",
                     "To complete your ADMIN registration, check your email and follow the link provided in the email");
+                
                 return View(registerViewModel);
             }
         }
@@ -233,6 +241,7 @@ public class AccountController : Controller
             }
             
             TempData.TempDataMessage("Error", errorMessages);
+            
             return View(registerViewModel);
         }
     }
@@ -259,6 +268,7 @@ public class AccountController : Controller
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var toUserProfileUrl = CreateCallBackUrl(token, "User", "Detail", new { id = user.Id });
+            
             await _emailService.SendEmailToAppUsers(EmailType.UserRegistration, user, toUserProfileUrl);
 
             var confirmEmailVM = new ConfirmEmailViewModel();
@@ -315,6 +325,7 @@ public class AccountController : Controller
         if (!userResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", "You wrote an incorrect email. Try again!");
+            
             return View(forgotPasswordBeforeEnteringViewModel);
         }
 
@@ -324,6 +335,7 @@ public class AccountController : Controller
         if (!emailCodeResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", emailCodeResult.Message);
+            
             return View(forgotPasswordBeforeEnteringViewModel);
         }
 
@@ -347,6 +359,7 @@ public class AccountController : Controller
         if (!emailCodeResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", emailCodeResult.Message);
+            
             return RedirectToAction("Login", "Account");
         }
 
@@ -364,6 +377,7 @@ public class AccountController : Controller
         };
 
         TempData["Code"] = code;
+        
         return View(forgotViewModel);
     }
 
@@ -390,6 +404,7 @@ public class AccountController : Controller
         else
         {
             TempData.TempDataMessage("Error", "Invalid code. Please try again.");
+            
             return RedirectToAction("Login", "Account");
         }
     }
@@ -434,11 +449,12 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> RegisterNewAdmin(RegisterAdminViewModel registerAdminViewModel)
     {
-        var user = await _userManager.FindByEmailAsync(registerAdminViewModel.Email);
+        var userResult = await _userService.GetUserByEmailAsync(registerAdminViewModel.Email);
 
-        if (user != null)
+        if (userResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"This email already exist");
+            
             return View(registerAdminViewModel);
         }
         
@@ -451,6 +467,7 @@ public class AccountController : Controller
         if (!newUserResponse.Succeeded)
         {
             TempData.TempDataMessage("Error", "Failed to add new admin");
+            
             return View(registerAdminViewModel);
         }
         
@@ -460,6 +477,7 @@ public class AccountController : Controller
         {
             await _userManager.DeleteAsync(newAdmin);
             TempData.TempDataMessage("Error", $"{sendResult.Message}");
+            
             return View(registerAdminViewModel);
         }
         
@@ -487,29 +505,30 @@ public class AccountController : Controller
             return View(newEmailViewModel);
         }
 
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
         
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             return RedirectToAction("Login");
         }
-
-        var user = await _userManager.FindByEmailAsync(newEmailViewModel.NewEmail);
+        
+        var user = await _userService.GetUserByEmailAsync(newEmailViewModel.NewEmail);
         
         if (user != null)
         {
             TempData.TempDataMessage("Error", $"This email already exist");
+            
             return View(newEmailViewModel);
         }
         
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(currentUser);
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(currentUserResult.Data);
 
         var callbackUrl =
-            CreateCallBackUrl(code, "Account", "ConfirmedResetEmail", new { userId = currentUser.Id, code = code, currentEmail = newEmailViewModel.Email, newEmail = newEmailViewModel.NewEmail});
+            CreateCallBackUrl(code, "Account", "ConfirmedResetEmail", new { userId = currentUserResult.Data.Id, code = code, currentEmail = newEmailViewModel.Email, newEmail = newEmailViewModel.NewEmail});
 
-        currentUser.Email = newEmailViewModel.NewEmail;
+        currentUserResult.Data.Email = newEmailViewModel.NewEmail;
         
-        await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUser, callbackUrl);
+        await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUserResult.Data, callbackUrl);
 
         TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
         
@@ -529,6 +548,7 @@ public class AccountController : Controller
         if (!userResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"{userResult.Message}");
+            
             return RedirectToAction("Login", "Account");
         }
         
@@ -542,6 +562,7 @@ public class AccountController : Controller
             if (!updateResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"{updateResult.Message}");
+                
                 return View("Login");
             }
 
@@ -550,6 +571,7 @@ public class AccountController : Controller
         else
         {
             TempData.TempDataMessage("Error", $"Failed to confirm email");
+            
             return View("Error");
         }
     }

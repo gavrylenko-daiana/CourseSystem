@@ -29,6 +29,7 @@ public class EducationMaterialController : Controller
         if (!(materials.IsSuccessful && materials.Data.Any()))
         {
             TempData.TempDataMessage("Error", $"Message: {materials.Message}");
+            
             return RedirectToAction("Index", "Course");
         }
 
@@ -43,6 +44,7 @@ public class EducationMaterialController : Controller
         if (!groupResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
+            
             return RedirectToAction("Index", "Group");
         }
         
@@ -61,6 +63,7 @@ public class EducationMaterialController : Controller
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Incorrect data. Please try again!");
+            
             return View(viewModel);
         }
 
@@ -69,6 +72,7 @@ public class EducationMaterialController : Controller
         if (!fullPath.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {fullPath.Message}");
+            
             return View(viewModel);
         }
         
@@ -77,16 +81,19 @@ public class EducationMaterialController : Controller
         if (!groupResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
+            
             return RedirectToAction("Index", "Group");
         }
 
         var addResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile,
             fullPath.Message, groupResult.Data);
+        
         await _groupService.UpdateGroup(addResult.Data);
 
         if (!addResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
+            
             return View(viewModel);
         }
 
@@ -101,6 +108,7 @@ public class EducationMaterialController : Controller
         if (!courseResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
+            
             return RedirectToAction("Index", "Course");
         }
     
@@ -122,6 +130,7 @@ public class EducationMaterialController : Controller
         if (!fullPath.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: Failed to upload file");
+            
             return View(viewModel);
         }
         
@@ -130,6 +139,7 @@ public class EducationMaterialController : Controller
         if (!groupResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
+            
             return RedirectToAction("Index", "Group");
         }
 
@@ -141,6 +151,7 @@ public class EducationMaterialController : Controller
             if (!addToGroupResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"Message: {addToGroupResult.Message}");
+                
                 return View(viewModel);
             }
         }
@@ -151,16 +162,19 @@ public class EducationMaterialController : Controller
             if (!courseResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
+                
                 return RedirectToAction("Index", "Course");
             }
 
             var addToCourseResult = await _educationMaterialService.AddToCourse(viewModel.UploadFile,
                 fullPath.Message, courseResult.Data);
+            
             await _courseService.UpdateCourse(courseResult.Data);
             
             if (!addToCourseResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"Message: {addToCourseResult.Message}");
+                
                 return View(viewModel);
             }
         }
@@ -228,6 +242,7 @@ public class EducationMaterialController : Controller
         if (!material.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {material.Message}");
+            
             return RedirectToAction("Index", "Course");
         }
 
@@ -244,15 +259,18 @@ public class EducationMaterialController : Controller
         if (!fileToDelete.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {fileToDelete.Message}");
+            
             return RedirectToAction("Detail", "EducationMaterial", new { id = id });
         }
 
         var deleteResult = await _educationMaterialService.DeleteFileFromGroup(fileToDelete.Data);
+        
         await _groupService.UpdateGroup(deleteResult.Data);
 
         if (!deleteResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {deleteResult.Message}");
+            
             return RedirectToAction("Detail", "EducationMaterial", new { id = id });
         }
         

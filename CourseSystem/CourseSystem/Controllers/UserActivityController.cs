@@ -32,6 +32,7 @@ public class UserActivityController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthorized user");
+            
             return RedirectToAction("Login", "Account");
         }
 
@@ -41,6 +42,7 @@ public class UserActivityController : Controller
         {
             _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", currentUser.Id, activitiesResult.Message);
             TempData.TempDataMessage("Error", activitiesResult.Message);
+            
             return RedirectToAction("Index", "Home");
         }
 
@@ -59,6 +61,7 @@ public class UserActivityController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthorized user");
+            
             return RedirectToAction("Login", "Account");
         }
 
@@ -68,6 +71,7 @@ public class UserActivityController : Controller
         {
             _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", currentUser.Id, activitiesResult.Message);
             TempData.TempDataMessage("Error", activitiesResult.Message);
+            
             return RedirectToAction("Index", "Home");
         }
 
@@ -85,6 +89,7 @@ public class UserActivityController : Controller
         {
             _logger.LogError("Failed to get notification by Id {activityId}! Error: {errorMessage}", id, activityResult.Message);
             TempData.TempDataMessage("Error", $"{activityResult.Message}");
+            
             return RedirectToAction("Index", "Home");
         }
 

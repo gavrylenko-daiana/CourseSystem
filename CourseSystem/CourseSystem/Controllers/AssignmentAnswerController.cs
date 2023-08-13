@@ -59,6 +59,7 @@ public class AssignmentAnswerController : Controller
             }
 
             TempData.TempDataMessage("Error", "Fail to create assignment answer");
+            
             return View(assignmentAnswerVM);
         }
 
@@ -84,6 +85,7 @@ public class AssignmentAnswerController : Controller
                 assignmentAnswerVM.AssignmentId, assignmentResult.Message);
 
             TempData.TempDataMessage("Error", assignmentResult.Message);
+            
             return View(assignmentAnswerVM);
         }
 
@@ -92,6 +94,7 @@ public class AssignmentAnswerController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthorized user");
+            
             return RedirectToAction("Login", "Account");
         }
 
@@ -104,6 +107,7 @@ public class AssignmentAnswerController : Controller
                 currentUser.Id, answerResult.Message);
 
             TempData.TempDataMessage("Error", "Fail to save assignment answer");
+            
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
         }
 
@@ -124,6 +128,7 @@ public class AssignmentAnswerController : Controller
                 assignmentAnswerId, assignmentAnswerResult.Message);
 
             TempData.TempDataMessage("Error", $"{assignmentAnswerResult.Data}");
+            
             return RedirectToAction("Index", "Group");
         }
 
@@ -153,6 +158,7 @@ public class AssignmentAnswerController : Controller
                 assignmentId, assignmentResult.Message);
 
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            
             return RedirectToAction("Index", "Group");
         }
 
@@ -191,6 +197,7 @@ public class AssignmentAnswerController : Controller
                 assignmentId, assignmentResult.Message);
 
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            
             return RedirectToAction("Index", "Group");
         }
         
@@ -226,6 +233,7 @@ public class AssignmentAnswerController : Controller
                 assignmentId, studentId, grade);
 
             TempData.TempDataMessage("Error", "Grade can't be more than 100 or less than 0");
+            
             return RedirectToAction("CheckAnswer", "AssignmentAnswer",
                 new { assignmentId = assignmentId, studentId = studentId });
         }
@@ -238,6 +246,7 @@ public class AssignmentAnswerController : Controller
                 assignmentId, assignmentResult.Message);
 
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            
             return RedirectToAction("Index", "Group");
         }
         
@@ -259,6 +268,7 @@ public class AssignmentAnswerController : Controller
                 grade, userAssignment.Id, updateResult.Message);
 
             TempData.TempDataMessage("Error", updateResult.Message);
+            
             return RedirectToAction("CheckAnswer", "AssignmentAnswer",
                 new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
         }

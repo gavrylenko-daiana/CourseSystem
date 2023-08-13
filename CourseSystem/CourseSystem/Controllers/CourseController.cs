@@ -56,8 +56,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}",
                 currentUser.Id, coursesResult.Message);
-
             TempData.TempDataMessage("Error", $"{coursesResult.Message}");
+            
             return View("Index");
         }
         
@@ -84,6 +84,7 @@ public class CourseController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthorized user");
+            
             return RedirectToAction("Login", "Account");
         }
         
@@ -98,8 +99,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to create course! Error: {errorMessage}",
                 createResult.Message);
-
             TempData.TempDataMessage("Error", $"{createResult.Message}");
+            
             return View(courseViewModel);
         }
 
@@ -115,8 +116,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 id, courseResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+            
             return View("Index");
         }
 
@@ -132,8 +133,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to update course by Id {courseId}! Error: {errorMessage}",
                 newCourse.Id, updateResult.Message);
-
             TempData.TempDataMessage("Error", $"{updateResult.Message}");
+            
             return View(newCourse);
         }
             
@@ -149,8 +150,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 id, courseResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+            
             return View("Index");
         }
 
@@ -166,8 +167,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to delete course by Id {courseId}! Error: {errorMessage}",
                 id, deleteResult.Message);
-
             TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+            
             return View("Delete");
         }
             
@@ -182,6 +183,7 @@ public class CourseController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthorized user");
+            
             return RedirectToAction("Login", "Account");
         }
 
@@ -191,8 +193,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 id, courseResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+            
             return View("Index");
         }
 
@@ -207,6 +209,7 @@ public class CourseController : Controller
         if (courseViewModel.CurrentUser == null)
         {
             _logger.LogError("Unauthorized user");
+            
             return RedirectToAction("Login", "Account");
         }
 
@@ -224,19 +227,19 @@ public class CourseController : Controller
         {
             _logger.LogError("Course Id wasn't given");
             ViewData.ViewDataMessage("Error", "Course Id wasn't given");
+            
             return View("Index");
         }
 
         var courseId = (int)TempData["CourseId"];
-
         var courseResult = await _courseService.GetById(courseId);
 
         if (!courseResult.IsSuccessful)
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+            
             return View("Index");
         }
 
@@ -266,8 +269,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+            
             return View("Index");
         }
         
@@ -275,8 +278,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}",
                 teacherId, teacherResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{teacherResult.Message}");
+            
             return View("Index");
         }
 
@@ -293,8 +296,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to send email with invitation to course {courseId} to teacher {teacherId}! Error: {errorMessage}",
                 courseResult.Data.Id, teacherResult.Data.Id, sendResult.Message);
-
             TempData.TempDataMessage("Error", sendResult.Message);
+            
             return View("SelectTeachers");
         }
 
@@ -312,6 +315,7 @@ public class CourseController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthorized user");
+            
             return RedirectToAction("Login", "Account");
         }         
 
@@ -321,8 +325,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+            
             return View("Index");
         }
         
@@ -331,6 +335,7 @@ public class CourseController : Controller
         if (courseTeachers.Contains(currentUser.Id))
         {
             TempData.TempDataMessage("Error", "You are already registered for the course");
+            
             return RedirectToAction("Index");
         }
 
@@ -338,6 +343,7 @@ public class CourseController : Controller
         {
             _logger.LogError("Unauthorized user");
             ViewData.ViewDataMessage("Error", "CurrentUser not found");
+            
             return View("Index");
         }
 
@@ -347,12 +353,14 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to confirm email for user {userId} with code {userCode}!",
                 currentUser.Id, code);
+            
             foreach (var error in result.Errors)
             {
                 _logger.LogError("Error: {errorMessage}", error.Description);
             }
 
             ViewData.ViewDataMessage("Error", "Confirm email is not successful");
+            
             return View("Index");
         }
 
@@ -362,8 +370,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to add teacher {teacherId} to course {courseId}! Error: {errorMessages}",
                 currentUser.Id, courseResult.Data.Id, addTeacherToCourseResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{addTeacherToCourseResult.Message}");
+            
             return View("Index");
         }
 
