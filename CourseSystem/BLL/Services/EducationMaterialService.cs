@@ -151,7 +151,8 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
         if (!materialResult.IsSuccessful)
         {
-            return new Result<EducationMaterial>(false, $"{nameof(materialResult)} with id {id} does not exist. Message - {materialResult.Message}");
+            return new Result<EducationMaterial>(false,
+                $"{nameof(materialResult)} with id {id} does not exist. Message - {materialResult.Message}");
         }
 
         return new Result<EducationMaterial>(true, materialResult.Data);
@@ -163,7 +164,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         {
             await _repository.DeleteAsync(material);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception e)

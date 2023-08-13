@@ -14,7 +14,8 @@ namespace BLL.Services
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
         private readonly IGroupService _groupService;
-        public AssignmentService(UnitOfWork unitOfWork, IGroupService groupService) 
+
+        public AssignmentService(UnitOfWork unitOfWork, IGroupService groupService)
             : base(unitOfWork, unitOfWork.AssignmentRepository)
         {
             _groupService = groupService;
@@ -50,7 +51,7 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, "Fail to get assignment");
             }
-                
+
             try
             {
                 await _repository.DeleteAsync(assignment);
@@ -58,7 +59,7 @@ namespace BLL.Services
 
                 return new Result<bool>(true);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new Result<bool>(false, "Fail to delete assignment");
             }
@@ -66,18 +67,18 @@ namespace BLL.Services
 
         public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId)
         {
-            var groupResult = await _groupService.GetById(groupId); 
+            var groupResult = await _groupService.GetById(groupId);
 
             if (!groupResult.IsSuccessful)
             {
                 return new Result<List<Assignment>>(false, $"{groupResult.Message}");
             }
-                
+
             if (groupResult.Data.Assignments.IsNullOrEmpty())
             {
                 return new Result<List<Assignment>>(true, "No assignment in group");
             }
-            
+
             var groupAssignments = await CheckStartAndEndAssignmentDate(groupResult.Data.Assignments);
 
             return new Result<List<Assignment>>(true, groupAssignments);
@@ -85,17 +86,10 @@ namespace BLL.Services
 
         public Result<bool> ValidateTimeInput(DateTime? startDate, DateTime? endDate)
         {
-            if(startDate == null)
-            {
-                startDate = DateTime.MinValue;
-            }
+            startDate ??= DateTime.MinValue;
+            endDate ??= DateTime.MaxValue;
 
-            if(endDate == null)
-            {
-                endDate = DateTime.MaxValue;
-            }
-
-            if(startDate > endDate)
+            if (startDate > endDate)
             {
                 return new Result<bool>(false, "End date can't be less than start date");
             }
@@ -109,7 +103,7 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, "Invalid assignment data");
             }
-                
+
             try
             {
                 await _repository.UpdateAsync(assignment);
@@ -125,7 +119,7 @@ namespace BLL.Services
 
         private async Task<List<Assignment>> CheckStartAndEndAssignmentDate(List<Assignment> assignments)
         {
-            foreach(var assignment in assignments)
+            foreach (var assignment in assignments)
             {
                 SetAssignmentStatus(assignment);
 
@@ -139,12 +133,12 @@ namespace BLL.Services
 
         private void SetAssignmentStatus(Assignment assignment)
         {
-            if(assignment.StartDate > DateTime.Now)
+            if (assignment.StartDate > DateTime.Now)
             {
                 assignment.AssignmentAccess = AssignmentAccess.Planned;
             }
 
-            if(assignment.StartDate <= DateTime.Now)
+            if (assignment.StartDate <= DateTime.Now)
             {
                 assignment.AssignmentAccess = AssignmentAccess.InProgress;
             }

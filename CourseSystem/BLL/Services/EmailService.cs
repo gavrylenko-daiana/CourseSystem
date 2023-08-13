@@ -29,30 +29,30 @@ namespace BLL.Services
             _emailSettings = settings.Value;
             _userService = userService;
         }
-              
+
         public async Task<Result<int>> SendCodeToUser(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
             {
                 return new Result<int>(false, "Fail to generate code for email");
             }
-            
+
             int randomCode = new Random().Next(1000, 9999);
 
             try
             {
-                var subjectAndBody = EmailTemplate.GetEmailSubjectAndBody(EmailType.CodeVerification, 
+                var subjectAndBody = EmailTemplate.GetEmailSubjectAndBody(EmailType.CodeVerification,
                     new Dictionary<string, object>() { { @"{randomcode}", randomCode } });
-                
+
                 var emailData = new EmailData(
-                    new List<string>() { email},
+                    new List<string>() { email },
                     subjectAndBody.Item1,
                     subjectAndBody.Item2
-                    );
+                );
 
                 var result = await SendEmailAsync(emailData);
 
-                if(!result.IsSuccessful)
+                if (!result.IsSuccessful)
                 {
                     return new Result<int>(false, 0);
                 }
@@ -71,7 +71,7 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, $"{nameof(appUser)} not found");
             }
-            
+
             var tempPassword = _userService.GenerateTemporaryPassword();
             var updateResult = await _userService.UpdatePasswordAsync(appUser.Email, tempPassword);
 
@@ -79,14 +79,14 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, $"{updateResult.Message}");
             }
-            
+
             var sendResult = await SendEmailToAppUsers(emailType, appUser, tempPassword: tempPassword);
 
             if (!sendResult.IsSuccessful)
             {
                 return new Result<bool>(false, $"{sendResult.Message}");
             }
-            
+
             return new Result<bool>(true, $"{updateResult.Message}");
         }
 
@@ -110,6 +110,7 @@ namespace BLL.Services
                 {
                     Text = emailData.Body
                 };
+
                 #endregion
 
                 #region Email sending
@@ -118,18 +119,22 @@ namespace BLL.Services
                 {
                     if (_emailSettings.UseSSL)
                     {
-                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.SslOnConnect);
+                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port,
+                            SecureSocketOptions.SslOnConnect);
                     }
                     else if (_emailSettings.UseStartTls)
                     {
-                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.StartTls);
+                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port,
+                            SecureSocketOptions.StartTls);
                     }
 
-                    await client.AuthenticateAsync(_emailSettings.UserName, _emailSettings.Password); //ключ доступа от Гугл
+                    await client.AuthenticateAsync(_emailSettings.UserName,
+                        _emailSettings.Password); //ключ доступа от Гугл
                     await client.SendAsync(emailMessage);
 
                     await client.DisconnectAsync(true);
                 }
+
                 #endregion
 
                 return new Result<bool>(true);
@@ -140,13 +145,14 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Result<bool>> SendToTeacherCourseInvitation(AppUser teacher, Course course, string invitationUrl)
+        public async Task<Result<bool>> SendToTeacherCourseInvitation(AppUser teacher, Course course,
+            string invitationUrl)
         {
             if (teacher == null || course == null)
             {
                 return new Result<bool>(false, $"Fail to send email invitation to the teacher");
             }
-            
+
             var emailContent = GetEmailSubjectAndBody(EmailType.CourseInvitation, teacher, course, invitationUrl);
 
             return await CreateAndSendEmail(new List<string> { teacher.Email }, emailContent.Item1, emailContent.Item2);
@@ -156,25 +162,27 @@ namespace BLL.Services
         {
             try
             {
-                foreach(var studentData in studentsData)
+                foreach (var studentData in studentsData)
                 {
-                    var emailContent = GetEmailSubjectAndBody(EmailType.GroupInvitationToStudent, group, studentData.Value, await _userManager.FindByEmailAsync(studentData.Key));
-                    var result = await CreateAndSendEmail(new List<string> { studentData.Key}, emailContent.Item1, emailContent.Item2);
+                    var emailContent = GetEmailSubjectAndBody(EmailType.GroupInvitationToStudent, group,
+                        studentData.Value, await _userManager.FindByEmailAsync(studentData.Key));
+                    var result = await CreateAndSendEmail(new List<string> { studentData.Key }, emailContent.Item1,
+                        emailContent.Item2);
 
                     if (!result.IsSuccessful)
                         return new Result<bool>(false, result.Message);
                 }
-               
+
                 return new Result<bool>(true, "Emails were sent to students");
             }
             catch (Exception ex)
             {
                 return new Result<bool>(false, "Fail to send email to students");
             }
-
         }
 
-        private async Task<Result<bool>> CreateAndSendEmail(List<string> toEmails, string subject, string body = null, string displayName = null)
+        private async Task<Result<bool>> CreateAndSendEmail(List<string> toEmails, string subject, string body = null,
+            string displayName = null)
         {
             if (toEmails.IsNullOrEmpty())
             {
@@ -191,18 +199,17 @@ namespace BLL.Services
                 {
                     return new Result<bool>(false, result.Message);
                 }
-                
+
                 return new Result<bool>(true);
             }
             catch (Exception ex)
             {
                 return new Result<bool>(false, "Fail to send email");
             }
-
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser,  string callBackUrl = null,
-            string tempPassword = null) 
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, string callBackUrl = null,
+            string tempPassword = null)
         {
             if (appUser == null)
             {
@@ -210,64 +217,64 @@ namespace BLL.Services
             }
 
             var parameters = new Dictionary<string, object>();
-            switch(emailType)
+            switch (emailType)
             {
                 case EmailType.AccountApproveByAdmin:
                     parameters = new Dictionary<string, object>()
                     {
-                        {@"{firstname}", appUser.FirstName },
-                        {@"{lastname}", appUser.LastName },
-                        {@"{email}", appUser.Email },
-                        {@"{userrole}", appUser.Role},
-                        {@"{callbackurl}", callBackUrl }
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{lastname}", appUser.LastName },
+                        { @"{email}", appUser.Email },
+                        { @"{userrole}", appUser.Role },
+                        { @"{callbackurl}", callBackUrl }
                     };
                     break;
                 case EmailType.UserRegistration:
                     parameters = new Dictionary<string, object>()
                     {
-                        {@"{firstname}", appUser.FirstName },
-                        {@"{callbackurl}", callBackUrl }
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{callbackurl}", callBackUrl }
                     };
                     break;
                 case EmailType.ConfirmAdminRegistration:
                     parameters = new Dictionary<string, object>()
                     {
-                        {@"{callbackurl}", callBackUrl }
+                        { @"{callbackurl}", callBackUrl }
                     };
                     break;
                 case EmailType.ConfirmDeletionByAdmin:
                     parameters = new Dictionary<string, object>()
                     {
-                        {@"{firstname}", appUser.FirstName },
-                        {@"{lastname}", appUser.LastName },
-                        {@"{email}", appUser.Email },
-                        {@"{userrole}", appUser.Role},
-                        {@"{callbackurl}", callBackUrl }
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{lastname}", appUser.LastName },
+                        { @"{email}", appUser.Email },
+                        { @"{userrole}", appUser.Role },
+                        { @"{callbackurl}", callBackUrl }
                     };
                     break;
                 case EmailType.ConfirmDeletionByUser:
                     parameters = new Dictionary<string, object>()
                     {
-                        {@"{firstname}", appUser.FirstName },
-                        {@"{callbackurl}", callBackUrl }
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{callbackurl}", callBackUrl }
                     };
                     break;
                 case EmailType.AccountApproveByUser:
                     parameters = new Dictionary<string, object>()
                     {
-                        {@"{firstname}", appUser.FirstName },
-                        {@"{lastname}", appUser.LastName },
-                        {@"{callbackurl}", callBackUrl }
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{lastname}", appUser.LastName },
+                        { @"{callbackurl}", callBackUrl }
                     };
-                    break;                  
+                    break;
                 case EmailType.GetTempPasswordToAdmin:
                     parameters = new Dictionary<string, object>()
                     {
-                        {@"{firstname}", appUser.FirstName },
-                        {@"{lastname}", appUser.LastName },
-                        {@"{email}", appUser.Email },
-                        {@"{userrole}", appUser.Role},
-                        {@"{temppassword}", tempPassword},
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{lastname}", appUser.LastName },
+                        { @"{email}", appUser.Email },
+                        { @"{userrole}", appUser.Role },
+                        { @"{temppassword}", tempPassword },
                     };
                     break;
                 default:
@@ -277,7 +284,8 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null,
+            AppUser appUser = null)
         {
             if (group == null)
             {
@@ -285,7 +293,8 @@ namespace BLL.Services
             }
 
             var parameters = new Dictionary<string, object>();
-            var groupEmailTypes = new List<EmailType>() {
+            var groupEmailTypes = new List<EmailType>()
+            {
                 EmailType.GroupConfirmationByAdmin,
                 EmailType.ApprovedGroupCreation,
                 EmailType.GroupInvitationToStudent
@@ -297,21 +306,22 @@ namespace BLL.Services
             }
 
             parameters = new Dictionary<string, object>()
-                    {
-                        {@"{groupname}", group.Name },
-                        {@"{callbackurl}", callBackUrl }
-                    };           
+            {
+                { @"{groupname}", group.Name },
+                { @"{callbackurl}", callBackUrl }
+            };
 
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course, string callBackUrl = null)
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course,
+            string callBackUrl = null)
         {
             if (appUser == null || course == null)
             {
                 return (String.Empty, String.Empty);
             }
-            
+
             var parameters = new Dictionary<string, object>();
             switch (emailType)
             {
@@ -323,9 +333,9 @@ namespace BLL.Services
 
                     parameters = new Dictionary<string, object>()
                     {
-                        {@"{firstname}", appUser.FirstName },
-                        {@"{coursename}", course.Name },
-                        {@"{callbackurl}", callBackUrl }
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{coursename}", course.Name },
+                        { @"{callbackurl}", callBackUrl }
                     };
                     break;
                 default:
@@ -335,7 +345,8 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
+        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser,
+            string callBackUrl = null, string tempPassword = null)
         {
             if (appUser == null)
             {
@@ -346,13 +357,13 @@ namespace BLL.Services
 
             var toEmail = new List<string>();
             var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
-            
+
             switch (emailType)
-            {               
-                case EmailType.ConfirmDeletionByAdmin:                   
-                    toEmail  = allAdmins.Select(a => a.Email).ToList();
+            {
+                case EmailType.ConfirmDeletionByAdmin:
+                    toEmail = allAdmins.Select(a => a.Email).ToList();
                     break;
-                case EmailType.AccountApproveByAdmin:                   
+                case EmailType.AccountApproveByAdmin:
                     toEmail = allAdmins.Select(a => a.Email).ToList();
                     break;
                 default:
@@ -363,7 +374,8 @@ namespace BLL.Services
             return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
         }
 
-        public async Task<Result<bool>> SendEmailGroups(EmailType emailType,Group group, string callBackUrl = null, AppUser appUser = null)
+        public async Task<Result<bool>> SendEmailGroups(EmailType emailType, Group group, string callBackUrl = null,
+            AppUser appUser = null)
         {
             if (group == null)
             {
@@ -387,6 +399,5 @@ namespace BLL.Services
 
             return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
         }
-
     }
 }

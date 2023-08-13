@@ -12,7 +12,7 @@ namespace BLL.Services
 {
     public class NotificationService : GenericService<Notification>, INotificationService
     {
-        public NotificationService(UnitOfWork unitOfWork) 
+        public NotificationService(UnitOfWork unitOfWork)
             : base(unitOfWork, unitOfWork.NotificationRepository)
         {
         }
@@ -228,7 +228,8 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment)
+        public async Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user,
+            UserAssignments userAssignment)
         {
             if (user == null)
             {
@@ -241,7 +242,8 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.MarkedAssignmentForTeacher,
-                DateTime.Now, user, userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, userAssignment.Grade);
+                DateTime.Now, user, userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName,
+                userAssignment.Assignment.Name, userAssignment.Grade);
 
             return await SaveNotification(notification);
         }
@@ -259,7 +261,8 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddSubmittedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment)
+        public async Task<Result<bool>> AddSubmittedAssignmentForTeacherNotification(AppUser user,
+            UserAssignments userAssignment)
         {
             if (user == null)
             {
@@ -272,7 +275,8 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.SubmittedAssignmentForTeacher,
-                DateTime.Now, user, userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name);
+                DateTime.Now, user, userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName,
+                userAssignment.Assignment.Name);
 
             return await SaveNotification(notification);
         }
@@ -299,8 +303,8 @@ namespace BLL.Services
             }
         }
 
-        private async Task<Notification> CreateNotification(NotificationType notificationType, DateTime created,
-            AppUser user,  params object[] descriptionParams)
+        private Task<Notification> CreateNotification(NotificationType notificationType, DateTime created,
+            AppUser user, params object[] descriptionParams)
         {
             var notification = new Notification()
             {
@@ -311,7 +315,7 @@ namespace BLL.Services
                 IsRead = false
             };
 
-            return notification;
+            return Task.FromResult(notification);
         }
 
         private async Task<Result<bool>> SaveNotification(Notification notification)

@@ -10,8 +10,9 @@ public class CourseService : GenericService<Course>, ICourseService
 {
     private readonly IUserCourseService _userCourseService;
     private readonly IEducationMaterialService _educationMaterial;
-    
-    public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService, IEducationMaterialService educationMaterial) 
+
+    public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
+        IEducationMaterialService educationMaterial)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
@@ -24,48 +25,48 @@ public class CourseService : GenericService<Course>, ICourseService
         {
             return new Result<bool>(false, $"{nameof(course)} not found");
         }
-        
+
         if (currentUser == null)
         {
             return new Result<bool>(false, $"{nameof(currentUser)} not found");
         }
-        
+
         try
         {
             await _repository.AddAsync(course);
             await _unitOfWork.Save();
-            
+
             var userCourse = new UserCourses()
             {
                 Course = course,
                 AppUser = currentUser,
             };
-            
+
             var createUserCoursesResult = await _userCourseService.CreateUserCourses(userCourse);
-            
+
             if (!createUserCoursesResult.IsSuccessful)
             {
                 await _repository.DeleteAsync(course);
                 await _unitOfWork.Save();
             }
-            
+
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,$"Failed to create {nameof(course)} {course.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to create {nameof(course)} {course.Id}. Exception: {ex.Message}");
         }
     }
 
     public async Task<Result<bool>> DeleteCourse(int courseId)
     {
         var course = await _repository.GetByIdAsync(courseId);
-        
+
         if (course == null)
         {
             return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
         }
-        
+
         try
         {
             if (course.EducationMaterials.Any())
@@ -77,15 +78,15 @@ public class CourseService : GenericService<Course>, ICourseService
                     await _educationMaterial.DeleteFileFromGroup(material);
                 }
             }
-            
+
             await _repository.DeleteAsync(course);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,$"Failed to delete {nameof(course)} by {courseId}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to delete {nameof(course)} by {courseId}. Exception: {ex.Message}");
         }
     }
 
@@ -95,41 +96,42 @@ public class CourseService : GenericService<Course>, ICourseService
         {
             return new Result<bool>(false, $"{nameof(course)} was not found");
         }
-        
+
         try
         {
             await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,$"Failed to update {nameof(course)}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to update {nameof(course)}. Exception: {ex.Message}");
         }
     }
 
     public async Task<Result<bool>> UpdateName(int courseId, string newName)
     {
         var course = await _repository.GetByIdAsync(courseId);
-        
+
         if (course == null)
         {
             return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
         }
-        
+
         try
         {
             course.Name = newName;
 
             await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,$"Failed to update {nameof(course)} by {courseId} with {newName}. Exception: {ex.Message}");
+            return new Result<bool>(false,
+                $"Failed to update {nameof(course)} by {courseId} with {newName}. Exception: {ex.Message}");
         }
     }
 
