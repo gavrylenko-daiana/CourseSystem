@@ -31,34 +31,34 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
             if (!uploadPath.IsSuccessful)
             {
-                return new Result<string>(false, $"Failed to get unique {nameof(uploadPath)}");
+                return new Result<string>(false, uploadPath.Message);
             }
 
             await using var stream = file.OpenReadStream();
             var uploadResult =
                 await _dropboxClient.Files.UploadAsync(uploadPath.Message, WriteMode.Overwrite.Instance, body: stream);
 
-            var link = await GetSharedLinkAsync(uploadResult.PathDisplay);
+            var linkResult = await GetSharedLinkAsync(uploadResult.PathDisplay);
 
-            if (!link.IsSuccessful)
+            if (!linkResult.IsSuccessful)
             {
-                return new Result<string>(false, $"Failed to get url {nameof(link)}");
+                return new Result<string>(false, linkResult.Message);
             }
 
             if (IsDocumentContentType(file.ContentType))
             {
-                return new Result<string>(true, link.Message);
+                return new Result<string>(true, linkResult.Message);
             }
             else
             {
-                var replaceLink = link.Message.Replace("dl=0", "raw=1");
+                var replaceLink = linkResult.Message.Replace("dl=0", "raw=1");
 
                 return new Result<string>(true, replaceLink);
             }
         }
         catch (Exception ex)
         {
-            return new Result<string>(false, $"File could not be loaded. ErrorMessage: {ex.Message}");
+            return new Result<string>(false, $"File could not be loaded. ErrorMessage - {ex.Message}");
         }
     }
 
@@ -74,7 +74,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
             if (!numberedFileNameResult.IsSuccessful)
             {
-                return new Result<string>(false);
+                return new Result<string>(false, $"Failed to get unique {nameof(fileName)}. ErrorMessage - {numberedFileNameResult.Message}");
             }
 
             uploadPath = "/" + numberedFileNameResult.Message;
@@ -93,9 +93,9 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
             return new Result<string>(true, sharedLink.Url);
         }
-        catch
+        catch (Exception ex)
         {
-            return new Result<string>(false);
+            return new Result<string>(false, $"Failed to get url {nameof(pathDisplay)}. ErrorMessage - {ex.Message}");
         }
     }
 
@@ -113,14 +113,14 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
         if (string.IsNullOrWhiteSpace(fileNameWithoutExtension))
         {
-            return new Result<string>(false);
+            return new Result<string>(false, $"The {nameof(fileNameWithoutExtension)} does not exist");
         }
 
         var fileExtension = Path.GetExtension(fileName);
 
         if (string.IsNullOrWhiteSpace(fileExtension))
         {
-            return new Result<string>(false);
+            return new Result<string>(false, $"The {nameof(fileExtension)} does not exist");
         }
 
         return new Result<string>(true, $"{fileNameWithoutExtension} ({count}){fileExtension}");
@@ -136,7 +136,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
         catch
         {
-            return new Result<bool>(false, $"Failed to get metadata by {filePath}");
+            return new Result<bool>(false, $"Failed to get metadata by {nameof(filePath)}");
         }
     }
 
@@ -150,48 +150,62 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false, $"ErrorMessage: {ex.Message}");
+            return new Result<bool>(false, $"Failed to delete file. ErrorMessage - {ex.Message}");
         }
     }
 
     public async Task<Result<Group>> AddToGroup(IFormFile material, string url, Group group)
     {
-        var materialFile = new EducationMaterial()
+        try
         {
-            Name = material.FileName,
-            Url = url,
-            FileExtension = Path.GetExtension(material.FileName),
-            MaterialAccess = MaterialAccess.Group,
-            GroupId = group.Id,
-            CourseId = group.CourseId
-        };
+            var materialFile = new EducationMaterial()
+            {
+                Name = material.FileName,
+                Url = url,
+                FileExtension = Path.GetExtension(material.FileName),
+                MaterialAccess = MaterialAccess.Group,
+                GroupId = group.Id,
+                CourseId = group.CourseId
+            };
 
-        await _repository.AddAsync(materialFile);
-        await _unitOfWork.Save();
+            await _repository.AddAsync(materialFile);
+            await _unitOfWork.Save();
 
-        group.EducationMaterials.Add(materialFile);
+            group.EducationMaterials.Add(materialFile);
 
-        return new Result<Group>(true);
+            return new Result<Group>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<Group>(false, $"ErrorMessage - {ex.Message}");
+        }
     }
 
     public async Task<Result<bool>> AddToCourse(IFormFile material, string url, Course course)
     {
-        var materialFile = new EducationMaterial()
+        try
         {
-            Name = material.FileName,
-            Url = url,
-            FileExtension = Path.GetExtension(material.FileName),
-            MaterialAccess = MaterialAccess.Course,
-            CourseId = course.Id,
-            Course = course
-        };
+            var materialFile = new EducationMaterial()
+            {
+                Name = material.FileName,
+                Url = url,
+                FileExtension = Path.GetExtension(material.FileName),
+                MaterialAccess = MaterialAccess.Course,
+                CourseId = course.Id,
+                Course = course
+            };
 
-        await _repository.AddAsync(materialFile);
-        await _unitOfWork.Save();
+            await _repository.AddAsync(materialFile);
+            await _unitOfWork.Save();
 
-        course.EducationMaterials.Add(materialFile);
-
-        return new Result<bool>(true);
+            course.EducationMaterials.Add(materialFile);
+            
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false, $"ErrorMessage - {ex.Message}");
+        }
     }
 
     public async Task<Result<Group>> DeleteFileFromGroup(EducationMaterial material)
@@ -200,14 +214,14 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
         if (!resultDeleteEducationMaterial.IsSuccessful)
         {
-            return new Result<Group>(false, $"Failed delete {nameof(material)}");
+            return new Result<Group>(false, $"Failed to delete {nameof(material)}");
         }
 
         var resultDeleteFromDropBox = await DeleteUploadFileAsync(material);
 
         if (!resultDeleteFromDropBox.IsSuccessful)
         {
-            return new Result<Group>(false, $"Failed delete {nameof(material)}");
+            return new Result<Group>(false, $"Failed to delete {nameof(material)}");
         }
 
         var group = material.Group;
@@ -239,7 +253,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         if (!materialResult.IsSuccessful)
         {
             return new Result<EducationMaterial>(false,
-                $"{nameof(materialResult)} with id {id} does not exist. Message - {materialResult.Message}");
+                $"The {nameof(materialResult)} with id {id} does not exist. Message - {materialResult.Message}");
         }
 
         return new Result<EducationMaterial>(true, materialResult.Data);
