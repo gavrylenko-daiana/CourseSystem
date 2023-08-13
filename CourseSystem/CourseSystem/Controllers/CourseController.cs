@@ -48,8 +48,7 @@ public class CourseController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var coursesResult = await _courseService.GetByPredicate(c => c.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
-        );
+        var coursesResult = await _courseService.GetByPredicate(c => c.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id));
 
         if (!coursesResult.IsSuccessful)
         {

@@ -38,7 +38,7 @@ public class GenericService<T> : IGenericService<T> where T : class
     }
 
     public async Task<Result<List<T>>> GetByPredicate(Expression<Func<T, bool>> filter = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null)
+        Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderBy = null)
     {
         try
         {

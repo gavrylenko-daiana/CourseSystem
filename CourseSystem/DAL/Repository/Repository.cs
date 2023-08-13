@@ -90,7 +90,7 @@ namespace DAL.Repository
 
         public virtual async Task<List<T>> GetAsync(
             Expression<Func<T, bool>> filter = null,
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null)
+            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderBy = null)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace DAL.Repository
 
                 if (orderBy != null)
                 {
-                    return await orderBy(query).ToListAsync();
+                    return await orderBy.Compile()(query).ToListAsync();
                 }
                 else
                 {
