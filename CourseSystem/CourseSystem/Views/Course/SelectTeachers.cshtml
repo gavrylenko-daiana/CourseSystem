@@ -25,7 +25,7 @@
                         {
                             <form asp-action="SendInvitation" asp-controller="Course" method="post">
                                 <input type="hidden" name="teacherId" value="@teacher.Id"/>
-                                <input type="hidden" name="courseId" value="@TempData["CourseId"]"/>
+                                <input type="hidden" name="courseId" value="@teacher.CourseId"/>
                                 <button type="submit" class="btn btn-primary btn-sm">Send Invitation</button>
                             </form>
                         }

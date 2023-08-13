@@ -212,23 +212,12 @@ public class CourseController : Controller
 
         courseViewModel.CurrentGroups = currentGroups;
 
-        TempData["CourseId"] = id;
-
         return View(courseViewModel);
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectTeachers()
+    public async Task<IActionResult> SelectTeachers(int courseId)
     {
-        if (TempData["CourseId"] == null)
-        {
-            _logger.LogError("Course Id wasn't given");
-            ViewData.ViewDataMessage("Error", "Course Id wasn't given");
-            return View("Index");
-        }
-
-        var courseId = (int)TempData["CourseId"];
-
         var courseResult = await _courseService.GetById(courseId);
 
         if (!courseResult.IsSuccessful)
@@ -249,10 +238,11 @@ public class CourseController : Controller
                 Id = u.Id,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
-                IsInvited = userCoursesForCourse.Contains(u.Id)
+                IsInvited = userCoursesForCourse.Contains(u.Id),
+                CourseId = courseId
             })
             .ToList();
-
+        
         return View(teachers);
     }
 
@@ -297,9 +287,7 @@ public class CourseController : Controller
             TempData.TempDataMessage("Error", sendResult.Message);
             return View("SelectTeachers");
         }
-
-        TempData["CourseId"] = courseResult.Data.Id;
-
+        
         return RedirectToAction("Index");
     }
 
