@@ -136,7 +136,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
         catch
         {
-            return new Result<bool>(false);
+            return new Result<bool>(false, $"Failed to get metadata by {filePath}");
         }
     }
 
