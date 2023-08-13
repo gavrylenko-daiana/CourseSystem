@@ -434,9 +434,9 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> RegisterNewAdmin(RegisterAdminViewModel registerAdminViewModel)
     {
-        var user = await _userManager.FindByEmailAsync(registerAdminViewModel.Email);
+        var userResult = await _userService.GetUserByEmailAsync(registerAdminViewModel.Email);
 
-        if (user != null)
+        if (userResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"This email already exist");
             return View(registerAdminViewModel);
@@ -487,14 +487,14 @@ public class AccountController : Controller
             return View(newEmailViewModel);
         }
 
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
         
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             return RedirectToAction("Login");
         }
-
-        var user = await _userManager.FindByEmailAsync(newEmailViewModel.NewEmail);
+        
+        var user = await _userService.GetUserByEmailAsync(newEmailViewModel.NewEmail);
         
         if (user != null)
         {
@@ -502,14 +502,14 @@ public class AccountController : Controller
             return View(newEmailViewModel);
         }
         
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(currentUser);
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(currentUserResult.Data);
 
         var callbackUrl =
-            CreateCallBackUrl(code, "Account", "ConfirmedResetEmail", new { userId = currentUser.Id, code = code, currentEmail = newEmailViewModel.Email, newEmail = newEmailViewModel.NewEmail});
+            CreateCallBackUrl(code, "Account", "ConfirmedResetEmail", new { userId = currentUserResult.Data.Id, code = code, currentEmail = newEmailViewModel.Email, newEmail = newEmailViewModel.NewEmail});
 
-        currentUser.Email = newEmailViewModel.NewEmail;
+        currentUserResult.Data.Email = newEmailViewModel.NewEmail;
         
-        await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUser, callbackUrl);
+        await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUserResult.Data, callbackUrl);
 
         TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
         
