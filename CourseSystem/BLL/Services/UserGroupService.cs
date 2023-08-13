@@ -16,12 +16,12 @@ public class UserGroupService : GenericService<UserGroups>, IUserGroupService
         {
             return new Result<bool>(false, $"{nameof(userGroups)} not found");
         }
-        
+
         try
         {
             await _repository.AddAsync(userGroups);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception ex)

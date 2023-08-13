@@ -13,8 +13,8 @@ public class UserService : GenericService<AppUser>, IUserService
 {
     private readonly UserManager<AppUser> _userManager;
 
-    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) : base(unitOfWork,
-        unitOfWork.UserRepository)
+    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) 
+        : base(unitOfWork, unitOfWork.UserRepository)
     {
         _userManager = userManager;
     }
@@ -105,7 +105,8 @@ public class UserService : GenericService<AppUser>, IUserService
         }
     }
 
-    public async Task<Result<bool>> CheckPasswordAsync(ClaimsPrincipal currentUser, string currentPassword, string newPassword)
+    public async Task<Result<bool>> CheckPasswordAsync(ClaimsPrincipal currentUser, string currentPassword,
+        string newPassword)
     {
         var result = await GetCurrentUser(currentUser);
 
@@ -117,8 +118,8 @@ public class UserService : GenericService<AppUser>, IUserService
 
             if (checkPassword)
             {
-                user.PasswordHash =
-                    _userManager.PasswordHasher.HashPassword(user, newPassword);
+                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, newPassword);
+                
                 await _userManager.UpdateAsync(user);
 
                 return new Result<bool>(true);
@@ -142,8 +143,9 @@ public class UserService : GenericService<AppUser>, IUserService
         {
             return new Result<bool>(false, userResult.Message);
         }
-        
+
         userResult.Data.PasswordHash = _userManager.PasswordHasher.HashPassword(userResult.Data, newPassword);
+        
         await _userManager.UpdateAsync(userResult.Data);
 
         return new Result<bool>(true);
@@ -159,6 +161,7 @@ public class UserService : GenericService<AppUser>, IUserService
         }
 
         userResult.Data.Email = newEmail;
+        
         await _userManager.UpdateAsync(userResult.Data);
 
         return new Result<bool>(true);
@@ -172,7 +175,7 @@ public class UserService : GenericService<AppUser>, IUserService
         {
             return new Result<AppUser>(false);
         }
-        
+
         return new Result<AppUser>(true, user);
     }
 
@@ -184,7 +187,7 @@ public class UserService : GenericService<AppUser>, IUserService
         {
             return new Result<AppUser>(false, $"{nameof(user)} does not exist");
         }
-        
+
         return new Result<AppUser>(true, user);
     }
 
@@ -199,7 +202,7 @@ public class UserService : GenericService<AppUser>, IUserService
 
         return new Result<AppUser>(true, appUser);
     }
-    
+
     public string GenerateTemporaryPassword()
     {
         const string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*";
@@ -217,7 +220,8 @@ public class UserService : GenericService<AppUser>, IUserService
         password.Append(specialChars[random.Next(specialChars.Length)]);
 
         var remainingChars = allowedChars + upperChars + lowerChars + digitChars + specialChars;
-        for (int i = 0; i < 8; i++) 
+        
+        for (int i = 0; i < 8; i++)
         {
             password.Append(remainingChars[random.Next(remainingChars.Length)]);
         }

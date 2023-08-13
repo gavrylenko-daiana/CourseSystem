@@ -8,7 +8,7 @@ namespace Core.EmailTemplates
 {
     public enum EmailType
     {
-        CodeVerification,
+        CodeVerification = 0,
         AccountApproveByAdmin,
         AccountApproveByUser,
         ApprovedGroupCreation,

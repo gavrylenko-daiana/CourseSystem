@@ -29,7 +29,7 @@ namespace DAL.Repository
         {
             _context = context;
         }
-        
+
         public Repository<AppUser> UserRepository
         {
             get
@@ -209,7 +209,6 @@ namespace DAL.Repository
             {
                 throw new Exception($"Fail to save changes to the database: {ex.Message}");
             }
-            
         }
 
         private bool disposed = false;

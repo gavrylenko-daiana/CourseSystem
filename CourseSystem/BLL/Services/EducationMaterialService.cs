@@ -17,8 +17,8 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 {
     private readonly DropboxClient _dropboxClient;
 
-    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config) : base(unitOfWork,
-        unitOfWork.EducationMaterialRepository)
+    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config) 
+        : base(unitOfWork, unitOfWork.EducationMaterialRepository)
     {
         _dropboxClient = new DropboxClient(config.Value.AccessToken);
     }

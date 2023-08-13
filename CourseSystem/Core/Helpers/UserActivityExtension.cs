@@ -21,10 +21,11 @@ namespace Core.Helpers
                 return new Result<List<UserActivity>>(false, nameof(month));
             }
 
-            return new Result<List<UserActivity>>(true,
-                activities.Where(a => a.Created.Month == month.Month)
-                    .OrderByDescending(a => a.Created)
-                        .ToList());
+            var userActivity = activities.Where(a => a.Created.Month == month.Month)
+                .OrderByDescending(a => a.Created)
+                .ToList();
+
+            return new Result<List<UserActivity>>(true, userActivity);
         }
 
         public static Result<List<UserActivity>> ForDate(this List<UserActivity> activities, DateTime date)
@@ -39,10 +40,11 @@ namespace Core.Helpers
                 return new Result<List<UserActivity>>(false, nameof(date));
             }
 
-            return new Result<List<UserActivity>>(true,
-                activities.Where(a => a.Created.Date == date.Date)
-                    .OrderByDescending(a => a.Created)
-                        .ToList());
+            var userActivity = activities.Where(a => a.Created.Date == date.Date)
+                .OrderByDescending(a => a.Created)
+                .ToList();
+
+            return new Result<List<UserActivity>>(true, userActivity);
         }
     }
 }
