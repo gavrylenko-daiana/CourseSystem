@@ -9,12 +9,12 @@ namespace UI.Hubs
     {
         private readonly IChatMessageService _chatMessageService;
         private readonly IAssignmentService _assignmentService;
-        private readonly UserManager<AppUser> _userManager;
-        public ChatHub(IChatMessageService chatMessageService, UserManager<AppUser> userManager, IAssignmentService assignmentService)
+        private readonly IUserService _userService;
+        public ChatHub(IChatMessageService chatMessageService, IAssignmentService assignmentService, IUserService userService)
         {
             _chatMessageService = chatMessageService;
-            _userManager = userManager;
             _assignmentService = assignmentService;
+            _userService = userService;
         }
         public async Task Send(string text, string assignmentId)
         {
@@ -28,9 +28,9 @@ namespace UI.Hubs
                 return;
             }
 
-            var user = await _userManager.GetUserAsync(Context.User);
+            var userResult = await _userService.GetCurrentUser(Context.User);
 
-            if (user == null)
+            if (!userResult.IsSuccessful)
             {
                 await Clients.Group(assignmentId).SendAsync("Error", "Unknown user");
             }
@@ -42,7 +42,7 @@ namespace UI.Hubs
                 await Clients.Group(assignmentId).SendAsync("Error", "Unknown assignment");
             }
 
-            var message = await _chatMessageService.CreateChatMessage(user, assignmentResult.Data, text);
+            var message = await _chatMessageService.CreateChatMessage(userResult.Data, assignmentResult.Data, text);
 
             if (!message.IsSuccessful)
             {
@@ -50,7 +50,7 @@ namespace UI.Hubs
             }
             else
             {
-                await Clients.Group(message.Data.AssignmentId.ToString()).SendAsync("Receive", message.Data.Text, $"{user.FirstName} {user.LastName}", message.Data.Created.ToString("g"));
+                await Clients.Group(message.Data.AssignmentId.ToString()).SendAsync("Receive", message.Data.Text, $"{userResult.Data.FirstName} {userResult.Data.LastName}", message.Data.Created.ToString("g"));
             }
         }
 
@@ -62,7 +62,7 @@ namespace UI.Hubs
                 {
                     throw new ArgumentNullException(nameof(assignmentId));
                 }
-
+        
                 await Groups.AddToGroupAsync(Context.ConnectionId, assignmentId);
             }
             catch(Exception ex)
