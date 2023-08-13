@@ -154,9 +154,6 @@ public class GroupController : Controller
             return View("Index");
         }
         
-        //delete
-        TempData["GroupId"] = id;
-
         var currentUserResult = await _userService.GetCurrentUser(User);
 
         if (!currentUserResult.IsSuccessful)
@@ -253,9 +250,7 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> SelectStudent(int id, bool approved = false)
     {
-        // delete
-        var groupId = (int)(TempData["GroupId"] ?? id);
-        var groupResult = await _groupService.GetById(groupId);
+        var groupResult = await _groupService.GetById(id);
         
         if (!groupResult.IsSuccessful)
         {
@@ -278,7 +273,7 @@ public class GroupController : Controller
             })
             .ToList();
         
-        ViewBag.GroupId = groupId;
+        ViewBag.GroupId = id;
         ViewBag.Approved = approved;
 
         return View(availableStudents);
