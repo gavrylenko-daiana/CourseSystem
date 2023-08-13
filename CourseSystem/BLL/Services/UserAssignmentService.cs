@@ -11,7 +11,7 @@ namespace BLL.Services
 {
     public class UserAssignmentService : GenericService<UserAssignments>, IUserAssignmentService
     {
-        public UserAssignmentService(UnitOfWork unitOfWork) 
+        public UserAssignmentService(UnitOfWork unitOfWork)
             : base(unitOfWork, unitOfWork.UserAssignmentsRepository)
         {
         }
@@ -22,7 +22,7 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, $"Fail to get {nameof(userAssignment)}");
             }
-               
+
             try
             {
                 userAssignment.Grade = newGrade;
@@ -41,20 +41,20 @@ namespace BLL.Services
 
         public async Task<Result<UserAssignments>> CreateUserAssignment(Assignment assignment, AppUser appUser)
         {
-            if(assignment == null || appUser == null)
+            if (assignment == null || appUser == null)
             {
                 return new Result<UserAssignments>(false, $"Invalid input {nameof(assignment)} and {nameof(appUser)} data");
             }
-                
+
             try
             {
                 var checkUserAssignment = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
 
                 if (checkUserAssignment.Any())
                 {
-                    return new Result<UserAssignments>(true, checkUserAssignment.FirstOrDefault());
+                    return new Result<UserAssignments>(true, checkUserAssignment.FirstOrDefault()!);
                 }
-                   
+
                 var userAssignment = new UserAssignments()
                 {
                     Assignment = assignment,
@@ -68,7 +68,7 @@ namespace BLL.Services
 
                 return new Result<UserAssignments>(true, userAssignment);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new Result<UserAssignments>(false, $"Fail to create {nameof(appUser)} {nameof(assignment)}");
             }

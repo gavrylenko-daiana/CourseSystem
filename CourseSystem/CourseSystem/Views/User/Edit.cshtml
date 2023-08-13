@@ -21,6 +21,7 @@
         <p class="text-success">@TempData["SuccessMessage"]</p>
     }
     <form method="post" asp-controller="User" asp-action="Edit" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Email" value="@Model.Email"/>
         <div class="form-group">
             <label asp-for="FirstName" class="control-label"></label>
             <input asp-for="FirstName" class="form-control" placeholder="FirstName">

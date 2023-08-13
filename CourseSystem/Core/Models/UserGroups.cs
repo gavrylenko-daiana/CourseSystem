@@ -12,6 +12,5 @@ namespace Core.Models
         public virtual AppUser AppUser { get; set; }
         public int GroupId { get; set; }
         public virtual Group Group { get; set; }
-
     }
 }
