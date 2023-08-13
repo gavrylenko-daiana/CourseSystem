@@ -11,37 +11,36 @@ namespace UI.Controllers;
 [Authorize]
 public class UserActivityController : Controller
 {
-    private readonly UserManager<AppUser> _userManager;
     private readonly IActivityService _activityService;
     private readonly ILogger<UserActivityController> _logger;
+    private readonly IUserService _userService;
 
-    public UserActivityController(UserManager<AppUser> userManager, IActivityService activityService,
-        ILogger<UserActivityController> logger)
+    public UserActivityController(IActivityService activityService, ILogger<UserActivityController> logger, IUserService userService)
     {
-        _userManager = userManager;
         _activityService = activityService;
         _logger = logger;
+        _userService = userService;
     }
 
     [HttpGet]
     public async Task<IActionResult> ActivityForMonth(DateTime? dateTime = null)
     {
         var month = dateTime ?? DateTime.Now;
-        var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null)
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
 
             return RedirectToAction("Login", "Account");
         }
 
-        var activitiesResult = currentUser.UserActivities.ForMonth(month);
+        var activitiesResult = currentUserResult.Data.UserActivities.ForMonth(month);
 
         if (!activitiesResult.IsSuccessful)
         {
-            _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", 
-                currentUser.Id, activitiesResult.Message);
+            _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", currentUserResult.Data.Id, activitiesResult.Message);
             TempData.TempDataMessage("Error", activitiesResult.Message);
 
             return RedirectToAction("Index", "Home");
@@ -56,21 +55,21 @@ public class UserActivityController : Controller
     public async Task<IActionResult> ActivityForDay(DateTime? thisDay)
     {
         var day = thisDay ?? DateTime.Today;
-        var currentUser = await _userManager.GetUserAsync(User);
 
-        if (currentUser == null)
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
 
             return RedirectToAction("Login", "Account");
         }
 
-        var activitiesResult = currentUser.UserActivities.ForDate(day);
+        var activitiesResult = currentUserResult.Data.UserActivities.ForDate(day);
 
         if (!activitiesResult.IsSuccessful)
         {
-            _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", 
-                currentUser.Id, activitiesResult.Message);
+            _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", currentUserResult.Data.Id, activitiesResult.Message);
             TempData.TempDataMessage("Error", activitiesResult.Message);
 
             return RedirectToAction("Index", "Home");

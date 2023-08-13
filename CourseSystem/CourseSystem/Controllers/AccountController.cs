@@ -504,10 +504,10 @@ public class AccountController : Controller
         {
             return RedirectToAction("Login");
         }
-
-        var user = await _userService.GetUserByEmailAsync(newEmailViewModel.NewEmail);
-
-        if (user != null)
+        
+        var userResult = await _userService.GetUserByEmailAsync(newEmailViewModel.NewEmail);
+        
+        if (!userResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"This email already exist");
 
