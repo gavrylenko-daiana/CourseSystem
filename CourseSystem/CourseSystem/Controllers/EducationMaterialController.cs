@@ -156,11 +156,18 @@ public class EducationMaterialController : Controller
 
             var addToCourseResult = await _educationMaterialService.AddToCourse(viewModel.UploadFile,
                 fullPath.Message, courseResult.Data);
-            await _courseService.UpdateCourse(courseResult.Data);
             
             if (!addToCourseResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"Message: {addToCourseResult.Message}");
+                return View(viewModel);
+            }
+            
+            var updateCourseResult = await _courseService.UpdateCourse(courseResult.Data);
+
+            if (!updateCourseResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"Message: {updateCourseResult.Message}");
                 return View(viewModel);
             }
         }
