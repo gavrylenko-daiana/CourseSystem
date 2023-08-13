@@ -16,9 +16,10 @@ namespace Core.Helpers
                 return new Result<List<Notification>>(false, nameof(list));
             }
 
-            return new Result<List<Notification>>(true, 
-                list.OrderByDescending(a => a.Created)
-                    .ToList());
+            var notification = list.OrderByDescending(a => a.Created)
+                .ToList();
+
+            return new Result<List<Notification>>(true, notification);
         }
 
         public static Result<List<Notification>> NotReadByDate(this List<Notification> list)
@@ -28,10 +29,11 @@ namespace Core.Helpers
                 return new Result<List<Notification>>(false, nameof(list));
             }
 
-            return new Result<List<Notification>>(true,
-                list.Where(n => !n.IsRead)
-                    .OrderByDescending(a => a.Created)
-                        .ToList());
+            var notification = list.Where(n => !n.IsRead)
+                .OrderByDescending(a => a.Created)
+                .ToList();
+
+            return new Result<List<Notification>>(true, notification);
         }
     }
 }
