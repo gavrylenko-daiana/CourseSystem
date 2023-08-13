@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DAL.Repository
 {
-    public class Repository<T> : IRepository<T> where T: class
+    public class Repository<T> : IRepository<T> where T : class
     {
         private readonly ApplicationContext _context;
         private readonly DbSet<T> _dbSet;
@@ -28,7 +28,7 @@ namespace DAL.Repository
             {
                 return await _dbSet.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             }
-            catch( Exception ex )
+            catch (Exception ex)
             {
                 throw new Exception($"Exception message:{ex.Message}");
             }
@@ -40,7 +40,7 @@ namespace DAL.Repository
             {
                 await _dbSet.AddAsync(item);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Exception message:{ex.Message}");
             }
@@ -54,6 +54,7 @@ namespace DAL.Repository
                 {
                     _dbSet.Attach(item);
                 }
+
                 _dbSet.Remove(item);
             }
             catch (Exception ex)
@@ -69,7 +70,7 @@ namespace DAL.Repository
                 _dbSet.Attach(item);
                 _context.Entry(item).State = EntityState.Modified;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Exception message: {ex.Message}");
             }
@@ -120,7 +121,9 @@ namespace DAL.Repository
             var entity = _dbSet.Find(keys);
 
             if (entity == null)
+            {
                 throw new Exception($"Entity {nameof(T)} wasn't found");
+            }
 
             try
             {
