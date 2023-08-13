@@ -27,24 +27,33 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
     {
         try
         {
-            using var stream = file.OpenReadStream();
-            var uploadResult =
-                await _dropboxClient.Files.UploadAsync("/" + file.FileName, WriteMode.Overwrite.Instance, body: stream);
+            var uploadPath = await GetUniqueUploadPathAsync(file.FileName);
 
-            var sharedLink = await _dropboxClient.Sharing.CreateSharedLinkWithSettingsAsync(uploadResult.PathDisplay);
-
-            string link = sharedLink.Url;
-
-            if (file.ContentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-                file.ContentType == "application/msword")
+            if (!uploadPath.IsSuccessful)
             {
-                return new Result<string>(true, link);
+                return new Result<string>(false, $"Failed to get unique {nameof(uploadPath)}");
+            }
+
+            await using var stream = file.OpenReadStream();
+            var uploadResult =
+                await _dropboxClient.Files.UploadAsync(uploadPath.Message, WriteMode.Overwrite.Instance, body: stream);
+
+            var link = await GetSharedLinkAsync(uploadResult.PathDisplay);
+
+            if (!link.IsSuccessful)
+            {
+                return new Result<string>(false, $"Failed to get url {nameof(link)}");
+            }
+
+            if (IsDocumentContentType(file.ContentType))
+            {
+                return new Result<string>(true, link.Message);
             }
             else
             {
-                link = link.Replace("dl=0", "raw=1");
+                var replaceLink = link.Message.Replace("dl=0", "raw=1");
 
-                return new Result<string>(true, link);
+                return new Result<string>(true, replaceLink);
             }
         }
         catch (Exception ex)
@@ -53,7 +62,85 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
 
-    public async Task<Result<bool>> DeleteFileAsync(string filePath)
+    private async Task<Result<string>> GetUniqueUploadPathAsync(string fileName)
+    {
+        int count = 1;
+        var uploadPath = "/" + fileName;
+        var resultExists = await FileExistsAsync(uploadPath);
+
+        while (resultExists.IsSuccessful)
+        {
+            var numberedFileNameResult = GetNumberedFileName(fileName, count);
+
+            if (!numberedFileNameResult.IsSuccessful)
+            {
+                return new Result<string>(false);
+            }
+
+            uploadPath = "/" + numberedFileNameResult.Message;
+            count++;
+            resultExists = await FileExistsAsync(uploadPath);
+        }
+
+        return new Result<string>(true, uploadPath);
+    }
+
+    private async Task<Result<string>> GetSharedLinkAsync(string pathDisplay)
+    {
+        try
+        {
+            var sharedLink = await _dropboxClient.Sharing.CreateSharedLinkWithSettingsAsync(pathDisplay);
+
+            return new Result<string>(true, sharedLink.Url);
+        }
+        catch
+        {
+            return new Result<string>(false);
+        }
+    }
+
+    private bool IsDocumentContentType(string contentType)
+    {
+        var isWord = contentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+                     contentType == "application/msword";
+
+        return isWord;
+    }
+    
+    private Result<string> GetNumberedFileName(string fileName, int count)
+    {
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+
+        if (string.IsNullOrWhiteSpace(fileNameWithoutExtension))
+        {
+            return new Result<string>(false);
+        }
+
+        var fileExtension = Path.GetExtension(fileName);
+
+        if (string.IsNullOrWhiteSpace(fileExtension))
+        {
+            return new Result<string>(false);
+        }
+
+        return new Result<string>(true, $"{fileNameWithoutExtension} ({count}){fileExtension}");
+    }
+
+    private async Task<Result<bool>> FileExistsAsync(string filePath)
+    {
+        try
+        {
+            await _dropboxClient.Files.GetMetadataAsync(filePath);
+
+            return new Result<bool>(true);
+        }
+        catch
+        {
+            return new Result<bool>(false);
+        }
+    }
+
+    private async Task<Result<bool>> DeleteFileAsync(string filePath)
     {
         try
         {
@@ -151,24 +238,25 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
         if (!materialResult.IsSuccessful)
         {
-            return new Result<EducationMaterial>(false, $"{nameof(materialResult)} with id {id} does not exist. Message - {materialResult.Message}");
+            return new Result<EducationMaterial>(false,
+                $"{nameof(materialResult)} with id {id} does not exist. Message - {materialResult.Message}");
         }
 
         return new Result<EducationMaterial>(true, materialResult.Data);
     }
 
-    public async Task<Result<bool>> DeleteUploadFileAsync(EducationMaterial material)
+    private async Task<Result<bool>> DeleteUploadFileAsync(EducationMaterial material)
     {
         try
         {
             await _repository.DeleteAsync(material);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            return new Result<bool>(false, "Failed to delete material");
+            return new Result<bool>(false, $"Failed to delete material. Message - {ex.Message}");
         }
     }
 
