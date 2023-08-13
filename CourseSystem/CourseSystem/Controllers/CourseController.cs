@@ -48,8 +48,7 @@ public class CourseController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var coursesResult = await _courseService.GetByPredicate(course =>
-            course.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
+        var coursesResult = await _courseService.GetByPredicate(c => c.UserCourses.Any(uc => uc.AppUser.Id == currentUser.Id)
         );
 
         if (!coursesResult.IsSuccessful)
@@ -97,8 +96,7 @@ public class CourseController : Controller
 
         if (!createResult.IsSuccessful)
         {
-            _logger.LogError("Failed to create course! Error: {errorMessage}",
-                createResult.Message);
+            _logger.LogError("Failed to create course! Error: {errorMessage}", createResult.Message);
             TempData.TempDataMessage("Error", $"{createResult.Message}");
 
             return View(courseViewModel);
@@ -291,13 +289,11 @@ public class CourseController : Controller
             new { courseId = courseId, code = code },
             protocol: HttpContext.Request.Scheme);
 
-        var sendResult =
-            await _emailService.SendToTeacherCourseInvitation(teacherResult.Data, courseResult.Data, callbackUrl);
+        var sendResult = await _emailService.SendToTeacherCourseInvitation(teacherResult.Data, courseResult.Data, callbackUrl);
 
         if (!sendResult.IsSuccessful)
         {
-            _logger.LogError(
-                "Failed to send email with invitation to course {courseId} to teacher {teacherId}! Error: {errorMessage}",
+            _logger.LogError("Failed to send email with invitation to course {courseId} to teacher {teacherId}! Error: {errorMessage}",
                 courseResult.Data.Id, teacherResult.Data.Id, sendResult.Message);
             TempData.TempDataMessage("Error", sendResult.Message);
 

@@ -56,8 +56,7 @@ namespace BLL.Services
 
                 if (assignmentAnswer.UserAssignment.AssignmentAnswers.Count() == 1)
                 {
-                    await _unitOfWork.UserAssignmentsRepository.DeleteEntityByKeys(new object[]
-                        { assignmentAnswer.UserAssignment.AppUserId, assignmentAnswer.UserAssignment.AssignmentId });
+                    await _unitOfWork.UserAssignmentsRepository.DeleteEntityByKeys(new object[] { assignmentAnswer.UserAssignment.AppUserId, assignmentAnswer.UserAssignment.AssignmentId });
                 }
 
                 await _unitOfWork.Save();

@@ -86,8 +86,7 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Index", "Group");
         }
 
-        var addResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile,
-            fullPath.Message, groupResult.Data);
+        var addResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile, fullPath.Message, groupResult.Data);
 
         await _groupService.UpdateGroup(addResult.Data);
 
@@ -146,8 +145,7 @@ public class EducationMaterialController : Controller
 
         if (viewModel.MaterialAccess == MaterialAccess.Group)
         {
-            var addToGroupResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile,
-                fullPath.Message, groupResult.Data);
+            var addToGroupResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile, fullPath.Message, groupResult.Data);
 
             if (!addToGroupResult.IsSuccessful)
             {
@@ -167,8 +165,7 @@ public class EducationMaterialController : Controller
                 return RedirectToAction("Index", "Course");
             }
 
-            var addToCourseResult = await _educationMaterialService.AddToCourse(viewModel.UploadFile,
-                fullPath.Message, courseResult.Data);
+            var addToCourseResult = await _educationMaterialService.AddToCourse(viewModel.UploadFile, fullPath.Message, courseResult.Data);
 
             await _courseService.UpdateCourse(courseResult.Data);
 

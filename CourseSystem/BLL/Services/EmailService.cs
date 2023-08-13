@@ -119,17 +119,14 @@ namespace BLL.Services
                 {
                     if (_emailSettings.UseSSL)
                     {
-                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port,
-                            SecureSocketOptions.SslOnConnect);
+                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.SslOnConnect);
                     }
                     else if (_emailSettings.UseStartTls)
                     {
-                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port,
-                            SecureSocketOptions.StartTls);
+                        await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.StartTls);
                     }
 
-                    await client.AuthenticateAsync(_emailSettings.UserName,
-                        _emailSettings.Password); //ключ доступа от Гугл
+                    await client.AuthenticateAsync(_emailSettings.UserName, _emailSettings.Password); //ключ доступа от Гугл
                     await client.SendAsync(emailMessage);
 
                     await client.DisconnectAsync(true);
@@ -145,8 +142,7 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Result<bool>> SendToTeacherCourseInvitation(AppUser teacher, Course course,
-            string invitationUrl)
+        public async Task<Result<bool>> SendToTeacherCourseInvitation(AppUser teacher, Course course, string invitationUrl)
         {
             if (teacher == null || course == null)
             {
@@ -166,11 +162,13 @@ namespace BLL.Services
                 {
                     var emailContent = GetEmailSubjectAndBody(EmailType.GroupInvitationToStudent, group,
                         studentData.Value, await _userManager.FindByEmailAsync(studentData.Key));
-                    var result = await CreateAndSendEmail(new List<string> { studentData.Key }, emailContent.Item1,
-                        emailContent.Item2);
+                    
+                    var result = await CreateAndSendEmail(new List<string> { studentData.Key }, emailContent.Item1, emailContent.Item2);
 
                     if (!result.IsSuccessful)
+                    {
                         return new Result<bool>(false, result.Message);
+                    }
                 }
 
                 return new Result<bool>(true, "Emails were sent to students");
@@ -181,8 +179,7 @@ namespace BLL.Services
             }
         }
 
-        private async Task<Result<bool>> CreateAndSendEmail(List<string> toEmails, string subject, string body = null,
-            string displayName = null)
+        private async Task<Result<bool>> CreateAndSendEmail(List<string> toEmails, string subject, string body = null, string displayName = null)
         {
             if (toEmails.IsNullOrEmpty())
             {
@@ -208,8 +205,7 @@ namespace BLL.Services
             }
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, string callBackUrl = null,
-            string tempPassword = null)
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
         {
             if (appUser == null)
             {
@@ -217,6 +213,7 @@ namespace BLL.Services
             }
 
             var parameters = new Dictionary<string, object>();
+            
             switch (emailType)
             {
                 case EmailType.AccountApproveByAdmin:
@@ -284,8 +281,7 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null,
-            AppUser appUser = null)
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
         {
             if (group == null)
             {
@@ -293,6 +289,7 @@ namespace BLL.Services
             }
 
             var parameters = new Dictionary<string, object>();
+            
             var groupEmailTypes = new List<EmailType>()
             {
                 EmailType.GroupConfirmationByAdmin,
@@ -314,8 +311,7 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course,
-            string callBackUrl = null)
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course, string callBackUrl = null)
         {
             if (appUser == null || course == null)
             {
@@ -323,6 +319,7 @@ namespace BLL.Services
             }
 
             var parameters = new Dictionary<string, object>();
+            
             switch (emailType)
             {
                 case EmailType.CourseInvitation:
@@ -345,8 +342,7 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser,
-            string callBackUrl = null, string tempPassword = null)
+        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
         {
             if (appUser == null)
             {
@@ -374,8 +370,7 @@ namespace BLL.Services
             return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
         }
 
-        public async Task<Result<bool>> SendEmailGroups(EmailType emailType, Group group, string callBackUrl = null,
-            AppUser appUser = null)
+        public async Task<Result<bool>> SendEmailGroups(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
         {
             if (group == null)
             {

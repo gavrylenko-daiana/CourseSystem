@@ -173,8 +173,7 @@ public class GroupController : Controller
         var userGroupVM = new UserGroupViewModel()
         {
             Group = groupResult.Data,
-            UserGroupsWithoutAdmins =
-                groupResult.Data.UserGroups.Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList(),
+            UserGroupsWithoutAdmins = groupResult.Data.UserGroups.Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList(),
             CurrentUser = currentUserResult.Data
         };
 
@@ -338,8 +337,8 @@ public class GroupController : Controller
                     "Group",
                     new { groupId = groupId, code = code },
                     protocol: HttpContext.Request.Scheme);
+                
                 callBacks.Add(callbackUrl);
-
                 studentsData.Add(studentResult.Data.Email, callbackUrl);
             }
 
@@ -381,8 +380,7 @@ public class GroupController : Controller
             return View("Index");
         }
 
-        var teachersInCourse = courseResult.Data.UserCourses.Where(uc => uc.AppUser.Role == AppUserRoles.Teacher)
-            .Select(uc => uc.AppUser);
+        var teachersInCourse = courseResult.Data.UserCourses.Where(uc => uc.AppUser.Role == AppUserRoles.Teacher).Select(uc => uc.AppUser);
         var teachersNotInGroup = teachersInCourse.Except(groupResult.Data.UserGroups.Select(ug => ug.AppUser));
 
         var teachersViewModels = teachersNotInGroup.Select(teacher => new UserSelectionViewModel
@@ -471,8 +469,8 @@ public class GroupController : Controller
                 "Group",
                 new { groupId = groupId, code = code },
                 protocol: HttpContext.Request.Scheme);
+            
             callBacks.Add(callbackUrl);
-
             studentsData.Add(studentResult.Data.Email, code);
         }
 
@@ -505,8 +503,7 @@ public class GroupController : Controller
 
         if (!result.Succeeded)
         {
-            _logger.LogError(
-                "Failed to confirm email with invitation to group {groupId} for user {userId}! Errors: {errorMessages}",
+            _logger.LogError("Failed to confirm email with invitation to group {groupId} for user {userId}! Errors: {errorMessages}",
                 groupId, currentUserResult.Data.Id, result.Errors);
 
             return View("Error");
@@ -541,7 +538,9 @@ public class GroupController : Controller
         }
 
         var inventationVM = new InventationViewModel()
-            { GroupName = groupResult.Data.Name, UserName = currentUserResult.Data.UserName };
+        {
+            GroupName = groupResult.Data.Name, UserName = currentUserResult.Data.UserName
+        };
 
         return View(inventationVM);
     }
@@ -577,8 +576,7 @@ public class GroupController : Controller
             new { groupId = id, teacherId = currentTeacherResult.Data.Id },
             protocol: HttpContext.Request.Scheme);
 
-        var sendEmailResult =
-            await _emailService.SendEmailGroups(EmailType.GroupConfirmationByAdmin, groupResult.Data, callbackUrl);
+        var sendEmailResult = await _emailService.SendEmailGroups(EmailType.GroupConfirmationByAdmin, groupResult.Data, callbackUrl);
 
         if (!sendEmailResult.IsSuccessful)
         {
@@ -626,8 +624,7 @@ public class GroupController : Controller
             new { groupId = groupId, code = code },
             protocol: HttpContext.Request.Scheme);
 
-        var sendEmailResult = await _emailService.SendEmailGroups(EmailType.ApprovedGroupCreation, groupResult.Data,
-            callbackUrl, teacherResult.Data);
+        var sendEmailResult = await _emailService.SendEmailGroups(EmailType.ApprovedGroupCreation, groupResult.Data, callbackUrl, teacherResult.Data);
 
         if (!sendEmailResult.IsSuccessful)
         {

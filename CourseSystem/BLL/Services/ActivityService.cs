@@ -35,8 +35,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.CreatedAssignment),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedAssignment,
-                    new object[] { assignment.Name, assignment.Group.Name, assignment.StartDate, assignment.EndDate }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedAssignment, new object[] { assignment.Name, assignment.Group.Name, assignment.StartDate, assignment.EndDate }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -59,8 +58,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.CreatedCourse),
-                Description =
-                    ActivityTemplate.GetActivityDescription(ActivityType.CreatedCourse, new object[] { course.Name }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedCourse, new object[] { course.Name }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -83,8 +81,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.CreatedGroup),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedGroup,
-                    new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedGroup, new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -107,8 +104,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.JoinedCourse),
-                Description =
-                    ActivityTemplate.GetActivityDescription(ActivityType.JoinedCourse, new object[] { course.Name }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.JoinedCourse, new object[] { course.Name }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -131,8 +127,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.JoinedGroup),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.JoinedGroup,
-                    new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.JoinedGroup, new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -183,8 +178,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.SubmittedAssignment),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.SubmittedAssignment,
-                    new object[] { assignment.Name }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.SubmittedAssignment, new object[] { assignment.Name }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -207,8 +201,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.AttachedEducationalMaterialForCourse),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForCourse,
-                    new object[] { course.Name }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForCourse, new object[] { course.Name }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -231,8 +224,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.AttachedEducationalMaterialForCourse),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForCourse,
-                    new object[] { group.Name }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForCourse, new object[] { group.Name }),
                 Created = DateTime.Now,
                 AppUser = user,
             };

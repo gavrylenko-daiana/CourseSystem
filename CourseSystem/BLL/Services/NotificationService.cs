@@ -119,8 +119,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid course");
             }
 
-            var notification = await CreateNotification(NotificationType.CreatedCourse,
-                DateTime.Now, user, course.Name);
+            var notification = await CreateNotification(NotificationType.CreatedCourse, DateTime.Now, user, course.Name);
 
             return await SaveNotification(notification);
         }
@@ -155,8 +154,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid group");
             }
 
-            var notification = await CreateNotification(NotificationType.GroupStartedForStudent,
-                group.StartDate, user, group.Name);
+            var notification = await CreateNotification(NotificationType.GroupStartedForStudent, group.StartDate, user, group.Name);
 
             return await SaveNotification(notification);
         }
@@ -173,8 +171,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid group");
             }
 
-            var notification = await CreateNotification(NotificationType.GroupStartedForTeacher,
-                group.StartDate, user, group.Name);
+            var notification = await CreateNotification(NotificationType.GroupStartedForTeacher, group.StartDate, user, group.Name);
 
             return await SaveNotification(notification);
         }
@@ -191,8 +188,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid course");
             }
 
-            var notification = await CreateNotification(NotificationType.JoinedCourse,
-                DateTime.Now, user, course.Name);
+            var notification = await CreateNotification(NotificationType.JoinedCourse, DateTime.Now, user, course.Name);
 
             return await SaveNotification(notification);
         }
@@ -241,9 +237,8 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid userAssignment");
             }
 
-            var notification = await CreateNotification(NotificationType.MarkedAssignmentForTeacher,
-                DateTime.Now, user, userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName,
-                userAssignment.Assignment.Name, userAssignment.Grade);
+            var notification = await CreateNotification(NotificationType.MarkedAssignmentForTeacher, DateTime.Now, user, 
+                userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, userAssignment.Grade);
 
             return await SaveNotification(notification);
         }
@@ -255,8 +250,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid userAssignment");
             }
 
-            var notification = await CreateNotification(NotificationType.SubmittedAssignmentForStudent,
-                DateTime.Now, userAssignment.AppUser, userAssignment.Assignment.Name);
+            var notification = await CreateNotification(NotificationType.SubmittedAssignmentForStudent, DateTime.Now, userAssignment.AppUser, userAssignment.Assignment.Name);
 
             return await SaveNotification(notification);
         }
@@ -274,9 +268,8 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid userAssignment");
             }
 
-            var notification = await CreateNotification(NotificationType.SubmittedAssignmentForTeacher,
-                DateTime.Now, user, userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName,
-                userAssignment.Assignment.Name);
+            var notification = await CreateNotification(NotificationType.SubmittedAssignmentForTeacher, DateTime.Now, user,
+                userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name);
 
             return await SaveNotification(notification);
         }

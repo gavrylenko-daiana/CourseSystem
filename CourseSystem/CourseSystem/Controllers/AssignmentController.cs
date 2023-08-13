@@ -45,8 +45,7 @@ public class AssignmentController : Controller
                 var assignmentVM = new AssignmentViewModel();
                 assignment.MapTo(assignmentVM);
                 
-                assignmentVM.UserAssignment =
-                    assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
+                assignmentVM.UserAssignment = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
                 assignmentsVM.Add(assignmentVM);
             });
         }
@@ -90,7 +89,7 @@ public class AssignmentController : Controller
         }
 
         var assignment = new Assignment();
-        LibraryForMapping.MapTo<CreateAssignmentViewModel, Assignment>(assignmentVM, assignment);
+        LibraryForMapping.MapTo(assignmentVM, assignment);
 
         if (assignmentVM.AttachedFiles != null)
         {
@@ -158,8 +157,7 @@ public class AssignmentController : Controller
         var assignentDetailsVM = new DetailsAssignmentViewModel();
         assignmentResult.Data.MapTo(assignentDetailsVM);
         
-        var userAssignment =
-            assignmentResult.Data.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignmentResult.Data.Id);
+        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignmentResult.Data.Id);
         assignentDetailsVM.UserAssignment = userAssignment;
 
         if (userAssignment?.AssignmentAnswers == null)
@@ -238,7 +236,7 @@ public class AssignmentController : Controller
         }
 
         var assignment = new Assignment();
-        editAssignmentVM.MapTo<EditAssignmentViewModel, Assignment>(assignment);
+        editAssignmentVM.MapTo(assignment);
 
         //AssignmentFiles Part
         //logic for check if the checkbox files was in the assignmnet before

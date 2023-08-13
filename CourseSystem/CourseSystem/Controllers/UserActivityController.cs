@@ -40,8 +40,8 @@ public class UserActivityController : Controller
 
         if (!activitiesResult.IsSuccessful)
         {
-            _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", currentUser.Id,
-                activitiesResult.Message);
+            _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", 
+                currentUser.Id, activitiesResult.Message);
             TempData.TempDataMessage("Error", activitiesResult.Message);
 
             return RedirectToAction("Index", "Home");
@@ -69,8 +69,8 @@ public class UserActivityController : Controller
 
         if (!activitiesResult.IsSuccessful)
         {
-            _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", currentUser.Id,
-                activitiesResult.Message);
+            _logger.LogError("Activities fail for user {userId}! Error: {errorMessage}", 
+                currentUser.Id, activitiesResult.Message);
             TempData.TempDataMessage("Error", activitiesResult.Message);
 
             return RedirectToAction("Index", "Home");
@@ -88,8 +88,8 @@ public class UserActivityController : Controller
 
         if (!activityResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get notification by Id {activityId}! Error: {errorMessage}", id,
-                activityResult.Message);
+            _logger.LogError("Failed to get notification by Id {activityId}! Error: {errorMessage}", 
+                id, activityResult.Message);
             TempData.TempDataMessage("Error", $"{activityResult.Message}");
 
             return RedirectToAction("Index", "Home");

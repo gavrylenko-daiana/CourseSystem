@@ -132,8 +132,7 @@ public class UserController : Controller
             return View("EditPassword", editUserPasswordViewModel);
         }
 
-        var resultCheckPassword = await _userService.CheckPasswordAsync(User, editUserPasswordViewModel.CurrentPassword,
-            editUserPasswordViewModel.NewPassword);
+        var resultCheckPassword = await _userService.CheckPasswordAsync(User, editUserPasswordViewModel.CurrentPassword, editUserPasswordViewModel.NewPassword);
 
         if (resultCheckPassword.IsSuccessful)
         {
@@ -182,8 +181,7 @@ public class UserController : Controller
                 new { userId = user.Id },
                 protocol: HttpContext.Request.Scheme);
 
-            var deletionSendingResult =
-                await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByAdmin, user, callbackUrl);
+            var deletionSendingResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByAdmin, user, callbackUrl);
 
             if (!deletionSendingResult.IsSuccessful)
             {

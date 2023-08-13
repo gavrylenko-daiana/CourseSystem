@@ -78,8 +78,7 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,
-                $"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
         }
     }
 
@@ -99,8 +98,7 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,
-                $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
         }
     }
 }

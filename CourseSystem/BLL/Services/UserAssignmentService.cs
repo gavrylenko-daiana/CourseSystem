@@ -43,14 +43,12 @@ namespace BLL.Services
         {
             if (assignment == null || appUser == null)
             {
-                return new Result<UserAssignments>(false,
-                    $"Invalid input {nameof(assignment)} and {nameof(appUser)} data");
+                return new Result<UserAssignments>(false, $"Invalid input {nameof(assignment)} and {nameof(appUser)} data");
             }
 
             try
             {
-                var checkUserAssignment =
-                    await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
+                var checkUserAssignment = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
 
                 if (checkUserAssignment.Any())
                 {

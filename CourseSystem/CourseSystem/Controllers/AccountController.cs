@@ -115,20 +115,19 @@ public class AccountController : Controller
             if (!await _userManager.IsEmailConfirmedAsync(user))
             {
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var callbackUrl =
-                    CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
+                var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
 
                 if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
                 {
                     await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
-                    TempData.TempDataMessage("Error",
-                        "Your ADMIN account is not verified, we sent email for confirmation again");
+                    
+                    TempData.TempDataMessage("Error", "Your ADMIN account is not verified, we sent email for confirmation again");
                 }
                 else
                 {
                     await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
-                    TempData.TempDataMessage("Error",
-                        "Admin hasn't verified your email yet, we sent email for confirmation again");
+                    
+                    TempData.TempDataMessage("Error", "Admin hasn't verified your email yet, we sent email for confirmation again");
                 }
 
                 return View(loginViewModel);
@@ -203,8 +202,7 @@ public class AccountController : Controller
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            var callbackUrl =
-                CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
+            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
 
             if (registerViewModel.Role != AppUserRoles.Admin)
             {
@@ -216,17 +214,14 @@ public class AccountController : Controller
             }
             else
             {
-                var emailSentResult =
-                    await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, newUser,
-                        callbackUrl);
+                var emailSentResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, newUser, callbackUrl);
 
                 if (!emailSentResult.IsSuccessful)
                 {
                     TempData.TempDataMessage("Error", emailSentResult.Message);
                 }
 
-                TempData.TempDataMessage("Error",
-                    "To complete your ADMIN registration, check your email and follow the link provided in the email");
+                TempData.TempDataMessage("Error", "To complete your ADMIN registration, check your email and follow the link provided in the email");
 
                 return View(registerViewModel);
             }
@@ -312,8 +307,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> ForgotPassword(
-        ForgotViewModel forgotPasswordBeforeEnteringViewModel)
+    public async Task<IActionResult> ForgotPassword(ForgotViewModel forgotPasswordBeforeEnteringViewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -339,8 +333,7 @@ public class AccountController : Controller
             return View(forgotPasswordBeforeEnteringViewModel);
         }
 
-        return RedirectToAction("CheckEmailCode",
-            new { code = emailCodeResult.Data, email = forgotPasswordBeforeEnteringViewModel.Email });
+        return RedirectToAction("CheckEmailCode", new { code = emailCodeResult.Data, email = forgotPasswordBeforeEnteringViewModel.Email });
     }
 
     [Authorize]
@@ -363,8 +356,7 @@ public class AccountController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        return RedirectToAction("CheckEmailCode",
-            new { code = emailCodeResult.Data, email = userResult.Data.Email, forgotEntity });
+        return RedirectToAction("CheckEmailCode", new { code = emailCodeResult.Data, email = userResult.Data.Email, forgotEntity });
     }
 
     [HttpGet]
@@ -382,8 +374,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> CheckEmailCode(int code,
-        ForgotViewModel forgotViewModel)
+    public async Task<IActionResult> CheckEmailCode(int code, ForgotViewModel forgotViewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -430,8 +421,7 @@ public class AccountController : Controller
             return View(newPasswordViewModel);
         }
 
-        var result =
-            await _userService.UpdatePasswordAsync(newPasswordViewModel.Email, newPasswordViewModel.NewPassword);
+        var result = await _userService.UpdatePasswordAsync(newPasswordViewModel.Email, newPasswordViewModel.NewPassword);
 
         if (!result.IsSuccessful)
         {
@@ -478,6 +468,7 @@ public class AccountController : Controller
         if (!sendResult.IsSuccessful)
         {
             await _userManager.DeleteAsync(newAdmin);
+            
             TempData.TempDataMessage("Error", $"{sendResult.Message}");
 
             return View(registerAdminViewModel);
@@ -525,9 +516,8 @@ public class AccountController : Controller
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(currentUserResult.Data);
 
-        var callbackUrl =
-            CreateCallBackUrl(code, "Account", "ConfirmedResetEmail",
-                new
+        var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmedResetEmail", 
+            new
                 {
                     userId = currentUserResult.Data.Id, code = code, currentEmail = newEmailViewModel.Email,
                     newEmail = newEmailViewModel.NewEmail

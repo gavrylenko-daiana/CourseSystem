@@ -16,8 +16,7 @@ namespace Core.Helpers
                 return new Result<List<Notification>>(false, nameof(list));
             }
 
-            var notification = list.OrderByDescending(a => a.Created)
-                .ToList();
+            var notification = list.OrderByDescending(a => a.Created).ToList();
 
             return new Result<List<Notification>>(true, notification);
         }

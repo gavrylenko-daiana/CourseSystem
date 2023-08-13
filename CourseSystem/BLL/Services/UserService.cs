@@ -13,8 +13,8 @@ public class UserService : GenericService<AppUser>, IUserService
 {
     private readonly UserManager<AppUser> _userManager;
 
-    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) : base(unitOfWork,
-        unitOfWork.UserRepository)
+    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) 
+        : base(unitOfWork, unitOfWork.UserRepository)
     {
         _userManager = userManager;
     }
@@ -118,8 +118,7 @@ public class UserService : GenericService<AppUser>, IUserService
 
             if (checkPassword)
             {
-                user.PasswordHash =
-                    _userManager.PasswordHasher.HashPassword(user, newPassword);
+                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, newPassword);
                 
                 await _userManager.UpdateAsync(user);
 

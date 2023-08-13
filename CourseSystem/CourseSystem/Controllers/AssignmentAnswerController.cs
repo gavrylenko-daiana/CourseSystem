@@ -230,8 +230,7 @@ public class AssignmentAnswerController : Controller
                 assignmentId, studentId, grade);
             TempData.TempDataMessage("Error", "Grade can't be more than 100 or less than 0");
 
-            return RedirectToAction("CheckAnswer", "AssignmentAnswer",
-                new { assignmentId = assignmentId, studentId = studentId });
+            return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = assignmentId, studentId = studentId });
         }
 
         var assignmentResult = await _assignmentService.GetById(assignmentId);
@@ -259,16 +258,13 @@ public class AssignmentAnswerController : Controller
 
         if (!updateResult.IsSuccessful)
         {
-            _logger.LogError(
-                "Failed to update grade to {grade} for userAssignment by Id {userAssignmentId}! Error: {errorMessage}",
+            _logger.LogError("Failed to update grade to {grade} for userAssignment by Id {userAssignmentId}! Error: {errorMessage}",
                 grade, userAssignment.Id, updateResult.Message);
             TempData.TempDataMessage("Error", updateResult.Message);
 
-            return RedirectToAction("CheckAnswer", "AssignmentAnswer",
-                new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
+            return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
         }
 
-        return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer",
-            new { assignmentId = userAssignment.AssignmentId });
+        return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId });
     }
 }
