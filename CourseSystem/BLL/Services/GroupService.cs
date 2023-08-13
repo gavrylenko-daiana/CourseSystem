@@ -10,15 +10,13 @@ namespace BLL.Services;
 public class GroupService : GenericService<Group>, IGroupService
 {
     private readonly IUserGroupService _userGroupService;
-    private readonly UserManager<AppUser> _userManager;
     private readonly IEducationMaterialService _educationMaterial;
-    
+
     public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService,
-        UserManager<AppUser> userManager, IEducationMaterialService educationMaterial) 
-            : base(unitOfWork, unitOfWork.GroupRepository)
+        IEducationMaterialService educationMaterial)
+        : base(unitOfWork, unitOfWork.GroupRepository)
     {
         _userGroupService = userGroupService;
-        _userManager = userManager;
         _educationMaterial = educationMaterial;
     }
 
@@ -28,24 +26,24 @@ public class GroupService : GenericService<Group>, IGroupService
         {
             return new Result<bool>(false, $"{nameof(group)} not found");
         }
-        
+
         if (currentUser == null)
         {
             return new Result<bool>(false, $"{nameof(currentUser)} not found");
         }
-        
+
         if (group.StartDate > group.EndDate)
         {
             return new Result<bool>(false, $"Start date must be less than end date");
         }
-        
+
         try
         {
             await _repository.AddAsync(group);
             await _unitOfWork.Save();
 
             var addAdminsResult = await AddAllAdminsAtGroup(group);
-            
+
             if (!addAdminsResult.IsSuccessful)
             {
                 return new Result<bool>(false, $"{addAdminsResult.Message}");
@@ -58,7 +56,7 @@ public class GroupService : GenericService<Group>, IGroupService
                     Group = group,
                     AppUser = currentUser
                 };
-            
+
                 var createUserGroupResult = await CreateUserGroup(userGroup);
 
                 if (!createUserGroupResult.IsSuccessful)
@@ -71,19 +69,19 @@ public class GroupService : GenericService<Group>, IGroupService
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,$"Failed to create group {group.Name}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to create group {group.Name}. Exception: {ex.Message}");
         }
     }
 
     public async Task<Result<bool>> DeleteGroup(int groupId)
     {
         var group = await _repository.GetByIdAsync(groupId);
-        
+
         if (group == null)
         {
             return new Result<bool>(false, $"Group by id {groupId} not found");
         }
-        
+
         try
         {
             if (group.EducationMaterials.Any())
@@ -95,7 +93,7 @@ public class GroupService : GenericService<Group>, IGroupService
                     await _educationMaterial.DeleteFileFromGroup(material);
                 }
             }
-            
+
             await _repository.DeleteAsync(group);
             await _unitOfWork.Save();
 
@@ -103,7 +101,7 @@ public class GroupService : GenericService<Group>, IGroupService
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,$"Failed to delete group by id {groupId}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to delete group by id {groupId}. Exception: {ex.Message}");
         }
     }
 
@@ -113,34 +111,34 @@ public class GroupService : GenericService<Group>, IGroupService
         {
             return new Result<bool>(false, $"{nameof(newGroup)} not found");
         }
-        
+
         if (newGroup.StartDate > newGroup.EndDate)
         {
             return new Result<bool>(false, $"Start date must be less than end date");
         }
-        
+
         try
         {
             var group = await _repository.GetByIdAsync(newGroup.Id);
             group.Name = newGroup.Name;
             group.StartDate = newGroup.StartDate;
             group.EndDate = newGroup.EndDate;
-            
+
             await _repository.UpdateAsync(group);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,$"Failed to update group {newGroup.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false, $"Failed to update group {newGroup.Id}. Exception: {ex.Message}");
         }
     }
-    
+
     public async Task<double> CalculateGroupProgress(int groupId)
     {
         var group = await _repository.GetByIdAsync(groupId);
-        
+
         if (group == null || group.Assignments == null || group.Assignments.Count == 0)
         {
             return 0.0;
@@ -148,11 +146,11 @@ public class GroupService : GenericService<Group>, IGroupService
 
         var totalAssignments = group.Assignments.Count;
         var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
-
         var groupProgress = (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+        
         return groupProgress;
     }
-    
+
     public async Task<Result<List<Group>>> GetAllGroupsAsync()
     {
         var groups = await _repository.GetAllAsync();
@@ -191,7 +189,7 @@ public class GroupService : GenericService<Group>, IGroupService
 
         return new Result<bool>(true);
     }
-    
+
     private async Task<Result<bool>> CreateUserGroup(UserGroups userGroups)
     {
         var createUserGroupResult = await _userGroupService.CreateUserGroups(userGroups);
@@ -200,10 +198,10 @@ public class GroupService : GenericService<Group>, IGroupService
         {
             await _repository.DeleteAsync(userGroups.Group);
             await _unitOfWork.Save();
-                
+
             return new Result<bool>(false, $"{createUserGroupResult.Message}");
         }
-        
+
         return new Result<bool>(true);
     }
 }

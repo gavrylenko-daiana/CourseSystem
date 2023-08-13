@@ -8,7 +8,7 @@ namespace Core.Enums
 {
     public enum AssignmentAccess
     {
-        Planned,
+        Planned = 0,
         InProgress,
         AwaitingApproval,
         Completed

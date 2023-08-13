@@ -41,7 +41,7 @@ public class GroupController : Controller
         _userService = userService;
         _logger = logger;
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -50,27 +50,29 @@ public class GroupController : Controller
         if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
         var groupsResult = await _groupService.GetByPredicate(g =>
             g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUserResult.Data.Id)));
-        
+
         if (!groupsResult.IsSuccessful)
         {
             _logger.LogError("Groups fail for user {userId}! Error: {errorMessage}",
                 currentUserResult.Data.Id, groupsResult.Message);
-
             TempData.TempDataMessage("Error", $"{groupsResult.Message}");
+
             return View("Index");
         }
-        
+
         var groupViewModels = groupsResult.Data.Select(group =>
         {
             var groupViewModel = new GroupViewModel();
             group.MapTo(groupViewModel);
-            groupViewModel.Progress = _groupService.CalculateGroupProgress(group.Id).Result;
             
+            groupViewModel.Progress = _groupService.CalculateGroupProgress(group.Id).Result;
+
             return groupViewModel;
         }).ToList();
 
@@ -79,7 +81,7 @@ public class GroupController : Controller
             Groups = groupViewModels,
             CurrentUser = currentUserResult.Data,
         };
-        
+
         return View(userGroupsViewModel);
     }
 
@@ -101,7 +103,7 @@ public class GroupController : Controller
 
         return View(groupViewModel);
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Create(GroupViewModel groupViewModel)
     {
@@ -109,7 +111,9 @@ public class GroupController : Controller
         
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Course Id wasn't given");
             TempData.TempDataMessage("Error", $"{courseResult.Message}");
+
             return View("Index");
         }
 
@@ -118,11 +122,13 @@ public class GroupController : Controller
         if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
         var group = new Group();
         groupViewModel.MapTo(group);
+        
         group.Course = courseResult.Data;
         group.CourseId = groupViewModel.CourseId;
 
@@ -132,11 +138,11 @@ public class GroupController : Controller
         {
             _logger.LogError("Group creation fail for user {userId}! Error: {errorMessage}",
                 currentUserResult.Data.Id, createResult.Message);
-            
             TempData.TempDataMessage("Error", $"{createResult.Message}");
+
             return View(groupViewModel);
         }
-        
+
         return RedirectToAction("Details", "Group", new { id = group.Id });
     }
 
@@ -144,13 +150,13 @@ public class GroupController : Controller
     public async Task<IActionResult> Details(int id)
     {
         var groupResult = await _groupService.GetById(id);
-        
+
         if (!groupResult.IsSuccessful)
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
         
@@ -159,6 +165,7 @@ public class GroupController : Controller
         if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -176,13 +183,13 @@ public class GroupController : Controller
     public async Task<IActionResult> Edit(int id)
     {
         var groupResult = await _groupService.GetById(id);
-        
+
         if (!groupResult.IsSuccessful)
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
 
@@ -197,18 +204,18 @@ public class GroupController : Controller
     {
         var newGroup = new Group();
         newGroupViewModel.MapTo(newGroup);
-        
+
         var updateResult = await _groupService.UpdateGroup(newGroup);
-        
+
         if (!updateResult.IsSuccessful)
         {
             _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}",
                 newGroupViewModel.Id, updateResult.Message);
-
             TempData.TempDataMessage("Error", $"{updateResult.Message}");
+
             return View(newGroupViewModel);
         }
-        
+
         return RedirectToAction("Details", new { id = newGroup.Id });
     }
 
@@ -216,13 +223,13 @@ public class GroupController : Controller
     public async Task<IActionResult> Delete(int id)
     {
         var groupResult = await _groupService.GetById(id);
-        
+
         if (!groupResult.IsSuccessful)
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
 
@@ -234,16 +241,16 @@ public class GroupController : Controller
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var deleteResult = await _groupService.DeleteGroup(id);
-        
+
         if (!deleteResult.IsSuccessful)
         {
             _logger.LogError("Failed to delete group by Id {groupId}! Error: {errorMessage}",
                 id, deleteResult.Message);
-
             TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+
             return View("Delete");
         }
-        
+
         return RedirectToAction("Index");
     }
 
@@ -256,13 +263,14 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
 
         var students = await _userManager.GetUsersInRoleAsync("Student");
         var studentsInGroupIds = groupResult.Data.UserGroups.Select(ug => ug.AppUserId);
+        
         var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
             .Select(u => new UserSelectionViewModel
             {
@@ -284,21 +292,21 @@ public class GroupController : Controller
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
         var groupResult = await _groupService.GetById(groupId);
-        
+
         if (!groupResult.IsSuccessful)
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
 
         if (selectedStudents.Count > 20)
         {
             _logger.LogInformation("More than 20 students added to group {groupId}!", groupId);
-
             TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation");
+
             return View("GetApprove", groupId);
         }
         else
@@ -306,8 +314,8 @@ public class GroupController : Controller
             var studentIds = selectedStudents.Select(s => s.Id).ToList();
             var studentsData = new Dictionary<string, string>();
             var callBacks = new List<string>();
-            
-            foreach (var studentId in studentIds) 
+
+            foreach (var studentId in studentIds)
             {
                 var studentResult = await _userService.FindByIdAsync(studentId);
 
@@ -321,13 +329,14 @@ public class GroupController : Controller
                 }
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(studentResult.Data);
+                
                 var callbackUrl = Url.Action(
                     "InvitationToGroup",
-                "Group",
-                new { groupId = groupId, code = code },
-                protocol: HttpContext.Request.Scheme);
+                    "Group",
+                    new { groupId = groupId, code = code },
+                    protocol: HttpContext.Request.Scheme);
+                
                 callBacks.Add(callbackUrl);
-
                 studentsData.Add(studentResult.Data.Email, callbackUrl);
             }
 
@@ -337,41 +346,41 @@ public class GroupController : Controller
             {
                 _logger.LogError("Failed to send emails with invitation to group {groupId}! Error: {errorMessage}",
                     groupResult.Data.Id, result.Message);
-
                 TempData.TempDataMessage("Error", result.Message);
             }
         }
 
         return RedirectToAction("Index");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> SelectTeachers(int courseId, int groupId)
     {
         var courseResult = await _courseService.GetById(courseId);
-        var groupResult = await _groupService.GetById(groupId);
-        
-        if (!groupResult.IsSuccessful)
-        {
-            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
-                groupId, groupResult.Message);
 
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-            return View("Index");
-        }
-        
         if (!courseResult.IsSuccessful)
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
+            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
 
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
             return View("Index");
         }
-        
+
+        var groupResult = await _groupService.GetById(groupId);
+
+        if (!groupResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                groupId, groupResult.Message);
+            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
+            return View("Index");
+        }
+
         var teachersInCourse = courseResult.Data.UserCourses.Where(uc => uc.AppUser.Role == AppUserRoles.Teacher).Select(uc => uc.AppUser);
         var teachersNotInGroup = teachersInCourse.Except(groupResult.Data.UserGroups.Select(ug => ug.AppUser));
-        
+
         var teachersViewModels = teachersNotInGroup.Select(teacher => new UserSelectionViewModel
         {
             Id = teacher.Id,
@@ -389,17 +398,16 @@ public class GroupController : Controller
     public async Task<IActionResult> ConfirmTeachersSelection(int groupId, List<UserSelectionViewModel> teachers)
     {
         var selectedTeachersVM = teachers.Where(s => s.IsSelected).ToList();
-        var selectedTeachersTasks = selectedTeachersVM.Select(s => s.Id).
-            Select(id => _userManager.FindByIdAsync(id));
+        var selectedTeachersTasks = selectedTeachersVM.Select(s => s.Id).Select(id => _userManager.FindByIdAsync(id));
         var selectedTeachers = (await Task.WhenAll(selectedTeachersTasks)).ToList();
         var groupResult = await _groupService.GetById(groupId);
-        
+
         if (!groupResult.IsSuccessful)
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
 
@@ -419,26 +427,26 @@ public class GroupController : Controller
 
         return RedirectToAction("Details", new { id = groupId });
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> ApprovedSelection(int groupId, List<UserSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
         var groupResult = await _groupService.GetById(groupId);
-        
+
         if (!groupResult.IsSuccessful)
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
 
         var studentIds = selectedStudents.Select(s => s.Id).ToList();
         var studentsData = new Dictionary<string, string>();
         var callBacks = new List<string>();
-        
+
         foreach (var studentId in studentIds)
         {
             var studentResult = await _userService.FindByIdAsync(studentId);
@@ -453,13 +461,14 @@ public class GroupController : Controller
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(studentResult.Data);
+            
             var callbackUrl = Url.Action(
                 "InvitationToGroup",
-            "Group",
-            new { groupId = groupId, code = code },
-            protocol: HttpContext.Request.Scheme);
+                "Group",
+                new { groupId = groupId, code = code },
+                protocol: HttpContext.Request.Scheme);
+            
             callBacks.Add(callbackUrl);
-
             studentsData.Add(studentResult.Data.Email, code);
         }
 
@@ -469,7 +478,6 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to send emails with invitation to group {groupId}! Error: {errorMessage}",
                 groupResult.Data.Id, result.Message);
-
             TempData.TempDataMessage("Error", result.Message);
         }
 
@@ -485,6 +493,7 @@ public class GroupController : Controller
         if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -504,8 +513,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
 
@@ -516,20 +525,22 @@ public class GroupController : Controller
         };
 
         var addStudentToGroupAndCourseResult = await _userCourseService.AddStudentToGroupAndCourse(userGroup);
-            
+
         if (!addStudentToGroupAndCourseResult.IsSuccessful)
         {
             _logger.LogError("Failed to add student {studentId} to group {groupId}! Error: {errorMessage}",
                 userGroup.AppUserId, userGroup.AppUserId, addStudentToGroupAndCourseResult.Message);
-
             TempData.TempDataMessage("Error", addStudentToGroupAndCourseResult.Message);
+
             return RedirectToAction("Index", "Home");
         }
 
-        var inventationVM = new InventationViewModel() { GroupName = groupResult.Data.Name, UserName = currentUserResult.Data.UserName};
+        var inventationVM = new InventationViewModel()
+        {
+            GroupName = groupResult.Data.Name, UserName = currentUserResult.Data.UserName
+        };
 
         return View(inventationVM);
-
     }
 
     [HttpGet]
@@ -543,8 +554,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
 
@@ -553,10 +564,11 @@ public class GroupController : Controller
         if (!currentTeacherResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
-            
-        var callbackUrl = Url.Action( 
+
+        var callbackUrl = Url.Action(
             "AdminApprove",
             "Group",
             new { groupId = id, teacherId = currentTeacherResult.Data.Id },
@@ -568,8 +580,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to send emails with confirmation of group {groupId}! Error: {errorMessage}",
                 groupResult.Data.Id, sendEmailResult.Message);
-
             TempData.TempDataMessage("Error", sendEmailResult.Message);
+
             return RedirectToAction("Index", "Home");
         }
 
@@ -583,29 +595,32 @@ public class GroupController : Controller
     public async Task<IActionResult> AdminApprove(int groupId, string teacherId)
     {
         var groupResult = await _groupService.GetById(groupId);
-        var teacherResult = await _userService.FindByIdAsync(teacherId);
-        
+
         if (!groupResult.IsSuccessful)
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
         }
-        
+
+        var teacherResult = await _userService.FindByIdAsync(teacherId);
+
         if (!teacherResult.IsSuccessful)
         {
             _logger.LogError("Failed to get user by Id {userId}!", teacherId);
+
             return View("Error");
         }
-            
+
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacherResult.Data);
-        var callbackUrl = Url.Action( 
-           "ApprovedGroup",
-           "Group",
-           new { groupId = groupId, code = code},
-           protocol: HttpContext.Request.Scheme);
+        
+        var callbackUrl = Url.Action(
+            "ApprovedGroup",
+            "Group",
+            new { groupId = groupId, code = code },
+            protocol: HttpContext.Request.Scheme);
 
         var sendEmailResult = await _emailService.SendEmailGroups(EmailType.ApprovedGroupCreation, groupResult.Data, callbackUrl, teacherResult.Data);
 
@@ -628,9 +643,10 @@ public class GroupController : Controller
         if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
-           
+
         var result = await _userManager.ConfirmEmailAsync(currentUserResult.Data, code);
 
         if (!result.Succeeded)
@@ -640,19 +656,18 @@ public class GroupController : Controller
 
             return View("Error");
         }
-            
+
         var groupResult = await _groupService.GetById(groupId);
 
         if (!groupResult.IsSuccessful)
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-
             ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+
             return View("Index");
-        }         
+        }
 
         return RedirectToAction("SelectStudent", "Group", new { id = groupId, approved = true });
     }
-
 }
