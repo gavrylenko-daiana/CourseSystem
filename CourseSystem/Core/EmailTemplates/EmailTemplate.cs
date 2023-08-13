@@ -87,6 +87,7 @@ namespace Core.EmailTemplates
         private static Dictionary<string, string> FillParameters(Dictionary<string, object> placeholderNameSandValues)
         {
             var parameters = new Dictionary<string, string>();
+            
             foreach (var parameter in placeholderNameSandValues)
             {
                 var parameterName = parameter.Key;

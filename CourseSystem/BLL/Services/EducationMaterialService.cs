@@ -17,8 +17,8 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 {
     private readonly DropboxClient _dropboxClient;
 
-    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config) : base(unitOfWork,
-        unitOfWork.EducationMaterialRepository)
+    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config) 
+        : base(unitOfWork, unitOfWork.EducationMaterialRepository)
     {
         _dropboxClient = new DropboxClient(config.Value.AccessToken);
     }
@@ -28,11 +28,8 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         try
         {
             using var stream = file.OpenReadStream();
-            var uploadResult =
-                await _dropboxClient.Files.UploadAsync("/" + file.FileName, WriteMode.Overwrite.Instance, body: stream);
-
+            var uploadResult = await _dropboxClient.Files.UploadAsync("/" + file.FileName, WriteMode.Overwrite.Instance, body: stream);
             var sharedLink = await _dropboxClient.Sharing.CreateSharedLinkWithSettingsAsync(uploadResult.PathDisplay);
-
             string link = sharedLink.Url;
 
             if (file.ContentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
@@ -163,7 +160,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         {
             await _repository.DeleteAsync(material);
             await _unitOfWork.Save();
-            
+
             return new Result<bool>(true);
         }
         catch (Exception e)

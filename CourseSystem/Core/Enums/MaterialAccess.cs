@@ -8,7 +8,7 @@ namespace Core.Enums
 {
     public enum MaterialAccess
     {
-        General,
+        General = 0,
         Course,
         Group
     }

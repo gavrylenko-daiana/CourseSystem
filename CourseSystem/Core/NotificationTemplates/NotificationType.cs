@@ -8,7 +8,7 @@ namespace Core.NotificationTemplates
 {
     public enum NotificationType
     {
-        CreatedCourse,
+        CreatedCourse = 0,
         JoinedCourse,
         CreatedGroup,
         JoinedGroup,

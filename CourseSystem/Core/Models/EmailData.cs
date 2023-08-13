@@ -12,6 +12,7 @@ namespace Core.Models
         public string? DisplayName { get; }
         public string Subject { get; }
         public string? Body { get; }
+
         public EmailData(List<string> to, string subject, string? body = null, string? displayName = null)
         {
             // Receiver
