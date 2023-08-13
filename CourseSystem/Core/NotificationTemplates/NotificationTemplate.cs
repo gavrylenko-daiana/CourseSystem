@@ -76,6 +76,7 @@ namespace Core.NotificationTemplates
         public static string GetNotificationDescription(NotificationType notificationType, params object[] obs)
         {
             var result = string.Format(_descriptionDictionary[notificationType], obs);
+            
             return result;
         }
     }

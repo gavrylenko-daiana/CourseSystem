@@ -70,6 +70,7 @@ public class GroupController : Controller
         {
             var groupViewModel = new GroupViewModel();
             group.MapTo(groupViewModel);
+            
             groupViewModel.Progress = _groupService.CalculateGroupProgress(group.Id).Result;
 
             return groupViewModel;
@@ -125,6 +126,7 @@ public class GroupController : Controller
 
         var group = new Group();
         groupViewModel.MapTo(group);
+        
         group.Course = courseResult.Data;
         group.CourseId = courseResult.Data.Id;
 
@@ -271,6 +273,7 @@ public class GroupController : Controller
 
         var students = await _userManager.GetUsersInRoleAsync("Student");
         var studentsInGroupIds = groupResult.Data.UserGroups.Select(ug => ug.AppUserId);
+        
         var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
             .Select(u => new UserSelectionViewModel
             {
@@ -329,6 +332,7 @@ public class GroupController : Controller
                 }
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(studentResult.Data);
+                
                 var callbackUrl = Url.Action(
                     "InvitationToGroup",
                     "Group",
@@ -461,6 +465,7 @@ public class GroupController : Controller
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(studentResult.Data);
+            
             var callbackUrl = Url.Action(
                 "InvitationToGroup",
                 "Group",
@@ -614,6 +619,7 @@ public class GroupController : Controller
         }
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacherResult.Data);
+        
         var callbackUrl = Url.Action(
             "ApprovedGroup",
             "Group",

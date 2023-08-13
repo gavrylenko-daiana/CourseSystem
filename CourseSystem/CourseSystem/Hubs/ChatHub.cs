@@ -10,12 +10,15 @@ namespace UI.Hubs
         private readonly IChatMessageService _chatMessageService;
         private readonly IAssignmentService _assignmentService;
         private readonly UserManager<AppUser> _userManager;
-        public ChatHub(IChatMessageService chatMessageService, UserManager<AppUser> userManager, IAssignmentService assignmentService)
+
+        public ChatHub(IChatMessageService chatMessageService, UserManager<AppUser> userManager,
+            IAssignmentService assignmentService)
         {
             _chatMessageService = chatMessageService;
             _userManager = userManager;
             _assignmentService = assignmentService;
         }
+
         public async Task Send(string text, string assignmentId)
         {
             if (String.IsNullOrWhiteSpace(text))
@@ -50,7 +53,8 @@ namespace UI.Hubs
             }
             else
             {
-                await Clients.Group(message.Data.AssignmentId.ToString()).SendAsync("Receive", message.Data.Text, $"{user.FirstName} {user.LastName}", message.Data.Created.ToString("g"));
+                await Clients.Group(message.Data.AssignmentId.ToString()).SendAsync("Receive", message.Data.Text,
+                    $"{user.FirstName} {user.LastName}", message.Data.Created.ToString("g"));
             }
         }
 
@@ -65,7 +69,7 @@ namespace UI.Hubs
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, assignmentId);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"User was not added to chat! Exception:{ex.Message}");
             }
