@@ -60,10 +60,10 @@
             <i class="dropdown icon"></i>
             <div class="menu">
                 <div class="item">
-                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId})">Marked</a>
+                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, isMarked = "IsMarked"})">Marked</a>
                 </div>
                 <div class="item">
-                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId})">Not Marked</a>
+                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, isMarked = "NotMarked"})">Not Marked</a>
                 </div>
             </div>
         </div>
