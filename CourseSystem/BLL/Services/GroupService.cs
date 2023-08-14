@@ -166,8 +166,11 @@ public class GroupService : GenericService<Group>, IGroupService
         }
 
         var totalAssignments = group.Assignments.Count;
+        var allStudents = (group.UserGroups.Where(ug => ug.AppUser.Role == AppUserRoles.Student)).Count();
+
         var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
-        var groupProgress = (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+        var groupProgress = (double)completedAssignments / (totalAssignments * allStudents) * 100;
+        
         var strGroupProgress = $"{groupProgress:0.##}";
         
         return strGroupProgress;
