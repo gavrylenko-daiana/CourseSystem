@@ -66,13 +66,25 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId, SortingParam sortOrder)
+        public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId, SortingParam sortOrder, string assignmentAccessFilter = null, string searchQuery = null)
         {
             Result<List<Assignment>> assignmentResult = null;
 
             var query = GetOrderByExpression(sortOrder);
 
-            assignmentResult = await GetByPredicate(a => a.GroupId == groupId, query.Data);
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                assignmentResult = await GetByPredicate(a => a.GroupId == groupId && a.Name.Contains(searchQuery), query.Data);
+            }
+            else if(assignmentAccessFilter != null)
+            {
+                var tempFilter = Enum.Parse(typeof(AssignmentAccess), assignmentAccessFilter);
+                assignmentResult = await GetByPredicate(a => a.GroupId == groupId && a.AssignmentAccess.Equals(tempFilter), query.Data);
+            }
+            else
+            {
+                assignmentResult = await GetByPredicate(a => a.GroupId == groupId, query.Data);
+            }
 
             if (!assignmentResult.IsSuccessful)
             {

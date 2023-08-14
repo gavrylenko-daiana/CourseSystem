@@ -27,7 +27,22 @@
     <!-- Add Font Awesome CSS -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-    
+    <style>
+        .rounded-left {
+            border-top-left-radius: 0.3rem;
+            border-bottom-left-radius: 0.3rem;
+        }
+
+        .margin-right {
+            margin-right: 10px; /* Adjust margin as needed */
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -46,64 +61,79 @@
             }
         </div>
     </div>
-    <div class="ui compact menu">
-        <div class="ui simple dropdown item">
-            Sort by
-            <i class="dropdown icon"></i>
-            <div class="menu">
-                <div class="item">
-                    @if (ViewBag.StartDateParam == SortingParam.StratDate)
-                    {
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
-                    }
-                </div>
-                <div class="item">
-                    @if (ViewBag.EndDateParam == SortingParam.EndDate)
-                    {
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
-                    }
-                </div>
-                <div class="item">
-                    @if (ViewBag.NameSortParam == SortingParam.Name)
-                    {
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="ui compact menu">
-        <div class="ui simple dropdown item">
-            Filter by status
-            <i class="dropdown icon"></i>
-            <div class="menu">
-                @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
-                {
-                    <div class="item">Planned</div>
-                }                
-                <div class="item">In progress</div>
-                <div class="item">Completed</div>
-            </div>
-        </div>
-    </div>
-    <div class="ui icon input">
-        <input type="text" placeholder="Search...">
-        <i class="inverted circular search link icon"></i>
-    </div>
     
+    <div style="display: flex; align-items: center;">
+        <div class="ui compact menu">
+            <div class="ui simple dropdown item">
+                Sort by
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item">
+                        @if (ViewBag.StartDateParam == SortingParam.StratDate)
+                        {
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
+                        }
+                    </div>
+                    <div class="item">
+                        @if (ViewBag.EndDateParam == SortingParam.EndDate)
+                        {
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
+                        }
+                    </div>
+                    <div class="item">
+                        @if (ViewBag.NameSortParam == SortingParam.Name)
+                        {
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ui compact menu">
+            <div class="ui simple dropdown item">
+                Filter by status
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+                    {
+                        <div class="item">
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.Planned.ToString()})">Planned</a>
+                        </div>
+                    }
+                    <div class="item">
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.InProgress.ToString()})">In progress</a>
+                    </div>
+                    <div class="item">
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.Completed.ToString()})">Completed</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="ui search">
+            <form method="get" asp-action="Index" asp-controller="Assignment" class="ui form inline">
+                <div class="ui icon input">
+                    <input type="hidden" id="groupId" name="groupId" value="@ViewBag.GroupId" />
+                    <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;" />
+                    <button type="submit" style="background: none; border: none; padding: 0;">
+                        <i class="inverted circular search link icon"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="row mt-3">
         @if (Model.Any())
         {

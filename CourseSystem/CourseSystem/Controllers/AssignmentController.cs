@@ -23,13 +23,13 @@ public class AssignmentController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int groupId, SortingParam sortOrder) 
+    public async Task<IActionResult> Index(int groupId, SortingParam sortOrder, string searchQuery, string assignmentAccessFilter) 
     {
         ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
         ViewBag.StartDateParam = sortOrder == SortingParam.StartDateDecs ? SortingParam.StratDate : SortingParam.StartDateDecs;
         ViewBag.EndDateParam = sortOrder == SortingParam.EndDateDesc ? SortingParam.EndDate : SortingParam.EndDateDesc;
 
-        var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId, sortOrder);
+        var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId, sortOrder, assignmentAccessFilter, searchQuery);
 
         if (!groupAssignmentsResult.IsSuccessful)
         {
