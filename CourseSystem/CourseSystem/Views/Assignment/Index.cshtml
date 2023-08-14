@@ -37,8 +37,8 @@
             Sort by
             <i class="dropdown icon"></i>
             <div class="menu">
-                <div class="item"><a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId})">Start date</a></div>
-                <div class="item"><a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId})">End date</a></div>
+                <div class="item"><a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})">Start date</a></div>
+                <div class="item"><a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})">End date</a></div>
                 <div class="item"><a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})">Name</a></div>
             </div>
         </div>

@@ -66,7 +66,7 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId, string sortOrder = null)
+        public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId, SortingParam sortOrder)
         {
             Result<List<Assignment>> assignmentResult = null;
 
@@ -157,14 +157,27 @@ namespace BLL.Services
             }
         }
 
-        private Result<Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>>> GetOrderByExpression(string sortBy)
+        private Result<Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>>> GetOrderByExpression(SortingParam sortBy)
         {
+
             Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>> query;
 
             switch (sortBy)
             {
-                case "NameDesc":
+                case SortingParam.NameDesc:
                     query = q => q.OrderByDescending(q => q.Name);
+                    break;
+                case SortingParam.StartDateDecs:
+                    query = q => q.OrderByDescending(q => q.StartDate);
+                    break;
+                case SortingParam.StratDate:
+                    query = q => q.OrderBy(q => q.StartDate);
+                    break;
+                case SortingParam.EndDate:
+                    query = q => q.OrderBy(q => q.EndDate);
+                    break;
+                case SortingParam.EndDateDesc:
+                    query = q => q.OrderByDescending(q => q.EndDate);
                     break;
                 default:
                     query = q => q.OrderBy(q => q.Name);
