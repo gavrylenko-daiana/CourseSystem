@@ -154,7 +154,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
 
-    public async Task<Result<Group>> AddToGroup(IFormFile material, string url, Group group)
+    public async Task<Result<bool>> AddEducationMaterial(IFormFile material, string url, MaterialAccess materialAccess, Group group = null!, Course course = null!)
     {
         try
         {
@@ -163,43 +163,33 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
                 Name = material.FileName,
                 Url = url,
                 FileExtension = Path.GetExtension(material.FileName),
-                MaterialAccess = MaterialAccess.Group,
-                GroupId = group.Id,
-                CourseId = group.CourseId
+                MaterialAccess = materialAccess
             };
 
-            await _repository.AddAsync(materialFile);
-            await _unitOfWork.Save();
-
-            group.EducationMaterials.Add(materialFile);
-
-            return new Result<Group>(true);
-        }
-        catch (Exception ex)
-        {
-            return new Result<Group>(false, $"ErrorMessage - {ex.Message}");
-        }
-    }
-
-    public async Task<Result<bool>> AddToCourse(IFormFile material, string url, Course course)
-    {
-        try
-        {
-            var materialFile = new EducationMaterial()
+            if (group != null)
             {
-                Name = material.FileName,
-                Url = url,
-                FileExtension = Path.GetExtension(material.FileName),
-                MaterialAccess = MaterialAccess.Course,
-                CourseId = course.Id,
-                Course = course
-            };
+                materialFile.GroupId = group.Id;
+                materialFile.CourseId = group.CourseId;
 
-            await _repository.AddAsync(materialFile);
-            await _unitOfWork.Save();
+                await _repository.AddAsync(materialFile);
+                await _unitOfWork.Save();
 
-            course.EducationMaterials.Add(materialFile);
-            
+                // group.EducationMaterials.Add(materialFile);
+            }
+            else if (course != null)
+            {
+                materialFile.CourseId = course.Id;
+                materialFile.Course = course;
+
+                await _repository.AddAsync(materialFile);
+                await _unitOfWork.Save();
+            }
+            else
+            {
+                await _repository.AddAsync(materialFile);
+                await _unitOfWork.Save();
+            }
+        
             return new Result<bool>(true);
         }
         catch (Exception ex)

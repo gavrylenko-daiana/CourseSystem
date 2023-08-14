@@ -41,203 +41,230 @@ public class EducationMaterialController : Controller
     public async Task<IActionResult> CreateInGroup(int groupId)
     {
         var groupResult = await _groupService.GetById(groupId);
-
+    
         if (!groupResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
-
+    
             return RedirectToAction("Index", "Group");
         }
-
+    
         var materialViewModel = new CreateInGroupEducationMaterialViewModel
         {
             Group = groupResult.Data,
             GroupId = groupResult.Data.Id
         };
-
+    
         return View(materialViewModel);
     }
-
+    
     [HttpPost]
     public async Task<IActionResult> CreateInGroup(CreateInGroupEducationMaterialViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Incorrect data. Please try again!");
-
+    
             return View(viewModel);
         }
-
+    
         var fullPath = await _educationMaterialService.AddFileAsync(viewModel.UploadFile);
-
+    
         if (!fullPath.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {fullPath.Message}");
-
+    
             return View(viewModel);
         }
-
+    
         var groupResult = await _groupService.GetById(viewModel.GroupId);
-
+    
         if (!groupResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
-
+    
             return RedirectToAction("Index", "Group");
         }
-
-        var addResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile, fullPath.Message, groupResult.Data);
-
-        await _groupService.UpdateGroup(addResult.Data);
+    
+        var addResult = await _educationMaterialService.AddEducationMaterial(viewModel.UploadFile, fullPath.Message, MaterialAccess.Group, groupResult.Data);
 
         if (!addResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-
+    
             return View(viewModel);
         }
-
+    
         return RedirectToAction("Details", "Group", new { id = viewModel.GroupId });
     }
-
+    
     [HttpGet]
     public async Task<IActionResult> CreateInCourse(int courseId)
     {
         var courseResult = await _courseService.GetById(courseId);
-
+    
         if (!courseResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
-
+    
             return RedirectToAction("Index", "Course");
         }
-
+    
         var materialViewModel = new CreateInCourseEducationMaterialViewModel
         {
             Course = courseResult.Data,
             CourseId = courseResult.Data.Id,
             Groups = courseResult.Data.Groups
         };
-
+    
         return View(materialViewModel);
     }
-
+    
     [HttpPost]
     public async Task<IActionResult> CreateInCourse(CreateInCourseEducationMaterialViewModel viewModel)
     {
         var fullPath = await _educationMaterialService.AddFileAsync(viewModel.UploadFile);
-
+    
         if (!fullPath.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: Failed to upload file");
-
+    
             return View(viewModel);
         }
-
+    
         var groupResult = await _groupService.GetById(viewModel.SelectedGroupId);
-
+    
         if (!groupResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
-
+    
             return RedirectToAction("Index", "Group");
         }
-
+    
         if (viewModel.MaterialAccess == MaterialAccess.Group)
         {
-            var addToGroupResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile, fullPath.Message, groupResult.Data);
-
+            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(viewModel.UploadFile, fullPath.Message, MaterialAccess.Group, groupResult.Data);
+    
             if (!addToGroupResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"Message: {addToGroupResult.Message}");
-
+    
                 return View(viewModel);
             }
         }
         else
         {
             var courseResult = await _courseService.GetById(viewModel.CourseId);
-
+    
             if (!courseResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
-
+    
                 return RedirectToAction("Index", "Course");
             }
-
-            var addToCourseResult = await _educationMaterialService.AddToCourse(viewModel.UploadFile,
-                fullPath.Message, courseResult.Data);
+    
+            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(viewModel.UploadFile,
+                fullPath.Message, MaterialAccess.Course, null!, courseResult.Data);
             
             if (!addToCourseResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"Message: {addToCourseResult.Message}");
-
+    
                 return View(viewModel);
             }
             
             var updateCourseResult = await _courseService.UpdateCourse(courseResult.Data);
-
+    
             if (!updateCourseResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", $"Message: {updateCourseResult.Message}");
                 return View(viewModel);
             }
         }
-
+    
         return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
     }
-
-    // [HttpGet]
-    // public async Task<IActionResult> CreateInGeneral()
-    // {
-    //     var courses = await _courseService.GetAllCoursesAsync();
-    //     var groups = await _groupService.GetAllGroupsAsync();
-    //
-    //     var materialViewModel = new CreateInGeneralEducationMaterialViewModel
-    //     {
-    //         Courses = courses.Data!,
-    //         Groups = groups.Data!
-    //     };
-    //
-    //     return View(materialViewModel);
-    // }
-    //
-    // [HttpPost]
-    // public async Task<IActionResult> CreateInGeneral(CreateInGeneralEducationMaterialViewModel viewModel)
-    // {
-    //     var fullPath = await _educationMaterialService.AddFileAsync(viewModel.UploadFile);
-    //
-    //     if (!fullPath.IsSuccessful)
-    //     {
-    //         TempData.TempDataMessage("Error", $"Message: Failed to upload file");
-    //         return View(viewModel);
-    //     }
-    //
-    //     if (viewModel.MaterialAccess == MaterialAccess.Group)
-    //     {
-    //         var addToGroupResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile,
-    //             fullPath.Message, viewModel.SelectedGroupId);
-    //         
-    //         if (!addToGroupResult.IsSuccessful)
-    //         {
-    //             TempData.TempDataMessage("Error", $"Message: {addToGroupResult.Message}");
-    //             return View(viewModel);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         var addToCourseResult = await _educationMaterialService.AddToCourse(viewModel.UploadFile,
-    //             fullPath.Message, viewModel.CourseId);
-    //         
-    //         if (!addToCourseResult.IsSuccessful)
-    //         {
-    //             TempData.TempDataMessage("Error", $"Message: {addToCourseResult.Message}");
-    //             return View(viewModel);
-    //         }
-    //     }
-    //
-    //     return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
-    // }
+    
+    [HttpGet]
+    public async Task<IActionResult> CreateInGeneral()
+    {
+        var courses = await _courseService.GetAllCoursesAsync();
+        var groups = await _groupService.GetAllGroupsAsync();
+    
+        var materialViewModel = new CreateInGeneralEducationMaterialViewModel
+        {
+            Courses = courses.Data!,
+            Groups = groups.Data!
+        };
+    
+        return View(materialViewModel);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateInGeneral(CreateInGeneralEducationMaterialViewModel viewModel)
+    {
+        var fullPath = await _educationMaterialService.AddFileAsync(viewModel.UploadFile);
+    
+        if (!fullPath.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Message: Failed to upload file");
+            return View(viewModel);
+        }
+    
+        if (viewModel.MaterialAccess == MaterialAccess.Group)
+        {
+            var groupResult = await _groupService.GetById(viewModel.SelectedGroupId);
+    
+            if (!groupResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"Message: {groupResult.Message}");
+                return View(viewModel);
+            }
+            
+            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(viewModel.UploadFile,
+                fullPath.Message, MaterialAccess.Group, groupResult.Data);
+            
+            // await _groupService.UpdateGroup(groupResult.Data);
+            
+            if (!addToGroupResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"Message: {addToGroupResult.Message}");
+                return View(viewModel);
+            }
+        }
+        else if (viewModel.MaterialAccess == MaterialAccess.Course)
+        {
+            var courseResult = await _courseService.GetById(viewModel.SelectedCourseId);
+    
+            if (!courseResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"Message: {courseResult.Message}");
+                return View(viewModel);
+            }
+            
+            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(viewModel.UploadFile,
+                fullPath.Message, MaterialAccess.Course, null!, courseResult.Data);
+            
+            if (!addToCourseResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"Message: {addToCourseResult.Message}");
+                return View(viewModel);
+            }
+        }
+        else if (viewModel.MaterialAccess == MaterialAccess.General)
+        {
+            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(viewModel.UploadFile,
+                fullPath.Message, MaterialAccess.General);
+            
+            if (!addToCourseResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"Message: {addToCourseResult.Message}");
+                return View(viewModel);
+            }
+        }
+    
+        return RedirectToAction("Index", "Course");
+    }
 
     [HttpGet]
     public async Task<IActionResult> Detail(int id)
