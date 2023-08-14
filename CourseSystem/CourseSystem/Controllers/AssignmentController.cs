@@ -15,13 +15,11 @@ namespace UI.Controllers;
 public class AssignmentController : Controller
 {
     private readonly IAssignmentService _assignmentService;
-    private readonly UserManager<AppUser> _userManager;
 
     public AssignmentController(IAssignmentService assignmentService,
         UserManager<AppUser> userManager)
     {
         _assignmentService = assignmentService;
-        _userManager = userManager;
     }
 
     [HttpGet]

@@ -13,21 +13,18 @@ namespace UI.Controllers;
 [Authorize]
 public class AssignmentAnswerController : Controller
 {
-    private readonly UserManager<AppUser> _userManager;
     private readonly IAssignmentService _assignmentService;
     private readonly IAssignmentAnswerService _assignmentAnswerService;
     private readonly IUserAssignmentService _userAssignmentService;
     private readonly IUserService _userService;
     private readonly ILogger<AssignmentAnswerController> _logger;
 
-    public AssignmentAnswerController(UserManager<AppUser> userManager,
-        IAssignmentService assignmentService,
+    public AssignmentAnswerController(IAssignmentService assignmentService,
         IAssignmentAnswerService assignmentAnswerService,
         IUserAssignmentService userAssignmentService,
         IUserService userService,
         ILogger<AssignmentAnswerController> logger)
     {
-        _userManager = userManager;
         _assignmentService = assignmentService;
         _assignmentAnswerService = assignmentAnswerService;
         _userAssignmentService = userAssignmentService;
@@ -87,21 +84,22 @@ public class AssignmentAnswerController : Controller
             return View(assignmentAnswerVM);
         }
 
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
 
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
         var answerResult =
-            await _assignmentAnswerService.CreateAssignmentAnswer(assignmentAnswer, assignmentResult.Data, currentUser);
+            await _assignmentAnswerService.CreateAssignmentAnswer(assignmentAnswer, assignmentResult.Data, currentUserResult.Data);
 
         if (!answerResult.IsSuccessful)
         {
             _logger.LogError("Failed to save assignment answer for user {userId}! Errors: {errorMessage}",
-                currentUser.Id, answerResult.Message);
+                currentUserResult.Data.Id, answerResult.Message);
 
             TempData.TempDataMessage("Error", "Fail to save assignment answer");
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
