@@ -144,6 +144,7 @@ public class AssignmentAnswerController : Controller
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> SeeStudentAnswers(int assignmentId)
     {
+        ViewBag.AssignmentId = assignmentId;
         var assignmentResult = await _assignmentService.GetById(assignmentId);
 
         if (!assignmentResult.IsSuccessful)

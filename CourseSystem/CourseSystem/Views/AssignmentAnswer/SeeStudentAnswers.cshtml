@@ -1,55 +1,122 @@
 ﻿@using UI.ViewModels
+
 @model IEnumerable<UserAssignmentViewModel>
 
-@if (TempData["Error"] != null)
-{
-    <div class="col-md-12 alert alert-danger">
-        <span>@TempData["Error"]</span>
-    </div>
-}
-<div class="p-5 mb-5 text-center bg-light">
-    <h1 class="mb-3">Students answers</h1>
-</div>
-<div class="row ">
-    @if (Model.Any())
-    {
-        @foreach (var userAssignment in Model)
-        {
-            <div class="col-sm-6">
-                <div class="card">
-                    @if (userAssignment.IsChecked)
-                    {
-                        <div class="card-header bg-transparent border-success">
-                            Marked
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="card-header bg-transparent border-danger">
-                            Not Marked
-                        </div>
-                    }
 
-                    <div class="card-body">
-                        <h5 class="card-title">@userAssignment.AppUser.FirstName @userAssignment.AppUser.LastName</h5>
-                        @foreach (var answer in userAssignment.AssignmentAnswers)
-                        {
-                            <p class="card-text">File: @answer.Name</p>
-                        }
-                        <a href="@Url.Action("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.Assignment.Id, studentId = userAssignment.AppUser.Id})" class="btn btn-primary">
-                            Check
-                        </a>
-                    </div>
-                    <div class="card-footer bg-transparent border-success">
-                        Grade: @userAssignment.Grade / 100
-                    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no" />
+    <meta name="description"
+          content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI." />
+    <meta name="keywords" content="Semantic-UI, Theme, Design, Template" />
+    <meta name="author" content="PPType" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments</title>
+
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add Font Awesome CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        .rounded-left {
+            border-top-left-radius: 0.3rem;
+            border-bottom-left-radius: 0.3rem;
+        }
+
+        .margin-right {
+            margin-right: 10px; /* Adjust margin as needed */
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+    <div class="p-5 mb-5 text-center bg-light">
+        <h1 class="mb-3">Students answers</h1>
+    </div>
+    <div class="ui compact menu mb-3">
+        <div class="ui simple dropdown item">
+            Filter by status
+            <i class="dropdown icon"></i>
+            <div class="menu">
+                <div class="item">
+                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId})">Marked</a>
+                </div>
+                <div class="item">
+                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId})">Not Marked</a>
                 </div>
             </div>
-        }
-    }
-    else
-    {
-        <h5>No students answers</h5>
-    }
+        </div>
+    </div>
+    <div class="row ">
+        @if (Model.Any())
+        {
+            @foreach (var userAssignment in Model)
+            {
+                <div class="col-sm-6">
+                    <div class="card">
+                        @if (userAssignment.IsChecked)
+                        {
+                            <div class="card-header bg-transparent border-success">
+                                Marked
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card-header bg-transparent border-danger">
+                                Not Marked
+                            </div>
+                        }
 
-</div>
+                        <div class="card-body">
+                            <h5 class="card-title">@userAssignment.AppUser.FirstName @userAssignment.AppUser.LastName</h5>
+                            @foreach (var answer in userAssignment.AssignmentAnswers)
+                            {
+                                <p class="card-text">File: @answer.Name</p>
+                            }
+                            <a href="@Url.Action("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.Assignment.Id, studentId = userAssignment.AppUser.Id})" class="btn btn-primary">
+                                Check
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-success">
+                            Grade: @userAssignment.Grade / 100
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <h5>No students answers</h5>
+        }
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.ui.dropdown').dropdown();
+        });
+    </script>
+</body>
+</html>
