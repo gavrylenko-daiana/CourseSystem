@@ -154,7 +154,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
 
-    public async Task<Result<bool>> AddEducationMaterial(IFormFile material, string url, MaterialAccess materialAccess, Group group = null!, Course course = null!)
+    public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile material, string url, MaterialAccess materialAccess, Group group = null!, Course course = null!)
     {
         try
         {
@@ -163,7 +163,8 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
                 Name = material.FileName,
                 Url = url,
                 FileExtension = Path.GetExtension(material.FileName),
-                MaterialAccess = materialAccess
+                MaterialAccess = materialAccess,
+                UploadTime = uploadTime
             };
 
             if (group != null)

@@ -10,6 +10,7 @@
 <div class="container py-4">
     <h1>Upload File to Task</h1>
     <form method="post" asp-controller="EducationMaterial" asp-action="CreateInGeneral" enctype="multipart/form-data">
+        <input type="hidden" asp-for="TimeUploaded" value="@DateTime.Now">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             <label asp-for="UploadFile" class="control-label"></label>

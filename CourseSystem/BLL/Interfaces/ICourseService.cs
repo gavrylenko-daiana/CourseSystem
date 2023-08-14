@@ -11,6 +11,6 @@ public interface ICourseService : IGenericService<Course>
     Task<Result<bool>> UpdateName(int courseId, string newName);
     Task<Result<bool>> UpdateCourse(Course course);
     Task<Result<List<Course>>> GetAllCoursesAsync();
-    Task<Result<bool>> AddEducationMaterial(IFormFile uploadFile, MaterialAccess materialAccess,
+    Task<Result<bool>> AddEducationMaterial(DateTime uploadedTime, IFormFile uploadFile, MaterialAccess materialAccess,
         int? groupId = null, int? courseId = null);
 }

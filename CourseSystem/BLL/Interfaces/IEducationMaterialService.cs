@@ -13,7 +13,7 @@ public interface IEducationMaterialService
     // Task<Result<Group>> AddToGroup(IFormFile material, string url, Group group);
     // Task<Result<bool>> AddToCourse(IFormFile material, string url, Course course);
     // Task<Result<Group>> AddToGeneral(IFormFile material, string url);
-    Task<Result<bool>> AddEducationMaterial(IFormFile material, string url, MaterialAccess materialAccess,
+    Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile material, string url, MaterialAccess materialAccess,
         Group group = null!, Course course = null!);
     Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id);
     Task<Result<Group>> DeleteFileFromGroup(EducationMaterial material);

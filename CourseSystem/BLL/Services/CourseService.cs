@@ -151,7 +151,7 @@ public class CourseService : GenericService<Course>, ICourseService
         return new Result<List<Course>>(true, courses);
     }
     
-    public async Task<Result<bool>> AddEducationMaterial(IFormFile uploadFile, MaterialAccess materialAccess,
+    public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile uploadFile, MaterialAccess materialAccess,
         int? groupId = null, int? courseId = null)
     {
         var fullPath = await _educationMaterialService.AddFileAsync(uploadFile);
@@ -170,7 +170,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 return new Result<bool>(false, $"Message: {groupResult.Message}");
             }
 
-            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadFile, fullPath.Message,
+            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
                 MaterialAccess.Group, groupResult.Data);
 
             if (!addToGroupResult.IsSuccessful)
@@ -187,7 +187,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 return new Result<bool>(false, $"Message: {courseResult.Message}");
             }
 
-            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadFile, fullPath.Message,
+            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
                 MaterialAccess.Course, null!, courseResult.Data);
 
             if (!addToCourseResult.IsSuccessful)
@@ -198,7 +198,7 @@ public class CourseService : GenericService<Course>, ICourseService
         else if (materialAccess == MaterialAccess.General)
         {
             var addToCourseResult =
-                await _educationMaterialService.AddEducationMaterial(uploadFile, fullPath.Message,
+                await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
                     MaterialAccess.General);
 
             if (!addToCourseResult.IsSuccessful)

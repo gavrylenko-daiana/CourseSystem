@@ -81,7 +81,7 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInGroup(CreateInGroupEducationMaterialViewModel viewModel)
     {
-        var addResult = await _courseService.AddEducationMaterial(viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId, viewModel.CourseId);
+        var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId, viewModel.CourseId);
 
         if (!addResult.IsSuccessful)
         {
@@ -116,7 +116,7 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInCourse(CreateInCourseEducationMaterialViewModel viewModel)
     {
-        var addResult = await _courseService.AddEducationMaterial(viewModel.UploadFile, viewModel.MaterialAccess,
+        var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess,
             viewModel.SelectedGroupId, viewModel.CourseId);
 
         if (!addResult.IsSuccessful)
@@ -146,7 +146,7 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInGeneral(CreateInGeneralEducationMaterialViewModel viewModel)
     {
-        var addResult = await _courseService.AddEducationMaterial(viewModel.UploadFile, viewModel.MaterialAccess,
+        var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess,
             viewModel.SelectedGroupId, viewModel.SelectedCourseId);
 
         if (!addResult.IsSuccessful)
