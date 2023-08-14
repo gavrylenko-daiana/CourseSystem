@@ -18,7 +18,7 @@ namespace Core.Models
         public string? GitHub { get; set; }
         public AppUserRoles Role { get; set; }
         public virtual List<UserAssignments> UserAssignments { get; set; }
-        public virtual List<UserCourses> UserCourses { get; set;}
+        public virtual List<UserCourses> UserCourses { get; set; }
         public virtual List<UserGroups> UserGroups { get; set; }
         public virtual List<UserActivity> UserActivities { get; set; }
         public virtual List<Notification> Notifications { get; set; }

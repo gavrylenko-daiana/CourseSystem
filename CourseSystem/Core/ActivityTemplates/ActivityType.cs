@@ -8,7 +8,7 @@ namespace Core.ActivityTemplates
 {
     public enum ActivityType
     {
-        CreatedCourse,
+        CreatedCourse = 0,
         JoinedCourse,
         CreatedGroup,
         JoinedGroup,

@@ -7,7 +7,7 @@ using Core.Models;
 
 namespace BLL.Services;
 
-public class GenericService<T>: IGenericService<T> where T : class
+public class GenericService<T> : IGenericService<T> where T : class
 {
     protected UnitOfWork _unitOfWork;
     protected IRepository<T> _repository;
@@ -28,7 +28,7 @@ public class GenericService<T>: IGenericService<T> where T : class
             {
                 return new Result<T>(false, $"{typeof(T).Name} by Id {id} not found");
             }
-            
+
             return new Result<T>(true, entity);
         }
         catch (Exception ex)
@@ -37,7 +37,8 @@ public class GenericService<T>: IGenericService<T> where T : class
         }
     }
 
-    public async Task<Result<List<T>>> GetByPredicate(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null)
+    public async Task<Result<List<T>>> GetByPredicate(Expression<Func<T, bool>> filter = null,
+        Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderBy = null)
     {
         try
         {
@@ -47,7 +48,7 @@ public class GenericService<T>: IGenericService<T> where T : class
             {
                 return new Result<List<T>>(false, $"{typeof(T).Name} by predicate not found");
             }
-            
+
             return new Result<List<T>>(true, entityList);
         }
         catch (Exception ex)
@@ -55,6 +56,4 @@ public class GenericService<T>: IGenericService<T> where T : class
             return new Result<List<T>>(false, $"Failed to get {typeof(T).Name} by predicate. Exception: {ex.Message}");
         }
     }
-    
-    
 }

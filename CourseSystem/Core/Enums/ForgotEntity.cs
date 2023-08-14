@@ -2,6 +2,6 @@ namespace Core.Enums;
 
 public enum ForgotEntity
 {
-    Password,
+    Password = 0,
     Email
 }
