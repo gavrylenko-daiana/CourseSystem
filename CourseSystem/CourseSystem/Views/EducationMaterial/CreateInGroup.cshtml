@@ -1,7 +1,7 @@
 @using UI.ViewModels;
 @using Core.Enums
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model CreateInGroupEducationMaterialViewModel
+@model UI.ViewModels.FileViewModels.CreateInGroupEducationMaterialViewModel
 
 <!DOCTYPE html>
 
@@ -11,6 +11,9 @@
     <h1>Upload File to Task</h1>
     <form method="post" asp-controller="EducationMaterial" asp-action="CreateInGroup" enctype="multipart/form-data">
         <input type="hidden" asp-for="GroupId"/>
+        <input type="hidden" asp-for="CourseId"/>
+        <input type="hidden" asp-for="Group"/>
+        <input type="hidden" asp-for="Course"/>
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             <label asp-for="UploadFile" class="control-label"></label>

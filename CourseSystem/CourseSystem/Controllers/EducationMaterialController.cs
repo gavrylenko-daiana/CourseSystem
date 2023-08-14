@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using BLL.Interfaces;
 using Core.Enums;
 using Core.Helpers;
@@ -5,6 +7,7 @@ using Core.Models;
 using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
+using UI.ViewModels.FileViewModels;
 
 namespace UI.Controllers;
 
@@ -23,18 +26,34 @@ public class EducationMaterialController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> IndexAccess(MaterialAccess access)
     {
-        var materials = await _educationMaterialService.GetAllMaterialAsync();
+        var materials = await _educationMaterialService.GetAllMaterialByAccessAsync(access);
 
         if (!(materials.IsSuccessful && materials.Data.Any()))
         {
             TempData.TempDataMessage("Error", $"Message: {materials.Message}");
-
             return RedirectToAction("Index", "Course");
         }
 
-        return View(materials.Data);
+        return View("Index", materials.Data);
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> IndexMaterials(string materials)
+    {
+        if (!(materials != null && materials.Any()))
+        {
+            TempData.TempDataMessage("Error", $"Message: {nameof(materials)} list is empty");
+            return RedirectToAction("Index", "Course");
+        }
+        
+        var materialsList = JsonSerializer.Deserialize<List<EducationMaterial>>(materials, new JsonSerializerOptions
+        {
+            ReferenceHandler = ReferenceHandler.Preserve
+        });
+        
+        return View("Index", materialsList);
     }
 
     [HttpGet]
@@ -51,7 +70,9 @@ public class EducationMaterialController : Controller
         var materialViewModel = new CreateInGroupEducationMaterialViewModel
         {
             Group = groupResult.Data,
-            GroupId = groupResult.Data.Id
+            GroupId = groupResult.Data.Id,
+            Course = groupResult.Data.Course,
+            CourseId = groupResult.Data.CourseId
         };
 
         return View(materialViewModel);
@@ -60,18 +81,12 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInGroup(CreateInGroupEducationMaterialViewModel viewModel)
     {
-        if (!ModelState.IsValid)
-        {
-            TempData.TempDataMessage("Error", "Incorrect data. Please try again!");
-            return View(viewModel);
-        }
-
-        var addResult = await _courseService.AddEducationMaterial(viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId);
+        var addResult = await _courseService.AddEducationMaterial(viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId, viewModel.CourseId);
 
         if (!addResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-            return View(viewModel);
+            return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
         }
 
         return RedirectToAction("Details", "Group", new { id = viewModel.GroupId });
@@ -101,19 +116,13 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInCourse(CreateInCourseEducationMaterialViewModel viewModel)
     {
-        if (!ModelState.IsValid)
-        {
-            TempData.TempDataMessage("Error", "Incorrect data. Please try again!");
-            return View(viewModel);
-        }
-
         var addResult = await _courseService.AddEducationMaterial(viewModel.UploadFile, viewModel.MaterialAccess,
             viewModel.SelectedGroupId, viewModel.CourseId);
 
         if (!addResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-            return View(viewModel);
+            return RedirectToAction("CreateInCourse", "EducationMaterial", new { groupId = viewModel.CourseId });
         }
 
         return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
@@ -137,19 +146,13 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInGeneral(CreateInGeneralEducationMaterialViewModel viewModel)
     {
-        if (!ModelState.IsValid)
-        {
-            TempData.TempDataMessage("Error", "Incorrect data. Please try again!");
-            return View(viewModel);
-        }
-
         var addResult = await _courseService.AddEducationMaterial(viewModel.UploadFile, viewModel.MaterialAccess,
             viewModel.SelectedGroupId, viewModel.SelectedCourseId);
 
         if (!addResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-            return View(viewModel);
+            return RedirectToAction("CreateInGeneral", "EducationMaterial");
         }
 
         return RedirectToAction("Index", "Course");

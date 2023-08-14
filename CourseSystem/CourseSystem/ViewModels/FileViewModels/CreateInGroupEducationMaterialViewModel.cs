@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Core.Enums;
 using Core.Models;
 
-namespace UI.ViewModels;
+namespace UI.ViewModels.FileViewModels;
 
 public class CreateInGroupEducationMaterialViewModel
 {
@@ -16,4 +16,6 @@ public class CreateInGroupEducationMaterialViewModel
     
     public Group? Group { get; set; }
     public int GroupId { get; set; }
+    public Course? Course { get; set; }
+    public int CourseId { get; set; }
 }
