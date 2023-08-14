@@ -3,8 +3,10 @@ using Core.Enums;
 using Core.Helpers;
 using Core.Models;
 using Dropbox.Api.Files;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
+using static Dropbox.Api.Team.GroupSelector;
 
 namespace UI.Controllers;
 
@@ -13,13 +15,15 @@ public class EducationMaterialController : Controller
     private readonly IEducationMaterialService _educationMaterialService;
     private readonly IGroupService _groupService;
     private readonly ICourseService _courseService;
+    private readonly ILogger<EducationMaterialController> _logger;
 
     public EducationMaterialController(IEducationMaterialService educationMaterial, IGroupService groupService,
-        ICourseService courseService)
+        ICourseService courseService, ILogger<EducationMaterialController> logger)
     {
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
         _courseService = courseService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -29,6 +33,8 @@ public class EducationMaterialController : Controller
 
         if (!(materials.IsSuccessful && materials.Data.Any()))
         {
+            _logger.LogError("Failed to retrieve educational materials! Error: {errorMessage}", materials.Message);
+
             TempData.TempDataMessage("Error", $"Message: {materials.Message}");
 
             return RedirectToAction("Index", "Course");
@@ -44,6 +50,9 @@ public class EducationMaterialController : Controller
 
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                groupId, groupResult.Message);
+
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
 
             return RedirectToAction("Index", "Group");
@@ -63,6 +72,12 @@ public class EducationMaterialController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogError("Failed to create eduactional material! Invalid model state.");
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             TempData.TempDataMessage("Error", "Incorrect data. Please try again!");
 
             return View(viewModel);
@@ -72,6 +87,7 @@ public class EducationMaterialController : Controller
 
         if (!fullPath.IsSuccessful)
         {
+            _logger.LogError("Failed to upload educational material! Error: {errorMessage}", fullPath.Message);
             TempData.TempDataMessage("Error", $"Message: {fullPath.Message}");
 
             return View(viewModel);
@@ -81,6 +97,9 @@ public class EducationMaterialController : Controller
 
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                viewModel.GroupId, groupResult.Message);
+
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
 
             return RedirectToAction("Index", "Group");
@@ -88,11 +107,22 @@ public class EducationMaterialController : Controller
 
         var addResult = await _educationMaterialService.AddToGroup(viewModel.UploadFile, fullPath.Message, groupResult.Data);
 
-        await _groupService.UpdateGroup(addResult.Data);
-
         if (!addResult.IsSuccessful)
         {
+            _logger.LogError("Failed to attach educational material {filePath} to group {groupId}! Error: {errorMessage}", 
+                fullPath.Data, groupResult.Data.Id, addResult.Message);
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
+
+            return View(viewModel);
+        }
+
+        var updateResult = await _groupService.UpdateGroup(addResult.Data);
+
+        if (!updateResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}",
+                addResult.Data.Id, updateResult.Message);
+            TempData.TempDataMessage("Error", $"Message: {updateResult.Message}");
 
             return View(viewModel);
         }
@@ -107,6 +137,9 @@ public class EducationMaterialController : Controller
 
         if (!courseResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
             TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
 
             return RedirectToAction("Index", "Course");
@@ -129,6 +162,7 @@ public class EducationMaterialController : Controller
 
         if (!fullPath.IsSuccessful)
         {
+            _logger.LogError("Failed to upload educational material! Error: {errorMessage}", fullPath.Message);
             TempData.TempDataMessage("Error", $"Message: Failed to upload file");
 
             return View(viewModel);
@@ -138,6 +172,9 @@ public class EducationMaterialController : Controller
 
         if (!groupResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                viewModel.SelectedGroupId, groupResult.Message);
+
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
 
             return RedirectToAction("Index", "Group");
@@ -149,6 +186,8 @@ public class EducationMaterialController : Controller
 
             if (!addToGroupResult.IsSuccessful)
             {
+                _logger.LogError("Failed to attach educational material {filePath} to group {groupId}! Error: {errorMessage}",
+                    fullPath.Data, groupResult.Data.Id, addToGroupResult.Message);
                 TempData.TempDataMessage("Error", $"Message: {addToGroupResult.Message}");
 
                 return View(viewModel);
@@ -160,6 +199,9 @@ public class EducationMaterialController : Controller
 
             if (!courseResult.IsSuccessful)
             {
+                _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                    viewModel.CourseId, courseResult.Message);
+
                 TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
 
                 return RedirectToAction("Index", "Course");
@@ -170,6 +212,9 @@ public class EducationMaterialController : Controller
             
             if (!addToCourseResult.IsSuccessful)
             {
+                _logger.LogError("Failed to attach educational material {filePath} to course {courseId}! Error: {errorMessage}",
+                    fullPath.Data, courseResult.Data.Id, addToCourseResult.Message);
+
                 TempData.TempDataMessage("Error", $"Message: {addToCourseResult.Message}");
 
                 return View(viewModel);
@@ -179,6 +224,9 @@ public class EducationMaterialController : Controller
 
             if (!updateCourseResult.IsSuccessful)
             {
+                _logger.LogError("Failed to update course by Id {courseId}! Error: {errorMessage}",
+                    courseResult.Data.Id, updateCourseResult.Message);
+
                 TempData.TempDataMessage("Error", $"Message: {updateCourseResult.Message}");
                 return View(viewModel);
             }
@@ -246,6 +294,9 @@ public class EducationMaterialController : Controller
 
         if (!material.IsSuccessful)
         {
+            _logger.LogError("Failed to get educational material by Id {materialId}! Error: {errorMessage}",
+                id, material.Message);
+
             TempData.TempDataMessage("Error", $"Message: {material.Message}");
 
             return RedirectToAction("Index", "Course");
@@ -263,6 +314,9 @@ public class EducationMaterialController : Controller
 
         if (!fileToDelete.IsSuccessful)
         {
+            _logger.LogError("Failed to get educational material by Id {materialId}! Error: {errorMessage}",
+                id, fileToDelete.Message);
+
             TempData.TempDataMessage("Error", $"Message: {fileToDelete.Message}");
 
             return RedirectToAction("Detail", "EducationMaterial", new { id = id });
@@ -270,13 +324,23 @@ public class EducationMaterialController : Controller
 
         var deleteResult = await _educationMaterialService.DeleteFileFromGroup(fileToDelete.Data);
 
-        await _groupService.UpdateGroup(deleteResult.Data);
-
         if (!deleteResult.IsSuccessful)
         {
+            _logger.LogError("Failed to delete educational material by Id {materialId}! Error: {errorMessage}",
+                fileToDelete.Data.Id, deleteResult.Message);
+
             TempData.TempDataMessage("Error", $"Message: {deleteResult.Message}");
 
             return RedirectToAction("Detail", "EducationMaterial", new { id = id });
+        }
+
+        var updateResult = await _groupService.UpdateGroup(deleteResult.Data);
+
+        if (!updateResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}",
+                deleteResult.Data.Id, updateResult.Message);
+            TempData.TempDataMessage("Error", $"Message: {updateResult.Message}");
         }
 
         return RedirectToAction("Index", "Course");
