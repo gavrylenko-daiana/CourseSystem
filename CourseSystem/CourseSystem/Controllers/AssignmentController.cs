@@ -25,7 +25,7 @@ public class AssignmentController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int groupId) 
+    public async Task<IActionResult> Index(int groupId, string sortOrder) 
     {
         var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId);
 
