@@ -12,6 +12,6 @@ namespace BLL.Interfaces
     {
         Task<Result<T>> GetById(int id);
         Task<Result<List<T>>> GetByPredicate(Expression<Func<T, bool>> filter = null,
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null);
+            Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderBy = null);
     }
 }

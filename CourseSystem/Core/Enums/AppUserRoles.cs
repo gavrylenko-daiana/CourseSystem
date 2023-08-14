@@ -8,7 +8,7 @@ namespace Core.Enums
 {
     public enum AppUserRoles
     {
-        Admin,
+        Admin = 0,
         Student,
         Teacher
     }

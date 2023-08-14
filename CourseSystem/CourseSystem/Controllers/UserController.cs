@@ -35,6 +35,7 @@ public class UserController : Controller
         else
         {
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+
             return RedirectToAction("Login", "Account");
         }
     }
@@ -51,6 +52,7 @@ public class UserController : Controller
         else
         {
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+
             return RedirectToAction("Index", "User");
         }
     }
@@ -70,6 +72,7 @@ public class UserController : Controller
         else
         {
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+
             return RedirectToAction("Index", "User");
         }
     }
@@ -80,6 +83,7 @@ public class UserController : Controller
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Failed to edit profile");
+
             return View("Edit", editUserViewModel);
         }
 
@@ -91,6 +95,7 @@ public class UserController : Controller
         if (!result.IsSuccessful)
         {
             TempData.TempDataMessage("Error", $"Edit is not successful. Please try again! - Message: {result.Message}");
+
             return View("Edit", editUserViewModel);
         }
 
@@ -111,6 +116,7 @@ public class UserController : Controller
         else
         {
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+
             return RedirectToAction("Index", "User");
         }
     }
@@ -122,6 +128,7 @@ public class UserController : Controller
         if (!ModelState.IsValid)
         {
             TempData.TempDataMessage("Error", "Failed to edit password");
+
             return View("EditPassword", editUserPasswordViewModel);
         }
 
@@ -130,15 +137,17 @@ public class UserController : Controller
         if (resultCheckPassword.IsSuccessful)
         {
             TempData.TempDataMessage("SuccessMessage", "password has been successfully changed.");
+
             return RedirectToAction("Index", "User");
         }
         else
         {
             TempData.TempDataMessage("Error", "You entered incorrect password");
+
             return View("EditPassword", editUserPasswordViewModel);
         }
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> EditEmail()
     {
@@ -146,11 +155,12 @@ public class UserController : Controller
 
         if (result.IsSuccessful)
         {
-            return RedirectToAction("SendCodeUser", "Account",new { forgotEntity = ForgotEntity.Email });
+            return RedirectToAction("SendCodeUser", "Account", new { forgotEntity = ForgotEntity.Email });
         }
         else
         {
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+
             return RedirectToAction("Index", "User");
         }
     }
@@ -171,20 +181,23 @@ public class UserController : Controller
                 new { userId = user.Id },
                 protocol: HttpContext.Request.Scheme);
 
-            var deletionSendingResult =
-                await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByAdmin, user, callbackUrl);
+            var deletionSendingResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByAdmin, user, callbackUrl);
 
             if (!deletionSendingResult.IsSuccessful)
             {
                 TempData.TempDataMessage("Error", deletionSendingResult.Message);
+
+                return RedirectToAction("Login", "Account");
             }
 
             TempData.TempDataMessage("Error", "Wait for confirmation of account deletion from the admin");
+
             return RedirectToAction("Login", "Account");
         }
         else
         {
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+
             return RedirectToAction("Index", "User");
         }
     }
@@ -195,6 +208,7 @@ public class UserController : Controller
         if (string.IsNullOrWhiteSpace(userId))
         {
             TempData.TempDataMessage("Error", $"Failed to get user by id");
+
             return RedirectToAction("Index", "User");
         }
 
@@ -221,6 +235,7 @@ public class UserController : Controller
         else
         {
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
+
             return RedirectToAction("Index", "User");
         }
     }
