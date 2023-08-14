@@ -1,6 +1,10 @@
 @using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @model UI.ViewModels.UserGroupViewModel
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
 <style>
     .object-list li {
         margin-top: 10px;
@@ -26,39 +30,56 @@
         }
         <div class="card-body">
             <h5 class="card-title">@Model.Group.Name</h5>
-            <p><strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")</p>
-            <p><strong>End Date:</strong> @Model.Group.EndDate.ToString("dd/MM/yyyy")</p>
-            <div><strong>Progress:</strong> 
+            <p>
+                <strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")
+            </p>
+            <p>
+                <strong>End Date:</strong> @Model.Group.EndDate.ToString("dd/MM/yyyy")
+            </p>
+            <div>
+                <strong>Progress:</strong>
                 @Model.Progress%
                 <progress class="ui progress" max="100" value="@Model.Progress"></progress>
             </div>
 
             @{
                 var materialsGroup = Model.Group.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
-            }
-            @if (materialsGroup != null && materialsGroup.Any())
-            {
-                <h6>Education Materials:</h6>
-                <ul>
-                    @foreach (var material in materialsGroup)
-                    {
-                        <div class="justify-content-start">
-                            <li>@material.Name</li>
-                            <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
-                        </div>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No education materials found for this group.</p>
-            }
 
-            @if (Model.CurrentUser.Role != AppUserRoles.Student)
-            {
-                <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="btn btn-outline-primary">Edit Group</a>
-                <a href="@Url.Action("Delete", "Group", new { id = Model.Group.Id })" class="btn btn-outline-danger">Delete Group</a>
+                var serializedMaterials = JsonSerializer.Serialize(materialsGroup, new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.Preserve
+                });
             }
+            @* @if (materialsGroup != null && materialsGroup.Any()) *@
+            @* { *@
+            @*     <h6>Education Materials:</h6> *@
+            @*     <ul> *@
+            @*         @foreach (var material in materialsGroup) *@
+            @*         { *@
+            @*             <div class="justify-content-start"> *@
+            @*                 <li>@material.Name</li> *@
+            @*                 <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a> *@
+            @*             </div> *@
+            @*         } *@
+            @*     </ul> *@
+            @* } *@
+            @* else *@
+            @* { *@
+            @*     <p>No education materials found for this group.</p> *@
+            @* } *@
+
+            <div class="ui segment">
+                @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                {
+                    <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="btn btn-outline-primary">Edit Group</a>
+                    <a href="@Url.Action("Delete", "Group", new { id = Model.Group.Id })" class="btn btn-outline-danger">Delete Group</a>
+
+                    @if (materialsGroup != null && materialsGroup.Any())
+                    {
+                        <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materials="@serializedMaterials">Education Materials</a>
+                    }
+                }
+            </div>
         </div>
     </div>
 
@@ -89,7 +110,7 @@
             </div>
         </div>
     }
-    <div class="card-footer"> 
+    <div class="card-footer">
         <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
     </div>
 
