@@ -72,10 +72,7 @@ namespace BLL.Services
 
             var query = GetOrderByExpression(sortOrder);
 
-            if (query.IsSuccessful)
-            {
-                assignmentResult = await GetByPredicate(a => a.GroupId == groupId, query.Data);
-            }
+            assignmentResult = await GetByPredicate(a => a.GroupId == groupId, query.Data);
 
             if (!assignmentResult.IsSuccessful)
             {
