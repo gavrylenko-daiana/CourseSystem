@@ -173,8 +173,6 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
                 await _repository.AddAsync(materialFile);
                 await _unitOfWork.Save();
-
-                // group.EducationMaterials.Add(materialFile);
             }
             else if (course != null)
             {
@@ -224,9 +222,10 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         return new Result<Group>(true, group);
     }
 
-    public async Task<Result<List<EducationMaterial>>> GetAllMaterialAsync()
+    public async Task<Result<List<EducationMaterial>>> GetAllMaterialByAccessAsync(MaterialAccess access)
     {
         var materials = await _repository.GetAllAsync();
+        materials = materials.Where(e => e.MaterialAccess == access).ToList();
 
         if (!materials.Any())
         {
