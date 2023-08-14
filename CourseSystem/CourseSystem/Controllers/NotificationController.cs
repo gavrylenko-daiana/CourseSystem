@@ -14,7 +14,8 @@ public class NotificationController : Controller
     private readonly INotificationService _notificationService;
     private readonly ILogger<NotificationController> _logger;
 
-    public NotificationController(UserManager<AppUser> userManager, INotificationService notificationService, ILogger<NotificationController> logger)
+    public NotificationController(UserManager<AppUser> userManager, INotificationService notificationService,
+        ILogger<NotificationController> logger)
     {
         _userManager = userManager;
         _notificationService = notificationService;
@@ -29,6 +30,7 @@ public class NotificationController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -36,8 +38,10 @@ public class NotificationController : Controller
 
         if (!notificationsResult.IsSuccessful)
         {
-            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", currentUser.Id, notificationsResult.Message);
+            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", 
+                currentUser.Id, notificationsResult.Message);
             TempData.TempDataMessage("Error", notificationsResult.Message);
+
             return RedirectToAction("Index", "Home");
         }
 
@@ -52,6 +56,7 @@ public class NotificationController : Controller
         if (currentUser == null)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -59,8 +64,10 @@ public class NotificationController : Controller
 
         if (!notificationsResult.IsSuccessful)
         {
-            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", currentUser.Id, notificationsResult.Message);
+            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", 
+                currentUser.Id, notificationsResult.Message);
             TempData.TempDataMessage("Error", notificationsResult.Message);
+
             return RedirectToAction("Index", "Home");
         }
 
@@ -74,11 +81,13 @@ public class NotificationController : Controller
 
         if (!notificationResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get notification by Id {notificationId}! Error: {errorMessage}", id, notificationResult.Message);
+            _logger.LogError("Failed to get notification by Id {notificationId}! Error: {errorMessage}", 
+                id, notificationResult.Message);
             TempData.TempDataMessage("Error", notificationResult.Message);
+
             return RedirectToAction("ViewAll");
         }
-        
+
         await _notificationService.MarkAsRead(notificationResult.Data);
 
         return View(notificationResult.Data);

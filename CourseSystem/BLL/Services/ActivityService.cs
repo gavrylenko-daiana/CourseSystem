@@ -15,7 +15,7 @@ namespace BLL.Services
 {
     public class ActivityService : GenericService<UserActivity>, IActivityService
     {
-        public ActivityService(UnitOfWork unitOfWork) 
+        public ActivityService(UnitOfWork unitOfWork)
             : base(unitOfWork, unitOfWork.UserActivityRepository)
         {
         }
@@ -30,13 +30,12 @@ namespace BLL.Services
             if (assignment == null)
             {
                 return new Result<bool>(false, $"Invalid {nameof(assignment)}");
-            }  
+            }
 
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.CreatedAssignment),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedAssignment,
-                    new object[] { assignment.Name, assignment.Group.Name, assignment.StartDate, assignment.EndDate }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedAssignment, new object[] { assignment.Name, assignment.Group.Name, assignment.StartDate, assignment.EndDate }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -54,7 +53,7 @@ namespace BLL.Services
             if (course == null)
             {
                 return new Result<bool>(false, $"Invalid {nameof(course)}");
-            }  
+            }
 
             var activity = new UserActivity()
             {
@@ -77,13 +76,12 @@ namespace BLL.Services
             if (group == null)
             {
                 return new Result<bool>(false, $"Invalid {nameof(group)}");
-            } 
+            }
 
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.CreatedGroup),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedGroup,
-                    new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedGroup, new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -101,7 +99,7 @@ namespace BLL.Services
             if (course == null)
             {
                 return new Result<bool>(false, $"Invalid {nameof(course)}");
-            } 
+            }
 
             var activity = new UserActivity()
             {
@@ -129,8 +127,7 @@ namespace BLL.Services
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.JoinedGroup),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.JoinedGroup,
-                    new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.JoinedGroup, new object[] { group.Name, group.Course.Name, group.StartDate, group.EndDate }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -154,7 +151,11 @@ namespace BLL.Services
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.MarkedAssignment),
                 Description = ActivityTemplate.GetActivityDescription(ActivityType.MarkedAssignment,
-                    new object[] { userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, userAssignment.Grade }),
+                    new object[]
+                    {
+                        userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName,
+                        userAssignment.Assignment.Name, userAssignment.Grade
+                    }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -245,6 +246,5 @@ namespace BLL.Services
                 return new Result<bool>(false, ex.Message);
             }
         }
-
     }
 }

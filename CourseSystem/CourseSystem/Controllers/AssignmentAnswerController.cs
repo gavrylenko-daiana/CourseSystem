@@ -13,21 +13,18 @@ namespace UI.Controllers;
 [Authorize]
 public class AssignmentAnswerController : Controller
 {
-    private readonly UserManager<AppUser> _userManager;
     private readonly IAssignmentService _assignmentService;
     private readonly IAssignmentAnswerService _assignmentAnswerService;
     private readonly IUserAssignmentService _userAssignmentService;
     private readonly IUserService _userService;
     private readonly ILogger<AssignmentAnswerController> _logger;
 
-    public AssignmentAnswerController(UserManager<AppUser> userManager,
-        IAssignmentService assignmentService,
+    public AssignmentAnswerController(IAssignmentService assignmentService,
         IAssignmentAnswerService assignmentAnswerService,
         IUserAssignmentService userAssignmentService,
         IUserService userService,
         ILogger<AssignmentAnswerController> logger)
     {
-        _userManager = userManager;
         _assignmentService = assignmentService;
         _assignmentAnswerService = assignmentAnswerService;
         _userAssignmentService = userAssignmentService;
@@ -53,17 +50,19 @@ public class AssignmentAnswerController : Controller
         if (!ModelState.IsValid)
         {
             _logger.LogError("Failed to create assignment answer!");
-            foreach(var error in ModelState.Values.SelectMany(v => v.Errors))
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
             {
                 _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
             }
 
             TempData.TempDataMessage("Error", "Fail to create assignment answer");
+
             return View(assignmentAnswerVM);
         }
 
         var assignmentAnswer = new AssignmentAnswer();
-        assignmentAnswerVM.MapTo<AssignmentAnsweViewModel, AssignmentAnswer>(assignmentAnswer);
+        assignmentAnswerVM.MapTo(assignmentAnswer);
 
         if (!assignmentAnswerVM.AssignmentAnswerFiles.IsNullOrEmpty())
         {
@@ -77,33 +76,34 @@ public class AssignmentAnswerController : Controller
 
         var assignmentResult = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
 
-
         if (!assignmentResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}", 
+            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentAnswerVM.AssignmentId, assignmentResult.Message);
-
             TempData.TempDataMessage("Error", assignmentResult.Message);
+
             return View(assignmentAnswerVM);
         }
 
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
 
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
         var answerResult =
-            await _assignmentAnswerService.CreateAssignmentAnswer(assignmentAnswer, assignmentResult.Data, currentUser);
+            await _assignmentAnswerService.CreateAssignmentAnswer(assignmentAnswer, assignmentResult.Data, currentUserResult.Data);
 
         if (!answerResult.IsSuccessful)
         {
             _logger.LogError("Failed to save assignment answer for user {userId}! Errors: {errorMessage}",
-                currentUser.Id, answerResult.Message);
+                currentUserResult.Data.Id, answerResult.Message);
 
             TempData.TempDataMessage("Error", "Fail to save assignment answer");
+
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
         }
 
@@ -118,12 +118,12 @@ public class AssignmentAnswerController : Controller
         var assignmentAnswerResult = await _assignmentAnswerService.GetById(assignmentAnswerId);
         var assignmentId = assignmentAnswerResult.Data.UserAssignment.AssignmentId;
 
-        if(!assignmentAnswerResult.IsSuccessful)
+        if (!assignmentAnswerResult.IsSuccessful)
         {
             _logger.LogError("Failed to get assignment answer by Id {assignmentAnswerId}! Error: {errorMessage}",
                 assignmentAnswerId, assignmentAnswerResult.Message);
-
             TempData.TempDataMessage("Error", $"{assignmentAnswerResult.Data}");
+
             return RedirectToAction("Index", "Group");
         }
 
@@ -131,9 +131,8 @@ public class AssignmentAnswerController : Controller
 
         if (!deleteResult.IsSuccessful)
         {
-            _logger.LogError("Failed to delete assignment answer by Id {assignmentAnswerId}! Error: {errorMessage}", 
+            _logger.LogError("Failed to delete assignment answer by Id {assignmentAnswerId}! Error: {errorMessage}",
                 assignmentAnswerResult.Data.Id, deleteResult.Message);
-
             TempData.TempDataMessage("Error", deleteResult.Message);
         }
 
@@ -147,12 +146,12 @@ public class AssignmentAnswerController : Controller
     {
         var assignmentResult = await _assignmentService.GetById(assignmentId);
 
-        if(!assignmentResult.IsSuccessful)
+        if (!assignmentResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}", 
+            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentId, assignmentResult.Message);
-
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+
             return RedirectToAction("Index", "Group");
         }
 
@@ -161,7 +160,8 @@ public class AssignmentAnswerController : Controller
         foreach (var userAssignment in assignmentResult.Data.UserAssignments)
         {
             var userAssignmentVM = new UserAssignmentViewModel();
-            userAssignment.MapTo<UserAssignments, UserAssignmentViewModel>(userAssignmentVM);
+            userAssignment.MapTo(userAssignmentVM);
+            
             userAssignmentVM.Id = userAssignment.Id;
             userAssignmentVMs.Add(userAssignmentVM);
         }
@@ -184,17 +184,18 @@ public class AssignmentAnswerController : Controller
         }
 
         var assignmentResult = await _assignmentService.GetById(assignmentId);
-        
-        if(!assignmentResult.IsSuccessful)
+
+        if (!assignmentResult.IsSuccessful)
         {
             _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentId, assignmentResult.Message);
-
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+
             return RedirectToAction("Index", "Group");
         }
-        
-        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(a => a.AppUserId == studentResult.Data.Id);
+
+        var userAssignment =
+            assignmentResult.Data.UserAssignments.FirstOrDefault(a => a.AppUserId == studentResult.Data.Id);
 
         if (userAssignment == null)
         {
@@ -205,7 +206,7 @@ public class AssignmentAnswerController : Controller
         }
 
         var checkAnswerVM = new CheckAnswerViewModel();
-        userAssignment.MapTo<UserAssignments, CheckAnswerViewModel>(checkAnswerVM);
+        userAssignment.MapTo(checkAnswerVM);
 
         TempData["AssignmentId"] = assignmentId;
         TempData["StudentId"] = studentId;
@@ -222,25 +223,25 @@ public class AssignmentAnswerController : Controller
 
         if (grade < 0 || grade > 100)
         {
-            _logger.LogInformation("Teacher tried to grade assignment {assignmentId} for student {studentId} with unacceptable grade {grade}",
+            _logger.LogInformation(
+                "Teacher tried to grade assignment {assignmentId} for student {studentId} with unacceptable grade {grade}",
                 assignmentId, studentId, grade);
-
             TempData.TempDataMessage("Error", "Grade can't be more than 100 or less than 0");
-            return RedirectToAction("CheckAnswer", "AssignmentAnswer",
-                new { assignmentId = assignmentId, studentId = studentId });
+
+            return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = assignmentId, studentId = studentId });
         }
 
         var assignmentResult = await _assignmentService.GetById(assignmentId);
-        
-        if(!assignmentResult.IsSuccessful)
+
+        if (!assignmentResult.IsSuccessful)
         {
             _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentId, assignmentResult.Message);
-
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+
             return RedirectToAction("Index", "Group");
         }
-        
+
         var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
 
         if (userAssignment == null)
@@ -257,13 +258,11 @@ public class AssignmentAnswerController : Controller
         {
             _logger.LogError("Failed to update grade to {grade} for userAssignment by Id {userAssignmentId}! Error: {errorMessage}",
                 grade, userAssignment.Id, updateResult.Message);
-
             TempData.TempDataMessage("Error", updateResult.Message);
-            return RedirectToAction("CheckAnswer", "AssignmentAnswer",
-                new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
+
+            return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
         }
 
-        return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer",
-            new { assignmentId = userAssignment.AssignmentId });
+        return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId });
     }
 }

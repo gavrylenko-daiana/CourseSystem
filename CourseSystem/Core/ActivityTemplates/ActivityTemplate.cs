@@ -51,6 +51,7 @@ namespace Core.ActivityTemplates
         public static string GetActivityDescription(ActivityType activityType, params object[] obs)
         {
             var result = string.Format(_descriptionDictionary[activityType], obs);
+            
             return result;
         }
     }
