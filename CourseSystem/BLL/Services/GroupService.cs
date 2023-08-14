@@ -11,13 +11,15 @@ public class GroupService : GenericService<Group>, IGroupService
 {
     private readonly IUserGroupService _userGroupService;
     private readonly IEducationMaterialService _educationMaterial;
+    private readonly IUserService _userService;
 
-    public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService,
-        IEducationMaterialService educationMaterial)
-        : base(unitOfWork, unitOfWork.GroupRepository)
+    public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService, 
+        IEducationMaterialService educationMaterial, IUserService userService) 
+            : base(unitOfWork, unitOfWork.GroupRepository)
     {
         _userGroupService = userGroupService;
         _educationMaterial = educationMaterial;
+        _userService = userService;
     }
 
     public async Task<Result<bool>> CreateGroup(Group group, AppUser currentUser)
@@ -135,20 +137,40 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     }
 
-    public async Task<double> CalculateGroupProgress(int groupId)
+    public async Task<string> CalculateStudentProgressInGroup(Group group, AppUser currentUser)
+    {
+        var totalAssignments = group.Assignments.Count;
+
+        int completedAssignments = group.Assignments
+            .SelectMany(assignment => assignment.UserAssignments)
+            .Count(userAssignment => userAssignment.AppUserId == currentUser.Id && userAssignment.IsChecked);
+
+        if (completedAssignments == 0)
+        {
+            return "0.0";
+        }
+
+        var averageProgress = (int)((double)completedAssignments / totalAssignments * 100);
+        var strAverageProgress = $"{averageProgress:0.##}";
+
+        return strAverageProgress;
+    }
+
+    public async Task<string> CalculateGroupProgress(int groupId)
     {
         var group = await _repository.GetByIdAsync(groupId);
 
         if (group == null || group.Assignments == null || group.Assignments.Count == 0)
         {
-            return 0.0;
+            return "0.0";
         }
 
         var totalAssignments = group.Assignments.Count;
         var completedAssignments = group.Assignments.Sum(a => a.UserAssignments.Count(ua => ua.Grade > 0));
         var groupProgress = (double)completedAssignments / (totalAssignments * group.UserGroups.Count) * 100;
+        var strGroupProgress = $"{groupProgress:0.##}";
         
-        return groupProgress;
+        return strGroupProgress;
     }
 
     public async Task<Result<List<Group>>> GetAllGroupsAsync()
@@ -202,6 +224,31 @@ public class GroupService : GenericService<Group>, IGroupService
             return new Result<bool>(false, $"{createUserGroupResult.Message}");
         }
 
+        return new Result<bool>(true);
+    }
+    
+    private async Task<Result<bool>> SetStudentProgressInUserGroup(Group group, AppUser currentUser, double progress)
+    {
+        if (group == null)
+        {
+            return new Result<bool>(false, $"{nameof(group)} not found");
+        }
+        
+        if (currentUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(currentUser)} not found");
+        }
+    
+        var userGroups = await _userGroupService.GetByPredicate(ug => ug.AppUserId == currentUser.Id && ug.GroupId == group.Id);
+        var userGroup = userGroups.Data.FirstOrDefault();
+
+        var updateProgressResult = await _userGroupService.UpdateProgressInUserGroups(userGroup, progress);
+    
+        if (!updateProgressResult.IsSuccessful)
+        {
+            return new Result<bool>(false, $"{updateProgressResult.Message}");
+        }
+    
         return new Result<bool>(true);
     }
 }
