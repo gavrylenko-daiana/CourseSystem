@@ -69,7 +69,16 @@ public class GroupController : Controller
         {
             var groupViewModel = new GroupViewModel();
             group.MapTo(groupViewModel);
-            groupViewModel.Progress = _groupService.CalculateGroupProgress(group.Id).Result;
+
+            if (currentUserResult.Data.Role == AppUserRoles.Student)
+            {
+                var setProgressResult = _groupService.CalculateStudentProgressInGroup(group, currentUserResult.Data).Result;
+                groupViewModel.Progress = setProgressResult;
+            }
+            else
+            {
+                groupViewModel.Progress = _groupService.CalculateGroupProgress(group.Id).Result;
+            }
             
             return groupViewModel;
         }).ToList();
@@ -169,6 +178,10 @@ public class GroupController : Controller
             UserGroupsWithoutAdmins = groupResult.Data.UserGroups.Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList(),
             CurrentUser = currentUserResult.Data
         };
+        
+        userGroupVM.Progress = currentUserResult.Data.Role == AppUserRoles.Student ? 
+            _groupService.CalculateStudentProgressInGroup(groupResult.Data, currentUserResult.Data).Result 
+            : _groupService.CalculateGroupProgress(groupResult.Data.Id).Result;
 
         return View(userGroupVM);
     }
