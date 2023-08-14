@@ -1,7 +1,9 @@
 using BLL.Interfaces;
+using Core.Enums;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Services;
@@ -9,14 +11,16 @@ namespace BLL.Services;
 public class CourseService : GenericService<Course>, ICourseService
 {
     private readonly IUserCourseService _userCourseService;
-    private readonly IEducationMaterialService _educationMaterial;
+    private readonly IEducationMaterialService _educationMaterialService;
+    private readonly IGroupService _groupService;
 
     public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
-        IEducationMaterialService educationMaterial)
+        IEducationMaterialService educationMaterial, IGroupService groupService)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
-        _educationMaterial = educationMaterial;
+        _educationMaterialService = educationMaterial;
+        _groupService = groupService;
     }
 
     public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)
@@ -75,7 +79,7 @@ public class CourseService : GenericService<Course>, ICourseService
 
                 foreach (var material in educationMaterialsCopy)
                 {
-                    await _educationMaterial.DeleteFileFromGroup(material);
+                    await _educationMaterialService.DeleteFileFromGroup(material);
                 }
             }
 
@@ -145,5 +149,64 @@ public class CourseService : GenericService<Course>, ICourseService
         }
 
         return new Result<List<Course>>(true, courses);
+    }
+    
+    public async Task<Result<bool>> AddEducationMaterial(IFormFile uploadFile, MaterialAccess materialAccess,
+        int? groupId = null, int? courseId = null)
+    {
+        var fullPath = await _educationMaterialService.AddFileAsync(uploadFile);
+
+        if (!fullPath.IsSuccessful)
+        {
+            return new Result<bool>(false, $"Failed to upload file: {fullPath.Message}");
+        }
+
+        if (materialAccess == MaterialAccess.Group && groupId.HasValue)
+        {
+            var groupResult = await _groupService.GetById(groupId.Value);
+
+            if (!groupResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Message: {groupResult.Message}");
+            }
+
+            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadFile, fullPath.Message,
+                MaterialAccess.Group, groupResult.Data);
+
+            if (!addToGroupResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Message: {addToGroupResult.Message}");
+            }
+        }
+        else if (materialAccess == MaterialAccess.Course && courseId.HasValue)
+        {
+            var courseResult = await GetById(courseId.Value);
+
+            if (!courseResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Message: {courseResult.Message}");
+            }
+
+            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadFile, fullPath.Message,
+                MaterialAccess.Course, null!, courseResult.Data);
+
+            if (!addToCourseResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Message: {addToCourseResult.Message}");
+            }
+        }
+        else if (materialAccess == MaterialAccess.General)
+        {
+            var addToCourseResult =
+                await _educationMaterialService.AddEducationMaterial(uploadFile, fullPath.Message,
+                    MaterialAccess.General);
+
+            if (!addToCourseResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Message: {addToCourseResult.Message}");
+            }
+        }
+
+        return new Result<bool>(true);
     }
 }
