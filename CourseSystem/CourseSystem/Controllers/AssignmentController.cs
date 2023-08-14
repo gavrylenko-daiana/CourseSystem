@@ -5,6 +5,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
 
@@ -24,7 +25,9 @@ public class AssignmentController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(int groupId, string sortOrder) 
     {
-        var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId);
+        ViewBag.NameSortParam = sortOrder.IsNullOrEmpty() ? SortingParams.NameDesc.ToString() : ""; 
+
+        var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId, sortOrder);
 
         if (!groupAssignmentsResult.IsSuccessful)
         {
