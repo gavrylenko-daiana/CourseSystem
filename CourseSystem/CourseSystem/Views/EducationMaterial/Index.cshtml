@@ -3,13 +3,27 @@
 @model List<EducationMaterial>
 
 <!DOCTYPE html>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
 <html>
 <body>
 @if (Model != null && Model.Count > 0)
 {
-    <h5>Uploaded Files:</h5>
     <div class="container py-4">
+        <h2>Uploaded Files:</h2>
+        <div class="ui compact menu">
+            <div class="ui simple dropdown item">
+                Sort by
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item">
+                        <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="IndexSort" asp-route-materials="@Model" asp-route-sortBy="recent">Sort by recent</a>
+                    </div>
+                    <div class="item">
+                        <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="IndexSort" asp-route-materials="@Model" asp-route-sortBy="old">Sort by old</a>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="list-group">
             @foreach (var file in Model)
             {
@@ -18,7 +32,7 @@
                         <div class="col-7">
                             <h5 class="mb-0">@file.Name</h5>
                         </div>
-                        <div class="col-2 d-flex justify-content-end" style="white-space: nowrap;">
+                        <div class="col-5 d-flex justify-content-end" style="white-space: nowrap;">
                             @if (User.Identity.IsAuthenticated && User.IsInRole(AppUserRoles.Admin.ToString()))
                             {
                                 <div class="mx-2">
@@ -27,6 +41,9 @@
                             }
                             <div class="mx-2">
                                 <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@file.Id">Detail</a>
+                            </div>
+                            <div class="mx-2">
+                                <p>@file.UploadTime.ToString("g")</p>
                             </div>
                         </div>
                     </div>

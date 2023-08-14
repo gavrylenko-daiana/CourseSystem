@@ -55,6 +55,18 @@ public class EducationMaterialController : Controller
         
         return View("Index", materialsList);
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> IndexSort(List<EducationMaterial> materials, string sortBy)
+    {
+        if (!(materials != null && materials.Any()))
+        {
+            TempData.TempDataMessage("Error", $"Message: {nameof(materials)} list is empty");
+            return RedirectToAction("Index", "Course");
+        }
+
+        return View("Index", materials);
+    }
 
     [HttpGet]
     public async Task<IActionResult> CreateInGroup(int groupId)
