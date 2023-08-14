@@ -37,9 +37,36 @@
             Sort by
             <i class="dropdown icon"></i>
             <div class="menu">
-                <div class="item"><a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})">Start date</a></div>
-                <div class="item"><a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})">End date</a></div>
-                <div class="item"><a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})">Name</a></div>
+                <div class="item">
+                    @if(ViewBag.StartDateParam == SortingParam.StratDate)
+                    {
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
+                    }
+                </div>
+                <div class="item">
+                    @if (ViewBag.EndDateParam == SortingParam.EndDate)
+                    {
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
+                    }
+                </div>
+                <div class="item">
+                    @if (ViewBag.NameSortParam == SortingParam.Name)
+                    {
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
+                    }
+                </div>
             </div>
         </div>
     </div>
