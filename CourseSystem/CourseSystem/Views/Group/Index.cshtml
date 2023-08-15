@@ -1,55 +1,82 @@
 @model UI.ViewModels.UserGroupsViewModel
 
-<style>
-    .group-card {
-        transition: box-shadow 0.3s ease;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Page Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
 
-    .group-card:hover {
-        box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-    }
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
 
-    .selected-group-card {
-        border: 2px solid #ff0000;
-    }
-</style>
+        .ui.container {
+            margin-top: 20px;
+        }
 
-<div class="container mt-4">
-    <h3>Groups</h3>
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
-        </div>
-    }
-    <hr/>
-    @if (Model.Groups.Any())
-    {
-        <div class="row row-cols-2">
-            @foreach (var group in Model.Groups)
+        .add-course-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .cover-card {
+            height: 200px; 
+        }             
+    </style>
+</head>
+<body>
+    <div class="ui container">
+        <h3 class="ui header">Groups</h3>
+        <hr class="ui divider">
+        <div class="ui stackable three column grid">
+            @if (!Model.Groups.Any())
             {
-                <div class="col mb-4">
-                    <div class="card group-card">
-                        <div class="card-body">
-                            <h5 class="card-title">@group.Name</h5>
-                            <p>Progress: @group.Progress%</p>
-                            <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="btn btn-outline-primary">Details</a>
-                        </div>
-                    </div>
+                <div class="column">
+                    <div class="ui warning message">No groups found.</div>
                 </div>
             }
+            else
+            {
+                @foreach (var group in Model.Groups)
+                {
+                    <div class="column">
+                        <div class="ui card cover-card">
+                            <div class="content">
+                                <div class="header">@group.Name</div>
+                                <p>Progress: @group.Progress%</p>
+                            </div>
+                            <div class="extra content">
+                                <a href="@Url.Action("Details", new { id = group.Id })" class="ui details-button button">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+@if (TempData["Error"] != null)
+    {
+        <div class="ui container">
+            <div class="ui negative message">
+                <span>@TempData["Error"]</span>
+            </div>
         </div>
     }
-    else
-    {
-        <p>No groups found for the current user.</p>
-    }
-</div>
+</body>
+</html>
 
 <script>
-    document.querySelectorAll('.group-card').forEach(groupCard => {
-        groupCard.addEventListener('click', function () {
-            window.location.href = this.querySelector('.btn-outline-primary').href;
+    document.querySelectorAll('.ui.card').forEach(card => {
+        card.addEventListener('click', function () {
+            window.location.href = this.querySelector('.ui.details-button.button').href;
         });
     });
 </script>

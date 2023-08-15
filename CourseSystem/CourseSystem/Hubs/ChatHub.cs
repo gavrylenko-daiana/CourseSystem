@@ -10,66 +10,78 @@ namespace UI.Hubs
         private readonly IChatMessageService _chatMessageService;
         private readonly IAssignmentService _assignmentService;
         private readonly IUserService _userService;
+        private readonly ILogger<ChatHub> _logger;
         
-        public ChatHub(IChatMessageService chatMessageService, IAssignmentService assignmentService, IUserService userService)
+        public ChatHub(IChatMessageService chatMessageService, IAssignmentService assignmentService, IUserService userService, ILogger<ChatHub> logger)
         {
             _chatMessageService = chatMessageService;
             _assignmentService = assignmentService;
             _userService = userService;
+            _logger = logger;
         }
 
         public async Task Send(string text, string assignmentId)
         {
-            if (String.IsNullOrWhiteSpace(text))
-            {
-                await Clients.Group(assignmentId).SendAsync("Error", "Empty message");
-            }
 
-            if (assignmentId == null)
+            if (string.IsNullOrEmpty(assignmentId))
             {
+                _logger.LogError("Chat failure: assignmentId wasn't received");
+
                 return;
             }
 
-            var userResult = await _userService.GetCurrentUser(Context.User);
+            var currentUserResult = await _userService.GetCurrentUser(Context.User);
 
-            if (!userResult.IsSuccessful)
+            if (!currentUserResult.IsSuccessful)
             {
-                await Clients.Group(assignmentId).SendAsync("Error", "Unknown user");
+                _logger.LogWarning("Unauthorized user");
+                await Clients.Group(assignmentId).SendAsync("Error", "Unknown user! Try to refresh this page.");
+
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                _logger.LogInformation("User {userId} tried to send empty message or white spaces", currentUserResult.Data.Id);
+                await Clients.Group(assignmentId).SendAsync("Error", "Empty message");
+
+                return;
             }
 
             var assignmentResult = await _assignmentService.GetById(int.Parse(assignmentId));
 
             if (!assignmentResult.IsSuccessful)
             {
-                await Clients.Group(assignmentId).SendAsync("Error", "Unknown assignment");
+                _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}", assignmentId, assignmentResult.Message);
+                await Clients.Group(assignmentId).SendAsync("Error", "Unknown assignment! Try to reload this page.");
+
+                return;
             }
 
-            var message = await _chatMessageService.CreateChatMessage(userResult.Data, assignmentResult.Data, text);
+            var messageResult = await _chatMessageService.CreateChatMessage(currentUserResult.Data, assignmentResult.Data, text);
 
-            if (!message.IsSuccessful)
+            if (!messageResult.IsSuccessful)
             {
-                await Clients.Group(assignmentId).SendAsync("Error", message.Message);
+                _logger.LogError("Failed to create chat message for assignment {assignmentId}! Error: {errorMessage}", assignmentId, messageResult.Message);
+
+                await Clients.Group(assignmentId).SendAsync("Error", "Something went wrong! Please, try again.");
             }
             else
             {
-                await Clients.Group(message.Data.AssignmentId.ToString()).SendAsync("Receive", message.Data.Text, $"{userResult.Data.FirstName} {userResult.Data.LastName}", message.Data.Created.ToString("g"));
+                await Clients.Group(messageResult.Data.AssignmentId.ToString()).SendAsync("Receive", messageResult.Data.Text, $"{currentUserResult.Data.FirstName} {currentUserResult.Data.LastName}", messageResult.Data.Created.ToString("g"));
             }
         }
 
         public async Task AddToAssignmentChat(string assignmentId)
         {
-            try
+            if (string.IsNullOrEmpty(assignmentId))
             {
-                if (assignmentId == null)
-                {
-                    throw new ArgumentNullException(nameof(assignmentId));
-                }
-        
-                await Groups.AddToGroupAsync(Context.ConnectionId, assignmentId);
+                _logger.LogError("Chat failure: assignmentId wasn't received");
+                throw new ArgumentNullException(nameof(assignmentId));
             }
-            catch (Exception ex)
+            else
             {
-                throw new Exception($"User was not added to chat! Exception:{ex.Message}");
+                await Groups.AddToGroupAsync(Context.ConnectionId, assignmentId);
             }
         }
     }
