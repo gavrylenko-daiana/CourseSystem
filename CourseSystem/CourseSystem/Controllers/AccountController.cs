@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.EmailViewModels;
+using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
 
 namespace UI.Controllers;
 
@@ -19,15 +20,18 @@ public class AccountController : Controller
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IEmailService _emailService;
     private readonly IUserService _userService;
+    private readonly ILogger<AccountController> _logger;
 
     public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-        RoleManager<IdentityRole> roleManager, IEmailService emailService, IUserService userService)
+        RoleManager<IdentityRole> roleManager, IEmailService emailService, 
+        IUserService userService, ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
         _emailService = emailService;
         _userService = userService;
+        _logger = logger;
     }
 
     private async Task CreateAppUserRoles()
@@ -74,6 +78,8 @@ public class AccountController : Controller
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
+            _logger.LogError("Authorised user tried to log in the system!");
+
             return RedirectToAction("Logout", "Account");
         }
 
@@ -87,6 +93,13 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("Failed to log in user - invalid input!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             TempData.TempDataMessage("Error", "Values must not be empty. Please try again.");
 
             return View(loginViewModel);
@@ -96,6 +109,8 @@ public class AccountController : Controller
 
         if (!userResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to log in user by email {userEmail}! Error: {errorMessage}", loginViewModel.EmailAddress, userResult.Message);
+
             ViewData.ViewDataMessage("Error", "Entered incorrect email or password. Please try again.");
 
             return View(loginViewModel);
@@ -105,6 +120,8 @@ public class AccountController : Controller
 
         if (!ValidationHelpers.IsValidEmail(loginViewModel.EmailAddress))
         {
+            _logger.LogWarning("Failed to log in user due to invalid email {userEmail}", loginViewModel.EmailAddress);
+
             ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
 
             return View(loginViewModel);
@@ -114,6 +131,8 @@ public class AccountController : Controller
         {
             if (!await _userManager.IsEmailConfirmedAsync(user))
             {
+                _logger.LogWarning("User with not verified email {userEmail} tried to log in!", loginViewModel.EmailAddress);
+
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
 
@@ -146,6 +165,8 @@ public class AccountController : Controller
             }
         }
 
+        _logger.LogWarning("Failed to log in user {userId} due to invalid password", user.Id);
+
         TempData.TempDataMessage("Error", "Entered incorrect email or password. Please try again.");
 
         return View(loginViewModel);
@@ -164,6 +185,13 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("Failed to register user - invalid input!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             return View(registerViewModel);
         }
 
@@ -171,6 +199,9 @@ public class AccountController : Controller
 
         if (userResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to register user by email {userEmail}! Error: user with this email already exists: {userId}", 
+                registerViewModel.Email, userResult.Data.Id);
+
             TempData.TempDataMessage("Error", "This email is already in use");
 
             return View(registerViewModel);
@@ -178,6 +209,8 @@ public class AccountController : Controller
 
         if (!ValidationHelpers.IsValidEmail(registerViewModel.Email))
         {
+            _logger.LogWarning("Failed to register user due to invalid email {userEmail}", registerViewModel.Email);
+
             ViewData.ViewDataMessage("Error", "Entered incorrect email. Please try again.");
 
             return View(registerViewModel);
@@ -228,11 +261,15 @@ public class AccountController : Controller
         }
         else
         {
+            _logger.LogError("Failed to register user!");
+
             var errorMessages = string.Empty;
 
             foreach (var error in newUserResponse.Errors)
             {
                 errorMessages += $"{error.Description}{Environment.NewLine}";
+
+                _logger.LogWarning("Error: {errorMessage}", error.Description);
             }
 
             TempData.TempDataMessage("Error", errorMessages);
@@ -246,6 +283,8 @@ public class AccountController : Controller
     {
         if (userId == null || code == null)
         {
+            _logger.LogWarning("Failed to confirm user email - code or user Id was null");
+
             return View("Error");
         }
 
@@ -253,6 +292,9 @@ public class AccountController : Controller
 
         if (!userResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to confirm email of user {userId}! Error: {errorMessage}", 
+                userId, userResult.Message);
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -273,6 +315,13 @@ public class AccountController : Controller
         }
         else
         {
+            _logger.LogError("Failed to confirm email of user {userId}!", user.Id);
+
+            foreach (var error in result.Errors)
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.Description);
+            }
+
             return View("Error");
         }
     }
@@ -294,6 +343,10 @@ public class AccountController : Controller
         {
             await _signInManager.UserManager.DeleteAsync(userResult.Data);
         }
+        else
+        {
+            _logger.LogWarning("Failed to delete user with id {userId}! Error: {errorMessage}", userId, userResult.Message);
+        }
 
         return View();
     }
@@ -311,6 +364,13 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("Failed to send email for password change to unouthorised user - invalid email input!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             return View(forgotPasswordBeforeEnteringViewModel);
         }
 
@@ -318,6 +378,9 @@ public class AccountController : Controller
 
         if (!userResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to send email for password change to unouthorised user by email {userEmail}! Error: {errorMessage}",
+                forgotPasswordBeforeEnteringViewModel.Email, userResult.Message);
+
             TempData.TempDataMessage("Error", "You wrote an incorrect email. Try again!");
 
             return View(forgotPasswordBeforeEnteringViewModel);
@@ -328,6 +391,9 @@ public class AccountController : Controller
 
         if (!emailCodeResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to send email for password change to unouthorised user by email {userEmail}! Error: {errorMessage}",
+                forgotPasswordBeforeEnteringViewModel.Email, emailCodeResult.Message);
+
             TempData.TempDataMessage("Error", emailCodeResult.Message);
 
             return View(forgotPasswordBeforeEnteringViewModel);
@@ -344,6 +410,8 @@ public class AccountController : Controller
 
         if (!userResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to send code to user - unauthorized user");
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -351,6 +419,9 @@ public class AccountController : Controller
 
         if (!emailCodeResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to send code to user {userId}! Error: {errorMessage}",
+                userResult.Data.Id, emailCodeResult.Message);
+
             TempData.TempDataMessage("Error", emailCodeResult.Message);
 
             return RedirectToAction("Login", "Account");
@@ -378,6 +449,13 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("Failed to check email code - invalid code input!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             return View(forgotViewModel);
         }
 
@@ -418,6 +496,13 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("Failed to reset password - invalid input!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             return View(newPasswordViewModel);
         }
 
@@ -425,6 +510,9 @@ public class AccountController : Controller
 
         if (!result.IsSuccessful)
         {
+            _logger.LogError("Failed to reset password for user with email {userEmail}! Error: {errorMessage}",
+                newPasswordViewModel.Email, result.Message);
+
             TempData.TempDataMessage("Error", "Failed to reset password.");
         }
 
@@ -444,6 +532,9 @@ public class AccountController : Controller
 
         if (userResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to register admin by email {userEmail}! Error: user with this email already exists: {userId}",
+                registerAdminViewModel.Email, userResult.Data.Id);
+
             TempData.TempDataMessage("Error", $"This email already exist");
 
             return View(registerAdminViewModel);
@@ -458,6 +549,13 @@ public class AccountController : Controller
 
         if (!newUserResponse.Succeeded)
         {
+            _logger.LogError("Failed to register new admin!");
+
+            foreach (var error in newUserResponse.Errors)
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.Description);
+            }
+
             TempData.TempDataMessage("Error", "Failed to add new admin");
 
             return View(registerAdminViewModel);
@@ -467,6 +565,9 @@ public class AccountController : Controller
 
         if (!sendResult.IsSuccessful)
         {
+            _logger.LogError("Failed to send email with temporarupassword to new admin {userId}! Error: {errorMessage}",
+                newAdmin.Id, sendResult.Message);
+
             await _userManager.DeleteAsync(newAdmin);
             
             TempData.TempDataMessage("Error", $"{sendResult.Message}");
@@ -495,6 +596,13 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("Failed to reset email - invalid input!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             return View(newEmailViewModel);
         }
 
@@ -502,13 +610,18 @@ public class AccountController : Controller
 
         if (!currentUserResult.IsSuccessful)
         {
+            _logger.LogError("Failed to reset email - unauthorised user!");
+
             return RedirectToAction("Login");
         }
         
         var userResult = await _userService.GetUserByEmailAsync(newEmailViewModel.NewEmail);
         
-        if (!userResult.IsSuccessful)
+        if (userResult.IsSuccessful)
         {
+            _logger.LogWarning("Failed to reset email for user {userId}! Error: user with email {desirableEmail} already exists: {userWithDesirableEmailId}",
+                currentUserResult.Data.Id, newEmailViewModel.NewEmail, userResult.Data.Id);
+
             TempData.TempDataMessage("Error", $"This email already exist");
 
             return View(newEmailViewModel);
@@ -523,9 +636,23 @@ public class AccountController : Controller
                     newEmail = newEmailViewModel.NewEmail
                 });
 
+        var oldEmail = currentUserResult.Data.Email;
+
         currentUserResult.Data.Email = newEmailViewModel.NewEmail;
 
-        await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUserResult.Data, callbackUrl);
+        var emailResult = await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUserResult.Data, callbackUrl);
+
+        if (!emailResult.IsSuccessful)
+        {
+            _logger.LogWarning("Failed to send letter with email change confirmation to email {userEmail} for user {userId}! Error: {errorMessage}",
+                newEmailViewModel.NewEmail, userResult.Data.Id, emailResult.Data);
+
+            currentUserResult.Data.Email = oldEmail;
+
+            TempData.TempDataMessage("Error", "Something went wrong! Your email wasn't changed. Please, try again.");
+
+            return RedirectToAction("Index", "Home");
+        }
 
         TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
 
@@ -538,6 +665,8 @@ public class AccountController : Controller
     {
         if (userId == null || code == null)
         {
+            _logger.LogWarning("Failed to confirm user email reset - code or user Id was null");
+
             return View("Error");
         }
 
@@ -545,6 +674,9 @@ public class AccountController : Controller
 
         if (!userResult.IsSuccessful)
         {
+            _logger.LogError("Failed to confirm email reset for user {userId}! Error: {errorMessage}",
+                userId, userResult.Message);
+
             TempData.TempDataMessage("Error", $"{userResult.Message}");
 
             return RedirectToAction("Login", "Account");
@@ -559,6 +691,9 @@ public class AccountController : Controller
 
             if (!updateResult.IsSuccessful)
             {
+                _logger.LogError("Failed to reset email for user {userId}! Error: {errorMessage}",
+                    userId, updateResult.Message);
+
                 TempData.TempDataMessage("Error", $"{updateResult.Message}");
 
                 return View("Login");
@@ -568,6 +703,13 @@ public class AccountController : Controller
         }
         else
         {
+            _logger.LogError("Failed to confirm email reset for user {userId}!", userId);
+
+            foreach (var error in result.Errors)
+            {
+                _logger.LogWarning("Error: {errorMessage}", error.Description);
+            }
+
             TempData.TempDataMessage("Error", $"Failed to confirm email");
 
             return View("Error");
