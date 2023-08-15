@@ -100,14 +100,13 @@
                             ReferenceHandler = ReferenceHandler.Preserve
                         });                 
                     }
-                  
+                    @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                    {
+                        <a class="ui black basic button mb-3" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
+                    }                  
                     @if (materialsGroup != null && materialsGroup.Any())
                     {
                         <div class="ui segment">
-                            @if (Model.CurrentUser.Role != AppUserRoles.Student)
-                            {
-                                <a class="ui black basic button mb-3" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
-                            }
                             <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materials="@serializedMaterials">Education Materials</a>   
                           
                             <h4 class="ui header">Education Materials:</h4>
