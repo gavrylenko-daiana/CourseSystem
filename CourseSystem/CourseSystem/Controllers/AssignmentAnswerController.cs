@@ -146,7 +146,6 @@ public class AssignmentAnswerController : Controller
     {
         ViewBag.AssignmentId = assignmentId;
         var userAssignmentsResult = await _userAssignmentService.GetAllUserAssignemnts(assignmentId, isMarked);
-        //var assignmentResult = await _assignmentService.GetById(assignmentId);
 
         if (!userAssignmentsResult.IsSuccessful)
         {
