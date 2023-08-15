@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
 using X.PagedList;
+using static Dropbox.Api.Team.GroupSelector;
 
 
 namespace UI.Controllers;
@@ -17,10 +18,14 @@ namespace UI.Controllers;
 public class AssignmentController : Controller
 {
     private readonly IAssignmentService _assignmentService;
+    private readonly IUserService _userService; 
+    private readonly IUserAssignmentService _userAssignmentService;
 
-    public AssignmentController(IAssignmentService assignmentService)
+    public AssignmentController(IAssignmentService assignmentService, IUserService userService, IUserAssignmentService userAssignmentService)
     {
         _assignmentService = assignmentService;
+        _userService = userService;
+        _userAssignmentService = userAssignmentService;
     }
 
     [HttpGet]
@@ -176,17 +181,33 @@ public class AssignmentController : Controller
 
         var assignentDetailsVM = new DetailsAssignmentViewModel();
         assignmentResult.Data.MapTo(assignentDetailsVM);
-        
-        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignmentResult.Data.Id);
-        assignentDetailsVM.UserAssignment = userAssignment;
 
-        if (userAssignment?.AssignmentAnswers == null)
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{currentUserResult.Data}");
+
+            return RedirectToAction("Index", "Assignment", new { groupId = assignmentResult.Data.GroupId});
+        }
+
+        var userAssignemntResult = await _userAssignmentService.GetUserAssignemnt(assignmentResult.Data, currentUserResult.Data);
+        
+        if (!userAssignemntResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{userAssignemntResult.Data}");
+
+            return RedirectToAction("Index", "Assignment", new { groupId = assignmentResult.Data.GroupId });
+        }
+        assignentDetailsVM.UserAssignment = userAssignemntResult.Data;
+
+        if (userAssignemntResult.Data?.AssignmentAnswers == null)
         {
             assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
         }
         else
         {
-            assignentDetailsVM.AssignmentAnswers = userAssignment.AssignmentAnswers;
+            assignentDetailsVM.AssignmentAnswers = userAssignemntResult.Data.AssignmentAnswers;
         }
 
         //logic for getting assignment files 

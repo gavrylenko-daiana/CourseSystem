@@ -97,5 +97,24 @@ namespace BLL.Services
 
             return userAssignmentsResult;
         }
+
+        public async Task<Result<UserAssignments>> GetUserAssignemnt(Assignment assignment, AppUser appUser)
+        {
+            var userAssignemnt = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id && ua.AppUserId == appUser.Id);
+
+            if(userAssignemnt == null)
+            {
+                var userAssignmentResult = await CreateUserAssignment(assignment, appUser);
+
+                if(!userAssignmentResult.IsSuccessful)
+                {
+                    return new Result<UserAssignments>(false, userAssignmentResult.Message);
+                }
+
+                userAssignemnt = userAssignmentResult.Data;
+            }
+
+            return new Result<UserAssignments>(true, userAssignemnt);
+        }
     }
 }
