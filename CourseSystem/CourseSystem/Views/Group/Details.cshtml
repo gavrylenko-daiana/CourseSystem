@@ -127,10 +127,13 @@
                         </div>
                     }
 
+                    @if (Model.Group.GroupAccess == GroupAccess.InProgress)
+                    {
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="ui black basic button">View Assignments</a>
+                    }
                     @if (Model.Group.Assignments != null && Model.Group.Assignments.Any())
                     {
                         <div class="ui segment">
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="ui black basic button">View Assignments</a>
                             <h4 class="ui header">Assignments:</h4>
                             <ul class="ui list">
                                 @foreach (var assignment in Model.Group.Assignments)
