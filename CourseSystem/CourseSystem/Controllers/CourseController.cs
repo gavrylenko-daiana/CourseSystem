@@ -19,6 +19,7 @@ public class CourseController : Controller
     private readonly IUserCourseService _userCourseService;
     private readonly IUserService _userService;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IActivityService _activityService;
     private readonly ILogger<CourseController> _logger;
 
     public CourseController(ICourseService courseService,
@@ -26,6 +27,7 @@ public class CourseController : Controller
         IEmailService emailService,
         IUserCourseService userCourseService,
         IUserService userService,
+        IActivityService activityService,
         ILogger<CourseController> logger)
     {
         _courseService = courseService;
@@ -33,6 +35,7 @@ public class CourseController : Controller
         _emailService = emailService;
         _userCourseService = userCourseService;
         _userService = userService;
+        _activityService = activityService;
         _logger = logger;
     }
 
@@ -102,6 +105,8 @@ public class CourseController : Controller
 
             return View(courseViewModel);
         }
+
+        await _activityService.AddCreatedCourseActivity(currentUserResult.Data, course);
 
         return RedirectToAction("Index");
     }
@@ -364,7 +369,7 @@ public class CourseController : Controller
             return View("Index");
         }
 
-        await _userCourseService.AddTeacherToCourse(courseResult.Data, currentUser);
+        await _activityService.AddJoinedCourseActivity(currentUser, courseResult.Data);
 
         return View();
     }
