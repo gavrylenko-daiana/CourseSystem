@@ -130,6 +130,17 @@ public class EducationMaterialController : Controller
             return View(viewModel);
         }
 
+        var groupResult = await _groupService.GetById(viewModel.GroupId);
+
+        if (!groupResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                viewModel.GroupId, groupResult.Message);
+
+            TempData.TempDataMessage("Error", $"Message: {groupResult.Message}");
+            return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
+        }
+
         var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId, viewModel.CourseId);
 
         if (!addResult.IsSuccessful)
@@ -140,7 +151,7 @@ public class EducationMaterialController : Controller
             return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
         }
 
-        await _activityService.AddAttachedEducationalMaterialForGroupActivity(currentUserResult.Data, viewModel.Group);
+        await _activityService.AddAttachedEducationalMaterialForGroupActivity(currentUserResult.Data, groupResult.Data);
 
         return RedirectToAction("Details", "Group", new { id = viewModel.GroupId });
     }
@@ -181,6 +192,17 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Login", "Account");
         }
 
+        var courseResult = await _courseService.GetById(viewModel.CourseId);
+
+        if (!courseResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                viewModel.CourseId, courseResult.Message);
+
+            TempData.TempDataMessage("Error", $"Message: {courseResult.Message}");
+            return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+        }
+
         var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess,
             viewModel.SelectedGroupId, viewModel.CourseId);
 
@@ -192,7 +214,7 @@ public class EducationMaterialController : Controller
             return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
         }
 
-        await _activityService.AddAttachedEducationalMaterialForCourseActivity(currentUserResult.Data, viewModel.Course);
+        await _activityService.AddAttachedEducationalMaterialForCourseActivity(currentUserResult.Data, courseResult.Data);
 
         return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
     }
