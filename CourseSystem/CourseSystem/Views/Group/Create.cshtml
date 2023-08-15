@@ -53,7 +53,7 @@
                     }
 
                     <button type="submit" class="ui create-button button">Create</button>
-                    <a href="@Url.Action("Index")" class="ui button">Cancel</a>
+                    <a href="@Url.Action("Details", "Course", new { id = Model.CourseId })" class="ui button">Cancel</a>
                 </div>
             }
         </div>
