@@ -1,4 +1,5 @@
 ﻿using BLL.Interfaces;
+using Core.Enums;
 using Core.Models;
 using DAL.Repository;
 using Microsoft.IdentityModel.Tokens;
@@ -83,16 +84,16 @@ namespace BLL.Services
             {
                 if (isMarked.Equals("IsMarked"))
                 {
-                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.IsChecked == true);
+                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AppUser.Role != AppUserRoles.Teacher && a.IsChecked == true);
                 }
                 else
                 {
-                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.IsChecked == false);
+                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AppUser.Role != AppUserRoles.Teacher && a.IsChecked == false);
                 }
             }
             else
             {
-                userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId);
+                userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AppUser.Role != AppUserRoles.Teacher);
             }
 
             return userAssignmentsResult;
