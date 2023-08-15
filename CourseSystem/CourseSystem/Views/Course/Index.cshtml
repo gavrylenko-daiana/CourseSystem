@@ -34,58 +34,62 @@
     </style>
 </head>
 <body>
-    <div class="ui container">
-        <h3 class="ui header">Courses</h3>
-        <hr class="ui divider">
-        <div class="ui stackable three column grid">
-            @if (Model.Courses.Count == 0)
+<div class="ui container">
+    <h3 class="ui header">Courses</h3>
+    <hr class="ui divider">
+    <div class="ui stackable three column grid">
+        @if (Model.Courses.Count == 0)
+        {
+            <div class="column">
+                <div class="ui warning message">No courses found.</div>
+            </div>
+        }
+        else
+        {
+            @foreach (var course in Model.Courses)
             {
                 <div class="column">
-                    <div class="ui warning message">No courses found.</div>
-                </div>
-            }
-            else
-            {
-                @foreach (var course in Model.Courses)
-                {
-                    <div class="column">
-                        <div class="ui card cover-card">
-                            <div class="content">
-                                <div class="header">@course.Name</div>
-                            </div>
-                            <div class="extra content">
-                                <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
-                                @if (Model.CurrentUser.Role == AppUserRoles.Admin)
-                                {
-                                    <div class="ui buttons">
-                                        <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
-                                        <div class="or"></div>
-                                        <a href="@Url.Action("Delete", new { id = course.Id })" class="ui delete-button button">Delete</a>
-                                    </div>
-                                }
-                            </div>
+                    <div class="ui card cover-card">
+                        <div class="content">
+                            <div class="header">@course.Name</div>
+                        </div>
+                        <div class="extra content">
+                            <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
+                            @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                            {
+                                <div class="ui buttons">
+                                    <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
+                                    <div class="or"></div>
+                                    <a href="@Url.Action("Delete", new { id = course.Id })" class="ui delete-button button">Delete</a>
+                                </div>
+                            }
                         </div>
                     </div>
-                }
+                </div>
             }
+        }
+    </div>
+</div>
+
+@if (Model.CurrentUser.Role == AppUserRoles.Admin)
+{
+    <div class="ui container add-course-button">
+        <a asp-action="Create" class="ui basic black button">Add New Course</a>
+    </div>
+}
+<div class="ui container add-course-button">
+    <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
+    <a asp-action="IndexAccess" asp-controller="EducationMaterial" asp-route-access="@MaterialAccess.General" class="ui basic black button">Education Materials</a>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="ui container">
+        <div class="ui negative message">
+            <span>@TempData["Error"]</span>
         </div>
     </div>
-
-    @if (Model.CurrentUser.Role == AppUserRoles.Admin)
-    {
-        <div class="ui container add-course-button">
-            <a asp-action="Create" class="ui basic black button">Add New Course</a>
-        </div>
-    }
-    
-    @if (TempData["Error"] != null)
-    {
-        <div class="ui container">
-            <div class="ui negative message">
-                <span>@TempData["Error"]</span>
-            </div>
-        </div>
-    }
+}
 </body>
 </html>
 
@@ -96,4 +100,3 @@
         });
     });
 </script>
-

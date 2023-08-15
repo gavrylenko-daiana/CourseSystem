@@ -1,148 +1,198 @@
 @using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @model UI.ViewModels.UserGroupViewModel
 
-<style>
-    .object-list li {
-        margin-top: 10px;
-    }
-    
-    .ui.progress {
-        width: 100%;
-        height: 10px;
-        margin-top: 5px;
-    }
-</style>
-
-<div class="container mt-4">
-    <div class="card mb-4">
-        <div class="card-header">
-            Group Details
-        </div>
-        @if (TempData["Error"] != null)
-        {
-            <div class="col-md-12 alert alert-danger">
-                <span><b>Sorry!</b> - @TempData["Error"]</span>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
         }
-        <div class="card-body">
-            <h5 class="card-title">@Model.Group.Name</h5>
-            <p><strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")</p>
-            <p><strong>End Date:</strong> @Model.Group.EndDate.ToString("dd/MM/yyyy")</p>
-            <div><strong>Progress:</strong> 
-                @Model.Progress%
-                <progress class="ui progress" max="100" value="@Model.Progress"></progress>
-            </div>
+            
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
 
-            @{
-                var materialsGroup = Model.Group.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
-            }
-            @if (materialsGroup != null && materialsGroup.Any())
-            {
-                <h6>Education Materials:</h6>
-                <ul>
-                    @foreach (var material in materialsGroup)
+        .user-list {
+            list-style-type: none !important;
+            padding: 0;
+        }
+        
+        .user-item {
+        display: flex;
+                    flex-direction: column;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }     
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            margin-right: 10px;
+        }
+        
+        .ui.teal.basic.button {
+            margin-left: auto;
+        }
+        
+        .left-container {
+            float: left;
+            width: 70%; 
+            padding: 0 10px; 
+        }
+        
+        .right-container {
+            float: right;
+            width: 30%; 
+            padding: 0 10px; 
+        }
+        
+        .view-profile-button {
+            width: 100%;
+            text-align: center;
+            white-space: nowrap;
+            margin-top: 10px;   
+        }
+        
+        .user-button {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui container mt-4">
+        <div class="ui centered raised card" style="width: 90%;">
+            <div class="content">
+                <div class="header">
+                    Group Details
+                </div>
+            </div>
+            <div class="content">
+                <div class="left-container">
+                    <h4 class="ui header">@Model.Group.Name</h4>
+                    <p><strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")</p>
+                    <p><strong>End Date:</strong> @Model.Group.EndDate.ToString("dd/MM/yyyy")</p>
+                    <div><strong>Progress:</strong> 
+                        @Model.Progress%
+                        <progress class="ui progress" max="100" value="@Model.Progress"></progress>
+                    </div>
+        
+                    @if (Model.CurrentUser.Role != AppUserRoles.Student)
                     {
-                        <div class="justify-content-start">
-                            <li>@material.Name</li>
-                            <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
+                        <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="ui edit-button button">Edit Group</a>
+                        <a href="@Url.Action("Delete", "Group", new { id = Model.Group.Id })" class="ui delete-button button">Delete Group</a>
+                    }
+
+                    @{
+                        var materialsGroup = Model.Group.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
+                  
+                        var serializedMaterials = JsonSerializer.Serialize(materialsGroup, new JsonSerializerOptions
+                        {
+                            ReferenceHandler = ReferenceHandler.Preserve
+                        });                 
+                    }
+                    @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                    {
+                        <a class="ui black basic button mb-3" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
+                    }                  
+                    @if (materialsGroup != null && materialsGroup.Any())
+                    {
+                        <div class="ui segment">
+                            <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materials="@serializedMaterials">Education Materials</a>   
+                          
+                            <h4 class="ui header">Education Materials:</h4>
+                            <ul class="ui list">
+                                @foreach (var material in materialsGroup)
+                                {
+                                    <li>@material.Name</li>
+                                    <a class="ui details-button button" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
+                                }
+                            </ul>
                         </div>
                     }
-                </ul>
-            }
-            else
-            {
-                <p>No education materials found for this group.</p>
-            }
-
-            @if (Model.CurrentUser.Role != AppUserRoles.Student)
-            {
-                <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="btn btn-outline-primary">Edit Group</a>
-                <a href="@Url.Action("Delete", "Group", new { id = Model.Group.Id })" class="btn btn-outline-danger">Delete Group</a>
-            }
-        </div>
-    </div>
-
-    @if (Model.Group.Assignments != null && Model.Group.Assignments.Any())
-    {
-        <div class="card mb-4">
-            <div class="card-header">
-                Assignments
-            </div>
-            <div class="card-body, object-list">
-                <ul>
-                    @foreach (var assignment in Model.Group.Assignments)
+                    else
                     {
-                        <li>@assignment.Name</li>
+                        <div class="ui warning message">
+                            <p>No education materials found for this group.</p>
+                        </div>
                     }
-                </ul>
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="card mb-4">
-            <div class="card-header">
-                Assignments
-            </div>
-            <div class="card-body">
-                <p>No assignments found for this group.</p>
-            </div>
-        </div>
-    }
-    <div class="card-footer"> 
-        <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="btn btn-primary">View Assignments</a>
-    </div>
 
-    @if (Model.UserGroupsWithoutAdmins != null && Model.UserGroupsWithoutAdmins.Any())
-    {
-        <div class="card">
-            <div class="card-header">
-                Users
-            </div>
-            <div class="card-body, object-list">
-                <ul>
-                    @foreach (var userGroup in Model.UserGroupsWithoutAdmins.OrderByDescending(ug => ug.AppUser.Role))
+                    @if (Model.Group.Assignments != null && Model.Group.Assignments.Any())
                     {
-                        <li>
-                            @userGroup.AppUser.Role - @userGroup.AppUser.FirstName
-                            <a href="@Url.Action("Detail", "User", new { id = userGroup.AppUser.Id })" class="btn btn-sm btn-outline-primary ml-2">View Profile</a>
-                        </li>
+                        <div class="ui segment">
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="ui black basic button">View Assignments</a>
+                            <h4 class="ui header">Assignments:</h4>
+                            <ul class="ui list">
+                                @foreach (var assignment in Model.Group.Assignments)
+                                {
+                                    <li>@assignment.Name</li>
+                                    <a class="ui details-button button" asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id">Detail</a>
+                                }
+                            </ul>
+                        </div>
                     }
-                </ul>
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="card">
-            <div class="card-header">
-                Users
-            </div>
-            <div class="card-body">
-                <p>No users found for this group.</p>
-            </div>
-        </div>
-    }
+                    else
+                    {
+                        <div class="ui warning message">
+                            <p>No assignment found for this group.</p>
+                        </div>
+                    }
+                </div>
+                
+                <div class="right-container">
+                    <div class="ui center aligned">
+                        @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                        {
+                            <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="ui black basic button mb-3">Add student in group</a>
+                            @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                            {
+                                <a href="@Url.Action("SelectTeachers", "Group", new { courseId = Model.Group.CourseId, groupId = Model.Group.Id })" class="ui black basic button">Add teacher in group</a>
+                            }
+                        }
+                    </div>
 
-    @if (Model.CurrentUser.Role != AppUserRoles.Student)
-    {
-        <div class="card-footer">
-            <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="btn btn-primary">Add student in group</a>
-        </div>
-        @if (Model.CurrentUser.Role == AppUserRoles.Admin)
-        {
-            <div class="card-footer">
-                <a href="@Url.Action("SelectTeachers", "Group", new { courseId = Model.Group.CourseId, groupId = Model.Group.Id })" class="btn btn-primary">Add teacher in group</a>
+                    @if (Model.UserGroupsWithoutAdmins != null && Model.UserGroupsWithoutAdmins.Any())
+                    {
+                        <h4 class="ui header">Users:</h4>
+                        <ul class="ui user-list">
+                            @foreach (var userGroupsWithoutAdmin in Model.UserGroupsWithoutAdmins)
+                            {
+                                <li class="user-item">
+                                    <div class="user-profile">
+                                        <div class="user-details">
+                                            <span>@userGroupsWithoutAdmin.AppUser.FirstName @userGroupsWithoutAdmin.AppUser.LastName - @userGroupsWithoutAdmin.AppUser.Role</span>
+                                        </div>
+                                        <div class="user-button">
+                                            <a href="@Url.Action("Detail", "User", new { id = userGroupsWithoutAdmin.AppUser.Id })" class="ui teal basic button view-profile-button">View Profile</a>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="ui warning message">
+                            <p>No user courses found for this group.</p>
+                        </div>
+                    }
+                </div>
             </div>
-        }
-    }
-    <div class="py-2">
-        <a class="nav-link text-dark btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
+            @if (TempData["Error"] != null)
+            {
+                <div class="col-md-12 alert alert-danger">
+                    <span><b>Sorry!</b> - @TempData["Error"]</span>
+                </div>
+            }
+        </div>
     </div>
-</div>
-@if (TempData["Error"] != null)
-{
-    <div class="col-md-12 alert alert-danger">
-        <span><b>Sorry!</b> - @TempData["Error"]</span>
-    </div>
-}
+</body>

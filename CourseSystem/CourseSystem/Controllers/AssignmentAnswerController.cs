@@ -142,22 +142,23 @@ public class AssignmentAnswerController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> SeeStudentAnswers(int assignmentId)
+    public async Task<IActionResult> SeeStudentAnswers(int assignmentId, string isMarked)
     {
-        var assignmentResult = await _assignmentService.GetById(assignmentId);
+        ViewBag.AssignmentId = assignmentId;
+        var userAssignmentsResult = await _userAssignmentService.GetAllUserAssignemnts(assignmentId, isMarked);
 
-        if (!assignmentResult.IsSuccessful)
+        if (!userAssignmentsResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
-                assignmentId, assignmentResult.Message);
-            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
+            _logger.LogError("Failed to get user assignments by Id {assignmentId}! Error: {errorMessage}",
+                assignmentId, userAssignmentsResult.Message);
+            TempData.TempDataMessage("Error", $"{userAssignmentsResult.Data}");
 
             return RedirectToAction("Index", "Group");
         }
 
         var userAssignmentVMs = new List<UserAssignmentViewModel>();
 
-        foreach (var userAssignment in assignmentResult.Data.UserAssignments)
+        foreach (var userAssignment in userAssignmentsResult.Data)
         {
             var userAssignmentVM = new UserAssignmentViewModel();
             userAssignment.MapTo(userAssignmentVM);
