@@ -39,6 +39,8 @@ public class GroupService : GenericService<Group>, IGroupService
             return new Result<bool>(false, $"Start date must be less than end date");
         }
 
+        SetGroupStatus(group);
+        
         try
         {
             await _repository.AddAsync(group);
@@ -188,6 +190,26 @@ public class GroupService : GenericService<Group>, IGroupService
         return new Result<List<Group>>(true, groups);
     }
 
+    public async Task<Result<List<Group>>> GetUserGroups(AppUser currentUser)
+    {
+        if (currentUser == null)
+        {
+            return new Result<List<Group>>(false, $"{nameof(currentUser)} not found");
+        }
+        
+        var groupsResult = await GetByPredicate(g =>
+            g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUser.Id)));
+
+        if (!groupsResult.IsSuccessful)
+        {
+            return new Result<List<Group>>(false, $"{groupsResult.Message}");
+        }
+        
+        var userGroups = await CheckStartAndEndGroupDate(groupsResult.Data);
+
+        return new Result<List<Group>>(true, userGroups);
+    }
+
     private async Task<Result<bool>> AddAllAdminsAtGroup(Group group)
     {
         if (group.Course.UserCourses.Any())
@@ -253,5 +275,37 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     
         return new Result<bool>(true);
+    }
+    
+    private async Task<List<Group>> CheckStartAndEndGroupDate(List<Group> groups)
+    {
+        foreach (var group in groups)
+        {
+            SetGroupStatus(group);
+
+            await _repository.UpdateAsync(group);
+        }
+
+        await _unitOfWork.Save();
+
+        return groups;
+    }
+    
+    private void SetGroupStatus(Group group)
+    {
+        if (group.StartDate > DateTime.Now)
+        {
+            group.GroupAccess = GroupAccess.Planned;
+        }
+
+        if (group.StartDate <= DateTime.Now)
+        {
+            group.GroupAccess = GroupAccess.InProgress;
+        }
+
+        if (group.EndDate < DateTime.Now)
+        {
+            group.GroupAccess = GroupAccess.Completed;
+        }
     }
 }

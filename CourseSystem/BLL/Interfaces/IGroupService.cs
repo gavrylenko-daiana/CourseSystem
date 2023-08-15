@@ -10,4 +10,5 @@ public interface IGroupService : IGenericService<Group>
     Task<string> CalculateStudentProgressInGroup(Group group, AppUser currentUser);
     Task<string> CalculateGroupProgress(int groupId);
     Task<Result<List<Group>>> GetAllGroupsAsync();
+    Task<Result<List<Group>>> GetUserGroups(AppUser currentUser);
 }
