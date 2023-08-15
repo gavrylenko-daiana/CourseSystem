@@ -163,7 +163,7 @@ namespace BLL.Services
             return await SaveActivity(activity);
         }
 
-        public async Task<Result<bool>> AddSubmittedAssignmentActivity(AppUser user, Assignment assignment)
+        public async Task<Result<bool>> AddSubmittedAssignmentAnswerActivity(AppUser user, Assignment assignment)
         {
             if (user == null)
             {
@@ -177,8 +177,8 @@ namespace BLL.Services
 
             var activity = new UserActivity()
             {
-                Name = ActivityTemplate.GetActivityName(ActivityType.SubmittedAssignment),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.SubmittedAssignment, new object[] { assignment.Name }),
+                Name = ActivityTemplate.GetActivityName(ActivityType.SubmittedAssignmentAnswer),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.SubmittedAssignmentAnswer, new object[] { assignment.Name }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
