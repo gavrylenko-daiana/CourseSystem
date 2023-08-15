@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
+using X.PagedList;
 
 
 namespace UI.Controllers;
@@ -23,11 +24,25 @@ public class AssignmentController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int groupId, SortingParam sortOrder, string searchQuery, string assignmentAccessFilter) 
+    public async Task<IActionResult> Index(int groupId, string currentQueryFilter, string currentAccessFilter, SortingParam sortOrder, string searchQuery, string assignmentAccessFilter, int? page) 
     {
+        ViewBag.CurrentSort = sortOrder;
         ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
         ViewBag.StartDateParam = sortOrder == SortingParam.StartDateDecs ? SortingParam.StratDate : SortingParam.StartDateDecs;
         ViewBag.EndDateParam = sortOrder == SortingParam.EndDateDesc ? SortingParam.EndDate : SortingParam.EndDateDesc;
+
+        if(searchQuery != null || assignmentAccessFilter != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            searchQuery = currentQueryFilter;
+            assignmentAccessFilter = currentAccessFilter;
+        }
+
+        ViewBag.CurrentQueryFilter = searchQuery;
+        ViewBag.CurrentAccessFilter = currentAccessFilter;
 
         var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId, sortOrder, assignmentAccessFilter, searchQuery);
 
@@ -53,8 +68,11 @@ public class AssignmentController : Controller
         }
 
         ViewBag.GroupId = groupId;
+        int pageSize = 3;
+        int pageNumber = (page ?? 1);
+        ViewBag.OnePageOfAssignemnts = assignmentsVM;
 
-        return View(assignmentsVM);
+        return View(assignmentsVM.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]

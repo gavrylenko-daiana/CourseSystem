@@ -1,7 +1,14 @@
 ﻿@using UI.ViewModels.AssignmentViewModels
 @using Core.Enums
+@using X.PagedList.Mvc.Core; 
+@using X.PagedList;
+@using System.Web;
+@using X.PagedList.Web.Common;
+@model X.PagedList.IPagedList<AssignmentViewModel>
 
-@model IEnumerable<AssignmentViewModel>
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@*@model IEnumerable<AssignmentViewModel>*@
 
 <!DOCTYPE html>
 <html lang="en">
@@ -71,31 +78,37 @@
                     <div class="item">
                         @if (ViewBag.StartDateParam == SortingParam.StratDate)
                         {
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam,
+                            currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter })"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
                         }
                         else
                         {
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam,
+                             currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
                         }
                     </div>
                     <div class="item">
                         @if (ViewBag.EndDateParam == SortingParam.EndDate)
                         {
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam,
+                             currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
                         }
                         else
                         {
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam,
+                             currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
                         }
                     </div>
                     <div class="item">
                         @if (ViewBag.NameSortParam == SortingParam.Name)
                         {
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam,
+                             currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
                         }
                         else
                         {
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam,
+                             currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
                         }
                     </div>
                 </div>
@@ -109,14 +122,17 @@
                     @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
                     {
                         <div class="item">
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.Planned.ToString()})">Planned</a>
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.Planned.ToString(),
+                             currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})">Planned</a>
                         </div>
                     }
                     <div class="item">
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.InProgress.ToString()})">In progress</a>
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.InProgress.ToString(),
+                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})">In progress</a>
                     </div>
                     <div class="item">
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.Completed.ToString()})">Completed</a>
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.Completed.ToString(),
+                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})">Completed</a>
                     </div>
                 </div>
             </div>
@@ -164,6 +180,17 @@
             <p>No assignment found for this group.</p>
         }
     </div>
+    <br />
+    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    <div>
+
+        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter }),
+        new PagedListRenderOptions {
+        LiElementClasses = new string[] { "page-item" },
+        PageClasses = new string[] { "page-link" }
+        })
+    </div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
     <script>
