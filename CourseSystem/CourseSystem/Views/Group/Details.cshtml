@@ -79,13 +79,14 @@
             <div class="content">
                 <div class="left-container">
                     <h4 class="ui header">@Model.Group.Name</h4>
+                    <p><strong>Access:</strong> @Model.Group.GroupAccess</p>
                     <p><strong>Start Date:</strong> @Model.Group.StartDate.ToString("dd/MM/yyyy")</p>
                     <p><strong>End Date:</strong> @Model.Group.EndDate.ToString("dd/MM/yyyy")</p>
                     <div><strong>Progress:</strong> 
                         @Model.Progress%
                         <progress class="ui progress" max="100" value="@Model.Progress"></progress>
                     </div>
-        
+
                     @if (Model.CurrentUser.Role != AppUserRoles.Student)
                     {
                         <a href="@Url.Action("Edit", "Group", new { id = Model.Group.Id })" class="ui edit-button button">Edit Group</a>

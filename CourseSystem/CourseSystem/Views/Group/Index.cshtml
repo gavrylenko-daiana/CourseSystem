@@ -1,3 +1,4 @@
+@using Core.Enums
 @model UI.ViewModels.UserGroupsViewModel
 
 <!DOCTYPE html>
@@ -51,6 +52,7 @@
                             <div class="content">
                                 <div class="header">@group.Name</div>
                                 <p>Progress: @group.Progress%</p>
+                                <p>Access: @group.GroupAccess</p>
                             </div>
                             <div class="extra content">
                                 <a href="@Url.Action("Details", new { id = group.Id })" class="ui details-button button">Details</a>
