@@ -1,5 +1,67 @@
 @model UI.ViewModels.GroupViewModel
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Course</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui container" style="margin-top: 20px;">
+        <div class="ui centered card" style="width: 400px;">
+            <div class="content">
+                <div class="header">
+                    Edit Group
+                </div>
+            </div>
+            <div class="content">
+                @using (Html.BeginForm("Edit", "Group", FormMethod.Post))
+                {
+                    @Html.HiddenFor(m => m.Id);
+                    <div class="ui form">
+                        <div class="field">
+                            <label>@Html.LabelFor(model => model.Name)</label>
+                            @Html.TextBoxFor(model => model.Name, new { @class = "ui input" })
+                        </div>
+
+                        <div class="field">
+                            <label> @Html.LabelFor(model => model.StartDate)</label>
+                            @Html.TextBoxFor(model => model.StartDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), @Value = Model.StartDate.ToString("yyyy-MM-dd"), required = "required" })
+                        </div>
+                        
+                        <div class="field">
+                            <label> @Html.LabelFor(model => model.StartDate)</label>
+                            @Html.TextBoxFor(model => model.EndDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), @Value = Model.EndDate.ToString("yyyy-MM-dd"), required = "required" })
+                        </div>
+                        
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="ui negative message">
+                                <p><b>Sorry!</b> - @TempData["Error"]</p>
+                            </div>
+                        }
+
+                        <button type="submit" class="ui edit-button button">Edit</button>
+                        <a href="@Url.Action("Details", "Group", new { id = Model.Id })" class="ui button">Cancel</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
 <div class="container mt-4">
     <div class="card">
         <div class="card-header">
