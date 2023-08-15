@@ -63,7 +63,7 @@
     </div>
     
     <div style="display: flex; align-items: center;">
-        <div class="ui compact menu">
+        <div class="ui compact menu" style="margin-right: 10px;">
             <div class="ui simple dropdown item">
                 Sort by
                 <i class="dropdown icon"></i>
@@ -101,7 +101,7 @@
                 </div>
             </div>
         </div>
-        <div class="ui compact menu">
+        <div class="ui compact menu" style="margin-right: 10px;">
             <div class="ui simple dropdown item">
                 Filter by status
                 <i class="dropdown icon"></i>
@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        <div class="ui search">
+        <div class="ui search" style="margin-right: 10px;">
             <form method="get" asp-action="Index" asp-controller="Assignment" class="ui form inline">
                 <div class="ui icon input">
                     <input type="hidden" id="groupId" name="groupId" value="@ViewBag.GroupId" />
