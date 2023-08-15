@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
+using X.PagedList;
 
 namespace UI.Controllers;
 
@@ -142,9 +143,21 @@ public class AssignmentAnswerController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> SeeStudentAnswers(int assignmentId, string isMarked)
+    public async Task<IActionResult> SeeStudentAnswers(int assignmentId, string isMarked, string currentFilter, int? page)
     {
         ViewBag.AssignmentId = assignmentId;
+
+        if(isMarked != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            isMarked = currentFilter;
+        }
+
+        ViewBag.CurrentFilter = isMarked;
+
         var userAssignmentsResult = await _userAssignmentService.GetAllUserAssignemnts(assignmentId, isMarked);
 
         if (!userAssignmentsResult.IsSuccessful)
@@ -167,7 +180,10 @@ public class AssignmentAnswerController : Controller
             userAssignmentVMs.Add(userAssignmentVM);
         }
 
-        return View(userAssignmentVMs);
+        int pageSize = 4;
+        int pageNumber = (page ?? 1);
+
+        return View(userAssignmentVMs.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]

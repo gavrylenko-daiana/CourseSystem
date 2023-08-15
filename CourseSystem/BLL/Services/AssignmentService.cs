@@ -182,10 +182,10 @@ namespace BLL.Services
                 case SortingParam.NameDesc:
                     query = q => q.OrderByDescending(q => q.Name);
                     break;
-                case SortingParam.StartDateDecs:
+                case SortingParam.StartDateDesc:
                     query = q => q.OrderByDescending(q => q.StartDate);
                     break;
-                case SortingParam.StratDate:
+                case SortingParam.StartDate:
                     query = q => q.OrderBy(q => q.StartDate);
                     break;
                 case SortingParam.EndDate:

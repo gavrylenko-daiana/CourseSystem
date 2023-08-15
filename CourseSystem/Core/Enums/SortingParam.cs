@@ -12,7 +12,7 @@ namespace Core.Enums
         Name,
         EndDateDesc,
         EndDate,
-        StratDate,
-        StartDateDecs
+        StartDate,
+        StartDateDesc
     }
 }

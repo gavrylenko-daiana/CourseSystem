@@ -73,7 +73,7 @@
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     <div class="item">
-                        @if (ViewBag.StartDateParam == SortingParam.StratDate)
+                        @if (ViewBag.StartDateParam == SortingParam.StartDate)
                         {
                             <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam,
                             currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter })"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
