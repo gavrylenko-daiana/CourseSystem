@@ -19,7 +19,8 @@ namespace Core.ActivityTemplates
             {ActivityType.MarkedAssignment, "You marked an assignment" },
             {ActivityType.SubmittedAssignmentAnswer, "You submitted an assignment answer" },
             {ActivityType.AttachedEducationalMaterialForGroup, "You attached a new educational material" },
-            {ActivityType.AttachedEducationalMaterialForCourse, "You attached a new educational material" }
+            {ActivityType.AttachedEducationalMaterialForCourse, "You attached a new educational material" },
+            {ActivityType.AttachedGeneralEducationalMaterial, "You attached a new educational material" }
         };
 
         private static readonly Dictionary<ActivityType, string> _descriptionDictionary = new()
@@ -39,7 +40,8 @@ namespace Core.ActivityTemplates
                 "His/her grade: {3}/100." },
             {ActivityType.SubmittedAssignmentAnswer, "You submitted a solution for assignment \"{0}\"." },
             {ActivityType.AttachedEducationalMaterialForGroup, "You attached a new educational material for group \"{0}\"." },
-            {ActivityType.AttachedEducationalMaterialForCourse, "You attached a new educational material for course \"{0}\"." }
+            {ActivityType.AttachedEducationalMaterialForCourse, "You attached a new educational material for course \"{0}\"." },
+            {ActivityType.AttachedGeneralEducationalMaterial, "You attached a new educational material for general access" }
         };
 
 

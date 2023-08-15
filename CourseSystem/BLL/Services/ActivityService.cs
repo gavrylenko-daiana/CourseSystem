@@ -232,8 +232,26 @@ namespace BLL.Services
 
             var activity = new UserActivity()
             {
+                Name = ActivityTemplate.GetActivityName(ActivityType.AttachedEducationalMaterialForGroup),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForGroup, new object[] { group.Name }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddAttachedGeneralEducationalMaterialActivity(AppUser user)
+        {
+            if (user == null)
+            {
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
+            }
+
+            var activity = new UserActivity()
+            {
                 Name = ActivityTemplate.GetActivityName(ActivityType.AttachedEducationalMaterialForCourse),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForCourse, new object[] { group.Name }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedGeneralEducationalMaterial, new object[] { }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
