@@ -24,7 +24,8 @@ public class AssignmentController : Controller
     private readonly IUserAssignmentService _userAssignmentService;
     private readonly ILogger<AssignmentController> _logger;
 
-    public AssignmentController(IAssignmentService assignmentService, IUserService userService, IUserAssignmentService userAssignmentService)
+    public AssignmentController(IAssignmentService assignmentService, IUserService userService, 
+        IUserAssignmentService userAssignmentService, ILogger<AssignmentController> logger)
     {
         _assignmentService = assignmentService;
         _userService = userService;
