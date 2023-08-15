@@ -54,8 +54,7 @@ public class GroupController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var groupsResult = await _groupService.GetByPredicate(g =>
-            g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUserResult.Data.Id)));
+        var groupsResult = await _groupService.GetUserGroups(currentUserResult.Data);
 
         if (!groupsResult.IsSuccessful)
         {
