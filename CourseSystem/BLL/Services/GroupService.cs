@@ -39,6 +39,8 @@ public class GroupService : GenericService<Group>, IGroupService
             return new Result<bool>(false, $"Start date must be less than end date");
         }
 
+        SetGroupStatus(group);
+        
         try
         {
             await _repository.AddAsync(group);
@@ -253,5 +255,23 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     
         return new Result<bool>(true);
+    }
+    
+    private void SetGroupStatus(Group group)
+    {
+        if (group.StartDate > DateTime.Now)
+        {
+            group.GroupAccess = GroupAccess.Planned;
+        }
+
+        if (group.StartDate <= DateTime.Now)
+        {
+            group.GroupAccess = GroupAccess.InProgress;
+        }
+
+        if (group.EndDate < DateTime.Now)
+        {
+            group.GroupAccess = GroupAccess.Completed;
+        }
     }
 }
