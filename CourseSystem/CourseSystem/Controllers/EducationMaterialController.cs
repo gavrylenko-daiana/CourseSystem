@@ -119,21 +119,10 @@ public class EducationMaterialController : Controller
 
         if (!addResult.IsSuccessful)
         {
-            _logger.LogError("Failed to attach educational material {filePath} to group {groupId}! Error: {errorMessage}", 
-                fullPath.Data, groupResult.Data.Id, addResult.Message);
+            _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
+
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-            return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
-        }
-
-        var updateResult = await _groupService.UpdateGroup(addResult.Data);
-
-        if (!updateResult.IsSuccessful)
-        {
-            _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}",
-                addResult.Data.Id, updateResult.Message);
-            TempData.TempDataMessage("Error", $"Message: {updateResult.Message}");
-
-            return View(viewModel);
+            return RedirectToAction("CreateInCourse", "EducationMaterial", new { groupId = viewModel.CourseId });
         }
 
         return RedirectToAction("Details", "Group", new { id = viewModel.GroupId });
