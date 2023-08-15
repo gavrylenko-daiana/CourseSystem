@@ -1,3 +1,4 @@
+using Core.Enums;
 using Core.Models;
 
 namespace UI.ViewModels;
@@ -10,4 +11,5 @@ public class GroupViewModel
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string Progress { get; set; }
+    public GroupAccess GroupAccess { get; set; }
 }
