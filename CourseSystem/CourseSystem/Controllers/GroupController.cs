@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using UI.ViewModels;
 using Group = Core.Models.Group;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace UI.Controllers;
 
@@ -22,6 +23,7 @@ public class GroupController : Controller
     private readonly IUserCourseService _userCourseService;
     private readonly UserManager<AppUser> _userManager;
     private readonly IUserService _userService;
+    private readonly IActivityService _activityService;
     private readonly ILogger<GroupController> _logger;
 
     public GroupController(IGroupService groupService, ICourseService courseService,
@@ -30,6 +32,7 @@ public class GroupController : Controller
         IUserGroupService userGroupService,
         IUserCourseService userCourseService,
         IUserService userService,
+        IActivityService activityService,
         ILogger<GroupController> logger)
     {
         _groupService = groupService;
@@ -39,6 +42,7 @@ public class GroupController : Controller
         _userGroupService = userGroupService;
         _userCourseService = userCourseService;
         _userService = userService;
+        _activityService = activityService;
         _logger = logger;
     }
 
@@ -151,6 +155,8 @@ public class GroupController : Controller
 
             return View(groupViewModel);
         }
+
+        await _activityService.AddCreatedGroupActivity(currentUserResult.Data, group);
 
         return RedirectToAction("Details", "Group", new { id = group.Id });
     }
@@ -435,6 +441,8 @@ public class GroupController : Controller
                 };
 
                 await _userGroupService.CreateUserGroups(userGroup);
+
+                await _activityService.AddJoinedGroupActivity(teacher, groupResult.Data);
             }
         }
 
@@ -537,6 +545,24 @@ public class GroupController : Controller
             GroupId = groupId
         };
 
+        Course course = null;
+
+        if(!currentUserResult.Data.UserCourses.Any(uc => uc.CourseId == groupResult.Data.CourseId))
+        {
+            var courseResult = await _courseService.GetById(groupResult.Data.CourseId);
+
+            if (!courseResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                    groupResult.Data.CourseId, courseResult.Message);
+                ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+
+                return View("Index");
+            }
+
+            course = courseResult.Data;
+        }
+
         var addStudentToGroupAndCourseResult = await _userCourseService.AddStudentToGroupAndCourse(userGroup);
 
         if (!addStudentToGroupAndCourseResult.IsSuccessful)
@@ -547,6 +573,13 @@ public class GroupController : Controller
 
             return RedirectToAction("Index", "Home");
         }
+
+        if(course != null)
+        {
+            await _activityService.AddJoinedCourseActivity(currentUserResult.Data, course);
+        }
+        
+        await _activityService.AddJoinedGroupActivity(currentUserResult.Data, groupResult.Data);
 
         var inventationVM = new InventationViewModel()
         {
