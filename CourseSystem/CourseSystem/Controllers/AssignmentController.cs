@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
+using X.PagedList;
 using static Dropbox.Api.Files.ListRevisionsMode;
 using static Dropbox.Api.Team.GroupSelector;
 
@@ -19,20 +20,38 @@ namespace UI.Controllers;
 public class AssignmentController : Controller
 {
     private readonly IAssignmentService _assignmentService;
+    private readonly IUserService _userService; 
+    private readonly IUserAssignmentService _userAssignmentService;
     private readonly ILogger<AssignmentController> _logger;
 
-    public AssignmentController(IAssignmentService assignmentService, ILogger<AssignmentController> logger)
+    public AssignmentController(IAssignmentService assignmentService, IUserService userService, IUserAssignmentService userAssignmentService)
     {
         _assignmentService = assignmentService;
+        _userService = userService;
+        _userAssignmentService = userAssignmentService;
         _logger = logger;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int groupId, SortingParam sortOrder, string searchQuery, string assignmentAccessFilter) 
+    public async Task<IActionResult> Index(int groupId, string currentQueryFilter, string currentAccessFilter, SortingParam sortOrder, string searchQuery, string assignmentAccessFilter, int? page) 
     {
+        ViewBag.CurrentSort = sortOrder;
         ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
-        ViewBag.StartDateParam = sortOrder == SortingParam.StartDateDecs ? SortingParam.StratDate : SortingParam.StartDateDecs;
+        ViewBag.StartDateParam = sortOrder == SortingParam.StartDateDesc ? SortingParam.StartDate : SortingParam.StartDateDesc;
         ViewBag.EndDateParam = sortOrder == SortingParam.EndDateDesc ? SortingParam.EndDate : SortingParam.EndDateDesc;
+
+        if(searchQuery != null || assignmentAccessFilter != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            searchQuery = currentQueryFilter;
+            assignmentAccessFilter = currentAccessFilter;
+        }
+
+        ViewBag.CurrentQueryFilter = searchQuery;
+        ViewBag.CurrentAccessFilter = assignmentAccessFilter;
 
         var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId, sortOrder, assignmentAccessFilter, searchQuery);
 
@@ -61,8 +80,11 @@ public class AssignmentController : Controller
         }
 
         ViewBag.GroupId = groupId;
+        int pageSize = 4;
+        int pageNumber = (page ?? 1);
+        ViewBag.OnePageOfAssignemnts = assignmentsVM;
 
-        return View(assignmentsVM);
+        return View(assignmentsVM.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]
@@ -186,17 +208,33 @@ public class AssignmentController : Controller
 
         var assignentDetailsVM = new DetailsAssignmentViewModel();
         assignmentResult.Data.MapTo(assignentDetailsVM);
-        
-        var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignmentResult.Data.Id);
-        assignentDetailsVM.UserAssignment = userAssignment;
 
-        if (userAssignment?.AssignmentAnswers == null)
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{currentUserResult.Data}");
+
+            return RedirectToAction("Index", "Assignment", new { groupId = assignmentResult.Data.GroupId});
+        }
+
+        var userAssignemntResult = await _userAssignmentService.GetUserAssignemnt(assignmentResult.Data, currentUserResult.Data);
+        
+        if (!userAssignemntResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"{userAssignemntResult.Data}");
+
+            return RedirectToAction("Index", "Assignment", new { groupId = assignmentResult.Data.GroupId });
+        }
+        assignentDetailsVM.UserAssignment = userAssignemntResult.Data;
+
+        if (userAssignemntResult.Data?.AssignmentAnswers == null)
         {
             assignentDetailsVM.AssignmentAnswers = new List<AssignmentAnswer>();
         }
         else
         {
-            assignentDetailsVM.AssignmentAnswers = userAssignment.AssignmentAnswers;
+            assignentDetailsVM.AssignmentAnswers = userAssignemntResult.Data.AssignmentAnswers;
         }
 
         //logic for getting assignment files 

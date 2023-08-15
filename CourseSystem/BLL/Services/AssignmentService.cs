@@ -71,8 +71,14 @@ namespace BLL.Services
             Result<List<Assignment>> assignmentResult = null;
 
             var query = GetOrderByExpression(sortOrder);
+            
 
-            if (!string.IsNullOrEmpty(searchQuery))
+            if (!string.IsNullOrEmpty(searchQuery) && !string.IsNullOrEmpty(assignmentAccessFilter))
+            {
+                var tempFilter = Enum.Parse(typeof(AssignmentAccess), assignmentAccessFilter);
+                assignmentResult = await GetByPredicate(a => a.GroupId == groupId && a.Name.Contains(searchQuery) && a.AssignmentAccess.Equals(tempFilter), query.Data);
+            }
+            else if (!string.IsNullOrEmpty(searchQuery))
             {
                 assignmentResult = await GetByPredicate(a => a.GroupId == groupId && a.Name.Contains(searchQuery), query.Data);
             }
@@ -176,10 +182,10 @@ namespace BLL.Services
                 case SortingParam.NameDesc:
                     query = q => q.OrderByDescending(q => q.Name);
                     break;
-                case SortingParam.StartDateDecs:
+                case SortingParam.StartDateDesc:
                     query = q => q.OrderByDescending(q => q.StartDate);
                     break;
-                case SortingParam.StratDate:
+                case SortingParam.StartDate:
                     query = q => q.OrderBy(q => q.StartDate);
                     break;
                 case SortingParam.EndDate:

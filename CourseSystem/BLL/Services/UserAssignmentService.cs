@@ -1,4 +1,5 @@
 ﻿using BLL.Interfaces;
+using Core.Enums;
 using Core.Models;
 using DAL.Repository;
 using Microsoft.IdentityModel.Tokens;
@@ -83,19 +84,38 @@ namespace BLL.Services
             {
                 if (isMarked.Equals("IsMarked"))
                 {
-                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.IsChecked == true);
+                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AppUser.Role != AppUserRoles.Teacher && a.IsChecked == true);
                 }
                 else
                 {
-                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.IsChecked == false);
+                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AppUser.Role != AppUserRoles.Teacher && a.IsChecked == false);
                 }
             }
             else
             {
-                userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId);
+                userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AppUser.Role != AppUserRoles.Teacher);
             }
 
             return userAssignmentsResult;
+        }
+
+        public async Task<Result<UserAssignments>> GetUserAssignemnt(Assignment assignment, AppUser appUser)
+        {
+            var userAssignemnt = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id && ua.AppUserId == appUser.Id);
+
+            if(userAssignemnt == null)
+            {
+                var userAssignmentResult = await CreateUserAssignment(assignment, appUser);
+
+                if(!userAssignmentResult.IsSuccessful)
+                {
+                    return new Result<UserAssignments>(false, userAssignmentResult.Message);
+                }
+
+                userAssignemnt = userAssignmentResult.Data;
+            }
+
+            return new Result<UserAssignments>(true, userAssignemnt);
         }
     }
 }

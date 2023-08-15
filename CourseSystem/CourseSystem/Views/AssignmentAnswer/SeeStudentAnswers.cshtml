@@ -1,7 +1,9 @@
 ﻿@using UI.ViewModels
-
-@model IEnumerable<UserAssignmentViewModel>
-
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@using System.Web;
+@using X.PagedList.Web.Common;
+@model X.PagedList.IPagedList<UserAssignmentViewModel>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -60,10 +62,10 @@
             <i class="dropdown icon"></i>
             <div class="menu">
                 <div class="item">
-                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, isMarked = "IsMarked"})">Marked</a>
+                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, currentFilter = "IsMarked"})">Marked</a>
                 </div>
                 <div class="item">
-                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, isMarked = "NotMarked"})">Not Marked</a>
+                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, currentFilter = "NotMarked"})">Not Marked</a>
                 </div>
             </div>
         </div>
@@ -111,6 +113,17 @@
         }
 
     </div>
+    <br />
+    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    <div>
+
+        @Html.PagedListPager((IPagedList)Model, page => Url.Action("SeeStudentAnswers", new {  assignmentId = ViewBag.AssignmentId, page = page, currentFilter = ViewBag.CurrentFilter}),
+        new PagedListRenderOptions {
+        LiElementClasses = new string[] { "page-item" },
+        PageClasses = new string[] { "page-link" }
+        })
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
     <script>
