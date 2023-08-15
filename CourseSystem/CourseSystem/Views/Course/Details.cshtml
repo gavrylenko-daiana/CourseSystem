@@ -126,9 +126,9 @@
                 }                  
 
                 @{
-                    var materialsGroup = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+                    var materialsGroup = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
                     var materialsCourse = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
-          
+
                     var serializedMaterials = JsonSerializer.Serialize(materialsCourse, new JsonSerializerOptions
                           {
                               ReferenceHandler = ReferenceHandler.Preserve
