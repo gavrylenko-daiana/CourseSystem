@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
 using UI.ViewModels.EmailViewModels;
+using static Dropbox.Api.Files.ListRevisionsMode;
 
 namespace UI.Controllers;
 
@@ -16,11 +17,13 @@ public class UserController : Controller
 {
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
+    private readonly ILogger<UserController> _logger;
 
-    public UserController(IEmailService emailService, IUserService userService)
+    public UserController(IEmailService emailService, IUserService userService, ILogger<UserController> logger)
     {
         _emailService = emailService;
         _userService = userService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -34,6 +37,8 @@ public class UserController : Controller
         }
         else
         {
+            _logger.LogWarning("Unauthorized user");
+
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
 
             return RedirectToAction("Login", "Account");
@@ -51,6 +56,9 @@ public class UserController : Controller
         }
         else
         {
+            _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}",
+                id, result.Message);
+
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
 
             return RedirectToAction("Index", "User");
@@ -71,6 +79,8 @@ public class UserController : Controller
         }
         else
         {
+            _logger.LogError("Failed to edit profile - unauthorized user!");
+
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
 
             return RedirectToAction("Index", "User");
@@ -82,6 +92,13 @@ public class UserController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogError("Failed to edit profile!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             TempData.TempDataMessage("Error", "Failed to edit profile");
 
             return View("Edit", editUserViewModel);
@@ -94,6 +111,8 @@ public class UserController : Controller
 
         if (!result.IsSuccessful)
         {
+            _logger.LogError("Failed to edit user! Error: {errorMessage}", result);
+
             TempData.TempDataMessage("Error", $"Edit is not successful. Please try again! - Message: {result.Message}");
 
             return View("Edit", editUserViewModel);
@@ -115,6 +134,8 @@ public class UserController : Controller
         }
         else
         {
+            _logger.LogError("Failed to edit password - unauthorized user!");
+
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
 
             return RedirectToAction("Index", "User");
@@ -127,6 +148,13 @@ public class UserController : Controller
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogError("Failed to edit password!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             TempData.TempDataMessage("Error", "Failed to edit password");
 
             return View("EditPassword", editUserPasswordViewModel);
@@ -142,6 +170,8 @@ public class UserController : Controller
         }
         else
         {
+            _logger.LogWarning("Failed to check password! Error: {errorMessage}", resultCheckPassword.Message);
+
             TempData.TempDataMessage("Error", "You entered incorrect password");
 
             return View("EditPassword", editUserPasswordViewModel);
@@ -159,6 +189,8 @@ public class UserController : Controller
         }
         else
         {
+            _logger.LogError("Failed to edit password - unauthorized user!");
+
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
 
             return RedirectToAction("Index", "User");
@@ -185,6 +217,9 @@ public class UserController : Controller
 
             if (!deletionSendingResult.IsSuccessful)
             {
+                _logger.LogError("Failed to send email with user {userId} account's deletion confirmation request to admins! Error: {errorMessage}",
+                    user.Id, deletionSendingResult.Message);
+
                 TempData.TempDataMessage("Error", deletionSendingResult.Message);
 
                 return RedirectToAction("Login", "Account");
@@ -196,6 +231,8 @@ public class UserController : Controller
         }
         else
         {
+            _logger.LogError("Failed to delete password - unauthorized user!");
+
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
 
             return RedirectToAction("Index", "User");
@@ -207,6 +244,8 @@ public class UserController : Controller
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
+            _logger.LogError("Failed to confirm user deletion - user Id wasn't received!");
+
             TempData.TempDataMessage("Error", $"Failed to get user by id");
 
             return RedirectToAction("Index", "User");
@@ -225,7 +264,17 @@ public class UserController : Controller
                 new { userId = userId },
                 protocol: HttpContext.Request.Scheme);
 
-            await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByUser, user, actionLink);
+            var deletionConfirmedEmailResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmDeletionByUser, user, actionLink);
+
+            if (!deletionConfirmedEmailResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to send email with user {userId} account's deletion confirmation to user! Error: {errorMessage}",
+                    user.Id, deletionConfirmedEmailResult.Message);
+
+                TempData.TempDataMessage("Error", deletionConfirmedEmailResult.Message);
+
+                return RedirectToAction("ConfirmUserDeletion", "User", userId);
+            }
 
             var confirmDeleteVM = new ConfirmUserDeleteViewModel();
             user.MapTo(confirmDeleteVM);
@@ -234,6 +283,9 @@ public class UserController : Controller
         }
         else
         {
+            _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}",
+                userId, result.Message);
+
             TempData.TempDataMessage("Error", $"Failed to get {nameof(result.Data)} - Message: {result.Message}");
 
             return RedirectToAction("Index", "User");

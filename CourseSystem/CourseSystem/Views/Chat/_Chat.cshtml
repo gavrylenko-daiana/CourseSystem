@@ -62,9 +62,14 @@
 
         hubConnection.start()
             .then(function () {
-                let assignment = document.getElementById("assignmentId").value;
-                hubConnection.invoke("AddToAssignmentChat", assignment);
                 document.getElementById("sendBtn").disabled = false;
+
+                let assignment = document.getElementById("assignmentId").value;
+                hubConnection.invoke("AddToAssignmentChat", assignment)
+                .catch(function (err) {
+                    document.getElementById("errorMessage").innerText = "Something went wrong! Please, try reloading this page.";
+                    document.getElementById("sendBtn").disabled = true;
+                });
             })
             .catch(function (err) {
                 return console.error(err.toString());

@@ -3,11 +3,14 @@ using Core.Enums;
 using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
+using static Dropbox.Api.Files.ListRevisionsMode;
+using static Dropbox.Api.Team.GroupSelector;
 
 
 namespace UI.Controllers;
@@ -16,10 +19,12 @@ namespace UI.Controllers;
 public class AssignmentController : Controller
 {
     private readonly IAssignmentService _assignmentService;
+    private readonly ILogger<AssignmentController> _logger;
 
-    public AssignmentController(IAssignmentService assignmentService)
+    public AssignmentController(IAssignmentService assignmentService, ILogger<AssignmentController> logger)
     {
         _assignmentService = assignmentService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -33,6 +38,9 @@ public class AssignmentController : Controller
 
         if (!groupAssignmentsResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get assignments for group {groupId}! Error: {errorMessage}",
+                groupId, groupAssignmentsResult.Message);
+
             TempData.TempDataMessage("Error", groupAssignmentsResult.Message);
 
             return RedirectToAction("Index", "Home");
@@ -71,11 +79,20 @@ public class AssignmentController : Controller
     {
         if (assignmentVM == null)
         {
+            _logger.LogError("Failed to create assignment - assignment view model was null!");
+
             return View("Error");
         }
 
         if (!ModelState.IsValid)
         {
+            _logger.LogError("Failed to create assignment - invalid input data!");
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             TempData.TempDataMessage("Error", "Invalid input data");
 
             return View(assignmentVM);
@@ -85,6 +102,8 @@ public class AssignmentController : Controller
         
         if (!checkTimeResult.IsSuccessful)
         {
+            _logger.LogError("Failed to create assignment! Error: {errorMessage}", checkTimeResult.Message);
+
             TempData.TempDataMessage("Error", checkTimeResult.Message);
 
             return View(assignmentVM);
@@ -105,6 +124,8 @@ public class AssignmentController : Controller
 
         if (!createResult.IsSuccessful)
         {
+            _logger.LogError("Failed to create assignment! Error: {errorMessage}", createResult.Message);
+
             TempData.TempDataMessage("Error", createResult.Message);
 
             return View(assignmentVM);
@@ -121,6 +142,9 @@ public class AssignmentController : Controller
 
         if (!assignmentResult.IsSuccessful)
         {
+            _logger.LogError("Failed to delete assignment by Id {assignmentId}! Error: {errorMessage}",
+                assignmentId, assignmentResult.Message);
+
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
 
             return RedirectToAction("Index", "Group");
@@ -136,6 +160,8 @@ public class AssignmentController : Controller
 
         if (!deleteResult.IsSuccessful)
         {
+            _logger.LogError("Failed to delete assignment by Id {assignmentId}! Error: {errorMessage}",
+                id, deleteResult.Message);
             TempData.TempDataMessage("Error", deleteResult.Message);
 
             return RedirectToAction("Delete", "Assignment", new { assignmentId = id });
@@ -151,6 +177,8 @@ public class AssignmentController : Controller
 
         if (!assignmentResult.IsSuccessful)
         {
+            _logger.LogError("Failed to get detailes for assignment by Id {assignmentId}! Error: {errorMessage}",
+                assignmentId, assignmentResult.Message);
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
 
             return RedirectToAction("Index", "Group");
@@ -185,6 +213,8 @@ public class AssignmentController : Controller
 
         if (!assignmentResult.IsSuccessful)
         {
+            _logger.LogError("Failed to edit assignment by Id {assignmentId}! Error: {errorMessage}",
+                id, assignmentResult.Message);
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
 
             return RedirectToAction("Details", "Assignment", new { assignmentId = id });
@@ -217,11 +247,20 @@ public class AssignmentController : Controller
     {
         if (editAssignmentVM == null)
         {
+            _logger.LogError("Failed to edit assignment - assignment view model wasn't received!");
+
             return View("Error");
         }
 
         if (!ModelState.IsValid)
         {
+            _logger.LogError("Failed to edit assignment by Id {assignmentId} - invalid input data!", editAssignmentVM.Id);
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
+            }
+
             TempData.TempDataMessage("Error", "Invalid data input");
 
             return View(editAssignmentVM);
@@ -232,6 +271,8 @@ public class AssignmentController : Controller
         
         if (!checkTimeResult.IsSuccessful)
         {
+            _logger.LogError("Failed to edir assignment by Id {assignmentId}! Error: {errorMessage}", editAssignmentVM.Id, checkTimeResult.Message);
+
             TempData.TempDataMessage("Error", checkTimeResult.Message);
 
             return View(editAssignmentVM);

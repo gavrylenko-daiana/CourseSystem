@@ -10,14 +10,14 @@ namespace UI.Controllers;
 [Authorize]
 public class NotificationController : Controller
 {
-    private readonly UserManager<AppUser> _userManager;
+    private readonly IUserService _userService;
     private readonly INotificationService _notificationService;
     private readonly ILogger<NotificationController> _logger;
 
-    public NotificationController(UserManager<AppUser> userManager, INotificationService notificationService,
+    public NotificationController(IUserService userService, INotificationService notificationService,
         ILogger<NotificationController> logger)
     {
-        _userManager = userManager;
+        _userService = userService;
         _notificationService = notificationService;
         _logger = logger;
     }
@@ -25,21 +25,21 @@ public class NotificationController : Controller
     [HttpGet]
     public async Task<IActionResult> ViewNew()
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
 
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
 
             return RedirectToAction("Login", "Account");
         }
 
-        var notificationsResult = currentUser.Notifications.NotReadByDate();
+        var notificationsResult = currentUserResult.Data.Notifications.NotReadByDate();
 
         if (!notificationsResult.IsSuccessful)
         {
-            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", 
-                currentUser.Id, notificationsResult.Message);
+            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
+                currentUserResult.Data.Id, notificationsResult.Message);
             TempData.TempDataMessage("Error", notificationsResult.Message);
 
             return RedirectToAction("Index", "Home");
@@ -51,21 +51,21 @@ public class NotificationController : Controller
     [HttpGet]
     public async Task<IActionResult> ViewAll()
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUserResult = await _userService.GetCurrentUser(User);
 
-        if (currentUser == null)
+        if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
 
             return RedirectToAction("Login", "Account");
         }
 
-        var notificationsResult = currentUser.Notifications.OrderByDate();
+        var notificationsResult = currentUserResult.Data.Notifications.OrderByDate();
 
         if (!notificationsResult.IsSuccessful)
         {
             _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", 
-                currentUser.Id, notificationsResult.Message);
+                currentUserResult.Data.Id, notificationsResult.Message);
             TempData.TempDataMessage("Error", notificationsResult.Message);
 
             return RedirectToAction("Index", "Home");
