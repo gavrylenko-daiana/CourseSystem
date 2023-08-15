@@ -257,6 +257,20 @@ public class GroupService : GenericService<Group>, IGroupService
         return new Result<bool>(true);
     }
     
+    private async Task<List<Group>> CheckStartAndEndGroupDate(List<Group> groups)
+    {
+        foreach (var group in groups)
+        {
+            SetGroupStatus(group);
+
+            await _repository.UpdateAsync(group);
+        }
+
+        await _unitOfWork.Save();
+
+        return groups;
+    }
+    
     private void SetGroupStatus(Group group)
     {
         if (group.StartDate > DateTime.Now)
