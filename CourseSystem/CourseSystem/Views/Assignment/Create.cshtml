@@ -2,6 +2,7 @@
 @using Core.Enums
 @model CreateAssignmentViewModel
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,7 +62,7 @@
                                     <div class="form-row form-group">
                                         <div class="col mb-3">
                                             <label asp-for="StartDate" class="control-label"></label>
-                                            <input asp-for="StartDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                                            <input asp-for="StartDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
                                             <span asp-validation-for="StartDate" class="text-danger"></span>
                                         </div>
                                         <div class="col mb-3">

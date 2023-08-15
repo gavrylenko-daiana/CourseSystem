@@ -1,4 +1,7 @@
 @using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @model UI.ViewModels.UserGroupViewModel
 
 <!DOCTYPE html>
@@ -91,14 +94,22 @@
 
                     @{
                         var materialsGroup = Model.Group.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
+                  
+                        var serializedMaterials = JsonSerializer.Serialize(materialsGroup, new JsonSerializerOptions
+                        {
+                            ReferenceHandler = ReferenceHandler.Preserve
+                        });                 
                     }
+                  
                     @if (materialsGroup != null && materialsGroup.Any())
                     {
                         <div class="ui segment">
                             @if (Model.CurrentUser.Role != AppUserRoles.Student)
                             {
-                                <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
+                                <a class="ui black basic button mb-3" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
                             }
+                            <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materials="@serializedMaterials">Education Materials</a>   
+                          
                             <h4 class="ui header">Education Materials:</h4>
                             <ul class="ui list">
                                 @foreach (var material in materialsGroup)

@@ -13,6 +13,7 @@
         <input type="hidden" asp-for="CourseId"/>
         <input type="hidden" asp-for="Course"/>
         <input type="hidden" asp-for="Groups"/>
+        <input type="hidden" asp-for="TimeUploaded" value="@DateTime.Now">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             <label asp-for="UploadFile" class="control-label"></label>
@@ -22,9 +23,17 @@
         <div class="form-group">
             <label asp-for="MaterialAccess" class="control-label"></label>
             <select id="materialAccessSelect" asp-for="MaterialAccess" class="form-control">
-                @foreach (var accessValue in Enum.GetValues(typeof(MaterialAccess)))
+                @if (Model.Groups?.Any() != true)
                 {
-                    <option value="@accessValue">@accessValue</option>
+                    <option value="@MaterialAccess.General">@MaterialAccess.General</option>
+                    <option value="@MaterialAccess.Course">@MaterialAccess.Course</option>
+                }
+                else
+                {
+                    @foreach (var accessValue in Enum.GetValues(typeof(MaterialAccess)))
+                    {
+                        <option value="@accessValue"> @accessValue </option>
+                    }
                 }
             </select>
             <span asp-validation-for="MaterialAccess" class="text-danger"></span>
@@ -32,7 +41,7 @@
         <div class="form-group" id="groupDropdown" style="display:none;">
             <label asp-for="SelectedGroupId" class="control-label">Select Group</label>
             <select asp-for="SelectedGroupId" class="form-control">
-                @if (Model.Groups.Any())
+                @if (Model.Groups?.Any() == true)
                 {
                     foreach (var group in Model.Groups)
                     {

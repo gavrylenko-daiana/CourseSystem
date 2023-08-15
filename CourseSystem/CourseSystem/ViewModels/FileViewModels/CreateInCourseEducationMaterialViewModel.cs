@@ -14,6 +14,8 @@ public class CreateInCourseEducationMaterialViewModel
     [Display(Name = "Material access")]
     public MaterialAccess MaterialAccess { get; set; }
     
+    public DateTime TimeUploaded { get; set; }
+    
     public Course Course { get; set; }
     public List<Group>? Groups { get; set; }
     public int SelectedGroupId { get; set; }

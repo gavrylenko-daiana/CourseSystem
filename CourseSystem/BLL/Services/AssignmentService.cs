@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,23 +66,39 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId)
+        public async Task<Result<List<Assignment>>> GetGroupAssignments(int groupId, SortingParam sortOrder, string assignmentAccessFilter = null, string searchQuery = null)
         {
-            var groupResult = await _groupService.GetById(groupId);
+            Result<List<Assignment>> assignmentResult = null;
 
-            if (!groupResult.IsSuccessful)
+            var query = GetOrderByExpression(sortOrder);
+
+            if (!string.IsNullOrEmpty(searchQuery))
             {
-                return new Result<List<Assignment>>(false, $"{groupResult.Message}");
+                assignmentResult = await GetByPredicate(a => a.GroupId == groupId && a.Name.Contains(searchQuery), query.Data);
+            }
+            else if(assignmentAccessFilter != null)
+            {
+                var tempFilter = Enum.Parse(typeof(AssignmentAccess), assignmentAccessFilter);
+                assignmentResult = await GetByPredicate(a => a.GroupId == groupId && a.AssignmentAccess.Equals(tempFilter), query.Data);
+            }
+            else
+            {
+                assignmentResult = await GetByPredicate(a => a.GroupId == groupId, query.Data);
             }
 
-            if (groupResult.Data.Assignments.IsNullOrEmpty())
+            if (!assignmentResult.IsSuccessful)
+            {
+                return new Result<List<Assignment>>(false, $"{assignmentResult.Message}");
+            }
+
+            if (assignmentResult.Data.IsNullOrEmpty())
             {
                 return new Result<List<Assignment>>(true, "No assignment in group");
             }
 
-            var groupAssignments = await CheckStartAndEndAssignmentDate(groupResult.Data.Assignments);
+            var groupAssignments = await CheckStartAndEndAssignmentDate(assignmentResult.Data);
 
-            return new Result<List<Assignment>>(true, groupAssignments);
+            return new Result<List<Assignment>>(true, assignmentResult.Data);
         }
 
         public Result<bool> ValidateTimeInput(DateTime? startDate, DateTime? endDate)
@@ -147,6 +164,36 @@ namespace BLL.Services
             {
                 assignment.AssignmentAccess = AssignmentAccess.Completed;
             }
+        }
+
+        private Result<Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>>> GetOrderByExpression(SortingParam sortBy)
+        {
+
+            Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>> query;
+
+            switch (sortBy)
+            {
+                case SortingParam.NameDesc:
+                    query = q => q.OrderByDescending(q => q.Name);
+                    break;
+                case SortingParam.StartDateDecs:
+                    query = q => q.OrderByDescending(q => q.StartDate);
+                    break;
+                case SortingParam.StratDate:
+                    query = q => q.OrderBy(q => q.StartDate);
+                    break;
+                case SortingParam.EndDate:
+                    query = q => q.OrderBy(q => q.EndDate);
+                    break;
+                case SortingParam.EndDateDesc:
+                    query = q => q.OrderByDescending(q => q.EndDate);
+                    break;
+                default:
+                    query = q => q.OrderBy(q => q.Name);
+                    break;
+            }
+
+            return new Result<Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>>>(true, query);
         }
     }
 }
