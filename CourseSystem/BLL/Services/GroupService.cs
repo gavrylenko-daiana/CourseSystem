@@ -190,6 +190,26 @@ public class GroupService : GenericService<Group>, IGroupService
         return new Result<List<Group>>(true, groups);
     }
 
+    public async Task<Result<List<Group>>> GetUserGroups(AppUser currentUser)
+    {
+        if (currentUser == null)
+        {
+            return new Result<List<Group>>(false, $"{nameof(currentUser)} not found");
+        }
+        
+        var groupsResult = await GetByPredicate(g =>
+            g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUser.Id)));
+
+        if (!groupsResult.IsSuccessful)
+        {
+            return new Result<List<Group>>(false, $"{groupsResult.Message}");
+        }
+        
+        var userGroups = await CheckStartAndEndGroupDate(groupsResult.Data);
+
+        return new Result<List<Group>>(true, userGroups);
+    }
+
     private async Task<Result<bool>> AddAllAdminsAtGroup(Group group)
     {
         if (group.Course.UserCourses.Any())
