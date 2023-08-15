@@ -1,39 +1,58 @@
 @model UI.ViewModels.GroupViewModel
 
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            Edit Group
-        </div>
-        @if (TempData["Error"] != null)
-        {
-            <div class="col-md-12 alert alert-danger">
-                <span><b>Sorry!</b> - @TempData["Error"]</span>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Course</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
         }
-        <div class="card-body">
-            @using (Html.BeginForm("Edit", "Group", FormMethod.Post))
-            {
-                @Html.HiddenFor(model => model.Id)
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Name)
-                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+    </style>
+</head>
+<body>
+    <div class="ui container" style="margin-top: 20px;">
+        <div class="ui centered card" style="width: 400px;">
+            <div class="content">
+                <div class="header">
+                    Edit Group
                 </div>
+            </div>
+            <div class="content">
+                @using (Html.BeginForm("Edit", "Group", FormMethod.Post))
+                {
+                    @Html.HiddenFor(m => m.Id);
+                    <div class="ui form">
+                        <div class="field">
+                            <label>@Html.LabelFor(model => model.Name)</label>
+                            @Html.TextBoxFor(model => model.Name, new { @class = "ui input" })
+                        </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.StartDate)
-                    @Html.TextBoxFor(model => model.StartDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), @Value = Model.StartDate.ToString("yyyy-MM-dd") })
-                </div>
+                        <div class="field">
+                            <label> @Html.LabelFor(model => model.StartDate)</label>
+                            @Html.TextBoxFor(model => model.StartDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), @Value = Model.StartDate.ToString("yyyy-MM-dd"), required = "required" })
+                        </div>
+                        
+                        <div class="field">
+                            <label> @Html.LabelFor(model => model.StartDate)</label>
+                            @Html.TextBoxFor(model => model.EndDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), @Value = Model.EndDate.ToString("yyyy-MM-dd"), required = "required" })
+                        </div>
+                        
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="ui negative message">
+                                <p><b>Sorry!</b> - @TempData["Error"]</p>
+                            </div>
+                        }
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.EndDate)
-                    @Html.TextBoxFor(model => model.EndDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), @Value = Model.EndDate.ToString("yyyy-MM-dd") })
-                </div>
-
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a href="@Url.Action("Details", "Group", new { id = Model.Id })" class="btn btn-secondary">Cancel</a>
-            }
+                        <button type="submit" class="ui edit-button button">Edit</button>
+                        <a href="@Url.Action("Details", "Group", new { id = Model.Id })" class="ui button">Cancel</a>
+                    </div>
+                }
+            </div>
         </div>
     </div>
-</div>
+</body>
+</html>
