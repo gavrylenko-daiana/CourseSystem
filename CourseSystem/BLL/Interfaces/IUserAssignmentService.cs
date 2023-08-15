@@ -6,5 +6,6 @@ namespace BLL.Interfaces
     {
         Task<Result<UserAssignments>> CreateUserAssignment(Assignment assignment, AppUser appUser);
         Task<Result<bool>> ChangeUserAssignmentGrade(UserAssignments userAssignment, int newGrade);
+        Task<Result<List<UserAssignments>>> GetAllUserAssignemnts(int assignmentId, string isMarked = null);
     }
 }

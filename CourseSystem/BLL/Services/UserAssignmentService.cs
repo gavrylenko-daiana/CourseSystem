@@ -1,6 +1,7 @@
 ﻿using BLL.Interfaces;
 using Core.Models;
 using DAL.Repository;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +73,29 @@ namespace BLL.Services
             {
                 return new Result<UserAssignments>(false, $"Fail to create {nameof(appUser)} {nameof(assignment)}");
             }
+        }
+
+        public async Task<Result<List<UserAssignments>>> GetAllUserAssignemnts(int assignmentId, string isMarked = null)
+        {
+            Result<List<UserAssignments>> userAssignmentsResult;
+
+            if (!isMarked.IsNullOrEmpty())
+            {
+                if (isMarked.Equals("IsMarked"))
+                {
+                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.IsChecked == true);
+                }
+                else
+                {
+                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.IsChecked == false);
+                }
+            }
+            else
+            {
+                userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId);
+            }
+
+            return userAssignmentsResult;
         }
     }
 }
