@@ -1,4 +1,7 @@
 @using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @model UI.ViewModels.CourseViewModel
 
 <!DOCTYPE html>
@@ -120,10 +123,15 @@
                     <div class="ui warning message">
                         <p>No groups found for this course.</p>
                     </div>
-                }
+                }                  
 
                 @{
                     var materialsGroup = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+          
+                    var serializedMaterials = JsonSerializer.Serialize(materialsCourse, new JsonSerializerOptions
+                          {
+                              ReferenceHandler = ReferenceHandler.Preserve
+                          });
                 }
                 @if (materialsGroup != null && materialsGroup.Any())
                 {
@@ -143,7 +151,12 @@
                     <div class="ui warning message">
                         <p>No education materials found for this course.</p>
                     </div>
-                }                
+                }
+          
+                @if (materialsCourse != null && materialsCourse.Any())
+                {
+                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materials="@serializedMaterials">Education Materials</a>
+                }
             </div>
 
             <div class="right-container">
