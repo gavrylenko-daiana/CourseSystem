@@ -13,8 +13,8 @@ namespace BLL.Interfaces
         Task<Result<bool>> AddJoinedCourseActivity(AppUser user, Course course);
         Task<Result<bool>> AddCreatedGroupActivity(AppUser user, Group group);
         Task<Result<bool>> AddJoinedGroupActivity(AppUser user, Group group);
-        Task<Result<bool>> AddCreatedAssignmentActivity(AppUser user, Assignment assignment);
-        Task<Result<bool>> AddMarkedAssignmentActivity(AppUser user, UserAssignments userAssignment);
+        Task<Result<bool>> AddCreatedAssignmentActivity(AppUser user, Assignment assignment); //ready
+        Task<Result<bool>> AddMarkedAssignmentActivity(AppUser user, UserAssignments userAssignment); //ready
         Task<Result<bool>> AddSubmittedAssignmentAnswerActivity(AppUser user, Assignment assignment); //ready
         Task<Result<bool>> AddAttachedEducationalMaterialForGroupActivity(AppUser user, Group group);
         Task<Result<bool>> AddAttachedEducationalMaterialForCourseActivity(AppUser user, Course course);
