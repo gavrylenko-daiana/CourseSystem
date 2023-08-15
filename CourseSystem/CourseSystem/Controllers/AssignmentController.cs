@@ -42,7 +42,7 @@ public class AssignmentController : Controller
         }
 
         ViewBag.CurrentQueryFilter = searchQuery;
-        ViewBag.CurrentAccessFilter = currentAccessFilter;
+        ViewBag.CurrentAccessFilter = assignmentAccessFilter;
 
         var groupAssignmentsResult = await _assignmentService.GetGroupAssignments(groupId, sortOrder, assignmentAccessFilter, searchQuery);
 
@@ -68,7 +68,7 @@ public class AssignmentController : Controller
         }
 
         ViewBag.GroupId = groupId;
-        int pageSize = 3;
+        int pageSize = 4;
         int pageNumber = (page ?? 1);
         ViewBag.OnePageOfAssignemnts = assignmentsVM;
 

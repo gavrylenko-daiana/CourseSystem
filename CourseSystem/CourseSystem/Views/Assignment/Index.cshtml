@@ -5,10 +5,7 @@
 @using System.Web;
 @using X.PagedList.Web.Common;
 @model X.PagedList.IPagedList<AssignmentViewModel>
-
-<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
-
-@*@model IEnumerable<AssignmentViewModel>*@
+ 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -122,17 +119,17 @@
                     @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
                     {
                         <div class="item">
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.Planned.ToString(),
-                             currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})">Planned</a>
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.Planned.ToString(),
+                             currentQueryFilter = ViewBag.CurrentQueryFilter})">Planned</a>
                         </div>
                     }
                     <div class="item">
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.InProgress.ToString(),
-                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})">In progress</a>
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.InProgress.ToString(),
+                         currentQueryFilter = ViewBag.CurrentQueryFilter})">In progress</a>
                     </div>
                     <div class="item">
-                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, assignmentAccessFilter = AssignmentAccess.Completed.ToString(),
-                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})">Completed</a>
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.Completed.ToString(),
+                         currentQueryFilter = ViewBag.CurrentQueryFilter})">Completed</a>
                     </div>
                 </div>
             </div>
@@ -142,7 +139,7 @@
             <form method="get" asp-action="Index" asp-controller="Assignment" class="ui form inline">
                 <div class="ui icon input">
                     <input type="hidden" id="groupId" name="groupId" value="@ViewBag.GroupId" />
-                    <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;" />
+                    <input type="text" name="currentQueryFilter" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;" />
                     <button type="submit" style="background: none; border: none; padding: 0;">
                         <i class="inverted circular search link icon"></i>
                     </button>
@@ -184,7 +181,7 @@
     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
     <div>
 
-        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter }),
+        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
         new PagedListRenderOptions {
         LiElementClasses = new string[] { "page-item" },
         PageClasses = new string[] { "page-link" }
