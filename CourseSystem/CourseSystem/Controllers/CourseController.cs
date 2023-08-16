@@ -20,6 +20,7 @@ public class CourseController : Controller
     private readonly IUserService _userService;
     private readonly UserManager<AppUser> _userManager;
     private readonly IActivityService _activityService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<CourseController> _logger;
 
     public CourseController(ICourseService courseService,
@@ -28,6 +29,7 @@ public class CourseController : Controller
         IUserCourseService userCourseService,
         IUserService userService,
         IActivityService activityService,
+        INotificationService notificationService,
         ILogger<CourseController> logger)
     {
         _courseService = courseService;
@@ -36,6 +38,7 @@ public class CourseController : Controller
         _userCourseService = userCourseService;
         _userService = userService;
         _activityService = activityService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -120,6 +123,8 @@ public class CourseController : Controller
         }
 
         await _activityService.AddCreatedCourseActivity(currentUserResult.Data, course);
+
+        await _notificationService.AddCreatedCourseNotification(currentUserResult.Data, course);
 
         return RedirectToAction("Index");
     }
@@ -383,6 +388,8 @@ public class CourseController : Controller
         }
 
         await _activityService.AddJoinedCourseActivity(currentUser, courseResult.Data);
+
+        await _notificationService.AddJoinedCourseNotification(currentUser, courseResult.Data);
 
         return View();
     }

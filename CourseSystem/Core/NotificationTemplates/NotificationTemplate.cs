@@ -19,7 +19,7 @@ namespace Core.NotificationTemplates
             {NotificationType.GroupStartedForStudent, "Education is starting in a group" },
             {NotificationType.CreatedAssignment, "You created a new assignment" },
             {NotificationType.SubmittedAssignmentForStudent, "You submitted an assignment" },
-            {NotificationType.SubmittedAssignmentForStudent, "Someone submitted an assignment" },
+            {NotificationType.SubmittedAssignmentForTeacher, "Someone submitted an assignment" },
             {NotificationType.MarkedAssignmentForTeacher, "You marked an assignment" },
             {NotificationType.MarkedAssignmentForStudent, "Your assignment was marked" },
             {NotificationType.AssignmentIsOpenForTeacher, "Assignment is open for submitting solutions" },
