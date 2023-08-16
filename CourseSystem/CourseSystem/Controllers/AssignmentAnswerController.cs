@@ -19,6 +19,7 @@ public class AssignmentAnswerController : Controller
     private readonly IUserAssignmentService _userAssignmentService;
     private readonly IUserService _userService;
     private readonly IActivityService _activityService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<AssignmentAnswerController> _logger;
 
     public AssignmentAnswerController(IAssignmentService assignmentService,
@@ -26,6 +27,7 @@ public class AssignmentAnswerController : Controller
         IUserAssignmentService userAssignmentService,
         IUserService userService,
         IActivityService activityService,
+        INotificationService notificationService,
         ILogger<AssignmentAnswerController> logger)
     {
         _assignmentService = assignmentService;
@@ -33,6 +35,7 @@ public class AssignmentAnswerController : Controller
         _userAssignmentService = userAssignmentService;
         _userService = userService;
         _activityService = activityService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -112,6 +115,16 @@ public class AssignmentAnswerController : Controller
         }
 
         await _activityService.AddSubmittedAssignmentAnswerActivity(currentUserResult.Data, assignmentResult.Data);
+
+        await _notificationService.AddSubmittedAssignmentForStudentNotification(assignmentAnswer.UserAssignment);
+        
+        var teachers = assignmentAnswer.UserAssignment.Assignment.UserAssignments
+            .Select(ua => ua.AppUser).Where(user => user.Role == Core.Enums.AppUserRoles.Teacher).ToList();
+
+        foreach (var teacher in teachers )
+        {
+            await _notificationService.AddSubmittedAssignmentForTeacherNotification(teacher, assignmentAnswer.UserAssignment);
+        }
 
         return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentResult.Data.Id });
     }
@@ -295,6 +308,9 @@ public class AssignmentAnswerController : Controller
         }
 
         await _activityService.AddMarkedAssignmentActivity(currentUserResult.Data, userAssignment);
+
+        await _notificationService.AddMarkedAssignmentForStudentNotification(userAssignment);
+        await _notificationService.AddMarkedAssignmentForTeacherNotification(currentUserResult.Data, userAssignment);
 
         return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId });
     }
