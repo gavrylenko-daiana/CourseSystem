@@ -60,21 +60,7 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Index", "Course");
         }
 
-        var idStrings = materialIds.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var materialsList = new List<EducationMaterial>();
-
-        foreach (var idString in idStrings)
-        {
-            if (int.TryParse(idString, out int materialId))
-            {
-                var materialResult = await _educationMaterialService.GetByIdMaterialAsync(materialId);
-
-                if (materialResult.IsSuccessful)
-                {
-                    materialsList.Add(materialResult.Data);
-                }
-            }
-        }
+        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds);
 
         return View("Index", materialsList);
     }

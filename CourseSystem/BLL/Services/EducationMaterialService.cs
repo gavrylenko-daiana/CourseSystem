@@ -267,4 +267,31 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
             return new Result<bool>(false, $"Failed to update material by id {material.Id}. Exception: {ex.Message}");
         }
     }
+    
+    public async Task<List<EducationMaterial>> GetMaterialsListFromIdsString(string materialIds)
+    {
+        var materialsList = new List<EducationMaterial>();
+
+        if (string.IsNullOrEmpty(materialIds))
+        {
+            return materialsList;
+        }
+
+        var idStrings = materialIds.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var idString in idStrings)
+        {
+            if (int.TryParse(idString, out int materialId))
+            {
+                var materialResult = await GetByIdMaterialAsync(materialId);
+
+                if (materialResult.IsSuccessful)
+                {
+                    materialsList.Add(materialResult.Data);
+                }
+            }
+        }
+
+        return materialsList;
+    }
 }
