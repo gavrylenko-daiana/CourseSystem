@@ -54,8 +54,18 @@
         
         .cover-card {
             height: 270px; 
-        }  
-           
+        } 
+         
+        .page-link {
+             background-color: #35DE9C !important;
+             color: white !important; 
+             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        } 
+        
+        .pagination-container {
+            background-color: white; 
+            padding: 3px;
+        }
     </style>
 </head>
 <body>
@@ -82,7 +92,7 @@
                 </div>            
             </div>
             
-            <div class="ui compact menu" style="margin-left: 10px;">
+            <div class="ui compact menu" style="margin-right: 10px;">
                 <div class="ui simple dropdown item">
                     Sort by
                     <i class="dropdown icon"></i>
@@ -151,7 +161,7 @@
             </div>
         </div>     
         <hr class="ui divider"> 
-        <div class="ui stackable three column grid">
+        <div class="ui stackable three column grid assignments-container">
             @if (Model.Any())
             {
                 @foreach (var assignment in Model)
@@ -185,16 +195,17 @@
                 </div>
             }        
         </div>
-
-        @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
-        {
+        
             <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
-                <div>
-                    <a href="@Url.Action("Create", "Assignment", new { groupId = ViewBag.GroupId })" class="ui basic black button">Create new Assignment</a>
-                </div>
-                <div>
+                    @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+                    {
+                        <div>
+                            <a href="@Url.Action("Create", "Assignment", new { groupId = ViewBag.GroupId })" class="ui basic black button">Create new Assignment</a>
+                        </div>
+                    }
+                <div class="pagination-container">
                     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                    <div>
+                    <div class="page-link">
                         @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
                             new PagedListRenderOptions {
                                 LiElementClasses = new string[] { "page-item" },
@@ -203,18 +214,7 @@
                     </div>
                 </div>
             </div>
-        }
-        
-        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-        <div>
-
-            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
-            new PagedListRenderOptions {
-            LiElementClasses = new string[] { "page-item" },
-            PageClasses = new string[] { "page-link" }
-            })
-        </div>        
-    </div>
+            </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
