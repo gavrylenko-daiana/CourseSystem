@@ -96,11 +96,7 @@
 
                 @{
                     var materialsGroup = Model.Group.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
-
-                    var serializedMaterials = JsonSerializer.Serialize(materialsGroup, new JsonSerializerOptions
-                    {
-                        ReferenceHandler = ReferenceHandler.Preserve
-                    });
+                    var materialIds = string.Join(" ", materialsGroup.Select(m => m.Id));
                 }
 
                 @if (Model.CurrentUser.Role != AppUserRoles.Student)
@@ -111,7 +107,7 @@
                     
                     @if (materialsGroup != null && materialsGroup.Any())
                     {
-                        <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materials="@serializedMaterials">Education Materials</a>
+                        <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds">Education Materials</a>
                     }
                 }
                 

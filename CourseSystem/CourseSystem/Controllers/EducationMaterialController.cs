@@ -52,7 +52,7 @@ public class EducationMaterialController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> IndexMaterials(string materialIds)
+    public async Task<IActionResult> IndexMaterials(string materialIds, string sortBy = null!)
     {
         var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds);
         
@@ -63,18 +63,6 @@ public class EducationMaterialController : Controller
         }
 
         return View("Index", materialsList.Data);
-    }
-    
-    [HttpGet]
-    public async Task<IActionResult> IndexSort(List<EducationMaterial> materials, string sortBy)
-    {
-        if (!(materials != null && materials.Any()))
-        {
-            TempData.TempDataMessage("Error", $"Message: {nameof(materials)} list is empty");
-            return RedirectToAction("Index", "Course");
-        }
-
-        return View("Index", materials);
     }
 
     [HttpGet]
