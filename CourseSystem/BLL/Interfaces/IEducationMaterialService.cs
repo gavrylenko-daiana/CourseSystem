@@ -14,5 +14,5 @@ public interface IEducationMaterialService
         Group group = null!, Course course = null!);
     Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id);
     Task<Result<bool>> DeleteFile(EducationMaterial material);
-    Task<List<EducationMaterial>> GetMaterialsListFromIdsString(string materialIds);
+    Task<Result<List<EducationMaterial>>> GetMaterialsListFromIdsString(string materialIds);
 }

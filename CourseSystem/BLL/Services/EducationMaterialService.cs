@@ -268,13 +268,13 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
     
-    public async Task<List<EducationMaterial>> GetMaterialsListFromIdsString(string materialIds)
+    public async Task<Result<List<EducationMaterial>>> GetMaterialsListFromIdsString(string materialIds)
     {
         var materialsList = new List<EducationMaterial>();
 
         if (string.IsNullOrEmpty(materialIds))
         {
-            return materialsList;
+            return new Result<List<EducationMaterial>>(false, $"{nameof(materialsList)} is empty");
         }
 
         var idStrings = materialIds.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -292,6 +292,6 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
             }
         }
 
-        return materialsList;
+        return new Result<List<EducationMaterial>>(true, materialsList);
     }
 }

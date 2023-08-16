@@ -54,15 +54,15 @@ public class EducationMaterialController : Controller
     [HttpGet]
     public async Task<IActionResult> IndexMaterials(string materialIds)
     {
-        if (string.IsNullOrEmpty(materialIds))
+        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds);
+        
+        if (!materialsList.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "Materials list is empty");
+            TempData.TempDataMessage("Error", materialsList.Message);
             return RedirectToAction("Index", "Course");
         }
 
-        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds);
-
-        return View("Index", materialsList);
+        return View("Index", materialsList.Data);
     }
     
     [HttpGet]
