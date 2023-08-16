@@ -84,7 +84,7 @@ public class AssignmentController : Controller
         }
 
         ViewBag.GroupId = groupId;
-        int pageSize = 4;
+        int pageSize = 6;
         int pageNumber = (page ?? 1);
         ViewBag.OnePageOfAssignemnts = assignmentsVM;
 
