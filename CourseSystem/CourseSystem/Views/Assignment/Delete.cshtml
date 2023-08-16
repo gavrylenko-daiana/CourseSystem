@@ -1,24 +1,44 @@
 ﻿@using UI.ViewModels.AssignmentViewModels
 @model Assignment
 
-<div class="container align-left">
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
-        </div>
-    }
-    <div class="row">
-        <div class="mbr-white col-md-7 mt-4">
-            <h4 class="mbr-section-title mbr-semibold pb-2 mbr-fonts-style display-4">
-                Are you sure that do you want to delete assigment (@Model.Name)?
-            </h4>
-            <div class="form-group">
-                <form asp-controller="Assignment" asp-action="DeleteAssignment" asp-route-id="@Model.Id"  method="post">
-                    <input type="submit" value="Confirm" class="btn btn-outline-danger" for="danger-outlined"/>
-                    <a class="btn btn-outline-success" for="success-outlined" asp-controller="Assignment" asp-action="Index">Cancel</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Course</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+            body {
+                background-color: #f7f7f7;
+            }
+    </style>
+</head>
+<body>
+    <div class="ui container mt-4">
+        <div class="ui centered card" style="width: 500px;">
+            <div class="content">
+                <div class="header">
+                    Delete Group
+                </div>
+            </div>
+            <div class="content">
+                <h5 class="ui header">Are you sure you want to delete the assigment '@Model.Name'?</h5>
+            </div>
+            <div class="extra content">
+                <form class="ui form" asp-action="DeleteAssignment" asp-controller="Assignment" asp-route-id="@Model.Id" method="post">
+                    <button type="submit" class="ui delete-button button">Delete</button>
+                    <a href="@Url.Action("Index", "Assignment", new { groupId = Model.GroupId})" class="ui button" for="success-outlined">Cancel</a>
                 </form>
             </div>
         </div>
     </div>
-</div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui container mt-4">
+            <div class="ui negative message">
+                <p><b>Sorry!</b> - @TempData["Error"]</p>
+            </div>
+        </div>
+    }
+</body>
+</html>
