@@ -23,20 +23,20 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between p-md-1">
                             <div class="d-flex flex-row">
-                                
                                 @if (Model.AssignmentAnswers.Any())
                                 {
                                     <div>
                                         @foreach(var answer in Model.AssignmentAnswers)
                                         {
                                             <h4>@answer.Name</h4>
+                                            <p>Submission time: @answer.CreationTime.ToString("dddd, dd MMMM yyyy HH:mm")</p>
                                             @if(answer.Text != null)
                                             {
                                                 <h6>Answer description: </h6>
                                                 <div>
                                                     @Markdown.ParseHtmlString(answer.Text)
                                                 </div>
-                                            }                                          
+                                            }                                            
                                         }
                                     </div>
                                 }                                

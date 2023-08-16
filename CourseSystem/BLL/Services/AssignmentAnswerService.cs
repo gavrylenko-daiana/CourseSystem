@@ -32,6 +32,7 @@ namespace BLL.Services
             try
             {
                 assignmentAnswer.UserAssignment = userAssignmentResult.Data;
+                assignmentAnswer.CreationTime = DateTime.Now;
                 await _repository.AddAsync(assignmentAnswer);
                 await _unitOfWork.Save();
 

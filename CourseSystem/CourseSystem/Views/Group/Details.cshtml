@@ -139,7 +139,8 @@
                                 @foreach (var assignment in Model.Group.Assignments)
                                 {
                                     <li>@assignment.Name</li>
-                                    <a class="ui details-button button" asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id">Detail</a>
+                                    <a href="@Url.Action("Details", "Assignment", new { assignmentId =@assignment.Id})" class="ui details-button button">Details</a>
+                                    @*<a class="ui details-button button" asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id">Detail</a>*@
                                 }
                             </ul>
                         </div>
@@ -190,6 +191,10 @@
                         </div>
                     }
                 </div>
+            </div>
+            <br />
+            <div>
+                <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id})" class="ui teal basic button view-profile-button">All assignments</a>
             </div>
             @if (TempData["Error"] != null)
             {
