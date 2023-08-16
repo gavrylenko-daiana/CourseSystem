@@ -10,10 +10,10 @@ namespace BLL.Interfaces
     public interface INotificationService : IGenericService<Notification>
     {
         Task<Result<bool>> MarkAsRead(Notification notification);
-        Task<Result<bool>> AddCreatedCourseNotification(AppUser user, Course course);
-        Task<Result<bool>> AddJoinedCourseNotification(AppUser user, Course course);
-        Task<Result<bool>> AddCreatedGroupNotification(AppUser user, Group group);
-        Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group);
+        Task<Result<bool>> AddCreatedCourseNotification(AppUser user, Course course); //ready
+        Task<Result<bool>> AddJoinedCourseNotification(AppUser user, Course course); //ready
+        Task<Result<bool>> AddCreatedGroupNotification(AppUser user, Group group); //ready
+        Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group); //ready
         Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group);
         Task<Result<bool>> AddGroupStartedForStudentNotification(AppUser user, Group group);
         Task<Result<bool>> AddCreatedAssignmentNotification(AppUser user, Assignment assignment); //ready

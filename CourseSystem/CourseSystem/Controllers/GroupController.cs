@@ -24,6 +24,7 @@ public class GroupController : Controller
     private readonly UserManager<AppUser> _userManager;
     private readonly IUserService _userService;
     private readonly IActivityService _activityService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<GroupController> _logger;
 
     public GroupController(IGroupService groupService, ICourseService courseService,
@@ -33,6 +34,7 @@ public class GroupController : Controller
         IUserCourseService userCourseService,
         IUserService userService,
         IActivityService activityService,
+        INotificationService notificationService,
         ILogger<GroupController> logger)
     {
         _groupService = groupService;
@@ -43,6 +45,7 @@ public class GroupController : Controller
         _userCourseService = userCourseService;
         _userService = userService;
         _activityService = activityService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -175,6 +178,8 @@ public class GroupController : Controller
         }
 
         await _activityService.AddCreatedGroupActivity(currentUserResult.Data, group);
+
+        await _notificationService.AddCreatedGroupNotification(currentUserResult.Data, group);
 
         return RedirectToAction("Details", "Group", new { id = group.Id });
     }
@@ -461,6 +466,8 @@ public class GroupController : Controller
                 await _userGroupService.CreateUserGroups(userGroup);
 
                 await _activityService.AddJoinedGroupActivity(teacher, groupResult.Data);
+
+                await _notificationService.AddJoinedGroupNotification(teacher, groupResult.Data);
             }
         }
 
@@ -595,9 +602,13 @@ public class GroupController : Controller
         if(course != null)
         {
             await _activityService.AddJoinedCourseActivity(currentUserResult.Data, course);
+
+            await _notificationService.AddJoinedCourseNotification(currentUserResult.Data, course);
         }
         
         await _activityService.AddJoinedGroupActivity(currentUserResult.Data, groupResult.Data);
+
+        await _notificationService.AddJoinedGroupNotification(currentUserResult.Data, groupResult.Data);
 
         var inventationVM = new InventationViewModel()
         {
