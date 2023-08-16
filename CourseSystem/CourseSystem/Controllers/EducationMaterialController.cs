@@ -50,21 +50,32 @@ public class EducationMaterialController : Controller
 
         return View("Index", materials.Data);
     }
-    
+
     [HttpGet]
-    public async Task<IActionResult> IndexMaterials(string materials)
+    public async Task<IActionResult> IndexMaterials(string materialIds)
     {
-        if (!(materials != null && materials.Any()))
+        if (string.IsNullOrEmpty(materialIds))
         {
-            TempData.TempDataMessage("Error", $"Message: {nameof(materials)} list is empty");
+            TempData.TempDataMessage("Error", "Materials list is empty");
             return RedirectToAction("Index", "Course");
         }
-        
-        var materialsList = JsonSerializer.Deserialize<List<EducationMaterial>>(materials, new JsonSerializerOptions
+
+        var idStrings = materialIds.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var materialsList = new List<EducationMaterial>();
+
+        foreach (var idString in idStrings)
         {
-            ReferenceHandler = ReferenceHandler.Preserve
-        });
-        
+            if (int.TryParse(idString, out int materialId))
+            {
+                var materialResult = await _educationMaterialService.GetByIdMaterialAsync(materialId);
+
+                if (materialResult.IsSuccessful)
+                {
+                    materialsList.Add(materialResult.Data);
+                }
+            }
+        }
+
         return View("Index", materialsList);
     }
     
