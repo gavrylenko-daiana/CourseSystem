@@ -23,50 +23,46 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         _dropboxClient = new DropboxClient(config.Value.AccessToken);
     }
 
-    public async Task<Result<string>> AddFileAsync(IFormFile file)
+    public async Task<Result<(string Url, string ModifiedFileName)>> AddFileAsync(IFormFile file)
     {
         try
         {
-            var uploadPath = await GetUniqueUploadPathAsync(file.FileName);
+            var uniquePathResult = await GetUniqueUploadPathAsync(file.FileName);
 
-            if (!uploadPath.IsSuccessful)
+            if (!uniquePathResult.IsSuccessful)
             {
-                return new Result<string>(false, uploadPath.Message);
+                return new Result<(string Url, string ModifiedFileName)>(false, uniquePathResult.Message);
             }
+            
+            var modifiedFileName = uniquePathResult.Message;
+            var uploadPath = "/" + modifiedFileName;
 
             await using var stream = file.OpenReadStream();
             var uploadResult =
-                await _dropboxClient.Files.UploadAsync(uploadPath.Message, WriteMode.Overwrite.Instance, body: stream);
+                await _dropboxClient.Files.UploadAsync(uploadPath, WriteMode.Overwrite.Instance, body: stream);
 
             var linkResult = await GetSharedLinkAsync(uploadResult.PathDisplay);
 
             if (!linkResult.IsSuccessful)
             {
-                return new Result<string>(false, linkResult.Message);
+                return new Result<(string Url, string ModifiedFileName)>(false, linkResult.Message);
             }
 
-            if (IsDocumentContentType(file.ContentType))
-            {
-                return new Result<string>(true, linkResult.Message);
-            }
-            else
-            {
-                var replaceLink = linkResult.Message.Replace("dl=0", "raw=1");
+            var url = IsDocumentContentType(file.ContentType) ? linkResult.Message : linkResult.Message.Replace("dl=0", "raw=1");
 
-                return new Result<string>(true, replaceLink);
-            }
+            return new Result<(string Url, string ModifiedFileName)>(true, (url, modifiedFileName));
         }
         catch (Exception ex)
         {
-            return new Result<string>(false, $"File could not be loaded. ErrorMessage - {ex.Message}");
+            return new Result<(string Url, string ModifiedFileName)>(false, $"File could not be loaded. ErrorMessage - {ex.Message}");
         }
     }
-
+    
     private async Task<Result<string>> GetUniqueUploadPathAsync(string fileName)
     {
         int count = 1;
-        var uploadPath = "/" + fileName;
-        var resultExists = await FileExistsAsync(uploadPath);
+        var modifiedFileName = fileName;
+        var resultExists = await FileExistsAsync(fileName);
 
         while (resultExists.IsSuccessful)
         {
@@ -77,12 +73,12 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
                 return new Result<string>(false, $"Failed to get unique {nameof(fileName)}. ErrorMessage - {numberedFileNameResult.Message}");
             }
 
-            uploadPath = "/" + numberedFileNameResult.Message;
+            modifiedFileName = numberedFileNameResult.Message;
             count++;
-            resultExists = await FileExistsAsync(uploadPath);
+            resultExists = await FileExistsAsync(modifiedFileName);
         }
 
-        return new Result<string>(true, uploadPath);
+        return new Result<string>(true, modifiedFileName);
     }
 
     private async Task<Result<string>> GetSharedLinkAsync(string pathDisplay)
@@ -123,14 +119,14 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
             return new Result<string>(false, $"The {nameof(fileExtension)} does not exist");
         }
 
-        return new Result<string>(true, $"{fileNameWithoutExtension} ({count}){fileExtension}");
+        return new Result<string>(true, $"{fileNameWithoutExtension}-{count}{fileExtension}");
     }
 
     private async Task<Result<bool>> FileExistsAsync(string filePath)
     {
         try
         {
-            await _dropboxClient.Files.GetMetadataAsync(filePath);
+            await _dropboxClient.Files.GetMetadataAsync("/" + filePath);
 
             return new Result<bool>(true);
         }
@@ -154,15 +150,15 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
 
-    public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile material, string url, MaterialAccess materialAccess, Group group = null!, Course course = null!)
+    public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, string materialName, string url, MaterialAccess materialAccess, Group group = null!, Course course = null!)
     {
         try
         {
             var materialFile = new EducationMaterial()
             {
-                Name = material.FileName,
+                Name = materialName,
                 Url = url,
-                FileExtension = Path.GetExtension(material.FileName),
+                FileExtension = Path.GetExtension(materialName),
                 MaterialAccess = materialAccess,
                 UploadTime = uploadTime
             };
@@ -197,30 +193,23 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
 
-    public async Task<Result<Group>> DeleteFileFromGroup(EducationMaterial material)
+    public async Task<Result<bool>> DeleteFile(EducationMaterial material)
     {
         var resultDeleteEducationMaterial = await DeleteFileAsync(material.Name);
 
         if (!resultDeleteEducationMaterial.IsSuccessful)
         {
-            return new Result<Group>(false, $"Failed to delete {nameof(material)}");
+            return new Result<bool>(false, $"Failed to delete {nameof(material)}");
         }
 
         var resultDeleteFromDropBox = await DeleteUploadFileAsync(material);
 
         if (!resultDeleteFromDropBox.IsSuccessful)
         {
-            return new Result<Group>(false, $"Failed to delete {nameof(material)}");
+            return new Result<bool>(false, $"Failed to delete {nameof(material)}");
         }
 
-        var group = material.Group;
-
-        if (group != null)
-        {
-            group.EducationMaterials.Remove(material);
-        }
-
-        return new Result<Group>(true, group);
+        return new Result<bool>(true);
     }
 
     public async Task<Result<List<EducationMaterial>>> GetAllMaterialByAccessAsync(MaterialAccess access)

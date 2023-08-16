@@ -297,7 +297,7 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Detail", "EducationMaterial", new { id = id });
         }
 
-        var deleteResult = await _educationMaterialService.DeleteFileFromGroup(fileToDelete.Data);
+        var deleteResult = await _educationMaterialService.DeleteFile(fileToDelete.Data);
 
         if (!deleteResult.IsSuccessful)
         {
@@ -309,14 +309,14 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Detail", "EducationMaterial", new { id = id });
         }
 
-        var updateResult = await _groupService.UpdateGroup(deleteResult.Data);
+        // var updateResult = await _groupService.UpdateGroup(deleteResult.Data);
 
-        if (!updateResult.IsSuccessful)
-        {
-            _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}",
-                deleteResult.Data.Id, updateResult.Message);
-            TempData.TempDataMessage("Error", $"Message: {updateResult.Message}");
-        }
+        // if (!updateResult.IsSuccessful)
+        // {
+        //     _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}",
+        //         deleteResult.Data.Id, updateResult.Message);
+        //     TempData.TempDataMessage("Error", $"Message: {updateResult.Message}");
+        // }
 
         return RedirectToAction("Index", "Course");
     }

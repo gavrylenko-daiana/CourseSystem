@@ -76,10 +76,10 @@ public class CourseService : GenericService<Course>, ICourseService
             if (course.EducationMaterials.Any())
             {
                 var educationMaterialsCopy = course.EducationMaterials.ToList();
-
+            
                 foreach (var material in educationMaterialsCopy)
                 {
-                    await _educationMaterialService.DeleteFileFromGroup(material);
+                    await _educationMaterialService.DeleteFile(material);
                 }
             }
 
@@ -170,7 +170,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 return new Result<bool>(false, $"Message: {groupResult.Message}");
             }
 
-            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
+            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
                 MaterialAccess.Group, groupResult.Data);
 
             if (!addToGroupResult.IsSuccessful)
@@ -187,7 +187,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 return new Result<bool>(false, $"Message: {courseResult.Message}");
             }
 
-            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
+            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
                 MaterialAccess.Course, null!, courseResult.Data);
 
             if (!addToCourseResult.IsSuccessful)
@@ -198,7 +198,7 @@ public class CourseService : GenericService<Course>, ICourseService
         else if (materialAccess == MaterialAccess.General)
         {
             var addToCourseResult =
-                await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
+                await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
                     MaterialAccess.General);
 
             if (!addToCourseResult.IsSuccessful)
