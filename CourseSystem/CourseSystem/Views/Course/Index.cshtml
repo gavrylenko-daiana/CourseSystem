@@ -117,10 +117,8 @@
 
 @if (TempData["Error"] != null)
 {
-    <div class="ui container">
-        <div class="ui negative message">
-            <span>@TempData["Error"]</span>
-        </div>
+    <div class="ui negative message">
+        <p><b>Sorry!</b> - @TempData["Error"]</p>
     </div>
 }
 </body>
