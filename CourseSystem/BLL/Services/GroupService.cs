@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using BLL.Interfaces;
 using Core.Enums;
 using Core.Helpers;
@@ -190,22 +191,44 @@ public class GroupService : GenericService<Group>, IGroupService
         return new Result<List<Group>>(true, groups);
     }
 
-    public async Task<Result<List<Group>>> GetUserGroups(AppUser currentUser)
+    public async Task<Result<List<Group>>> GetUserGroups(AppUser currentUser, SortingParam sortOrder, string groupAccessFilter = null, string searchQuery = null)
     {
-        if (currentUser == null)
-        {
-            return new Result<List<Group>>(false, $"{nameof(currentUser)} not found");
-        }
-        
-        var groupsResult = await GetByPredicate(g =>
-            g.UserGroups.Any(ug => ug.AppUserId.Equals(currentUser.Id)));
+        Result<List<Group>> groupResult = null;
 
-        if (!groupsResult.IsSuccessful)
+        var groups = currentUser.UserGroups.Select(ug => ug.Group).ToList();
+
+        if (!groups.Any())
         {
-            return new Result<List<Group>>(false, $"{groupsResult.Message}");
+            return new Result<List<Group>>(true, new List<Group>());
+        }
+
+        var query = GetOrderByExpression(sortOrder);
+
+        if (!string.IsNullOrEmpty(searchQuery) && !string.IsNullOrEmpty(groupAccessFilter))
+        {
+            var tempFilter = Enum.Parse(typeof(GroupAccess), groupAccessFilter);
+            groupResult = await GetByPredicate(g => groups.Contains(g) && g.Name.Contains(searchQuery) && g.GroupAccess.Equals(tempFilter), query);
+        }
+        else if (!string.IsNullOrEmpty(searchQuery))
+        {
+            groupResult = await GetByPredicate(g => groups.Contains(g) && g.Name.Contains(searchQuery), query);
+        }
+        else if (groupAccessFilter != null)
+        {
+            var tempFilter = Enum.Parse(typeof(GroupAccess), groupAccessFilter);
+            groupResult = await GetByPredicate(g => groups.Contains(g) && g.GroupAccess.Equals(tempFilter), query);
+        }
+        else
+        {
+            groupResult = await GetByPredicate(g => groups.Contains(g), query);
+        }
+
+        if (!groupResult.IsSuccessful)
+        {
+            return new Result<List<Group>>(false, $"{groupResult.Message}");
         }
         
-        var userGroups = await CheckStartAndEndGroupDate(groupsResult.Data);
+        var userGroups = await CheckStartAndEndGroupDate(groupResult.Data);
 
         return new Result<List<Group>>(true, userGroups);
     }
@@ -307,5 +330,34 @@ public class GroupService : GenericService<Group>, IGroupService
         {
             group.GroupAccess = GroupAccess.Completed;
         }
+    }
+    
+    private Expression<Func<IQueryable<Group>, IOrderedQueryable<Group>>> GetOrderByExpression(SortingParam sortBy)
+    {
+        Expression<Func<IQueryable<Group>, IOrderedQueryable<Group>>> query;
+
+        switch (sortBy)
+        {
+            case SortingParam.NameDesc:
+                query = q => q.OrderByDescending(q => q.Name);
+                break;
+            case SortingParam.StartDateDesc:
+                query = q => q.OrderByDescending(q => q.StartDate);
+                break;
+            case SortingParam.StartDate:
+                query = q => q.OrderBy(q => q.StartDate);
+                break;
+            case SortingParam.EndDate:
+                query = q => q.OrderBy(q => q.EndDate);
+                break;
+            case SortingParam.EndDateDesc:
+                query = q => q.OrderByDescending(q => q.EndDate);
+                break;
+            default:
+                query = q => q.OrderBy(q => q.Name);
+                break;
+        }
+
+        return query;
     }
 }

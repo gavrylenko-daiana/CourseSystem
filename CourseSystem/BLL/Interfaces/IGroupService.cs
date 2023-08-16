@@ -1,3 +1,4 @@
+using Core.Enums;
 using Core.Models;
 
 namespace BLL.Interfaces;
@@ -10,5 +11,5 @@ public interface IGroupService : IGenericService<Group>
     Task<string> CalculateStudentProgressInGroup(Group group, AppUser currentUser);
     Task<string> CalculateGroupProgress(int groupId);
     Task<Result<List<Group>>> GetAllGroupsAsync();
-    Task<Result<List<Group>>> GetUserGroups(AppUser currentUser);
+    Task<Result<List<Group>>> GetUserGroups(AppUser currentUser, SortingParam sortOrder, string groupAccessFilter = null, string searchQuery = null);
 }
