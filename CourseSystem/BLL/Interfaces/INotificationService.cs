@@ -16,7 +16,7 @@ namespace BLL.Interfaces
         Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group);
         Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group);
         Task<Result<bool>> AddGroupStartedForStudentNotification(AppUser user, Group group);
-        Task<Result<bool>> AddCreatedAssignmentNotification(AppUser user, Assignment assignment);
+        Task<Result<bool>> AddCreatedAssignmentNotification(AppUser user, Assignment assignment); //ready
         Task<Result<bool>> AddSubmittedAssignmentForStudentNotification(UserAssignments userAssignment); //ready
         Task<Result<bool>> AddSubmittedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment); //ready
         Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment); //ready
