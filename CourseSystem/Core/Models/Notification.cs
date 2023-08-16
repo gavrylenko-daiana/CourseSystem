@@ -18,5 +18,7 @@ namespace Core.Models
         public virtual Course? Course { get; set; }
         public int? GroupId { get; set; }
         public virtual Group? Group { get; set; }
+        public int? AssignmentId { get; set; }
+        public virtual Assignment? Assignment { get; set; }
     }
 }
