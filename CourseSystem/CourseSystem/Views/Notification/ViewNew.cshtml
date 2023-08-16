@@ -1,39 +1,53 @@
-﻿@model List<Notification>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User notifications</title>
-</head>
-<body>
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card w-100 pb-0">
-                <div class="card-header text-center">
-                    <h4>Your new notifications</h4>
-                </div>
-                @if (TempData["Error"] != null)
-                {
-                    <div class="col-md-12 alert alert-danger">
-                        <span><b>Sorry!</b> - @TempData["Error"]</span>
-                    </div>
-                }
-                <div class="card-body">
-                    @foreach (var notification in Model)
-                    {
-                        @Html.ActionLink(
-                            notification.Name,
-                            "NotificationDetails",
-                            new { notification.Id },
-                            new { @class = "list-group-item" }
-                            )
-                        <p>@notification.Created.ToString("f")</p>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+﻿@using BLL.Interfaces;
+@using Core.Helpers;
+@inject IUserService _userService;
+@{
+    var currentUserResult = await _userService.GetCurrentUser(User);
+    var notifications = currentUserResult.Data.Notifications.NotReadByDate().Data;
 
-</body>
-</html>
+    string btnStyle = "btn-secondary";
+}
+
+<style>
+    #notifications-menu {
+        max-height: 70vh;
+        overflow: auto;
+    }
+</style>
+
+<div class="dropdown">
+    @if (notifications.Any())
+    {
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Notifications
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @notifications.Count()
+                <span class="visually-hidden">unread messages</span>
+            </span>
+        </button>
+    }
+    else
+    {
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Notifications
+        </button>
+    }
+    
+    <ul class="dropdown-menu" id="notifications-menu">
+        <li>
+            <a class="dropdown-item" asp-controller="Notification" asp-action="ViewAll">Go to all notifications</a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        @foreach (var notification in notifications)
+        {
+            <li>
+                @Html.ActionLink(
+                $"{notification.Name}  ({@notification.Created.ToString("g")})",
+                "NotificationDetails",
+                "Notification",
+                new { notification.Id },
+                new { @class = "dropdown-item" })
+            </li>
+        }
+    </ul>
+</div>
