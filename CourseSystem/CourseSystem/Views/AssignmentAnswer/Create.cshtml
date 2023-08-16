@@ -54,8 +54,11 @@
                                     </div>
                                     <!-- Submit Button -->
                                     <div class="form-row form-group">
-                                        <div class="col">
-                                            <input class="btn btn-outline-primary" type="submit" value="Create" />
+                                        <div class="col" style="display: inline-block;">
+                                            <input class="btn btn-outline-success" type="submit" value="Create" />
+                                        </div>
+                                        <div class="col" style="display: inline-block;">
+                                            <a href="@Url.Action("Details", "Assignment", new { assignmentId = Model.AssignmentId})" class="btn btn-outline-danger">Cancel</a>
                                         </div>
                                     </div>
                                 </form>
