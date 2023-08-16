@@ -119,6 +119,11 @@ public class CourseService : GenericService<Course>, ICourseService
 
     public async Task<Result<List<Course>>> GetUserCourses(AppUser currentUser, SortingParam sortOrder, string searchQuery = null)
     {
+        if (currentUser == null)
+        {
+            return new Result<List<Course>>(false, $"{nameof(currentUser)} not found");
+        }
+        
         Result<List<Course>> coursesResult = null;
         
         var courses = currentUser.UserCourses.Select(uc => uc.Course).ToList();
