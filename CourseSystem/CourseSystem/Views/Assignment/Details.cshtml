@@ -14,6 +14,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Add Font Awesome CSS -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        #chat-card
+        {
+            max-height: 70vh;
+            overflow: auto;
+        }
+    </style>
 </head>
 <body>
     @if (TempData["Error"] != null)
@@ -163,7 +170,7 @@
                     <div class="card-header">
                         <p>Chat</p>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" id="chat-card">
                         @await Html.PartialAsync("~/Views/Chat/_Chat.cshtml", new AssignmentChatViewModel { Id = Model.Id, ChatMessages = Model.ChatMessages })
                     </div>
                 </div>
