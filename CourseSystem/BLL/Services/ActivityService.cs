@@ -15,9 +15,11 @@ namespace BLL.Services
 {
     public class ActivityService : GenericService<UserActivity>, IActivityService
     {
-        public ActivityService(UnitOfWork unitOfWork)
+        private readonly IGroupService _groupService;
+        public ActivityService(UnitOfWork unitOfWork, IGroupService groupService)
             : base(unitOfWork, unitOfWork.UserActivityRepository)
         {
+            _groupService = groupService;
         }
 
         public async Task<Result<bool>> AddCreatedAssignmentActivity(AppUser user, Assignment assignment)
@@ -32,10 +34,17 @@ namespace BLL.Services
                 return new Result<bool>(false, $"Invalid {nameof(assignment)}");
             }
 
+            var groupResult = await _groupService.GetById(assignment.GroupId);
+
+            if (!groupResult.IsSuccessful)
+            {
+                return new Result<bool>(false);
+            }
+
             var activity = new UserActivity()
             {
                 Name = ActivityTemplate.GetActivityName(ActivityType.CreatedAssignment),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedAssignment, new object[] { assignment.Name, assignment.Group.Name, assignment.StartDate, assignment.EndDate }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.CreatedAssignment, new object[] { assignment.Name, groupResult.Data.Name, assignment.StartDate, assignment.EndDate }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -163,7 +172,7 @@ namespace BLL.Services
             return await SaveActivity(activity);
         }
 
-        public async Task<Result<bool>> AddSubmittedAssignmentActivity(AppUser user, Assignment assignment)
+        public async Task<Result<bool>> AddSubmittedAssignmentAnswerActivity(AppUser user, Assignment assignment)
         {
             if (user == null)
             {
@@ -177,8 +186,8 @@ namespace BLL.Services
 
             var activity = new UserActivity()
             {
-                Name = ActivityTemplate.GetActivityName(ActivityType.SubmittedAssignment),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.SubmittedAssignment, new object[] { assignment.Name }),
+                Name = ActivityTemplate.GetActivityName(ActivityType.SubmittedAssignmentAnswer),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.SubmittedAssignmentAnswer, new object[] { assignment.Name }),
                 Created = DateTime.Now,
                 AppUser = user,
             };
@@ -223,8 +232,26 @@ namespace BLL.Services
 
             var activity = new UserActivity()
             {
+                Name = ActivityTemplate.GetActivityName(ActivityType.AttachedEducationalMaterialForGroup),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForGroup, new object[] { group.Name }),
+                Created = DateTime.Now,
+                AppUser = user,
+            };
+
+            return await SaveActivity(activity);
+        }
+
+        public async Task<Result<bool>> AddAttachedGeneralEducationalMaterialActivity(AppUser user)
+        {
+            if (user == null)
+            {
+                return new Result<bool>(false, $"Invalid ${nameof(user)}");
+            }
+
+            var activity = new UserActivity()
+            {
                 Name = ActivityTemplate.GetActivityName(ActivityType.AttachedEducationalMaterialForCourse),
-                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedEducationalMaterialForCourse, new object[] { group.Name }),
+                Description = ActivityTemplate.GetActivityDescription(ActivityType.AttachedGeneralEducationalMaterial, new object[] { }),
                 Created = DateTime.Now,
                 AppUser = user,
             };

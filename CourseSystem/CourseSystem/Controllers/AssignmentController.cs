@@ -22,14 +22,17 @@ public class AssignmentController : Controller
     private readonly IAssignmentService _assignmentService;
     private readonly IUserService _userService; 
     private readonly IUserAssignmentService _userAssignmentService;
+    private readonly IActivityService _activityService;
     private readonly ILogger<AssignmentController> _logger;
 
-    public AssignmentController(IAssignmentService assignmentService, IUserService userService, 
-        IUserAssignmentService userAssignmentService, ILogger<AssignmentController> logger)
+    public AssignmentController(IAssignmentService assignmentService, IUserService userService,
+        IUserAssignmentService userAssignmentService, IActivityService activityService,
+        ILogger<AssignmentController> logger)
     {
         _assignmentService = assignmentService;
         _userService = userService;
         _userAssignmentService = userAssignmentService;
+        _activityService = activityService;
         _logger = logger;
     }
 
@@ -100,6 +103,15 @@ public class AssignmentController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(CreateAssignmentViewModel assignmentVM)
     {
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Unauthorized user");
+
+            return RedirectToAction("Login", "Account");
+        }
+
         if (assignmentVM == null)
         {
             _logger.LogError("Failed to create assignment - assignment view model was null!");
@@ -153,6 +165,8 @@ public class AssignmentController : Controller
 
             return View(assignmentVM);
         }
+
+        await _activityService.AddCreatedAssignmentActivity(currentUserResult.Data, assignment);
 
         return RedirectToAction("Index", "Assignment", new { groupId = assignmentVM.GroupId });
     }

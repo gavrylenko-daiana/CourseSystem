@@ -14,8 +14,9 @@ namespace Core.ActivityTemplates
         JoinedGroup,
         CreatedAssignment,
         MarkedAssignment,
-        SubmittedAssignment,
+        SubmittedAssignmentAnswer,
         AttachedEducationalMaterialForGroup,
-        AttachedEducationalMaterialForCourse
+        AttachedEducationalMaterialForCourse,
+        AttachedGeneralEducationalMaterial
     }
 }

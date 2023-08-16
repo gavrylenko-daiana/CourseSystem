@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
 using static Dropbox.Api.Team.GroupSelector; //I don't know what that is, need to check
 using UI.ViewModels.FileViewModels;
+using BLL.Services;
 
 namespace UI.Controllers;
 
@@ -18,14 +19,19 @@ public class EducationMaterialController : Controller
     private readonly IEducationMaterialService _educationMaterialService;
     private readonly IGroupService _groupService;
     private readonly ICourseService _courseService;
+    private readonly IActivityService _activityService;
+    private readonly IUserService _userService;
     private readonly ILogger<EducationMaterialController> _logger;
 
     public EducationMaterialController(IEducationMaterialService educationMaterial, IGroupService groupService,
-        ICourseService courseService, ILogger<EducationMaterialController> logger)
+        ICourseService courseService, IActivityService activityService,
+        IUserService userService, ILogger<EducationMaterialController> logger)
     {
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
         _courseService = courseService;
+        _activityService = activityService;
+        _userService = userService;
         _logger = logger;
     }
 
@@ -102,6 +108,15 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInGroup(CreateInGroupEducationMaterialViewModel viewModel)
     {
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Unauthorized user");
+
+            return RedirectToAction("Login", "Account");
+        }
+
         if (!ModelState.IsValid)
         {
             _logger.LogError("Failed to create eduactional material! Invalid model state.");
@@ -115,26 +130,28 @@ public class EducationMaterialController : Controller
             return View(viewModel);
         }
 
+        var groupResult = await _groupService.GetById(viewModel.GroupId);
+
+        if (!groupResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                viewModel.GroupId, groupResult.Message);
+
+            TempData.TempDataMessage("Error", $"Message: {groupResult.Message}");
+            return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
+        }
+
         var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId, viewModel.CourseId);
 
         if (!addResult.IsSuccessful)
         {
-            _logger.LogError("Failed to attach educational material {filePath} to group {groupId}! Error: {errorMessage}", 
-                fullPath.Data, groupResult.Data.Id, addResult.Message);
+            _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
+
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
             return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
         }
 
-        var updateResult = await _groupService.UpdateGroup(addResult.Data);
-
-        if (!updateResult.IsSuccessful)
-        {
-            _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}",
-                addResult.Data.Id, updateResult.Message);
-            TempData.TempDataMessage("Error", $"Message: {updateResult.Message}");
-
-            return View(viewModel);
-        }
+        await _activityService.AddAttachedEducationalMaterialForGroupActivity(currentUserResult.Data, groupResult.Data);
 
         return RedirectToAction("Details", "Group", new { id = viewModel.GroupId });
     }
@@ -166,6 +183,26 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInCourse(CreateInCourseEducationMaterialViewModel viewModel)
     {
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Unauthorized user");
+
+            return RedirectToAction("Login", "Account");
+        }
+
+        var courseResult = await _courseService.GetById(viewModel.CourseId);
+
+        if (!courseResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                viewModel.CourseId, courseResult.Message);
+
+            TempData.TempDataMessage("Error", $"Message: {courseResult.Message}");
+            return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+        }
+
         var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess,
             viewModel.SelectedGroupId, viewModel.CourseId);
 
@@ -174,8 +211,10 @@ public class EducationMaterialController : Controller
             _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
 
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-            return RedirectToAction("CreateInCourse", "EducationMaterial", new { groupId = viewModel.CourseId });
+            return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
         }
+
+        await _activityService.AddAttachedEducationalMaterialForCourseActivity(currentUserResult.Data, courseResult.Data);
 
         return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
     }
@@ -198,6 +237,15 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateInGeneral(CreateInGeneralEducationMaterialViewModel viewModel)
     {
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Unauthorized user");
+
+            return RedirectToAction("Login", "Account");
+        }
+
         var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess,
             viewModel.SelectedGroupId, viewModel.SelectedCourseId);
 
@@ -208,6 +256,8 @@ public class EducationMaterialController : Controller
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
             return RedirectToAction("CreateInGeneral", "EducationMaterial");
         }
+
+        await _activityService.AddAttachedGeneralEducationalMaterialActivity(currentUserResult.Data);
 
         return RedirectToAction("Index", "Course");
     }

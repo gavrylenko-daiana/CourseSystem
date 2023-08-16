@@ -18,18 +18,21 @@ public class AssignmentAnswerController : Controller
     private readonly IAssignmentAnswerService _assignmentAnswerService;
     private readonly IUserAssignmentService _userAssignmentService;
     private readonly IUserService _userService;
+    private readonly IActivityService _activityService;
     private readonly ILogger<AssignmentAnswerController> _logger;
 
     public AssignmentAnswerController(IAssignmentService assignmentService,
         IAssignmentAnswerService assignmentAnswerService,
         IUserAssignmentService userAssignmentService,
         IUserService userService,
+        IActivityService activityService,
         ILogger<AssignmentAnswerController> logger)
     {
         _assignmentService = assignmentService;
         _assignmentAnswerService = assignmentAnswerService;
         _userAssignmentService = userAssignmentService;
         _userService = userService;
+        _activityService = activityService;
         _logger = logger;
     }
 
@@ -107,6 +110,8 @@ public class AssignmentAnswerController : Controller
 
             return RedirectToAction("Create", "AssignmentAnswer", new { assignmentAnswerVM.AssignmentId });
         }
+
+        await _activityService.AddSubmittedAssignmentAnswerActivity(currentUserResult.Data, assignmentResult.Data);
 
         return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentResult.Data.Id });
     }
@@ -235,6 +240,15 @@ public class AssignmentAnswerController : Controller
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> ChangeGrade(int grade)
     {
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Unauthorized user");
+
+            return RedirectToAction("Login", "Account");
+        }
+
         var assignmentId = (int)TempData["AssignmentId"];
         var studentId = TempData["StudentId"].ToString();
 
@@ -279,6 +293,8 @@ public class AssignmentAnswerController : Controller
 
             return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
         }
+
+        await _activityService.AddMarkedAssignmentActivity(currentUserResult.Data, userAssignment);
 
         return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId });
     }
