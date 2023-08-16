@@ -47,7 +47,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string currentQueryFilter, string currentAccessFilter, SortingParam sortOrder, string searchQuery, string groupAccessFilter, int? page)
     {
         var currentUserResult = await _userService.GetCurrentUser(User);
 
@@ -57,8 +57,26 @@ public class GroupController : Controller
 
             return RedirectToAction("Login", "Account");
         }
+        
+        ViewBag.CurrentSort = sortOrder;
+        ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
+        ViewBag.StartDateParam = sortOrder == SortingParam.StartDateDesc ? SortingParam.StartDate : SortingParam.StartDateDesc;
+        ViewBag.EndDateParam = sortOrder == SortingParam.EndDateDesc ? SortingParam.EndDate : SortingParam.EndDateDesc;
 
-        var groupsResult = await _groupService.GetUserGroups(currentUserResult.Data);
+        if (searchQuery != null || groupAccessFilter != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            searchQuery = currentQueryFilter;
+            groupAccessFilter = currentAccessFilter;
+        }
+
+        ViewBag.CurrentQueryFilter = searchQuery;
+        ViewBag.CurrentAccessFilter = groupAccessFilter;
+
+        var groupsResult = await _groupService.GetUserGroups(currentUserResult.Data, sortOrder, groupAccessFilter, searchQuery);
 
         if (!groupsResult.IsSuccessful)
         {
