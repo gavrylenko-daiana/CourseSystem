@@ -11,6 +11,7 @@ using MailKit.Security;
 using System.Runtime;
 using Core.Enums;
 using Core.EmailTemplates;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BLL.Services
@@ -341,6 +342,37 @@ namespace BLL.Services
 
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
+        
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, IFormFile material, string callBackUrl = null)
+        {
+            if (appUser == null || material == null)
+            {
+                return (String.Empty, String.Empty);
+            }
+
+            var parameters = new Dictionary<string, object>();
+            
+            switch (emailType)
+            {
+                case EmailType.EducationMaterialApproveByAdmin:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{lastname}", appUser.LastName },
+                        { @"{email}", appUser.Email!},
+                        { @"{materialname}", material.FileName },
+                        { @"{material}", material.ContentType },
+                        { @"{callbackurl}", callBackUrl }
+                    };
+                    break;
+                case EmailType.ApprovedUploadEducationalMaterial:
+                    break;
+                default:
+                    return (String.Empty, String.Empty);
+            }
+
+            return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
+        }
 
         public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
         {
@@ -394,5 +426,31 @@ namespace BLL.Services
 
             return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
         }
+        
+        public async Task<Result<bool>> SendEmailMaterial(EmailType emailType, AppUser appUser, IFormFile material, string callBackUrl = null!)
+        {
+            if (appUser == null)
+            {
+                return new Result<bool>(false, "Fail to send email");
+            }
+
+            var emailContent = GetEmailSubjectAndBody(emailType, appUser, material, callBackUrl);
+            
+            var toEmail = new List<string>();
+            var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
+
+            switch (emailType)
+            {
+                case EmailType.EducationMaterialApproveByAdmin:
+                    toEmail = allAdmins.Select(a => a.Email).ToList();
+                    break;
+                default:
+                    toEmail.Add(appUser.Email);
+                    break;
+            }
+            
+            return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
+        }
+
     }
 }

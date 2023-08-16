@@ -71,7 +71,6 @@ namespace BLL.Services
             Result<List<Assignment>> assignmentResult = null;
 
             var query = GetOrderByExpression(sortOrder);
-            
 
             if (!string.IsNullOrEmpty(searchQuery) && !string.IsNullOrEmpty(assignmentAccessFilter))
             {

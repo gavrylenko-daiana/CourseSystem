@@ -11,9 +11,13 @@ using UI.ViewModels;
 using static Dropbox.Api.Team.GroupSelector; //I don't know what that is, need to check
 using UI.ViewModels.FileViewModels;
 using BLL.Services;
+using Core.EmailTemplates;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 
 namespace UI.Controllers;
 
+[Authorize]
 public class EducationMaterialController : Controller
 {
     private readonly IEducationMaterialService _educationMaterialService;
@@ -21,11 +25,12 @@ public class EducationMaterialController : Controller
     private readonly ICourseService _courseService;
     private readonly IActivityService _activityService;
     private readonly IUserService _userService;
+    private readonly IEmailService _emailService;
     private readonly ILogger<EducationMaterialController> _logger;
 
     public EducationMaterialController(IEducationMaterialService educationMaterial, IGroupService groupService,
         ICourseService courseService, IActivityService activityService,
-        IUserService userService, ILogger<EducationMaterialController> logger)
+        IUserService userService, ILogger<EducationMaterialController> logger, IEmailService emailService)
     {
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
@@ -33,6 +38,28 @@ public class EducationMaterialController : Controller
         _activityService = activityService;
         _userService = userService;
         _logger = logger;
+        _emailService = emailService;
+    }
+    
+    private string CreateCallBackUrl(string controllerName, string actionName, object routeValues)
+    {
+        if (controllerName.IsNullOrEmpty() || actionName.IsNullOrEmpty())
+        {
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+        }
+
+        if (routeValues == null)
+        {
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+        }
+
+        var callbackUrl = Url.Action(
+            actionName,
+            controllerName,
+            routeValues,
+            protocol: HttpContext.Request.Scheme);
+
+        return callbackUrl;
     }
 
     [HttpGet]
@@ -45,6 +72,7 @@ public class EducationMaterialController : Controller
             _logger.LogError("Failed to retrieve educational materials! Error: {errorMessage}", materials.Message);
 
             TempData.TempDataMessage("Error", $"Message: {materials.Message}");
+            
             return RedirectToAction("Index", "Course");
         }
 
@@ -59,6 +87,7 @@ public class EducationMaterialController : Controller
         if (!materialsList.IsSuccessful)
         {
             TempData.TempDataMessage("Error", materialsList.Message);
+            
             return RedirectToAction("Index", "Course");
         }
 
@@ -66,7 +95,7 @@ public class EducationMaterialController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> CreateInGroup(int groupId)
+    public async Task<IActionResult> CreateInGroup(int groupId, bool isApproved = false)
     {
         var groupResult = await _groupService.GetById(groupId);
 
@@ -74,8 +103,9 @@ public class EducationMaterialController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-
+            
             TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
+            
             return RedirectToAction("Index", "Group");
         }
 
@@ -87,6 +117,8 @@ public class EducationMaterialController : Controller
             CourseId = groupResult.Data.CourseId
         };
 
+        ViewBag.IsApproved = isApproved;
+
         return View(materialViewModel);
     }
 
@@ -94,7 +126,7 @@ public class EducationMaterialController : Controller
     public async Task<IActionResult> CreateInGroup(CreateInGroupEducationMaterialViewModel viewModel)
     {
         var currentUserResult = await _userService.GetCurrentUser(User);
-
+        
         if (!currentUserResult.IsSuccessful)
         {
             _logger.LogWarning("Unauthorized user");
@@ -105,6 +137,7 @@ public class EducationMaterialController : Controller
         if (!ModelState.IsValid)
         {
             _logger.LogError("Failed to create eduactional material! Invalid model state.");
+            
             foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
             {
                 _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
@@ -121,8 +154,9 @@ public class EducationMaterialController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 viewModel.GroupId, groupResult.Message);
-
+            
             TempData.TempDataMessage("Error", $"Message: {groupResult.Message}");
+            
             return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
         }
 
@@ -131,8 +165,9 @@ public class EducationMaterialController : Controller
         if (!addResult.IsSuccessful)
         {
             _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
-
+            
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
+            
             return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
         }
 
@@ -150,8 +185,9 @@ public class EducationMaterialController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
-
+            
             TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
+            
             return RedirectToAction("Index", "Course");
         }
 
@@ -176,31 +212,41 @@ public class EducationMaterialController : Controller
 
             return RedirectToAction("Login", "Account");
         }
-
-        var courseResult = await _courseService.GetById(viewModel.CourseId);
-
-        if (!courseResult.IsSuccessful)
+        
+        if (currentUserResult.Data.Role == AppUserRoles.Teacher)
         {
-            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
-                viewModel.CourseId, courseResult.Message);
-
-            TempData.TempDataMessage("Error", $"Message: {courseResult.Message}");
-            return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+            var callBack = CreateCallBackUrl("EducationMaterial", "EmailConfirmationUploadMaterialByTeacher",  new { teacherId = currentUserResult.Data.Id } );
+            await _emailService.SendEmailMaterial(EmailType.EducationMaterialApproveByAdmin, currentUserResult.Data, viewModel.UploadFile, callBack);
         }
-
-        var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess,
-            viewModel.SelectedGroupId, viewModel.CourseId);
-
-        if (!addResult.IsSuccessful)
+        else
         {
-            _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
+            var courseResult = await _courseService.GetById(viewModel.CourseId);
 
-            TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-            return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+            if (!courseResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                    viewModel.CourseId, courseResult.Message);
+
+                TempData.TempDataMessage("Error", $"Message: {courseResult.Message}");
+
+                return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+            }
+
+            var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile,
+                viewModel.MaterialAccess, viewModel.SelectedGroupId, viewModel.CourseId);
+
+            if (!addResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
+
+                TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
+
+                return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+            }
+
+            await _activityService.AddAttachedEducationalMaterialForCourseActivity(currentUserResult.Data, courseResult.Data);
         }
-
-        await _activityService.AddAttachedEducationalMaterialForCourseActivity(currentUserResult.Data, courseResult.Data);
-
+        
         return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
     }
 
@@ -239,6 +285,7 @@ public class EducationMaterialController : Controller
             _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
 
             TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
+            
             return RedirectToAction("CreateInGeneral", "EducationMaterial");
         }
 
@@ -246,6 +293,15 @@ public class EducationMaterialController : Controller
 
         return RedirectToAction("Index", "Course");
     }
+    
+    // [HttpGet]
+    // public async Task<bool> EmailConfirmationUploadMaterialByTeacher(int teacherId, bool isApproved, string ActionName)
+    // {
+    //     // send to teacher
+    //     isApproved = true;
+    //     
+    //     return RedirectToAction()
+    // }
 
     [HttpGet]
     public async Task<IActionResult> Detail(int id)
@@ -293,15 +349,6 @@ public class EducationMaterialController : Controller
 
             return RedirectToAction("Detail", "EducationMaterial", new { id = id });
         }
-
-        // var updateResult = await _groupService.UpdateGroup(deleteResult.Data);
-
-        // if (!updateResult.IsSuccessful)
-        // {
-        //     _logger.LogError("Failed to update group by Id {groupId}! Error: {errorMessage}",
-        //         deleteResult.Data.Id, updateResult.Message);
-        //     TempData.TempDataMessage("Error", $"Message: {updateResult.Message}");
-        // }
 
         return RedirectToAction("Index", "Course");
     }
