@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <title>Your Page Title</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f7f7f7;
@@ -34,11 +35,44 @@
     </style>
 </head>
 <body>
-<div class="ui container">
+<div class="ui container"/>
+<div style="display: flex; align-items: center;">
     <h3 class="ui header">Courses</h3>
-    <hr class="ui divider">
-    <div class="ui stackable three column grid">
-        @if (Model.Courses.Count == 0)
+    <div style="flex-grow: 1; text-align: center;">
+        <div class="ui search">
+            <form method="get" asp-action="Index" asp-controller="Course" class="ui form inline">
+                <div class="ui icon input">
+                    <input type="text" name="currentQueryFilter" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;"/>
+                    <button type="submit" style="background: none; border: none; padding: 0;">
+                        <i class="inverted circular search link icon"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="ui compact menu" style="margin-left: 10px;">
+        <div class="ui simple dropdown item">
+            Sort by
+            <i class="dropdown icon"></i>
+            <div class="menu">
+                <div class="item">
+                    @if (ViewBag.NameSortParam == SortingParam.Name)
+                    {
+                        <a href="@Url.Action("Index", "Course", new { sortOrder = ViewBag.NameSortParam, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter })"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "Course", new { sortOrder = ViewBag.NameSortParam, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter })"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr class="ui divider">
+<div class="ui stackable three column grid">
+    @if (Model.Courses.Count == 0)
         {
             <div class="column">
                 <div class="ui warning message">No courses found.</div>
@@ -69,7 +103,6 @@
             }
         }
     </div>
-</div>
 
 @if (Model.CurrentUser.Role == AppUserRoles.Admin)
 {
