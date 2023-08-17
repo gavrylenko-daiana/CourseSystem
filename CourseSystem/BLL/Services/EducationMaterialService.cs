@@ -144,7 +144,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
         }
     }
     
-    public async Task<Result<List<EducationMaterial>>> GetMaterialsListFromIdsString(string materialIds, SortingParam sortOrder)
+    public async Task<Result<List<EducationMaterial>>> GetMaterialsListFromIdsString(string materialIds, SortingParam sortOrder, string searchQuery = null!)
     {
         var materialsList = new List<EducationMaterial>();
 
@@ -169,9 +169,16 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
             }
         }
 
-        var sortMaterials = (await GetByPredicate(m => materialsList.Contains(m), query.Data)).Data;
-
-        return new Result<List<EducationMaterial>>(true, sortMaterials);
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            materialsList = (await GetByPredicate(m => materialsList.Contains(m) && m.Name.Contains(searchQuery), query.Data)).Data;
+        }
+        else
+        {
+            materialsList = (await GetByPredicate(m => materialsList.Contains(m), query.Data)).Data;
+        }
+        
+        return new Result<List<EducationMaterial>>(true, materialsList);
     }
     
     private Result<Expression<Func<IQueryable<EducationMaterial>, IOrderedQueryable<EducationMaterial>>>> GetOrderByExpression(SortingParam sortBy)
