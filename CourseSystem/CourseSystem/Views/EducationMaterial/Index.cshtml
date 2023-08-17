@@ -56,5 +56,13 @@
         </div>
     </div>
 }
+
+@if (TempData["Error"] != null)
+{
+    <div class="ui negative message">
+        <p><b>Sorry!</b> - @TempData["Error"]</p>
+    </div>
+}
+
 </body>
 </html>

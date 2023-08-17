@@ -85,6 +85,13 @@
     </form>
 </div>
 
+@if (TempData["Error"] != null)
+{
+    <div class="ui negative message">
+        <p><b>Sorry!</b> - @TempData["Error"]</p>
+    </div>
+}
+
 <script>
     const materialAccessSelect = document.querySelector("#materialAccessSelect");
     const groupDropdown = document.querySelector("#groupDropdown");
