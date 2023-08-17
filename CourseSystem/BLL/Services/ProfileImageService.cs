@@ -1,5 +1,6 @@
 ﻿using BLL.Interfaces;
 using Core.Configuration;
+using Core.Enums;
 using Core.ImageStore;
 using Core.Models;
 using DAL.Interfaces;
@@ -81,7 +82,7 @@ namespace BLL.Services
 
             try
             {
-                var addDropboxResult = await _dropboxService.AddFileAsync(newProfileImage, "ProfileImages");
+                var addDropboxResult = await _dropboxService.AddFileAsync(newProfileImage, DropboxFolders.ProfileImages.ToString());
 
                 if(!addDropboxResult.IsSuccessful)
                 {
