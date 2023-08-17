@@ -18,5 +18,6 @@ namespace Core.Models
         public virtual List<EducationMaterial> EducationMaterials { get; set; }
         public virtual List<Assignment> Assignments { get; set; }
         public virtual List<UserGroups> UserGroups { get; set; }
+        public virtual List<Notification> Notifications { get; set; }
     }
 }
