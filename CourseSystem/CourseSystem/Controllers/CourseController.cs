@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using UI.ViewModels;
+using X.PagedList;
 
 namespace UI.Controllers;
 
@@ -43,7 +44,7 @@ public class CourseController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(string currentQueryFilter, string currentAccessFilter, SortingParam sortOrder, string searchQuery, int? page)
+    public async Task<IActionResult> Index(string currentQueryFilter, SortingParam sortOrder, string searchQuery, int? page)
     {
         ViewBag.CurrentSort = sortOrder;
         ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
@@ -79,14 +80,24 @@ public class CourseController : Controller
 
             return View("Index");
         }
-
-        var userCoursesViewModel = new UserCoursesViewModel()
+     
+        var coursesVM = new List<CourseViewModel>();  
+        
+        if (coursesResult.Data != null)
         {
-            CurrentUser = currentUserResult.Data,
-            Courses = coursesResult.Data
-        };
+            coursesResult.Data.ForEach(course =>
+            {
+                var courseVM = new CourseViewModel();
+                course.MapTo(courseVM);
+                coursesVM.Add(courseVM);
+            });
+        }
 
-        return View(userCoursesViewModel);
+        int pageSize = 6;
+        int pageNumber = (page ?? 1);
+        ViewBag.OnePageOfAssignemnts = coursesVM;
+        
+        return View(coursesVM.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]

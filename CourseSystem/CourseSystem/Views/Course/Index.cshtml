@@ -1,6 +1,11 @@
 @using Core.Enums
+@using Core.Enums
+@using X.PagedList.Mvc.Core; 
+@using X.PagedList;
+@using System.Web;
+@using X.PagedList.Web.Common;
+@model X.PagedList.IPagedList<UI.ViewModels.CourseViewModel>
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model UI.ViewModels.UserCoursesViewModel
 
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +36,7 @@
         
         .cover-card {
             height: 200px; 
-        }             
+        }                 
     </style>
 </head>
 <body>
@@ -72,7 +77,7 @@
 </div>
 <hr class="ui divider">
 <div class="ui stackable three column grid">
-    @if (Model.Courses.Count == 0)
+    @if (!Model.Any())
         {
             <div class="column">
                 <div class="ui warning message">No courses found.</div>
@@ -80,7 +85,7 @@
         }
         else
         {
-            @foreach (var course in Model.Courses)
+            @foreach (var course in Model)
             {
                 <div class="column">
                     <div class="ui card cover-card">
@@ -89,7 +94,7 @@
                         </div>
                         <div class="extra content">
                             <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
-                            @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                            @if (User.IsInRole(AppUserRoles.Admin.ToString()))
                             {
                                 <div class="ui buttons">
                                     <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
@@ -103,19 +108,32 @@
             }
         }
     </div>
+            <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+                @if (Model.PageCount > 1)
+                    {
+                        <div class="pagination-container">
+                            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                            <div class="page-link">
+                                @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page = page, sortOrder = ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter}),
+                                    new PagedListRenderOptions {
+                                        LiElementClasses = new string[] { "page-item" },
+                                        PageClasses = new string[] { "page-link" }
+                                    })
+                            </div>
+                        </div>
+                    }
+            </div>    
 
-@if (Model.CurrentUser.Role == AppUserRoles.Admin)
+@if (User.IsInRole(AppUserRoles.Admin.ToString()))
 {
     <div class="ui container add-course-button">
         <a asp-action="Create" class="ui basic black button">Add New Course</a>
-    </div>
-}
-
-@if (Model.CurrentUser.Role != AppUserRoles.Student)
-{
-    <div class="ui container add-course-button">
-        <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
-        <a asp-action="IndexAccess" asp-controller="EducationMaterial" asp-route-access="@MaterialAccess.General" class="ui basic black button">Education Materials</a>
+        
+        @if (!User.IsInRole(AppUserRoles.Student.ToString()))
+        {
+            <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
+            <a asp-action="IndexAccess" asp-controller="EducationMaterial" asp-route-access="@MaterialAccess.General" class="ui basic black button">Education Materials</a>
+        }
     </div>
 }
 
