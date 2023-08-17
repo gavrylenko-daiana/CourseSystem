@@ -23,32 +23,6 @@ public class NotificationController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> ViewNew()
-    {
-        var currentUserResult = await _userService.GetCurrentUser(User);
-
-        if (!currentUserResult.IsSuccessful)
-        {
-            _logger.LogWarning("Unauthorized user");
-
-            return RedirectToAction("Login", "Account");
-        }
-
-        var notificationsResult = currentUserResult.Data.Notifications.NotReadByDate();
-
-        if (!notificationsResult.IsSuccessful)
-        {
-            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
-                currentUserResult.Data.Id, notificationsResult.Message);
-            TempData.TempDataMessage("Error", notificationsResult.Message);
-
-            return RedirectToAction("Index", "Home");
-        }
-
-        return View(notificationsResult.Data);
-    }
-
-    [HttpGet]
     public async Task<IActionResult> ViewAll()
     {
         var currentUserResult = await _userService.GetCurrentUser(User);

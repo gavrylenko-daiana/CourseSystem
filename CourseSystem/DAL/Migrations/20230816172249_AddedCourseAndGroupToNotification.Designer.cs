@@ -4,6 +4,7 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230816172249_AddedCourseAndGroupToNotification")]
+    partial class AddedCourseAndGroupToNotification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -372,9 +375,6 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("AssignmentId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("CourseId")
                         .HasColumnType("int");
 
@@ -398,8 +398,6 @@ namespace DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
-
-                    b.HasIndex("AssignmentId");
 
                     b.HasIndex("CourseId");
 
@@ -731,10 +729,6 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Core.Models.Assignment", "Assignment")
-                        .WithMany()
-                        .HasForeignKey("AssignmentId");
-
                     b.HasOne("Core.Models.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId");
@@ -744,8 +738,6 @@ namespace DAL.Migrations
                         .HasForeignKey("GroupId");
 
                     b.Navigation("AppUser");
-
-                    b.Navigation("Assignment");
 
                     b.Navigation("Course");
 

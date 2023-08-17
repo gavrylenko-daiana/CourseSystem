@@ -23,16 +23,18 @@ public class AssignmentController : Controller
     private readonly IUserService _userService; 
     private readonly IUserAssignmentService _userAssignmentService;
     private readonly IActivityService _activityService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<AssignmentController> _logger;
 
     public AssignmentController(IAssignmentService assignmentService, IUserService userService,
         IUserAssignmentService userAssignmentService, IActivityService activityService,
-        ILogger<AssignmentController> logger)
+            INotificationService notificationService, ILogger<AssignmentController> logger)
     {
         _assignmentService = assignmentService;
         _userService = userService;
         _userAssignmentService = userAssignmentService;
         _activityService = activityService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -84,7 +86,7 @@ public class AssignmentController : Controller
         }
 
         ViewBag.GroupId = groupId;
-        int pageSize = 4;
+        int pageSize = 6;
         int pageNumber = (page ?? 1);
         ViewBag.OnePageOfAssignemnts = assignmentsVM;
 
@@ -167,6 +169,8 @@ public class AssignmentController : Controller
         }
 
         await _activityService.AddCreatedAssignmentActivity(currentUserResult.Data, assignment);
+
+        await _notificationService.AddCreatedAssignmentNotification(currentUserResult.Data, assignment);
 
         return RedirectToAction("Index", "Assignment", new { groupId = assignmentVM.GroupId });
     }

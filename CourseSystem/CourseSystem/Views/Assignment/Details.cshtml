@@ -14,18 +14,114 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Add Font Awesome CSS -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+      #chat-card
+        {
+            max-height: 70vh;
+            overflow: auto;
+        }
+        body {
+            background-color: #f7f7f7;
+        }
+
+        .card {
+            box-shadow: 0 20px 27px 0 rgb(0 0 0 / 5%);
+        }
+
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 0 solid rgba(0,0,0,.125);
+            border-radius: 1rem;
+        }
+
+        .text-reset {
+            --bs-text-opacity: 1;
+            color: inherit !important;
+        }
+
+        a {
+            color: #5465ff;
+            text-decoration: none;
+        }        
+            
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
+
+        .user-list {
+            list-style-type: none !important;
+            padding: 0;
+        }
+        
+        .user-item {
+        display: flex;
+                    flex-direction: column;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            margin-right: 10px;
+        }
+        
+        .ui.teal.basic.button {
+            margin-left: auto;
+        }
+        
+        .left-container {
+            float: left;
+            width: 70%; 
+            padding: 0 10px; 
+        }
+        
+        .right-container {
+            float: right;
+            width: 30%; 
+            padding: 0 10px; 
+        }
+        
+        .view-profile-button {
+            width: 100%;
+            text-align: center;
+            white-space: nowrap;
+            margin-top: 10px;   
+        }
+        
+        .user-button {
+            margin-top: auto;
+        }
+        
+        .border-container {
+            border-radius: 10px;
+        }
+    </style>    
 </head>
-<body>
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
+<body> 
+    <div class="ui container mt-4">
+        <div class="ui container center aligned">
+            <div class="ui centered raised card" style="width: 100%;">
+                <div class="content">
+                    <div class="header">
+                        Assignment Details
+                    </div>
+                </div>            
+            </div>
         </div>
-    }
-    <div class="container">
-        <!-- Title -->
-        <div class="d-flex justify-content-between align-items-center py-3">
-            <h2 class="h5 mb-0"><a href="#" class="text-muted"></a>Assignment name: @Model.Name</h2>
+
+        <div class="ui container py-3">
+            <h2 class="ui header">@Model.Name</h2>
         </div>
 
         <!-- Main content -->
@@ -33,7 +129,7 @@
             <div class="col-lg-8">
                 <!-- Details -->
                 <div class="card mb-4">
-                    <div class="card-body">
+                    <div class="card-body border-container">
                         <div class="mb-3 d-flex justify-content-between">
                             <div>
                                 <div class="me-3">Start Date: @Model.StartDate.ToString("dddd, dd MMMM yyyy HH:mm")</div>
@@ -44,13 +140,17 @@
                             @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
                             {
                                 <div class="d-inline-block">
-                                    <a href="@Url.Action("Edit", "Assignment", new { id = @Model.Id })" class="btn btn-primary">
-                                        Edit
-                                    </a>
-                                    <a href="@Url.Action("Delete", "Assignment", new { assignmentId = @Model.Id })" class="btn btn-primary">
-                                        Delete
-                                    </a>
-                                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = Model.Id})" class="btn btn-primary">
+                                    <div class="ui buttons">
+                                        <a href="@Url.Action("Edit", "Assignment", new { id = @Model.Id })" class="ui edit-button button">
+                                            Edit
+                                        </a>
+                                        <div class="or"></div>
+                                        <a href="@Url.Action("Delete", "Assignment", new { assignmentId = @Model.Id })" class="ui delete-button button">
+                                            Delete
+                                        </a>
+                                    </div>
+                                    
+                                    <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = Model.Id })" class="ui details-button button">
                                         See all student answers
                                     </a>
                                 </div>
@@ -72,7 +172,7 @@
                                         }
                                         else if (Model.AssignmentAccess == AssignmentAccess.InProgress)
                                         {
-                                            <a href="@Url.Action("Create", "AssignmentAnswer", new { id = Model.Id})" class="btn btn-primary">
+                                            <a href="@Url.Action("Create", "AssignmentAnswer", new { id = Model.Id})" class="ui details-button button">
                                                 Add answer
                                             </a>
                                         }
@@ -136,12 +236,12 @@
                         <h4>Your answer:</h4>
                         foreach (var assignmnetAnswer in Model.AssignmentAnswers)
                         {
-                            <div class="card-body">                               
-                                <strong>@assignmnetAnswer.Name</strong>                               
+                            <div class="card-body">
                                 <div class="d-inline-block">
                                     @if(Model.UserAssignment != null && !Model.UserAssignment.IsChecked)
                                     {
-                                        <a href="@Url.Action("Delete", "AssignmentAnswer", new { assignmentAnswerId = @assignmnetAnswer.Id})" class="btn btn-primary">
+                                        <li>@assignmnetAnswer.Name</li>
+                                        <a href="@Url.Action("Delete", "AssignmentAnswer", new { assignmentAnswerId = @assignmnetAnswer.Id})" class="ui delete-button button">
                                             Delete
                                         </a>
                                     }                                    
@@ -152,8 +252,8 @@
                     }
                     else if(User.IsInRole("Student"))
                     {
-                        <div class="d-inline-block">
-                            <p>No answers</p>
+                        <div class="ui warning message">
+                            <p>No answers found for this assignment.</p>
                         </div>
                     }
                 </div>
@@ -163,44 +263,13 @@
                     <div class="card-header">
                         <p>Chat</p>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" id="chat-card">
                         @await Html.PartialAsync("~/Views/Chat/_Chat.cshtml", new AssignmentChatViewModel { Id = Model.Id, ChatMessages = Model.ChatMessages })
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <style>
-        body {
-            background: #eee;
-        }
-
-        .card {
-            box-shadow: 0 20px 27px 0 rgb(0 0 0 / 5%);
-        }
-
-        .card {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            word-wrap: break-word;
-            background-color: #fff;
-            background-clip: border-box;
-            border: 0 solid rgba(0,0,0,.125);
-            border-radius: 1rem;
-        }
-
-        .text-reset {
-            --bs-text-opacity: 1;
-            color: inherit !important;
-        }
-
-        a {
-            color: #5465ff;
-            text-decoration: none;
-        }
-    </style>
 </body>
 </html>
 

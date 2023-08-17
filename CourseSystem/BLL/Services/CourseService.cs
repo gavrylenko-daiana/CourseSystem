@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using BLL.Interfaces;
 using Core.Enums;
 using Core.Models;
@@ -5,6 +6,8 @@ using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BLL.Services;
 
@@ -116,6 +119,36 @@ public class CourseService : GenericService<Course>, ICourseService
         }
     }
 
+    public async Task<Result<List<Course>>> GetUserCourses(AppUser currentUser, SortingParam sortOrder, string searchQuery = null)
+    {
+        if (currentUser == null)
+        {
+            return new Result<List<Course>>(false, $"{nameof(currentUser)} not found");
+        }
+        
+        Result<List<Course>> coursesResult = null;
+        
+        var courses = currentUser.UserCourses.Select(uc => uc.Course).ToList();
+
+        if (!courses.Any())
+        {
+            return new Result<List<Course>>(true, new List<Course>());
+        }
+        
+        var query = GetOrderByExpression(sortOrder);
+        
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            coursesResult = await GetByPredicate(c => c.Name.Contains(searchQuery) && courses.Contains(c), query);
+        }
+        else
+        {
+            coursesResult = await GetByPredicate(c => courses.Contains(c), query);
+        }
+        
+        return coursesResult;
+    }
+
     public async Task<Result<bool>> UpdateName(int courseId, string newName)
     {
         var course = await _repository.GetByIdAsync(courseId);
@@ -210,5 +243,23 @@ public class CourseService : GenericService<Course>, ICourseService
         }
 
         return new Result<bool>(true);
+    }
+    
+    private Expression<Func<IQueryable<Course>, IOrderedQueryable<Course>>> GetOrderByExpression(SortingParam sortBy)
+    {
+
+        Expression<Func<IQueryable<Course>, IOrderedQueryable<Course>>> query;
+
+        switch (sortBy)
+        {
+            case SortingParam.NameDesc:
+                query = q => q.OrderByDescending(q => q.Name);
+                break;
+            default:
+                query = q => q.OrderBy(q => q.Name);
+                break;
+        }
+
+        return query;
     }
 }

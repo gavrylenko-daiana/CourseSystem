@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>Your Page Title</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f7f7f7;
@@ -33,45 +34,125 @@
     </style>
 </head>
 <body>
-    <div class="ui container">
+<div class="ui container">
+    <div style="display: flex; align-items: center;">
         <h3 class="ui header">Groups</h3>
-        <hr class="ui divider">
-        <div class="ui stackable three column grid">
-            @if (!Model.Groups.Any())
-            {
-                <div class="column">
-                    <div class="ui warning message">No groups found.</div>
+        <div style="flex-grow: 1; text-align: center;">
+            <div class="ui search">
+                <form method="get" asp-action="Index" asp-controller="Group" class="ui form inline">
+                    <div class="ui icon input">
+                        <input type="text" name="currentQueryFilter" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;"/>
+                        <button type="submit" style="background: none; border: none; padding: 0;">
+                            <i class="inverted circular search link icon"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="ui compact menu">
+            <div class="ui simple dropdown item">
+                Sort by
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item">
+                        @if (ViewBag.StartDateParam == SortingParam.StartDate)
+                        {
+                            <a href="@Url.Action("Index", "Group", new { sortOrder = ViewBag.StartDateParam,
+                                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter })"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", "Group", new { sortOrder = ViewBag.StartDateParam,
+                                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
+                        }
+                    </div>
+                    <div class="item">
+                        @if (ViewBag.EndDateParam == SortingParam.EndDate)
+                        {
+                            <a href="@Url.Action("Index", "Group", new { sortOrder = ViewBag.EndDateParam,
+                                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", "Group", new { sortOrder = ViewBag.EndDateParam,
+                                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
+                        }
+                    </div>
+                    <div class="item">
+                        @if (ViewBag.NameSortParam == SortingParam.Name)
+                        {
+                            <a href="@Url.Action("Index", "Group", new { sortOrder = ViewBag.NameSortParam,
+                                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", "Group", new { sortOrder = ViewBag.NameSortParam,
+                                         currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
+                        }
+                    </div>
                 </div>
-            }
-            else
-            {
-                @foreach (var group in Model.Groups)
-                {
-                    <div class="column">
-                        <div class="ui card cover-card">
-                            <div class="content">
-                                <div class="header">@group.Name</div>
-                                <p>Progress: @group.Progress%</p>
-                                <p>Access: @group.GroupAccess</p>
+            </div>
+        </div>
+                <div class="ui compact menu" style="margin-left: 10px;">
+                    <div class="ui simple dropdown item">
+                        Filter by status
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            <div class="item">
+                                <a href="@Url.Action("Index", "Group", new { currentAccessFilter = GroupAccess.Planned.ToString(), 
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter})">Planned</a>
                             </div>
-                            <div class="extra content">
-                                <a href="@Url.Action("Details", new { id = group.Id })" class="ui details-button button">Details</a>
+                            <div class="item">
+                                <a href="@Url.Action("Index", "Group", new { currentAccessFilter = GroupAccess.InProgress.ToString(),
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter})">In progress</a>
+                            </div>
+                            <div class="item">
+                                <a href="@Url.Action("Index", "Group", new { currentAccessFilter = GroupAccess.Completed.ToString(),
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter})">Completed</a>
                             </div>
                         </div>
                     </div>
-                }
-            }
-        </div>
+                </div>
     </div>
+    <hr class="ui divider">
+    <div class="ui stackable three column grid">
+        @if (!Model.Groups.Any())
+        {
+            <div class="column">
+                <div class="ui warning message">No groups found.</div>
+            </div>
+        }
+        else
+        {
+            @foreach (var group in Model.Groups)
+            {
+                <div class="column">
+                    <div class="ui card cover-card">
+                        <div class="content">
+                            <div class="header">@group.Name</div>
+                            <p>Progress: @group.Progress%</p>
+                            <p>Access: @group.GroupAccess</p>
+                            <p>Start: @group.StartDate.ToShortDateString()</p>
+                            <p>End: @group.EndDate.ToShortDateString()</p>
+                        </div>
+                        <div class="extra content">
+                            <a href="@Url.Action("Details", new { id = group.Id })" class="ui details-button button">Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
 
 @if (TempData["Error"] != null)
-    {
-        <div class="ui container">
-            <div class="ui negative message">
-                <span>@TempData["Error"]</span>
-            </div>
+{
+    <div class="ui container">
+        <div class="ui negative message">
+            <span>@TempData["Error"]</span>
         </div>
-    }
+    </div>
+}
 </body>
 </html>
 

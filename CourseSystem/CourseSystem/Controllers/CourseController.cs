@@ -20,6 +20,7 @@ public class CourseController : Controller
     private readonly IUserService _userService;
     private readonly UserManager<AppUser> _userManager;
     private readonly IActivityService _activityService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<CourseController> _logger;
 
     public CourseController(ICourseService courseService,
@@ -28,6 +29,7 @@ public class CourseController : Controller
         IUserCourseService userCourseService,
         IUserService userService,
         IActivityService activityService,
+        INotificationService notificationService,
         ILogger<CourseController> logger)
     {
         _courseService = courseService;
@@ -36,12 +38,27 @@ public class CourseController : Controller
         _userCourseService = userCourseService;
         _userService = userService;
         _activityService = activityService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string currentQueryFilter, string currentAccessFilter, SortingParam sortOrder, string searchQuery, int? page)
     {
+        ViewBag.CurrentSort = sortOrder;
+        ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
+
+        if (searchQuery != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            searchQuery = currentQueryFilter;
+        }
+        
+        ViewBag.CurrentQueryFilter = searchQuery;
+        
         var currentUserResult = await _userService.GetCurrentUser(User);
 
         if (!currentUserResult.IsSuccessful)
@@ -51,14 +68,13 @@ public class CourseController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var coursesResult = await _courseService.GetByPredicate(course =>
-            course.UserCourses.Any(uc => uc.AppUser.Id == currentUserResult.Data.Id)
-        );
+        var coursesResult = await _courseService.GetUserCourses(currentUserResult.Data, sortOrder, searchQuery);
 
         if (!coursesResult.IsSuccessful)
         {
             _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}",
                 currentUserResult.Data.Id, coursesResult.Message);
+            
             TempData.TempDataMessage("Error", $"{coursesResult.Message}");
 
             return View("Index");
@@ -107,6 +123,8 @@ public class CourseController : Controller
         }
 
         await _activityService.AddCreatedCourseActivity(currentUserResult.Data, course);
+
+        await _notificationService.AddCreatedCourseNotification(currentUserResult.Data, course);
 
         return RedirectToAction("Index");
     }
@@ -370,6 +388,8 @@ public class CourseController : Controller
         }
 
         await _activityService.AddJoinedCourseActivity(currentUser, courseResult.Data);
+
+        await _notificationService.AddJoinedCourseNotification(currentUser, courseResult.Data);
 
         return View();
     }

@@ -4,6 +4,7 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230816141845_AddCourseBackground")]
+    partial class AddCourseBackground
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -372,21 +375,12 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("AssignmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CourseId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
@@ -398,12 +392,6 @@ namespace DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
-
-                    b.HasIndex("AssignmentId");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("GroupId");
 
                     b.ToTable("Notifications");
                 });
@@ -731,25 +719,7 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Core.Models.Assignment", "Assignment")
-                        .WithMany()
-                        .HasForeignKey("AssignmentId");
-
-                    b.HasOne("Core.Models.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId");
-
-                    b.HasOne("Core.Models.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId");
-
                     b.Navigation("AppUser");
-
-                    b.Navigation("Assignment");
-
-                    b.Navigation("Course");
-
-                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("Core.Models.UserActivity", b =>
