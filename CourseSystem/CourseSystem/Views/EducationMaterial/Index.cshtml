@@ -95,24 +95,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="ui compact menu" style="margin-left: 10px;">
-                <div class="ui simple dropdown item">
-                    Filter by status
-                    <i class="dropdown icon"></i>
-                    <div class="menu">
-                        <div class="item">
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.Planned.ToString(), currentQueryFilter = ViewBag.CurrentQueryFilter })">Planned</a>
-                        </div>
-                        <div class="item">
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.InProgress.ToString(), currentQueryFilter = ViewBag.CurrentQueryFilter })">In progress</a>
-                        </div>
-                        <div class="item">
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.Completed.ToString(), currentQueryFilter = ViewBag.CurrentQueryFilter })">Completed</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <hr class="ui divider">

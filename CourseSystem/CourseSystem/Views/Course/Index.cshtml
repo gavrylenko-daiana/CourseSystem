@@ -121,11 +121,13 @@
 
     @{
         var materialsGeneral = await EducationMaterialService.GetAllMaterialByAccessAsync(MaterialAccess.General, SortingParam.UploadTimeDesc);
-        var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
-    }
-    @if (materialsGeneral.IsSuccessful && materialsGeneral.Data.Any())
-    {
-        <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc" class="ui basic black button">Education Materials</a>
+        
+        @if (materialsGeneral.IsSuccessful && materialsGeneral.Data.Any())
+        {
+            var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
+            
+            <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc" class="ui basic black button">Education Materials</a>
+        }
     }
 </div>
 
