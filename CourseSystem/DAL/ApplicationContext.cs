@@ -30,7 +30,6 @@ namespace DAL
         public DbSet<UserActivity> UserActivities { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
-        public DbSet<CourseBackground> CourseBackgrounds { get; set; }
         // public DbSet<UserAssignments> UserAssignments { get; set; }
         // public DbSet<UserCourses> UserCourses { get; set; }
         // public DbSet<UserGroups> UserGroups { get; set; }
