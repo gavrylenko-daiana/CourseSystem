@@ -52,10 +52,15 @@
             <input asp-for="GitHub" class="form-control" placeholder="GitHub">
             <span asp-validation-for="GitHub" class="text-danger"></span>
         </div>
+        <div class="form-group">
+                <label asp-for="NewProfileImage" class="control-label"></label>
+            <input asp-for="NewProfileImage" type="file" class="form-control">
+            <span asp-validation-for="NewProfileImage" class="text-danger"></span>
+        </div>
         <div class="py-2">
             <div class="form-group">
                 <a class="nav-link text-dark btn btn-outline-primary" asp-controller="User" asp-action="EditPassword">Change password</a>
-                <a class="nav-link text-dark btn btn-outline-primary" asp-controller="User" asp-action="EditEmail">Change email</a>
+                <a class="nav-link text-dark btn btn-outline-primary" asp-controller="User" asp-action="EditEmail">Change email</a>                
                 <div class="py-2">
                     <input class="btn btn-outline-primary" type="submit" value="Edit"/>
                     <a class="btn btn-outline-dark" asp-controller="User" asp-action="Index">Cancel</a>

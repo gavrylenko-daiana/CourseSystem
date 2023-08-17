@@ -15,12 +15,6 @@ namespace DAL
         {
             
         }
-
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //}
-
-        //public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<AssignmentAnswer> AssignmentAnswers { get; set; }
         public DbSet<AssignmentFile> AssignmentFiles { get; set; }
@@ -30,9 +24,8 @@ namespace DAL
         public DbSet<UserActivity> UserActivities { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
-        // public DbSet<UserAssignments> UserAssignments { get; set; }
-        // public DbSet<UserCourses> UserCourses { get; set; }
-        // public DbSet<UserGroups> UserGroups { get; set; }
+        public DbSet<ProfileImage> ProfileImages { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -49,11 +42,6 @@ namespace DAL
                 .HasForeignKey(em => em.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
-            //builder.Entity<UserAssignments>()
-            //    .HasMany<AssignmentAnswer>(ua => ua.AssignmentAnswers)
-            //    .WithOne(aa => aa.UserAssignment)
-            //    .HasForeignKey(aa => aa.UserAssignmentId)
-            //    .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }

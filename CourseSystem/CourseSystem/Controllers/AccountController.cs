@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.EmailViewModels;
 using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
+using Core.ImageStore;
+using static Dropbox.Api.TeamLog.AccessMethodLogInfo;
 
 namespace UI.Controllers;
 
@@ -20,17 +22,19 @@ public class AccountController : Controller
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IEmailService _emailService;
     private readonly IUserService _userService;
+    private readonly IProfileImageService _profileImageService;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
         RoleManager<IdentityRole> roleManager, IEmailService emailService, 
-        IUserService userService, ILogger<AccountController> logger)
+        IUserService userService, IProfileImageService profileImageService, ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
         _emailService = emailService;
         _userService = userService;
+        _profileImageService = profileImageService;
         _logger = logger;
     }
 
@@ -115,8 +119,14 @@ public class AccountController : Controller
 
             return View(loginViewModel);
         }
-
         var user = userResult.Data;
+
+        var imageUserResult = await _profileImageService.SetDefaultProfileImage(user);
+
+        if (!imageUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Failed to set profile image", imageUserResult.Data);
+        }
 
         if (!ValidationHelpers.IsValidEmail(loginViewModel.EmailAddress))
         {
@@ -224,6 +234,13 @@ public class AccountController : Controller
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 
         await CreateAppUserRoles();
+
+        var imageUserResult = await _profileImageService.SetDefaultProfileImage(newUser);
+
+        if (!imageUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Failed to set profile image", imageUserResult.Data);
+        }
 
         if (newUserResponse.Succeeded)
         {
