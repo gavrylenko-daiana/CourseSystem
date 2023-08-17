@@ -27,7 +27,6 @@ public class EducationMaterialController : Controller
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
     private readonly ILogger<EducationMaterialController> _logger;
-    private Dictionary<string, IFormFile> _files = new Dictionary<string, IFormFile>();
 
     public EducationMaterialController(IEducationMaterialService educationMaterial, IGroupService groupService,
         ICourseService courseService, IActivityService activityService,
@@ -216,9 +215,8 @@ public class EducationMaterialController : Controller
         
         if (currentUserResult.Data.Role == AppUserRoles.Teacher)
         {
-            _files.Add(currentUserResult.Data.Id, viewModel.UploadFile);
-            var callBack = CreateCallBackUrl("EducationMaterial", "EmailConfirmationUploadMaterialByAdmin", new { teacherId = currentUserResult.Data.Id });
-            await _emailService.SendEmailToAppUsers(EmailType.EducationMaterialApproveByAdmin, currentUserResult.Data, callBack, null, viewModel.UploadFile);
+            var callBack = CreateCallBackUrl("EducationMaterial", "EmailConfirmationUploadMaterialByTeacher",  new { teacherId = currentUserResult.Data.Id } );
+            await _emailService.SendEmailMaterial(EmailType.EducationMaterialApproveByAdmin, currentUserResult.Data, viewModel.UploadFile, callBack);
         }
         else
         {
@@ -250,21 +248,6 @@ public class EducationMaterialController : Controller
         }
         
         return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> EmailConfirmationUploadMaterialByAdmin(string teacherId) //crete view for admin about success
-    {
-        //check if such user exist
-
-        //get the file from dictionary
-        //add check on containing such key
-        var file = _files[teacherId];
-
-        //deletion
-        _files.Remove(teacherId);
-
-        return RedirectToAction("Index", "Home");
     }
 
     [HttpGet]

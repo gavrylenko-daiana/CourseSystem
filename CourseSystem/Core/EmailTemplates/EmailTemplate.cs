@@ -67,17 +67,16 @@ namespace Core.EmailTemplates
                                                "<p>Email: {email}</p>" +
                                                "<p>Role: {userrole}</p>" +
                                                "<bolt>Temporary Password: {temppassword}</bolt>" + 
-                                               "<h3>You need to change password at the first visit</h3>"},
-            //{ EmailType.EducationMaterialApproveByAdmin, @"<h4>Information about Teacher</h4>" + "<hr/>" +
-            //                                            "<p>First name: {firstname}</p>" +
-            //                                            "<p>Last name: {lastname}</p>" +
-            //                                            "<p>Email: {email}</p>" + "<hr/>" +
-            //                                            "<h4>Information about Education Material</h4>" +
-            //                                            "<p>Name: {materialname}</p>" +
-            //                                            "<p>File: {material}</p>" + "<hr/>" +
-            //                                            "<h4>Confirm upload educational material by {firstname} {lastname}, " +
-            //                                            "follow the link: <a href='{callbackurl}'>link</a></h4>"},
-            {EmailType.EducationMaterialApproveByAdmin, @"<h4>Confirm upload educational material by {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4></h4>" },
+                                               "<h3>You need to change password at the first visit</h3>"}, 
+            { EmailType.EducationMaterialApproveByAdmin, @"<h4>Information about Teacher</h4>" + "<hr/>" +
+                                                        "<p>First name: {firstname}</p>" +
+                                                        "<p>Last name: {lastname}</p>" +
+                                                        "<p>Email: {email}</p>" + "<hr/>" +
+                                                        "<h4>Information about Education Material</h4>" +
+                                                        "<p>Name: {materialname}</p>" +
+                                                        "<p>File: {material}</p>" + "<hr/>" +
+                                                        "<h4>Confirm upload educational material by {firstname} {lastname}, " +
+                                                        "follow the link: <a href='{callbackurl}'>link</a></h4>"},
             { EmailType.ApprovedUploadEducationalMaterial, @"<h4>Educational material that you added was successfully approved by Admin</h4>" },
         };
 
