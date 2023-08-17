@@ -73,36 +73,36 @@
 <hr class="ui divider">
 <div class="ui stackable three column grid">
     @if (Model.Courses.Count == 0)
+    {
+        <div class="column">
+            <div class="ui warning message">No courses found.</div>
+        </div>
+    }
+    else
+    {
+        @foreach (var course in Model.Courses)
         {
             <div class="column">
-                <div class="ui warning message">No courses found.</div>
-            </div>
-        }
-        else
-        {
-            @foreach (var course in Model.Courses)
-            {
-                <div class="column">
-                    <div class="ui card cover-card">
-                        <div class="content">
-                            <div class="header">@course.Name</div>
-                        </div>
-                        <div class="extra content">
-                            <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
-                            @if (Model.CurrentUser.Role == AppUserRoles.Admin)
-                            {
-                                <div class="ui buttons">
-                                    <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
-                                    <div class="or"></div>
-                                    <a href="@Url.Action("Delete", new { id = course.Id })" class="ui delete-button button">Delete</a>
-                                </div>
-                            }
-                        </div>
+                <div class="ui card cover-card" style="background-image: url('@course.Url');   background-size: cover; background-position: center;">
+                    <div class="content">
+                        <div class="header">@course.Name</div>
+                    </div>
+                    <div class="extra content">
+                        <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
+                        @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                        {
+                            <div class="ui buttons">
+                                <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
+                                <div class="or"></div>
+                                <a href="@Url.Action("Delete", new { id = course.Id })" class="ui delete-button button">Delete</a>
+                            </div>
+                        }
                     </div>
                 </div>
-            }
+            </div>
         }
-    </div>
+    }
+</div>
 
 @if (Model.CurrentUser.Role == AppUserRoles.Admin)
 {
@@ -135,3 +135,4 @@
         });
     });
 </script>
+
