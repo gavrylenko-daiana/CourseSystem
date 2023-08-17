@@ -290,42 +290,6 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<List<Notification>>> GetNotifications(AppUser currentUser,
-            NotificationsFilteringParams filteringParam = NotificationsFilteringParams.Default, string searchQuery = null)
-        {
-            if (currentUser == null)
-            {
-                return new Result<List<Notification>>(false, "Invalid user");
-            }
-
-            if (filteringParam == NotificationsFilteringParams.Default || searchQuery == null)
-            {
-                return new Result<List<Notification>>(true, currentUser.Notifications.OrderByDescending(a => a.Created).ToList());
-            }
-
-            var notifications = new List<Notification>();
-
-            switch(filteringParam)
-            {
-                case NotificationsFilteringParams.Course:
-                    notifications = currentUser.Notifications.Where(n => n.CourseId != null && n.Course.Name.Contains(searchQuery))
-                        .OrderByDescending(a => a.Created).ToList();
-                    break;
-
-                case NotificationsFilteringParams.Group:
-                    notifications = currentUser.Notifications.Where(n => n.GroupId != null && n.Group.Name.Contains(searchQuery))
-                        .OrderByDescending(a => a.Created).ToList();
-                    break;
-
-                case NotificationsFilteringParams.Assignment:
-                    notifications = currentUser.Notifications.Where(n => n.AssignmentId != null && n.Assignment.Name.Contains(searchQuery))
-                        .OrderByDescending(a => a.Created).ToList();
-                    break;
-            }
-
-            return new Result<List<Notification>>(true, notifications);
-        }
-
         public async Task<Result<bool>> MarkAsRead(Notification notification)
         {
             if (notification == null)
