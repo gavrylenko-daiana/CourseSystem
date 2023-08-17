@@ -192,7 +192,7 @@ public class CourseService : GenericService<Course>, ICourseService
     public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile uploadFile, MaterialAccess materialAccess,
         int? groupId = null, int? courseId = null)
     {
-        var fullPath = await _dropboxService.AddFileAsync(uploadFile);
+        var fullPath = await _dropboxService.AddFileAsync(uploadFile, materialAccess.ToString());
 
         if (!fullPath.IsSuccessful)
         {

@@ -18,11 +18,6 @@ public class DropboxService : IDropboxService
     {
         _dropboxClient = new DropboxClient(config.Value.AccessToken);
     }
-    //public DropboxService(string accessToken)
-    //{
-    //    _dropboxClient = new DropboxClient(accessToken);
-    //}
-
     public async Task<Result<(string Url, string ModifiedFileName)>> AddFileAsync(IFormFile file, string? folder = null)
     {
         try
@@ -85,7 +80,7 @@ public class DropboxService : IDropboxService
 
             modifiedFileName = numberedFileNameResult.Message;
             count++;
-            resultExists = await FileExistsAsync(modifiedFileName);
+            resultExists = await FileExistsAsync(modifiedFileName, folder);
         }
 
         return new Result<string>(true, modifiedFileName);

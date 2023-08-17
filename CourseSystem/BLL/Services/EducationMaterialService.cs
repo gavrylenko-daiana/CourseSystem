@@ -68,7 +68,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
     public async Task<Result<bool>> DeleteFile(EducationMaterial material)
     {
-        var resultDeleteEducationMaterial = await _dropboxService.DeleteFileAsync(material.Name);
+        var resultDeleteEducationMaterial = await _dropboxService.DeleteFileAsync(material.Name, material.MaterialAccess.ToString());
 
         if (!resultDeleteEducationMaterial.IsSuccessful)
         {
