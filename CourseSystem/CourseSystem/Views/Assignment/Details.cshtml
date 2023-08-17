@@ -16,6 +16,11 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <style>
+      #chat-card
+        {
+            max-height: 70vh;
+            overflow: auto;
+        }
         body {
             background-color: #f7f7f7;
         }
@@ -258,7 +263,7 @@
                     <div class="card-header">
                         <p>Chat</p>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" id="chat-card">
                         @await Html.PartialAsync("~/Views/Chat/_Chat.cshtml", new AssignmentChatViewModel { Id = Model.Id, ChatMessages = Model.ChatMessages })
                     </div>
                 </div>
