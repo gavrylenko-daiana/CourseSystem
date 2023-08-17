@@ -85,7 +85,7 @@
         @foreach (var course in Model.Courses)
         {
             <div class="column">
-                <div class="ui card cover-card">
+                <div class="ui card cover-card" style="background-image: url('@course.Url');   background-size: cover; background-position: center;">
                     <div class="content">
                         <div class="header">@course.Name</div>
                     </div>
@@ -147,3 +147,4 @@
         });
     });
 </script>
+

@@ -19,5 +19,6 @@ namespace Core.Models
         public virtual List<AssignmentFile> AssignmentFiles { get; set; }
         public virtual List<UserAssignments> UserAssignments { get; set; }
         public virtual List<ChatMessage> ChatMessages { get; set; }
+        public virtual List<Notification> Notifications { get; set; }
     }
 }
