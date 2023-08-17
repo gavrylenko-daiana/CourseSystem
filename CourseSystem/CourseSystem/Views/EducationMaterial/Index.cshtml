@@ -61,30 +61,42 @@
                 </div>
             </div>
         </div>
-        <div class="list-group">
-            @foreach (var file in Model)
+        <hr class="ui divider">
+        <div class="ui stackable three column grid">
+            @if (Model.Count == 0)
             {
-                <div class="list-group-item list-group-item-action my-2">
-                    <div class="row">
-                        <div class="col-7">
-                            <h5 class="mb-0">@file.Name</h5>
-                        </div>
-                        <div class="col-5 d-flex justify-content-end" style="white-space: nowrap;">
-                            @if (User.Identity.IsAuthenticated && User.IsInRole(AppUserRoles.Admin.ToString()))
-                            {
-                                <div class="mx-2">
-                                    <a type="button" class="btn btn-outline-danger" asp-controller="EducationMaterial" asp-action="Delete" asp-route-id="@file.Id">Delete</a>
-                                </div>
-                            }
-                            <div class="mx-2">
-                                <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@file.Id">Detail</a>
-                            </div>
-                            <div class="mx-2">
+                <div class="column">
+                    <div class="ui warning message">No courses found.</div>
+                </div>
+            }
+            else
+            {
+                @foreach (var file in Model)
+                {
+                    <div class="column">
+                        <div class="ui card cover-card">
+                            <div class="content">
                                 <p>@file.UploadTime.ToString("g")</p>
+                            </div>
+                            <div class="content" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <h7 class="header" style="margin-right: auto;">@((file.Name.Length > 21) ? $"{file.Name.Substring(0, 18)}..." : file.Name)</h7>
+                                <img src="https://www.dropbox.com/scl/fi/5g1ksrohqg1evn43q9fbn/file.png?rlkey=e4jztnby1hyc1gg5srx5w2hzh&raw=1" alt="Image" style="height: 60px; align-self: flex-start;">
+                            </div>
+
+                            <div class="extra content">
+                                @if (User.Identity.IsAuthenticated && User.IsInRole(AppUserRoles.Admin.ToString()))
+                                {
+                                    <div class="ui buttons">
+                                        <a class="ui delete-button button" asp-controller="EducationMaterial" asp-action="Delete" asp-route-id="@file.Id">Delete</a>
+                                    </div>
+                                }
+                                <div class="ui buttons">
+                                    <a class="ui details-button button" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@file.Id">Details</a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             }
         </div>
     </div>
