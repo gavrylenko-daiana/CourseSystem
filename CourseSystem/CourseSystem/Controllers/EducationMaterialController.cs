@@ -64,9 +64,12 @@ public class EducationMaterialController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> IndexAccess(MaterialAccess access)
+    public async Task<IActionResult> IndexAccess(MaterialAccess access, SortingParam sortOrder)
     {
-        var materials = await _educationMaterialService.GetAllMaterialByAccessAsync(access);
+        ViewBag.CurrentSort = sortOrder;
+        ViewBag.NameSortParam = sortOrder == SortingParam.UploadTimeDesc ? SortingParam.UploadTime : SortingParam.UploadTimeDesc;
+
+        var materials = await _educationMaterialService.GetAllMaterialByAccessAsync(access, sortOrder);
 
         if (!(materials.IsSuccessful && materials.Data.Any()))
         {
@@ -81,9 +84,12 @@ public class EducationMaterialController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> IndexMaterials(string materialIds, string sortBy = null!)
+    public async Task<IActionResult> IndexMaterials(string materialIds, SortingParam sortOrder)
     {
-        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds);
+        ViewBag.CurrentSort = sortOrder;
+        ViewBag.NameSortParam = sortOrder == SortingParam.UploadTimeDesc ? SortingParam.UploadTime : SortingParam.UploadTimeDesc;
+
+        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds, sortOrder);
         
         if (!materialsList.IsSuccessful)
         {

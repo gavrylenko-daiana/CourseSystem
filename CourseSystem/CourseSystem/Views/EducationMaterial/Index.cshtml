@@ -3,8 +3,37 @@
 @model List<EducationMaterial>
 
 <!DOCTYPE html>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Page Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
+
+        .ui.container {
+            margin-top: 20px;
+        }
+
+        .add-course-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .cover-card {
+            height: 200px; 
+        }             
+    </style>
+</head>
 <body>
 @{
     var materialIds = string.Join(" ", Model.Select(m => m.Id));
@@ -14,16 +43,20 @@
 {
     <div class="container py-4">
         <h2>Uploaded Files:</h2>
-        <div class="ui compact menu">
+        <div class="ui compact menu" style="margin-left: 10px;">
             <div class="ui simple dropdown item">
                 Sort by
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     <div class="item">
-                        <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortBy="recent">Sort by recent</a>
-                    </div>
-                    <div class="item">
-                        <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortBy="old">Sort by old</a>
+                        @if (ViewBag.NameSortParam == SortingParam.UploadTime)
+                        {
+                            <a asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="@ViewBag.NameSortParam"><i class="fa fa-arrow-down" aria-hidden="true"></i> Recent</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="@ViewBag.NameSortParam"><i class="fa fa-arrow-up" aria-hidden="true"></i> Recent</a>
+                        }
                     </div>
                 </div>
             </div>
