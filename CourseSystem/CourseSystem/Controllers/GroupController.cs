@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using UI.ViewModels;
 using Group = Core.Models.Group;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using X.PagedList;
 
 namespace UI.Controllers;
 
@@ -90,7 +91,7 @@ public class GroupController : Controller
             return View("Index");
         }
 
-        var groupViewModels = groupsResult.Data.Select(group =>
+        var groupsViewModels = groupsResult.Data.Select(group =>
         {
             var groupViewModel = new GroupViewModel();
             group.MapTo(groupViewModel);
@@ -109,14 +110,12 @@ public class GroupController : Controller
 
             return groupViewModel;
         }).ToList();
-
-        var userGroupsViewModel = new UserGroupsViewModel()
-        {
-            Groups = groupViewModels,
-            CurrentUser = currentUserResult.Data,
-        };
-
-        return View(userGroupsViewModel);
+        
+        int pageSize = 6;
+        int pageNumber = (page ?? 1);
+        ViewBag.OnePageOfAssignemnts = groupsViewModels;
+        
+        return View(groupsViewModels.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]
