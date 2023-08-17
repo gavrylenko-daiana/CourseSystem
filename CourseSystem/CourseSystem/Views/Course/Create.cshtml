@@ -39,7 +39,7 @@
                       <div class="field">
                           @Html.LabelFor(model => model.UploadImage, htmlAttributes: new { @class = "control-label" })
                           <div class="ui input">
-                              <input asp-for="UploadImage" type="file">
+                              <input asp-for="UploadImage" type="file" accept="image/*">
                           </div>
                           <span asp-validation-for="UploadImage" class="text-danger"></span>
                       </div>
