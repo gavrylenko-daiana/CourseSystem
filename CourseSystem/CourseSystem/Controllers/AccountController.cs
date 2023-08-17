@@ -402,8 +402,8 @@ public class AccountController : Controller
         return RedirectToAction("CheckEmailCode", new { code = emailCodeResult.Data, email = forgotPasswordBeforeEnteringViewModel.Email });
     }
 
-    [Authorize]
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> SendCodeUser(ForgotEntity forgotEntity)
     {
         var userResult = await _userService.GetCurrentUser(User);

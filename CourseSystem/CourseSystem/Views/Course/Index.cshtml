@@ -110,10 +110,14 @@
         <a asp-action="Create" class="ui basic black button">Add New Course</a>
     </div>
 }
-<div class="ui container add-course-button">
-    <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
-    <a asp-action="IndexAccess" asp-controller="EducationMaterial" asp-route-access="@MaterialAccess.General" class="ui basic black button">Education Materials</a>
-</div>
+
+@if (Model.CurrentUser.Role != AppUserRoles.Student)
+{
+    <div class="ui container add-course-button">
+        <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
+        <a asp-action="IndexAccess" asp-controller="EducationMaterial" asp-route-access="@MaterialAccess.General" class="ui basic black button">Education Materials</a>
+    </div>
+}
 
 @if (TempData["Error"] != null)
 {
