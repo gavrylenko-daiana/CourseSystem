@@ -125,7 +125,7 @@ public class AccountController : Controller
 
         if (!imageUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Failed to set profile image", imageUserResult.Data.Email);
+            _logger.LogWarning("Failed to set profile image", imageUserResult.Data);
         }
 
         if (!ValidationHelpers.IsValidEmail(loginViewModel.EmailAddress))
@@ -239,7 +239,7 @@ public class AccountController : Controller
 
         if (!imageUserResult.IsSuccessful)
         {
-            _logger.LogWarning("Failed to set profile image", imageUserResult.Data.Email);
+            _logger.LogWarning("Failed to set profile image", imageUserResult.Data);
         }
 
         if (newUserResponse.Succeeded)

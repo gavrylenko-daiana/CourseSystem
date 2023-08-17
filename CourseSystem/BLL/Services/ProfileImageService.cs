@@ -18,24 +18,23 @@ namespace BLL.Services
     public class ProfileImageService : GenericService<ProfileImage>, IProfileImageService
     {
         private readonly IDropboxService _dropboxService;
-        public ProfileImageService(UnitOfWork unitOfWork, IRepository<ProfileImage> repository, IOptions<DropboxSettings> config) : base(unitOfWork, repository)
+        public ProfileImageService(UnitOfWork unitOfWork, IRepository<ProfileImage> repository, IDropboxService dropboxService) : base(unitOfWork, repository)
         {
-            string accessTokenProfile = config.Value.AccessTokenProfile;
-            _dropboxService = new DropboxService(accessTokenProfile);
+            _dropboxService = dropboxService;
         }
 
-        public async Task<Result<AppUser>> SetDefaultProfileImage(AppUser user)
+        public async Task<Result<bool>> SetDefaultProfileImage(AppUser user)
         {
             if(user == null)
             {
-                return new Result<AppUser>(false, "Invalid user");
+                return new Result<bool>(false, "Invalid user");
             }
 
             var isNotDefaultImageResult = await IsNotDefaultProfileImage(user);
 
             if (!isNotDefaultImageResult.IsSuccessful)
             {
-                return new Result<AppUser>(true, user);
+                return new Result<bool>(true);
             }
 
             var imageNameAndUrl = DefaultProfileImage.GetDefaultImageUrl();
@@ -51,11 +50,11 @@ namespace BLL.Services
                 await _repository.AddAsync(profileImage);
                 await _unitOfWork.Save();
 
-                return new Result<AppUser>(true, user);
+                return new Result<bool>(true);
             }
             catch (Exception ex)
             {
-                return new Result<AppUser>(false, "Invalid user");
+                return new Result<bool>(false, "Invalid user");
             }
 
         }

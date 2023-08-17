@@ -22,14 +22,13 @@ public class CourseService : GenericService<Course>, ICourseService
     private readonly IGroupService _groupService;
 
     public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
-        IEducationMaterialService educationMaterial, IGroupService groupService, IOptions<DropboxSettings> config)
+        IEducationMaterialService educationMaterial, IGroupService groupService, IDropboxService dropboxService)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
-        string accessToken = config.Value.AccessToken;
-        _dropboxService = new DropboxService(accessToken);
+        _dropboxService = dropboxService;
     }
 
     public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)

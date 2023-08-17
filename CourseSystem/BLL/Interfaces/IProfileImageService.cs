@@ -10,7 +10,7 @@ namespace BLL.Interfaces
 {
     public interface IProfileImageService : IGenericService<ProfileImage>
     {
-        Task<Result<AppUser>> SetDefaultProfileImage(AppUser user);
+        Task<Result<bool>> SetDefaultProfileImage(AppUser user);
         Task<Result<bool>> UpdateProfileImage(AppUser user, IFormFile newProfileImage);
     }
 }
