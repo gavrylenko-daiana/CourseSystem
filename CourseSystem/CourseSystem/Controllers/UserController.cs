@@ -17,12 +17,14 @@ public class UserController : Controller
 {
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
+    private readonly IProfileImageService _profileImageService;
     private readonly ILogger<UserController> _logger;
 
-    public UserController(IEmailService emailService, IUserService userService, ILogger<UserController> logger)
+    public UserController(IEmailService emailService, IUserService userService,IProfileImageService profileImageService, ILogger<UserController> logger)
     {
         _emailService = emailService;
         _userService = userService;
+        _profileImageService= profileImageService;
         _logger = logger;
     }
 
@@ -104,6 +106,17 @@ public class UserController : Controller
             return View("Edit", editUserViewModel);
         }
 
+        if(editUserViewModel.NewProfileImage != null)
+        {
+            var checkResult = _profileImageService.CheckFileExtension(editUserViewModel.NewProfileImage);
+
+            if (!checkResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", checkResult.Message);
+
+                return View("Edit", editUserViewModel);
+            }
+        }
         var userViewModel = new AppUser();
         editUserViewModel.MapTo(userViewModel);
 

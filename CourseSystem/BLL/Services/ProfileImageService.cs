@@ -23,6 +23,19 @@ namespace BLL.Services
             _dropboxService = dropboxService;
         }
 
+        public Result<bool> CheckFileExtension(IFormFile newProfileImage)
+        {
+            var supportedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var fileExtension = System.IO.Path.GetExtension(newProfileImage.FileName);
+
+            if(supportedImageExtensions.Contains(fileExtension))
+            {
+                return new Result<bool>(true);
+            }
+
+            return new Result<bool>(false, "An invalid file format has been sent. The file may have the extension .jpeg, .png, .jpg, .gif.");
+        }
+
         public async Task<Result<bool>> SetDefaultProfileImage(AppUser user)
         {
             if(user == null)

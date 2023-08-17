@@ -214,14 +214,14 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Login", "Account");
         }
         
-        if (currentUserResult.Data.Role == AppUserRoles.Teacher)
-        {
-            _files.Add(currentUserResult.Data.Id, viewModel.UploadFile);
-            var callBack = CreateCallBackUrl("EducationMaterial", "EmailConfirmationUploadMaterialByAdmin", new { teacherId = currentUserResult.Data.Id });
-            await _emailService.SendEmailToAppUsers(EmailType.EducationMaterialApproveByAdmin, currentUserResult.Data, callBack, null, viewModel.UploadFile);
-        }
-        else
-        {
+        //if (currentUserResult.Data.Role == AppUserRoles.Teacher)
+        //{
+        //    _files.Add(currentUserResult.Data.Id, viewModel.UploadFile);
+        //    var callBack = CreateCallBackUrl("EducationMaterial", "EmailConfirmationUploadMaterialByAdmin", new { teacherId = currentUserResult.Data.Id });
+        //    await _emailService.SendEmailToAppUsers(EmailType.EducationMaterialApproveByAdmin, currentUserResult.Data, callBack, null, viewModel.UploadFile);
+        //}
+        //else
+        //{
             var courseResult = await _courseService.GetById(viewModel.CourseId);
 
             if (!courseResult.IsSuccessful)
@@ -247,7 +247,7 @@ public class EducationMaterialController : Controller
             }
 
             await _activityService.AddAttachedEducationalMaterialForCourseActivity(currentUserResult.Data, courseResult.Data);
-        }
+        //}
         
         return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
     }
