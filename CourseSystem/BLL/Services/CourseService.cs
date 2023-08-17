@@ -76,6 +76,13 @@ public class CourseService : GenericService<Course>, ICourseService
             return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
         }
 
+        foreach (var notification in course.Notifications)
+        {
+            notification.AssignmentId = null;
+            notification.GroupId = null;
+            notification.CourseId = null;
+        }
+
         try
         {
             if (course.EducationMaterials.Any())

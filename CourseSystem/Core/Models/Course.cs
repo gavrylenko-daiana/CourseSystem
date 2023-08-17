@@ -13,5 +13,6 @@ namespace Core.Models
         public virtual List<EducationMaterial> EducationMaterials { get; set; }
         public virtual List<UserCourses> UserCourses { get; set; }
         public virtual CourseBackground Background { get; set; }
+        public virtual List<Notification> Notifications { get; set; }
     }
 }

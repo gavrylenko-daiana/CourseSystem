@@ -87,6 +87,13 @@ public class GroupService : GenericService<Group>, IGroupService
             return new Result<bool>(false, $"Group by id {groupId} not found");
         }
 
+        foreach (var notification in group.Notifications)
+        {
+            notification.AssignmentId = null;
+            notification.GroupId = null;
+            notification.CourseId = null;
+        }
+
         try
         {
             if (group.EducationMaterials.Any())
