@@ -142,7 +142,7 @@
                             @foreach (var material in materialsGroup)
                             {
                                 <li>@material.Name</li>
-                                <a class="btn btn-outline-danger btn-sm" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
+                                <a class="ui details-button button" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
                             }
                         </ul>
                     </div>
