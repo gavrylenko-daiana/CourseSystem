@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using BLL.Interfaces;
 using Core.Configuration;
 using Core.Enums;
+using Core.Helpers;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
@@ -31,7 +32,7 @@ public class CourseService : GenericService<Course>, ICourseService
         _dropboxService = dropboxService;
     }
 
-    public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)
+    public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser, IFormFile uploadFile)
     {
         if (course == null)
         {
@@ -45,6 +46,15 @@ public class CourseService : GenericService<Course>, ICourseService
 
         try
         {
+            var getUrlResult = await GetBackgroundImageUrl(uploadFile);
+            
+            if (!getUrlResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"{getUrlResult.Message}");
+            }
+            
+            course.Url = getUrlResult.Data;
+
             await _repository.AddAsync(course);
             await _unitOfWork.Save();
 
@@ -97,6 +107,8 @@ public class CourseService : GenericService<Course>, ICourseService
                     await _educationMaterialService.DeleteFile(material);
                 }
             }
+            
+            //delete background
 
             await _repository.DeleteAsync(course);
             await _unitOfWork.Save();
@@ -181,6 +193,37 @@ public class CourseService : GenericService<Course>, ICourseService
         {
             return new Result<bool>(false,
                 $"Failed to update {nameof(course)} by {courseId} with {newName}. Exception: {ex.Message}");
+        }
+    }
+    
+    public async Task<Result<bool>> UpdateBackground(int courseId, IFormFile uploadFile)
+    {
+        var course = await _repository.GetByIdAsync(courseId);
+
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
+        }
+
+        try
+        {
+            var getUrlResult = await GetBackgroundImageUrl(uploadFile);
+            
+            if (!getUrlResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"{getUrlResult.Message}");
+            }
+            
+            course.Url = getUrlResult.Data;
+
+            await _repository.UpdateAsync(course);
+            await _unitOfWork.Save();
+
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false, $"Failed to update {nameof(course)} by {courseId} with {uploadFile.Name}. Exception: {ex.Message}");
         }
     }
 
@@ -271,5 +314,48 @@ public class CourseService : GenericService<Course>, ICourseService
         }
 
         return query;
+    }
+    
+    private async Task<Result<string>> GetRandomDefaultBackgroundLink()
+    {
+        var defaultImagesLinks = DefaultBackgroundImages.GetDefaultImagesLinks();
+
+        if (defaultImagesLinks.Count > 0)
+        {
+            var randomIndex = new Random().Next(0, defaultImagesLinks.Count);
+            var randomImageLink = defaultImagesLinks[randomIndex];
+
+            return new Result<string>(true, data: randomImageLink);
+        }
+        else
+        {
+            return new Result<string>(false, "No default images available");
+        }
+    }
+
+    private async Task<Result<string>> GetBackgroundImageUrl(IFormFile uploadFile)
+    {
+        if (uploadFile == null)
+        {
+            var backgroundUrlResult = await GetRandomDefaultBackgroundLink();
+
+            if (!backgroundUrlResult.IsSuccessful)
+            {
+                return new Result<string>(false, $"{backgroundUrlResult.Message}");
+            }
+
+            return new Result<string>(true, data: backgroundUrlResult.Data);
+        }
+        else
+        {
+            var backgroundUrlResult = await _dropboxService.AddFileAsync(uploadFile);
+                
+            if (!backgroundUrlResult.IsSuccessful)
+            {
+                return new Result<string>(false, $"{backgroundUrlResult.Message}");
+            }
+                
+            return new Result<string>(true, data: backgroundUrlResult.Data.Url);
+        }
     }
 }

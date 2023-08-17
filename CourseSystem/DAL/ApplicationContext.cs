@@ -24,8 +24,8 @@ namespace DAL
         public DbSet<UserActivity> UserActivities { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
-        public DbSet<CourseBackground> CourseBackgrounds { get; set; }
         public DbSet<ProfileImage> ProfileImages { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

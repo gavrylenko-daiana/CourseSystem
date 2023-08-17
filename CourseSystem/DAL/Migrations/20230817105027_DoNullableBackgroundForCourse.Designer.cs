@@ -4,6 +4,7 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230817105027_DoNullableBackgroundForCourse")]
+    partial class DoNullableBackgroundForCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,13 +255,40 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.HasKey("Id");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("Core.Models.CourseBackground", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileExtension")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Courses");
+                    b.HasIndex("CourseId")
+                        .IsUnique();
+
+                    b.ToTable("CourseBackgrounds");
                 });
 
             modelBuilder.Entity("Core.Models.EducationMaterial", b =>
@@ -379,34 +409,6 @@ namespace DAL.Migrations
                     b.HasIndex("GroupId");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("Core.Models.ProfileImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AppUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId")
-                        .IsUnique();
-
-                    b.ToTable("ProfileImages");
                 });
 
             modelBuilder.Entity("Core.Models.UserActivity", b =>
@@ -687,6 +689,17 @@ namespace DAL.Migrations
                     b.Navigation("Assignment");
                 });
 
+            modelBuilder.Entity("Core.Models.CourseBackground", b =>
+                {
+                    b.HasOne("Core.Models.Course", "Course")
+                        .WithOne("Background")
+                        .HasForeignKey("Core.Models.CourseBackground", "CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("Core.Models.EducationMaterial", b =>
                 {
                     b.HasOne("Core.Models.Course", "Course")
@@ -740,17 +753,6 @@ namespace DAL.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("Core.Models.ProfileImage", b =>
-                {
-                    b.HasOne("Core.Models.AppUser", "AppUser")
-                        .WithOne("ProfileImage")
-                        .HasForeignKey("Core.Models.ProfileImage", "AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("Core.Models.UserActivity", b =>
@@ -878,9 +880,6 @@ namespace DAL.Migrations
 
                     b.Navigation("Notifications");
 
-                    b.Navigation("ProfileImage")
-                        .IsRequired();
-
                     b.Navigation("UserActivities");
 
                     b.Navigation("UserAssignments");
@@ -901,6 +900,8 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Core.Models.Course", b =>
                 {
+                    b.Navigation("Background");
+
                     b.Navigation("EducationMaterials");
 
                     b.Navigation("Groups");

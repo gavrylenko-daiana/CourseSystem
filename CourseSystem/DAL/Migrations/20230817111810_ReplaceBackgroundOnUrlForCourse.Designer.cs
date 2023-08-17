@@ -4,6 +4,7 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230817111810_ReplaceBackgroundOnUrlForCourse")]
+    partial class ReplaceBackgroundOnUrlForCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -381,34 +384,6 @@ namespace DAL.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("Core.Models.ProfileImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AppUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId")
-                        .IsUnique();
-
-                    b.ToTable("ProfileImages");
-                });
-
             modelBuilder.Entity("Core.Models.UserActivity", b =>
                 {
                     b.Property<int>("Id")
@@ -742,17 +717,6 @@ namespace DAL.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("Core.Models.ProfileImage", b =>
-                {
-                    b.HasOne("Core.Models.AppUser", "AppUser")
-                        .WithOne("ProfileImage")
-                        .HasForeignKey("Core.Models.ProfileImage", "AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-                });
-
             modelBuilder.Entity("Core.Models.UserActivity", b =>
                 {
                     b.HasOne("Core.Models.AppUser", "AppUser")
@@ -877,9 +841,6 @@ namespace DAL.Migrations
                     b.Navigation("ChatMessages");
 
                     b.Navigation("Notifications");
-
-                    b.Navigation("ProfileImage")
-                        .IsRequired();
 
                     b.Navigation("UserActivities");
 
