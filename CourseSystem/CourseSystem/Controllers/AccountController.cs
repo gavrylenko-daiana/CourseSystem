@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.EmailViewModels;
 using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
+using Core.ImageStore;
 
 namespace UI.Controllers;
 
@@ -220,10 +221,23 @@ public class AccountController : Controller
         registerViewModel.MapTo(newUser);
 
         newUser.UserName = registerViewModel.FirstName + registerViewModel.LastName;
+        //Profile icon -> create method in service
+        var nameUrl = DefaultProfileImage.GetDefaultImageUrl();
+        var profileIcon = new ProfileImage()
+        {
+            AppUser = newUser,
+            Name = nameUrl.Item1,
+            Url = nameUrl.Item2
+        };
+
+        newUser.ProfileImage = profileIcon;
+        //
 
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 
         await CreateAppUserRoles();
+
+        
 
         if (newUserResponse.Succeeded)
         {

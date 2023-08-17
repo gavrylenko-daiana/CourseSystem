@@ -17,6 +17,7 @@ namespace Core.Models
         public string? Telegram { get; set; }
         public string? GitHub { get; set; }
         public AppUserRoles Role { get; set; }
+        public virtual ProfileImage ProfileImage { get; set; }
         public virtual List<UserAssignments> UserAssignments { get; set; }
         public virtual List<UserCourses> UserCourses { get; set; }
         public virtual List<UserGroups> UserGroups { get; set; }
