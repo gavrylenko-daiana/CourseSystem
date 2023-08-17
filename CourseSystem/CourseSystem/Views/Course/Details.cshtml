@@ -106,7 +106,7 @@
                 @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())
                 {
                     <h5 class="ui header">Groups:</h5>
-                    <div class="ui two stackable cards">
+                    <div class="ui two stackable cards" style="max-height: 270px; overflow-y: auto;">
                         @foreach (var group in Model.CurrentGroups)
                         {
                             <div class="ui card cover-card">
@@ -146,7 +146,7 @@
                     @if (Model.UserCourses != null && Model.UserCourses.Any())
                     {
                         <h4 class="ui header">Users:</h4>
-                        <ul class="ui user-list">
+                        <ul class="ui user-list" style="max-height: 100%; overflow-y: auto;">
                             @foreach (var userCourse in Model.UserCourses)
                             {
                                 <li class="user-item">
