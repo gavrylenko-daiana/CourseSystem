@@ -8,7 +8,6 @@ namespace BLL.Interfaces;
 
 public interface IEducationMaterialService
 {
-    Task<Result<(string Url, string ModifiedFileName)>> AddFileAsync(IFormFile file);
     Task<Result<List<EducationMaterial>>> GetAllMaterialByAccessAsync(MaterialAccess access);
     Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, string materialName, string url, MaterialAccess materialAccess,
         Group group = null!, Course course = null!);
