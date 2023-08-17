@@ -9,5 +9,6 @@ namespace BLL.Interfaces
 {
     public interface IProfileImageService : IGenericService<ProfileImage>
     {
+        Task<Result<AppUser>> SetDefaultProfileImage(AppUser user);
     }
 }
