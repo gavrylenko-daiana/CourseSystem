@@ -53,6 +53,13 @@ namespace BLL.Services
                 return new Result<bool>(false, "Fail to get assignment");
             }
 
+            foreach (var notification in assignment.Notifications)
+            {
+                notification.AssignmentId = null;
+                notification.GroupId = null;
+                notification.CourseId = null;
+            }
+
             try
             {
                 await _repository.DeleteAsync(assignment);
