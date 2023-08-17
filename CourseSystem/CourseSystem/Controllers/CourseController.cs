@@ -112,7 +112,7 @@ public class CourseController : Controller
             Name = courseViewModel.Name
         };
         
-        var createResult = await _courseService.CreateCourse(course, currentUserResult.Data);
+        var createResult = await _courseService.CreateCourse(course, currentUserResult.Data, courseViewModel.UploadImage);
 
         if (!createResult.IsSuccessful)
         {
@@ -143,19 +143,36 @@ public class CourseController : Controller
             return View("Index");
         }
 
-        return View(courseResult.Data);
+        var courseVM = new CourseViewModel();
+        courseResult.Data.MapTo(courseVM);
+
+        return View(courseVM);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Course newCourse)
+    public async Task<IActionResult> Edit(CourseViewModel newCourse)
     {
-        var updateResult = await _courseService.UpdateName(newCourse.Id, newCourse.Name);
+        var updateNameResult = await _courseService.UpdateName(newCourse.Id, newCourse.Name);
+        
+        if (newCourse.UploadImage != null)
+        {
+            var updateBackgroundResult = await _courseService.UpdateBackground(newCourse.Id, newCourse.UploadImage);
+            
+            if (!updateBackgroundResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to update course by Id {courseId}! Error: {errorMessage}",
+                    newCourse.Id, updateBackgroundResult.Message);
+                TempData.TempDataMessage("Error", $"{updateBackgroundResult.Message}");
 
-        if (!updateResult.IsSuccessful)
+                return View(newCourse);
+            }
+        }
+
+        if (!updateNameResult.IsSuccessful)
         {
             _logger.LogError("Failed to update course by Id {courseId}! Error: {errorMessage}",
-                newCourse.Id, updateResult.Message);
-            TempData.TempDataMessage("Error", $"{updateResult.Message}");
+                newCourse.Id, updateNameResult.Message);
+            TempData.TempDataMessage("Error", $"{updateNameResult.Message}");
 
             return View(newCourse);
         }
