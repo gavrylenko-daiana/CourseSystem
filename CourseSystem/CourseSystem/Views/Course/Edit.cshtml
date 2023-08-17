@@ -1,4 +1,5 @@
-@model Core.Models.Course
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model UI.ViewModels.CourseViewModel
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,7 +22,7 @@
                 </div>
             </div>
             <div class="content">
-                @using  (Html.BeginForm("Edit", "Course", FormMethod.Post))
+                @using  (Html.BeginForm("Edit", "Course", FormMethod.Post, new { enctype = "multipart/form-data" }))
                 {
                     @Html.HiddenFor(m => m.Id);
                     <div class="ui form">
@@ -29,6 +30,13 @@
                             <label>@Html.LabelFor(model => model.Name)</label>
                             @Html.TextBoxFor(model => model.Name, new { @class = "ui input" })
                         </div>
+                          <div class="field">
+                              @Html.LabelFor(model => model.UploadImage, htmlAttributes: new { @class = "control-label" })
+                              <div class="ui input">
+                                  <input asp-for="UploadImage" type="file">
+                              </div>
+                              <span asp-validation-for="UploadImage" class="text-danger"></span>
+                          </div>                    
 
                         @if (TempData["Error"] != null)
                         {
