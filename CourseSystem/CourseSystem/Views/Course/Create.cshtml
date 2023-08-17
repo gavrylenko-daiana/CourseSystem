@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="content">
-                @using (Html.BeginForm())
+                @using (Html.BeginForm("Create", "Course", FormMethod.Post, new { enctype = "multipart/form-data" }))
                 {
                     <div class="ui form">
                         <div class="field">
@@ -35,6 +35,14 @@
                                 <p><b>Sorry!</b> - @TempData["Error"]</p>
                             </div>
                         }
+                        
+                      <div class="field">
+                          @Html.LabelFor(model => model.UploadImage, htmlAttributes: new { @class = "control-label" })
+                          <div class="ui input">
+                              <input asp-for="UploadImage" type="file">
+                          </div>
+                          <span asp-validation-for="UploadImage" class="text-danger"></span>
+                      </div>
 
                         <button type="submit" class="ui create-button button">Create</button>
                         <a href="@Url.Action("Index", "Course")" class="ui button">Cancel</a>
