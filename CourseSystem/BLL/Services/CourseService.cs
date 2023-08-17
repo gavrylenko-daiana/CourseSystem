@@ -12,15 +12,17 @@ public class CourseService : GenericService<Course>, ICourseService
 {
     private readonly IUserCourseService _userCourseService;
     private readonly IEducationMaterialService _educationMaterialService;
+    private readonly IDropboxService _dropboxService;
     private readonly IGroupService _groupService;
 
     public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
-        IEducationMaterialService educationMaterial, IGroupService groupService)
+        IEducationMaterialService educationMaterial, IGroupService groupService, IDropboxService dropboxService)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
+        _dropboxService = dropboxService;
     }
 
     public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)
@@ -154,7 +156,7 @@ public class CourseService : GenericService<Course>, ICourseService
     public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile uploadFile, MaterialAccess materialAccess,
         int? groupId = null, int? courseId = null)
     {
-        var fullPath = await _educationMaterialService.AddFileAsync(uploadFile);
+        var fullPath = await _dropboxService.AddFileAsync(uploadFile);
 
         if (!fullPath.IsSuccessful)
         {
