@@ -348,7 +348,7 @@ public class CourseService : GenericService<Course>, ICourseService
         }
         else
         {
-            var backgroundUrlResult = await _dropboxService.AddFileAsync(uploadFile);
+            var backgroundUrlResult = await _dropboxService.AddFileAsync(uploadFile, DropboxFolders.CourseBackgroundImages.ToString());
                 
             if (!backgroundUrlResult.IsSuccessful)
             {
