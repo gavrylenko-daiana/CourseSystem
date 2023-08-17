@@ -95,7 +95,7 @@ public class GroupService : GenericService<Group>, IGroupService
 
                 foreach (var material in educationMaterialsCopy)
                 {
-                    await _educationMaterial.DeleteFileFromGroup(material);
+                    await _educationMaterial.DeleteFile(material);
                 }
             }
 

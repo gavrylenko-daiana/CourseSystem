@@ -22,7 +22,7 @@
         </div>
         <div class="form-group">
             <label asp-for="MaterialAccess" class="control-label"></label>
-            <select id="materialAccessSelect" asp-for="MaterialAccess" class="form-control">
+            <select id="materialAccessSelect" asp-for="MaterialAccess" class="form-control ui fluid search dropdown" multiple="">
                 @if (Model.Groups?.Any() != true)
                 {
                     <option value="@MaterialAccess.General">@MaterialAccess.General</option>

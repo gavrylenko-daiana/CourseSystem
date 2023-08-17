@@ -6,6 +6,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
 <html>
 <body>
+@{
+    var materialIds = string.Join(" ", Model.Select(m => m.Id));
+}
+
 @if (Model != null && Model.Count > 0)
 {
     <div class="container py-4">
@@ -16,10 +20,10 @@
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     <div class="item">
-                        <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="IndexSort" asp-route-materials="@Model" asp-route-sortBy="recent">Sort by recent</a>
+                        <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortBy="recent">Sort by recent</a>
                     </div>
                     <div class="item">
-                        <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="IndexSort" asp-route-materials="@Model" asp-route-sortBy="old">Sort by old</a>
+                        <a type="button" class="btn btn-outline-primary" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortBy="old">Sort by old</a>
                     </div>
                 </div>
             </div>

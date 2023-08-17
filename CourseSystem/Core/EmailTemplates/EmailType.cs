@@ -19,6 +19,8 @@ namespace Core.EmailTemplates
         CourseInvitation,
         GroupConfirmationByAdmin,
         GroupInvitationToStudent,
-        GetTempPasswordToAdmin
+        GetTempPasswordToAdmin,
+        EducationMaterialApproveByAdmin,
+        ApprovedUploadEducationalMaterial
     }
 }

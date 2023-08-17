@@ -15,15 +15,17 @@ public class CourseService : GenericService<Course>, ICourseService
 {
     private readonly IUserCourseService _userCourseService;
     private readonly IEducationMaterialService _educationMaterialService;
+    private readonly IDropboxService _dropboxService;
     private readonly IGroupService _groupService;
 
     public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
-        IEducationMaterialService educationMaterial, IGroupService groupService)
+        IEducationMaterialService educationMaterial, IGroupService groupService, IDropboxService dropboxService)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
+        _dropboxService = dropboxService;
     }
 
     public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)
@@ -79,10 +81,10 @@ public class CourseService : GenericService<Course>, ICourseService
             if (course.EducationMaterials.Any())
             {
                 var educationMaterialsCopy = course.EducationMaterials.ToList();
-
+            
                 foreach (var material in educationMaterialsCopy)
                 {
-                    await _educationMaterialService.DeleteFileFromGroup(material);
+                    await _educationMaterialService.DeleteFile(material);
                 }
             }
 
@@ -187,7 +189,7 @@ public class CourseService : GenericService<Course>, ICourseService
     public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile uploadFile, MaterialAccess materialAccess,
         int? groupId = null, int? courseId = null)
     {
-        var fullPath = await _educationMaterialService.AddFileAsync(uploadFile);
+        var fullPath = await _dropboxService.AddFileAsync(uploadFile);
 
         if (!fullPath.IsSuccessful)
         {
@@ -203,7 +205,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 return new Result<bool>(false, $"Message: {groupResult.Message}");
             }
 
-            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
+            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
                 MaterialAccess.Group, groupResult.Data);
 
             if (!addToGroupResult.IsSuccessful)
@@ -220,7 +222,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 return new Result<bool>(false, $"Message: {courseResult.Message}");
             }
 
-            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
+            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
                 MaterialAccess.Course, null!, courseResult.Data);
 
             if (!addToCourseResult.IsSuccessful)
@@ -231,7 +233,7 @@ public class CourseService : GenericService<Course>, ICourseService
         else if (materialAccess == MaterialAccess.General)
         {
             var addToCourseResult =
-                await _educationMaterialService.AddEducationMaterial(uploadTime, uploadFile, fullPath.Message,
+                await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
                     MaterialAccess.General);
 
             if (!addToCourseResult.IsSuccessful)
