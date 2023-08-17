@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,9 @@ namespace Core.Models
         public string? DisplayName { get; }
         public string Subject { get; }
         public string? Body { get; }
+        public IFormFile? Attachment { get; set; }
 
-        public EmailData(List<string> to, string subject, string? body = null, string? displayName = null)
+        public EmailData(List<string> to, string subject, string? body = null, string? displayName = null, IFormFile? attachment = null)
         {
             // Receiver
             To = to;
@@ -24,6 +26,7 @@ namespace Core.Models
             // Content
             Subject = subject;
             Body = body;
+            Attachment = attachment;
         }
     }
 }

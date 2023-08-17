@@ -13,6 +13,8 @@ using Core.Enums;
 using Core.EmailTemplates;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.Mail;
+using Org.BouncyCastle.Asn1.Pkcs;
 
 namespace BLL.Services
 {
@@ -105,13 +107,32 @@ namespace BLL.Services
                 }
 
                 #region Content
-
+                var body = new BodyBuilder();
                 emailMessage.Subject = emailData.Subject;
-                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-                {
-                    Text = emailData.Body
-                };
+                body.HtmlBody = emailData.Body;
+                
+                //emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+                //{
+                //    Text = emailData.Body
+                //};
 
+                if(emailData.Attachment != null)
+                {
+                    byte[] attachmentFileByteArray;
+
+                    if(emailData.Attachment.Length > 0)
+                    {
+                        using (MemoryStream memoryStream = new MemoryStream())
+                        {
+                            emailData.Attachment.CopyTo(memoryStream);
+                            attachmentFileByteArray = memoryStream.ToArray();
+                        }
+
+                        body.Attachments.Add(emailData.Attachment.FileName, attachmentFileByteArray, ContentType.Parse(emailData.Attachment.ContentType));
+                    }
+                }
+
+                emailMessage.Body = body.ToMessageBody();
                 #endregion
 
                 #region Email sending
@@ -180,14 +201,14 @@ namespace BLL.Services
             }
         }
 
-        private async Task<Result<bool>> CreateAndSendEmail(List<string> toEmails, string subject, string body = null, string displayName = null)
+        private async Task<Result<bool>> CreateAndSendEmail(List<string> toEmails, string subject, string body = null, IFormFile? file = null, string displayName = null)
         {
             if (toEmails.IsNullOrEmpty())
             {
                 return new Result<bool>(false, "No emails to send data");
             }
 
-            var emailData = new EmailData(toEmails, subject, body, displayName);
+            var emailData = new EmailData(toEmails, subject, body, displayName, file);
 
             try
             {
@@ -273,6 +294,14 @@ namespace BLL.Services
                         { @"{email}", appUser.Email },
                         { @"{userrole}", appUser.Role },
                         { @"{temppassword}", tempPassword },
+                    };
+                    break;
+                case EmailType.EducationMaterialApproveByAdmin:
+                    parameters = new Dictionary<string, object>()
+                    {
+                        { @"{firstname}", appUser.FirstName },
+                        { @"{lastname}", appUser.LastName },
+                        { @"{callbackurl}", callBackUrl }
                     };
                     break;
                 default:
@@ -374,7 +403,7 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
 
-        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
+        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null, IFormFile? file = null)
         {
             if (appUser == null)
             {
@@ -394,12 +423,15 @@ namespace BLL.Services
                 case EmailType.AccountApproveByAdmin:
                     toEmail = allAdmins.Select(a => a.Email).ToList();
                     break;
+                case EmailType.EducationMaterialApproveByAdmin:
+                    toEmail = allAdmins.Select(a => a.Email).ToList();
+                    break;
                 default:
                     toEmail.Add(appUser.Email);
                     break;
             }
 
-            return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
+            return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2, file);
         }
 
         public async Task<Result<bool>> SendEmailGroups(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
