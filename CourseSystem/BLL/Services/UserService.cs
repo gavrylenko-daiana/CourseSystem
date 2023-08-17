@@ -5,6 +5,7 @@ using Core.Helpers;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Services;
@@ -12,11 +13,13 @@ namespace BLL.Services;
 public class UserService : GenericService<AppUser>, IUserService
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly IProfileImageService _profileImageService;
 
-    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager) 
+    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IProfileImageService profileImageService) 
         : base(unitOfWork, unitOfWork.UserRepository)
     {
         _userManager = userManager;
+        _profileImageService = profileImageService;
     }
 
     public async Task<Result<AppUser>> GetInfoUserByCurrentUserAsync(ClaimsPrincipal currentUser)
@@ -68,7 +71,7 @@ public class UserService : GenericService<AppUser>, IUserService
         return Task.FromResult(user);
     }
 
-    public async Task<Result<bool>> EditUserAsync(ClaimsPrincipal currentUser, AppUser editUserViewModel)
+    public async Task<Result<bool>> EditUserAsync(ClaimsPrincipal currentUser, AppUser editUserViewModel, IFormFile? newProfileImage = null)
     {
         if (editUserViewModel == null)
         {
@@ -94,6 +97,16 @@ public class UserService : GenericService<AppUser>, IUserService
             user.Telegram = editUserViewModel.Telegram!;
             user.GitHub = editUserViewModel.GitHub!;
             user.Email = editUserViewModel.Email;
+
+            if(newProfileImage != null)
+            {
+                var updateImageResult = await _profileImageService.UpdateProfileImage(user, newProfileImage);
+                
+                if(!updateImageResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, $"Failed to update {nameof(updateImageResult.Data)} - Message: {updateImageResult.Message}");
+                }
+            }
 
             await _userManager.UpdateAsync(user);
 

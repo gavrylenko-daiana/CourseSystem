@@ -1,4 +1,5 @@
 ﻿using Core.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,6 @@ namespace BLL.Interfaces
     public interface IProfileImageService : IGenericService<ProfileImage>
     {
         Task<Result<AppUser>> SetDefaultProfileImage(AppUser user);
+        Task<Result<bool>> UpdateProfileImage(AppUser user, IFormFile newProfileImage);
     }
 }

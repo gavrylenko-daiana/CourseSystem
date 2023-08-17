@@ -23,7 +23,7 @@ public class DropboxService : IDropboxService
         _dropboxClient = new DropboxClient(accessToken);
     }
 
-    public async Task<Result<(string Url, string ModifiedFileName)>> AddFileAsync(IFormFile file)
+    public async Task<Result<(string Url, string ModifiedFileName)>> AddFileAsync(IFormFile file, string? folder = null)
     {
         try
         {
@@ -35,7 +35,17 @@ public class DropboxService : IDropboxService
             }
             
             var modifiedFileName = uniquePathResult.Message;
-            var uploadPath = "/" + modifiedFileName;
+
+            string uploadPath;
+
+            if(folder == null)
+            {
+                uploadPath = "/" + modifiedFileName;
+            }
+            else
+            {
+                uploadPath = "/" + folder + "/" + modifiedFileName;
+            }
 
             await using var stream = file.OpenReadStream();
             var uploadResult =

@@ -4,6 +4,7 @@ using Core.ImageStore;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -45,9 +46,57 @@ namespace BLL.Services
                 Url = imageNameAndUrl.Item2
             };
 
-            user.ProfileImage = profileImage;
+            try
+            {
+                await _repository.AddAsync(profileImage);
+                await _unitOfWork.Save();
 
-            return new Result<AppUser>(true, user);
+                return new Result<AppUser>(true, user);
+            }
+            catch (Exception ex)
+            {
+                return new Result<AppUser>(false, "Invalid user");
+            }
+
+        }
+
+        public async Task<Result<bool>> UpdateProfileImage(AppUser user, IFormFile newProfileImage)
+        {
+            if(user == null || newProfileImage == null)
+            {
+                return new Result<bool>(false, "Fail to update profile image");
+            }
+
+            try
+            {
+                var addDropboxResult = await _dropboxService.AddFileAsync(newProfileImage, "ProfileImages");
+
+                if(!addDropboxResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, $"Failed to update {nameof(addDropboxResult.Data)} - Message: {addDropboxResult.Message}");
+                }
+
+                var currentProfileImageResult = await GetByPredicate(p => p.AppUserId == user.Id);
+
+                if (!currentProfileImageResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, currentProfileImageResult.Message);
+                }
+
+                var profileImage = currentProfileImageResult.Data.FirstOrDefault();
+
+                profileImage.Url = addDropboxResult.Data.Url;
+                profileImage.Name = addDropboxResult.Data.ModifiedFileName;
+
+                await _repository.UpdateAsync(profileImage);
+                await _unitOfWork.Save();
+
+                return new Result<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, $"Failed to update profile image");
+            }
         }
 
         private async Task<Result<bool>> IsNotDefaultProfileImage(AppUser user)
@@ -59,12 +108,12 @@ namespace BLL.Services
                 return new Result<bool>(false, "Fail to get profile image");
             }
 
-            if(profileImageResult.Data.Count > 0)
+            if(profileImageResult.Data.Count == 0)
             {
-                return new Result<bool>(false);
+                return new Result<bool>(true);
             }
 
-            return new Result<bool>(true);
+            return new Result<bool>(false);
         }
     }
 }

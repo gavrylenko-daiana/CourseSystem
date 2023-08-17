@@ -11,6 +11,7 @@ using UI.ViewModels;
 using UI.ViewModels.EmailViewModels;
 using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
 using Core.ImageStore;
+using static Dropbox.Api.TeamLog.AccessMethodLogInfo;
 
 namespace UI.Controllers;
 
@@ -118,8 +119,14 @@ public class AccountController : Controller
 
             return View(loginViewModel);
         }
-
         var user = userResult.Data;
+
+        var imageUserResult = await _profileImageService.SetDefaultProfileImage(user);
+
+        if (!imageUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Failed to set profile image", imageUserResult.Data.Email);
+        }
 
         if (!ValidationHelpers.IsValidEmail(loginViewModel.EmailAddress))
         {
@@ -224,18 +231,16 @@ public class AccountController : Controller
 
         newUser.UserName = registerViewModel.FirstName + registerViewModel.LastName;
 
+        var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
+
+        await CreateAppUserRoles();
+
         var imageUserResult = await _profileImageService.SetDefaultProfileImage(newUser);
 
         if (!imageUserResult.IsSuccessful)
         {
             _logger.LogWarning("Failed to set profile image", imageUserResult.Data.Email);
         }
-
-        var newUserResponse = await _userManager.CreateAsync(imageUserResult.Data, registerViewModel.Password);
-
-        await CreateAppUserRoles();
-
-        
 
         if (newUserResponse.Succeeded)
         {

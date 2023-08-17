@@ -107,7 +107,7 @@ public class UserController : Controller
         var userViewModel = new AppUser();
         editUserViewModel.MapTo(userViewModel);
 
-        var result = await _userService.EditUserAsync(User, userViewModel);
+        var result = await _userService.EditUserAsync(User, userViewModel, editUserViewModel.NewProfileImage);
 
         if (!result.IsSuccessful)
         {
