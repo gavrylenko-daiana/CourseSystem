@@ -41,6 +41,7 @@ namespace DAL
                 .WithMany(g => g.EducationMaterials)
                 .HasForeignKey(em => em.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
+
         }
     }
 }

@@ -17,10 +17,11 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 {
     private readonly IDropboxService _dropboxService;
 
-    public EducationMaterialService(UnitOfWork unitOfWork, IDropboxService dropboxService) 
+    public EducationMaterialService(UnitOfWork unitOfWork, IOptions<DropboxSettings> config) 
         : base(unitOfWork, unitOfWork.EducationMaterialRepository)
     {
-        _dropboxService = dropboxService;
+        string accessTokenProfile = config.Value.AccessToken;
+        _dropboxService = new DropboxService(accessTokenProfile);
     }
 
     public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, string materialName, string url, MaterialAccess materialAccess, Group group = null!, Course course = null!)

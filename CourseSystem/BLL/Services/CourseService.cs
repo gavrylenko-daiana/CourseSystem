@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using BLL.Interfaces;
+using Core.Configuration;
 using Core.Enums;
 using Core.Models;
 using DAL.Interfaces;
@@ -7,7 +8,9 @@ using DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace BLL.Services;
 
@@ -19,13 +22,14 @@ public class CourseService : GenericService<Course>, ICourseService
     private readonly IGroupService _groupService;
 
     public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
-        IEducationMaterialService educationMaterial, IGroupService groupService, IDropboxService dropboxService)
+        IEducationMaterialService educationMaterial, IGroupService groupService, IOptions<DropboxSettings> config)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
-        _dropboxService = dropboxService;
+        string accessToken = config.Value.AccessToken;
+        _dropboxService = new DropboxService(accessToken);
     }
 
     public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser)

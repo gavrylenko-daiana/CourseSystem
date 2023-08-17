@@ -1,8 +1,10 @@
 ﻿using BLL.Interfaces;
+using Core.Configuration;
 using Core.ImageStore;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +16,11 @@ namespace BLL.Services
 {
     public class ProfileImageService : GenericService<ProfileImage>, IProfileImageService
     {
-        public ProfileImageService(UnitOfWork unitOfWork, IRepository<ProfileImage> repository) : base(unitOfWork, repository)
+        private readonly IDropboxService _dropboxService;
+        public ProfileImageService(UnitOfWork unitOfWork, IRepository<ProfileImage> repository, IOptions<DropboxSettings> config) : base(unitOfWork, repository)
         {
+            string accessTokenProfile = config.Value.AccessTokenProfile;
+            _dropboxService = new DropboxService(accessTokenProfile);
         }
 
         public async Task<Result<AppUser>> SetDefaultProfileImage(AppUser user)

@@ -6,6 +6,7 @@ using Dropbox.Api;
 using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace BLL.Services;
 
@@ -13,11 +14,15 @@ public class DropboxService : IDropboxService
 {
     private readonly DropboxClient _dropboxClient;
 
-    public DropboxService(IOptions<DropboxSettings> config)
+    //public DropboxService(IOptions<DropboxSettings> config)
+    //{
+    //    _dropboxClient = new DropboxClient(config.Value.AccessToken);
+    //}
+    public DropboxService(string accessToken)
     {
-        _dropboxClient = new DropboxClient(config.Value.AccessToken);
+        _dropboxClient = new DropboxClient(accessToken);
     }
-    
+
     public async Task<Result<(string Url, string ModifiedFileName)>> AddFileAsync(IFormFile file)
     {
         try
