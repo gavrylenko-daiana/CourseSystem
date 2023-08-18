@@ -4,19 +4,34 @@
 <div id="errorMessage"></div>
 
     <div id="inputForm">
+        @*<input type="text" name="currentQueryFilter" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;" />
+        <button type="submit" style="background: none; border: none; padding: 0;">
+            <i class="inverted circular search link icon"></i>
+        </button>*@
         <input type="hidden" id="assignmentId" value=@Model.Id />
-        <input type="text" id="message" />
-        <input type="button" id="sendBtn" value="Отправить" disabled="disabled" />
+        <input type="text" id="message" placeholder="Type message..." style="border-radius: 15px; margin-right: 10px; padding: 6px;" />
+        <input type="button" id="sendBtn" value="Send" disabled="disabled" style="background-color: #5DADE2; color: white; border: none; padding: 6px; border-radius: 5px; cursor: pointer;">
     </div>
-    <div id="chatroom">
+    <div id="chatroom" style="margin-top: 20px;">
         @foreach(var message in Model.ChatMessages.OrderByDescending(m => m.Created).ToList())
         {
-            <p>
+            <div style="display: flex; align-items: center;">
+                <img src="@message.AppUser.ProfileImage.Url" alt="@message.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 10px;">
+                <p><b>@message.AppUser.FirstName @message.AppUser.LastName :</b></p>
+            </div>
+            <div style="margin-left: 40px; position: relative; padding: 10px; border-radius: 10px; background-color: #f7f7f7;">
+                <p style="margin: 0; padding-bottom: 5px; background-color: #f7f7f7;">@message.Text</p>
+                <i style="position: absolute; bottom: 5px; right: 8px;">@message.Created.ToString("g")</i>
+            </div>
+
+
+            @*<img src="@message.AppUser.ProfileImage.Url" alt="@message.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px">
+            <p>               
                 <b>@message.AppUser.FirstName @message.AppUser.LastName :</b>
                 @message.Text
                 <br />
                 <i>@message.Created.ToString("g")</i>
-            </p>
+            </p>*@
         }
     </div>
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
