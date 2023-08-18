@@ -6,6 +6,9 @@
 @using X.PagedList.Web.Common;
 @model X.PagedList.IPagedList<UI.ViewModels.CourseViewModel>
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@using BLL.Interfaces
+@model UI.ViewModels.UserCoursesViewModel
+@inject IEducationMaterialService EducationMaterialService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -55,7 +58,7 @@
             </form>
         </div>
     </div>
-    
+
     <div class="ui compact menu" style="margin-left: 10px;">
         <div class="ui simple dropdown item">
             Sort by
@@ -108,8 +111,8 @@
         }
     }
 </div>
-
-<div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+  
+ <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
     @if (Model.PageCount > 1)
     {
         <div class="pagination-container">
@@ -125,19 +128,31 @@
         </div>
     }
 </div>
-
-@if (User.IsInRole(AppUserRoles.Admin.ToString()))
-{
-    <div class="ui container add-course-button">
+  
+<div class="ui container add-course-button">
+    @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+    {
         <a asp-action="Create" class="ui basic black button">Add New Course</a>
+    }
+</div>
 
-        @if (!User.IsInRole(AppUserRoles.Student.ToString()))
+<div class="ui container add-course-button">
+    @if (Model.CurrentUser.Role != AppUserRoles.Student)
+    {
+        <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
+    }
+
+    @{
+        var materialsGeneral = await EducationMaterialService.GetAllMaterialByAccessAsync(MaterialAccess.General, SortingParam.UploadTimeDesc);
+        
+        @if (materialsGeneral.IsSuccessful && materialsGeneral.Data.Any())
         {
-            <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
-            <a asp-action="IndexAccess" asp-controller="EducationMaterial" asp-route-access="@MaterialAccess.General" class="ui basic black button">Education Materials</a>
+            var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
+            
+            <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc" class="ui basic black button">Education Materials</a>
         }
-    </div>
-}
+    }
+</div>
 
 @if (TempData["Error"] != null)
 {

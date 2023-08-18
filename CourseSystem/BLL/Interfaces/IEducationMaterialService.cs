@@ -8,10 +8,10 @@ namespace BLL.Interfaces;
 
 public interface IEducationMaterialService
 {
-    Task<Result<List<EducationMaterial>>> GetAllMaterialByAccessAsync(MaterialAccess access);
+    Task<Result<List<EducationMaterial>>> GetAllMaterialByAccessAsync(MaterialAccess access, SortingParam sortOrder);
     Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, string materialName, string url, MaterialAccess materialAccess,
         Group group = null!, Course course = null!);
     Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id);
     Task<Result<bool>> DeleteFile(EducationMaterial material);
-    Task<Result<List<EducationMaterial>>> GetMaterialsListFromIdsString(string materialIds);
+    Task<Result<List<EducationMaterial>>> GetMaterialsListFromIdsString(string materialIds, SortingParam sortOrder, string searchQuery = null!);
 }

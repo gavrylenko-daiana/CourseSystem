@@ -14,6 +14,7 @@ using BLL.Services;
 using Core.EmailTemplates;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using X.PagedList;
 
 namespace UI.Controllers;
 
@@ -62,28 +63,26 @@ public class EducationMaterialController : Controller
 
         return callbackUrl;
     }
-
+    
     [HttpGet]
-    public async Task<IActionResult> IndexAccess(MaterialAccess access)
+    public async Task<IActionResult> IndexMaterials(string materialIds, SortingParam sortOrder, string currentQueryFilter, string searchQuery, int? page)
     {
-        var materials = await _educationMaterialService.GetAllMaterialByAccessAsync(access);
+        ViewBag.CurrentSort = sortOrder;
+        ViewBag.NameSortParam = sortOrder == SortingParam.UploadTimeDesc ? SortingParam.UploadTime : SortingParam.UploadTimeDesc;
 
-        if (!(materials.IsSuccessful && materials.Data.Any()))
+        if (searchQuery != null)
         {
-            _logger.LogError("Failed to retrieve educational materials! Error: {errorMessage}", materials.Message);
-
-            TempData.TempDataMessage("Error", $"Message: {materials.Message}");
-            
-            return RedirectToAction("Index", "Course");
+            page = 1;
         }
-
-        return View("Index", materials.Data);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> IndexMaterials(string materialIds, string sortBy = null!)
-    {
-        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds);
+        else
+        {
+            searchQuery = currentQueryFilter;
+        }
+        
+        ViewBag.CurrentQueryFilter = searchQuery;
+        ViewBag.MaterialIds = materialIds;
+        
+        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds, sortOrder, searchQuery);
         
         if (!materialsList.IsSuccessful)
         {
@@ -92,7 +91,11 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Index", "Course");
         }
 
-        return View("Index", materialsList.Data);
+        int pageSize = 8;
+        int pageNumber = (page ?? 1);
+        ViewBag.OnePageOfAssignemnts = materialsList.Data;
+
+        return View("Index", materialsList.Data.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]

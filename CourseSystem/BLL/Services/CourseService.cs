@@ -300,7 +300,6 @@ public class CourseService : GenericService<Course>, ICourseService
     
     private Expression<Func<IQueryable<Course>, IOrderedQueryable<Course>>> GetOrderByExpression(SortingParam sortBy)
     {
-
         Expression<Func<IQueryable<Course>, IOrderedQueryable<Course>>> query;
 
         switch (sortBy)
