@@ -190,9 +190,9 @@ public class EducationMaterialController : Controller
 
         if (currentUserResult.Data.Role == AppUserRoles.Teacher)
         {
-            await SendEmailToAdminToApprove(currentUserResult.Data.Id, viewModel.UploadFile, viewModel.MaterialAccess, currentUserResult.Data, viewModel.CourseId, viewModel.SelectedGroupId);
+            await SendEmailToAdminToApprove(currentUserResult.Data.Id, viewModel.UploadFile, viewModel.MaterialAccess, currentUserResult.Data, viewModel.CourseId, viewModel.GroupId);
 
-            return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+            return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
         }
         else
         {
@@ -434,9 +434,9 @@ public class EducationMaterialController : Controller
 
         if (currentUserResult.Data.Role == AppUserRoles.Teacher)
         {
-            await SendEmailToAdminToApprove(currentUserResult.Data.Id, viewModel.UploadFile, viewModel.MaterialAccess, currentUserResult.Data, viewModel.CourseId, viewModel.SelectedGroupId);
+            await SendEmailToAdminToApprove(currentUserResult.Data.Id, viewModel.UploadFile, viewModel.MaterialAccess, currentUserResult.Data, viewModel.SelectedCourseId, viewModel.SelectedGroupId);
 
-            return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+            return RedirectToAction("CreateInGeneral", "EducationMaterial");
         }
         else
         {
