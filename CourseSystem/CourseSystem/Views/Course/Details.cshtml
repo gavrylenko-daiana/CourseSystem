@@ -2,7 +2,9 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using BLL.Interfaces
 @model UI.ViewModels.CourseViewModel
+@inject IEducationMaterialService EducationMaterialService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -88,8 +90,8 @@
                 <h4 class="ui header">@Model.Name</h4>
 
                 @{
-                    var materialsCourse1 = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
-                    var materialIds = string.Join(" ", materialsCourse1.Select(m => m.Id));
+                    var materialsCourse = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+                    var materialIds = string.Join(" ", materialsCourse.Select(m => m.Id));
                 }
 
                 @if (Model.CurrentUser.Role != AppUserRoles.Student)
@@ -97,9 +99,13 @@
                     <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
                     <a href="@Url.Action("CreateInCourse", "EducationMaterial", new { courseId = Model.Id })" class="ui black basic button mb-3">Upload Education Material</a>
                 }
-                @if (materialsCourse1 != null && materialsCourse1.Any())
+                @if (materialsCourse != null && materialsCourse.Any() && ViewBag.OnePageOfAssignments != null)
                 {
-                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds">Education Materials</a>
+                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@ViewBag.OnePageOfAssignments" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
+                }
+                else
+                {
+                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
                 }
 
                 @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())

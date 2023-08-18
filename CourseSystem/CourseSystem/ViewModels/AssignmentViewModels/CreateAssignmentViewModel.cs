@@ -22,6 +22,6 @@ namespace UI.ViewModels.AssignmentViewModels
         [DataType(DataType.Date)]
         public DateTime EndDate { get; set; }
         public int GroupId { get; set; }
-        public List<IFormFile>? AttachedFiles { get; set; }
+        public IFormFile? AttachedFiles { get; set; }
     }
 }

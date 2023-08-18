@@ -30,8 +30,9 @@
         <div class="content">
             <form method="post" asp-controller="Assignment" asp-action="Edit" enctype="multipart/form-data" class="ui form">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" id="GroupId" name="GroupId" value="@Model.GroupId" />
-                
+                <input type="hidden" asp-for="GroupId" value="@Model.GroupId">
+                <input type="hidden" asp-for="AssignmentFiles" value="@Model.AssignmentFiles">
+
                 <!-- Assignment Details Inputs -->
                 <div class="form-row form-group">
                     <div class="field">
@@ -45,7 +46,7 @@
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
                 </div>
-                
+
                 <div class="form-row form-group">
                     <div class="field">
                         <label asp-for="StartDate" class="control-label"></label>
@@ -59,41 +60,29 @@
                     </div>
                 </div>
                 
-                <h6>Choose assignment files: </h6>
+                <h6>Assignment files: </h6>
                 
-                <!-- File Upload Input -->
-                @if (Model.AttachedFilesCheckBoxes.Any())
+                @for (int i = 0; i < Model.AssignmentFiles.Count; i++)
                 {
-                    foreach(var fileCheckBoxes in Model.AttachedFilesCheckBoxes)
-                    {
-                        <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   value="@fileCheckBoxes.Value.Url"
-                                   name="ResponsibleUsers"
-                                   id="checkbox_@fileCheckBoxes.Value.Url"
-                                   checked="@fileCheckBoxes.IsActive">
-                            <label class="form-check-label" for="checkbox_@fileCheckBoxes.Value.Url">
-                                @fileCheckBoxes.Description
-                            </label>
-                        </div>
-                    }
+                    <label>@(i + 1)) @((Model.AssignmentFiles[i].Name.Length > 43) ? $"{Model.AssignmentFiles[i].Name.Substring(0, 40)}..." : Model.AssignmentFiles[i].Name)</label>
+                    <br>
                 }
-                
+
                 <hr/>
                 <h6>Upload new files: </h6>
                 <div class="field">
-                    <label for="NewAddedFiles">Select File(s):</label>
-                    <input asp-for="NewAddedFiles" type="file" class="form-control-file" id="NewAddedFiles" name="NewAddedFiles" multiple>
+                    <label asp-for="NewAddedFiles">Select File:</label>
+                    <input asp-for="NewAddedFiles" type="file" class="form-control">
+                    <span asp-validation-for="NewAddedFiles" class="text-danger"></span>
                 </div>
-                
+
                 <!-- Submit Button -->
                 <div class="field">
                     <div class="col" style="display: inline-block;">
-                        <input class="ui edit-button button" type="submit" value="Edit" />
+                        <input class="ui edit-button button" type="submit" value="Edit"/>
                     </div>
                     <div class="col" style="display: inline-block;">
-                        <a href="@Url.Action("Details", "Assignment", new { assignmentId = Model.Id})" class="ui button">Cancel</a>
+                        <a href="@Url.Action("Details", "Assignment", new { assignmentId = Model.Id })" class="ui button">Cancel</a>
                     </div>
                 </div>
             </form>
@@ -101,9 +90,24 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const checkboxes = document.querySelectorAll('.form-check-input');
 
-    <!-- Add Bootstrap JS and other scripts here if needed -->
-    <!-- This script is for Bootstrap's JavaScript plugins, including the ones used in the form -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const value = this.value;
+                const isActive = this.checked;
+                
+                // Update the corresponding input field value
+                document.querySelector(`input[data-url="${value}"]`).value = isActive;
+            });
+        });
+    });
+</script>
+
+<!-- Add Bootstrap JS and other scripts here if needed -->
+<!-- This script is for Bootstrap's JavaScript plugins, including the ones used in the form -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

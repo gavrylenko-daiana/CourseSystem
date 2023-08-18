@@ -30,10 +30,9 @@ public class DropboxService : IDropboxService
             }
             
             var modifiedFileName = uniquePathResult.Message;
-
             string uploadPath;
 
-            if(folder == null)
+            if (folder == null)
             {
                 uploadPath = "/" + modifiedFileName;
             }
@@ -43,9 +42,8 @@ public class DropboxService : IDropboxService
             }
 
             await using var stream = file.OpenReadStream();
-            var uploadResult =
-                await _dropboxClient.Files.UploadAsync(uploadPath, WriteMode.Overwrite.Instance, body: stream);
-
+            
+            var uploadResult = await _dropboxClient.Files.UploadAsync(uploadPath, WriteMode.Overwrite.Instance, body: stream);
             var linkResult = await GetSharedLinkAsync(uploadResult.PathDisplay);
 
             if (!linkResult.IsSuccessful)

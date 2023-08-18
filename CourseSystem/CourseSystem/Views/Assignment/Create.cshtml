@@ -18,67 +18,66 @@
     </style>
 </head>
 <body>
-    @if (TempData["Error"] != null)
-    {
-        <div class="ui negative message">
-            <p><b>Sorry!</b> - @TempData["Error"]</p>
-        </div>
-    }
-    <div class="ui container" style="margin-top: 20px;">
-        <div class="ui centered card" style="width: 400px;">
-            <div class="content">
-                <div class="header">
-                    Create New Assignment
-                </div>
-            </div>  
-            <div class="content">
-                <form method="post" asp-action="Create" enctype="multipart/form-data" class="ui form">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <input type="hidden" id="GroupId" name="GroupId" value="@Model.GroupId" />
-                    <!-- Assignment Details Inputs -->
-                    <div class="form-row form-group">
-                        <div class="field">
-                            <label asp-for="Name" class="control-label"></label>
-                            <input asp-for="Name" class="form-control">
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                            </div>
-                        <div class="field">
-                            <label asp-for="Description" class="control-label"></label>
-                            <textarea asp-for="Description" class="form-control custom-textarea" rows="5"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="form-row form-group">
-                        <div class="field">
-                            <label asp-for="StartDate" class="control-label"></label>
-                            <input asp-for="StartDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
-                            <span asp-validation-for="StartDate" class="text-danger"></span>
-                        </div>
-                        <div class="field">
-                            <label asp-for="EndDate" class="control-label"></label>
-                            <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
-                            <span asp-validation-for="EndDate" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <!-- File Upload Input -->
-                    <div class="field">
-                        <label for="AttachedFiles">Select File(s):</label>
-                        <input asp-for="AttachedFiles" type="file" class="form-control-file" id="AttachedFiles" name="AttachedFiles" multiple>
-                    </div>
-                    <!-- Submit Button -->
-                    <div class="field">
-                        <div class="col" style="display: inline-block;">
-                            <input class="ui create-button button" type="submit" value="Create" />
-                        </div>
-                        <div class="col" style="display: inline-block;">
-                            <a href="@Url.Action("Index", "Assignment", new { groupId = Model.GroupId})" class="ui button">Cancel</a>
-                        </div>
-                    </div>
-                </form>                
+@if (TempData["Error"] != null)
+{
+    <div class="ui negative message">
+        <p><b>Sorry!</b> - @TempData["Error"]</p>
+    </div>
+}
+<div class="ui container" style="margin-top: 20px;">
+    <div class="ui centered card" style="width: 400px;">
+        <div class="content">
+            <div class="header">
+                Create New Assignment
             </div>
         </div>
+        <div class="content">
+            <form method="post" asp-action="Create" enctype="multipart/form-data" class="ui form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" id="GroupId" name="GroupId" value="@Model.GroupId"/>
+                <!-- Assignment Details Inputs -->
+                <div class="form-row form-group">
+                    <div class="field">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control">
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control custom-textarea" rows="5"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-row form-group">
+                    <div class="field">
+                        <label asp-for="StartDate" class="control-label"></label>
+                        <input asp-for="StartDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="EndDate" class="control-label"></label>
+                        <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <!-- File Upload Input -->
+                <div class="field">
+                    <label asp-for="AttachedFiles">Select File:</label>
+                    <input asp-for="AttachedFiles" type="file" class="form-control">
+                    <span asp-validation-for="AttachedFiles" class="text-danger"></span>
+                </div>
+                <!-- Submit Button -->
+                <div class="field">
+                    <div class="col" style="display: inline-block;">
+                        <input class="ui create-button button" type="submit" value="Create"/>
+                    </div>
+                    <div class="col" style="display: inline-block;">
+                        <a href="@Url.Action("Index", "Assignment", new { groupId = Model.GroupId })" class="ui button">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 </body>
 </html>
-
-

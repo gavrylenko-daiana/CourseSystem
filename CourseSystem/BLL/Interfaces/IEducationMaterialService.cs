@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace BLL.Interfaces;
 
-public interface IEducationMaterialService
+public interface IEducationMaterialService : IGenericService<EducationMaterial>
 {
     Task<Result<List<EducationMaterial>>> GetAllMaterialByAccessAsync(MaterialAccess access, SortingParam sortOrder);
     Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, string materialName, string url, MaterialAccess materialAccess,

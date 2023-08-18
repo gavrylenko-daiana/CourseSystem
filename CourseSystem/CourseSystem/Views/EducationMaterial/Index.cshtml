@@ -85,11 +85,11 @@
                         <div class="item">
                             @if (ViewBag.NameSortParam == SortingParam.UploadTime)
                             {
-                                <a asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="@ViewBag.NameSortParam"><i class="fa fa-arrow-down" aria-hidden="true"></i> Recent</a>
+                                <a asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@ViewBag.MaterialIds" asp-route-sortOrder="@ViewBag.NameSortParam"><i class="fa fa-arrow-down" aria-hidden="true"></i> Recent</a>
                             }
                             else
                             {
-                                <a asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="@ViewBag.NameSortParam"><i class="fa fa-arrow-up" aria-hidden="true"></i> Recent</a>
+                                <a asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@ViewBag.MaterialIds" asp-route-sortOrder="@ViewBag.NameSortParam"><i class="fa fa-arrow-up" aria-hidden="true"></i> Recent</a>
                             }
                         </div>
                     </div>
