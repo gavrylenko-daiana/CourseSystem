@@ -106,15 +106,11 @@
                     <a class="ui black basic button mb-3" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
                 }
 
-                @if (materialsGroup != null && materialsGroup.Any() && ViewBag.OnePageOfAssignments != null)
-                {
-                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@ViewBag.OnePageOfAssignments" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
-                }
-                else
+                @if (materialsGroup != null && materialsGroup.Any())
                 {
                     <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
                 }
-
+                
                 @if (Model.Group.GroupAccess == GroupAccess.InProgress)
                 {
                     <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="ui black basic button">View Assignments</a>
