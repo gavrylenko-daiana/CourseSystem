@@ -14,16 +14,16 @@ namespace BLL.Interfaces
         Task<Result<bool>> AddJoinedCourseNotification(AppUser user, Course course); //ready
         Task<Result<bool>> AddCreatedGroupNotification(AppUser user, Group group); //ready
         Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group); //ready
-        Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group);
-        Task<Result<bool>> AddGroupStartedForStudentNotification(AppUser user, Group group);
+        Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group); //ready
+        Task<Result<bool>> AddGroupStartedForStudentNotification(AppUser user, Group group); //ready
         Task<Result<bool>> AddCreatedAssignmentNotification(AppUser user, Assignment assignment); //ready
         Task<Result<bool>> AddSubmittedAssignmentForStudentNotification(UserAssignments userAssignment); //ready
         Task<Result<bool>> AddSubmittedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment); //ready
         Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment); //ready
         Task<Result<bool>> AddMarkedAssignmentForStudentNotification(UserAssignments userAssignment); //ready
-        Task<Result<bool>> AddAssignmentIsOpenForTeacherNotification(AppUser user, Assignment assignment);
-        Task<Result<bool>> AddAssignmentIsOpenForStudentNotification(AppUser user, Assignment assignment);
-        Task<Result<bool>> AddAssignmentIsClosedForTeacherNotification(AppUser user, Assignment assignment);
-        Task<Result<bool>> AddAssignmentIsClosedForStudentNotification(AppUser user, Assignment assignment);
+        Task<Result<bool>> AddAssignmentIsOpenForTeacherNotification(AppUser user, Assignment assignment); //ready
+        Task<Result<bool>> AddAssignmentIsOpenForStudentNotification(AppUser user, Assignment assignment); //ready
+        Task<Result<bool>> AddAssignmentIsClosedForTeacherNotification(AppUser user, Assignment assignment); //ready
+        Task<Result<bool>> AddAssignmentIsClosedForStudentNotification(AppUser user, Assignment assignment); //ready
     }
 }
