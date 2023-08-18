@@ -50,13 +50,13 @@ public class NotificationController : Controller
             switch (filteringParam)
             {
                 case NotificationsFilteringParams.Course:
-
                     var notificationsResult = currentUserResult.Data.Notifications.ByCourse(entityId);
 
                     if (!notificationsResult.IsSuccessful)
                     {
                         _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
                             currentUserResult.Data.Id, notificationsResult.Message);
+
                         TempData.TempDataMessage("Error", notificationsResult.Message);
 
                         return RedirectToAction("Index", "Home");
@@ -64,15 +64,14 @@ public class NotificationController : Controller
 
                     notifications = notificationsResult.Data;
                     break;
-
                 case NotificationsFilteringParams.Group:
-
                     notificationsResult = currentUserResult.Data.Notifications.ByGroup(entityId);
 
                     if (!notificationsResult.IsSuccessful)
                     {
                         _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
                             currentUserResult.Data.Id, notificationsResult.Message);
+
                         TempData.TempDataMessage("Error", notificationsResult.Message);
 
                         return RedirectToAction("Index", "Home");
@@ -80,15 +79,14 @@ public class NotificationController : Controller
 
                     notifications = notificationsResult.Data;
                     break;
-
                 case NotificationsFilteringParams.Assignment:
-
                     notificationsResult = currentUserResult.Data.Notifications.ByAssignment(entityId);
 
                     if (!notificationsResult.IsSuccessful)
                     {
                         _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
                             currentUserResult.Data.Id, notificationsResult.Message);
+
                         TempData.TempDataMessage("Error", notificationsResult.Message);
 
                         return RedirectToAction("Index", "Home");
@@ -107,6 +105,7 @@ public class NotificationController : Controller
             {
                 _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
                     currentUserResult.Data.Id, notificationsResult.Message);
+
                 TempData.TempDataMessage("Error", notificationsResult.Message);
 
                 return RedirectToAction("Index", "Home");
@@ -130,6 +129,7 @@ public class NotificationController : Controller
         {
             _logger.LogError("Failed to get notification by Id {notificationId}! Error: {errorMessage}", 
                 id, notificationResult.Message);
+
             TempData.TempDataMessage("Error", notificationResult.Message);
 
             return RedirectToAction("ViewAll");
