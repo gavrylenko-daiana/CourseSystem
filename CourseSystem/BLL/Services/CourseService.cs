@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using BLL.Interfaces;
+using Core.Configuration;
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
@@ -8,7 +9,9 @@ using DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace BLL.Services;
 
@@ -239,7 +242,7 @@ public class CourseService : GenericService<Course>, ICourseService
     public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile uploadFile, MaterialAccess materialAccess,
         int? groupId = null, int? courseId = null)
     {
-        var fullPath = await _dropboxService.AddFileAsync(uploadFile);
+        var fullPath = await _dropboxService.AddFileAsync(uploadFile, materialAccess.ToString());
 
         if (!fullPath.IsSuccessful)
         {
@@ -344,7 +347,7 @@ public class CourseService : GenericService<Course>, ICourseService
         }
         else
         {
-            var backgroundUrlResult = await _dropboxService.AddFileAsync(uploadFile);
+            var backgroundUrlResult = await _dropboxService.AddFileAsync(uploadFile, DropboxFolders.CourseBackgroundImages.ToString());
                 
             if (!backgroundUrlResult.IsSuccessful)
             {

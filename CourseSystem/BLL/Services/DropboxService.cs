@@ -6,6 +6,7 @@ using Dropbox.Api;
 using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace BLL.Services;
 
@@ -17,12 +18,11 @@ public class DropboxService : IDropboxService
     {
         _dropboxClient = new DropboxClient(config.Value.AccessToken);
     }
-    
-    public async Task<Result<(string Url, string ModifiedFileName)>> AddFileAsync(IFormFile file)
+    public async Task<Result<(string Url, string ModifiedFileName)>> AddFileAsync(IFormFile file, string? folder = null)
     {
         try
         {
-            var uniquePathResult = await GetUniqueUploadPathAsync(file.FileName);
+            var uniquePathResult = await GetUniqueUploadPathAsync(file.FileName, folder);
 
             if (!uniquePathResult.IsSuccessful)
             {
@@ -30,7 +30,17 @@ public class DropboxService : IDropboxService
             }
             
             var modifiedFileName = uniquePathResult.Message;
-            var uploadPath = "/" + modifiedFileName;
+
+            string uploadPath;
+
+            if(folder == null)
+            {
+                uploadPath = "/" + modifiedFileName;
+            }
+            else
+            {
+                uploadPath = "/" + folder + "/" + modifiedFileName;
+            }
 
             await using var stream = file.OpenReadStream();
             var uploadResult =
@@ -53,11 +63,11 @@ public class DropboxService : IDropboxService
         }
     }
     
-    private async Task<Result<string>> GetUniqueUploadPathAsync(string fileName)
+    private async Task<Result<string>> GetUniqueUploadPathAsync(string fileName, string? folder = null)
     {
         int count = 1;
         var modifiedFileName = fileName;
-        var resultExists = await FileExistsAsync(fileName);
+        var resultExists = await FileExistsAsync(fileName, folder);
 
         while (resultExists.IsSuccessful)
         {
@@ -70,7 +80,7 @@ public class DropboxService : IDropboxService
 
             modifiedFileName = numberedFileNameResult.Message;
             count++;
-            resultExists = await FileExistsAsync(modifiedFileName);
+            resultExists = await FileExistsAsync(modifiedFileName, folder);
         }
 
         return new Result<string>(true, modifiedFileName);
@@ -117,12 +127,19 @@ public class DropboxService : IDropboxService
         return new Result<string>(true, $"{fileNameWithoutExtension}-{count}{fileExtension}");
     }
 
-    private async Task<Result<bool>> FileExistsAsync(string filePath)
+    private async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
     {
         try
         {
-            await _dropboxClient.Files.GetMetadataAsync("/" + filePath);
-
+            if (string.IsNullOrEmpty(folder))
+            {
+                await _dropboxClient.Files.GetMetadataAsync("/" + filePath);
+            }
+            else
+            {
+                await _dropboxClient.Files.GetMetadataAsync("/" + folder + "/" + filePath);
+            }
+            
             return new Result<bool>(true);
         }
         catch
@@ -131,12 +148,19 @@ public class DropboxService : IDropboxService
         }
     }
 
-    public async Task<Result<bool>> DeleteFileAsync(string filePath)
+    public async Task<Result<bool>> DeleteFileAsync(string filePath, string? folder = null)
     {
         try
         {
-            await _dropboxClient.Files.DeleteV2Async("/" + filePath);
-
+            if (string.IsNullOrEmpty(folder))
+            {
+                await _dropboxClient.Files.DeleteV2Async("/" + filePath);
+            }
+            else
+            {
+                await _dropboxClient.Files.DeleteV2Async("/" + folder + "/" + filePath);
+            }
+            
             return new Result<bool>(true);
         }
         catch (Exception ex)

@@ -81,38 +81,54 @@
 <hr class="ui divider">
 <div class="ui stackable three column grid">
     @if (!Model.Any())
+    {
+        <div class="column">
+            <div class="ui warning message">No courses found.</div>
+        </div>
+    }
+    else
+    {
+        @foreach (var course in Model)
         {
             <div class="column">
-                <div class="ui warning message">No courses found.</div>
-            </div>
-        }
-        else
-        {
-            @foreach (var course in Model)
-            {
-                <div class="column">
-                    <div class="ui card cover-card" style="background-image: url('@course.Url'); background-size: cover; background-position: center;">
-                        <div class="content">
-                            <div class="header">@course.Name</div>
-                        </div>
-                        <div class="extra content">
-                            <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
-                            @if (User.IsInRole(AppUserRoles.Admin.ToString()))
-                            {
-                                <div class="ui buttons">
-                                    <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
-                                    <div class="or"></div>
-                                    <a href="@Url.Action("Delete", new { id = course.Id })" class="ui delete-button button">Delete</a>
-                                </div>
-                            }
-                        </div>
+                <div class="ui card cover-card" style="background-image: url('@course.Url'); background-size: cover; background-position: center;">
+                    <div class="content">
+                        <div class="header">@course.Name</div>
+                    </div>
+                    <div class="extra content">
+                        <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
+                        @if (User.IsInRole(AppUserRoles.Admin.ToString()))
+                        {
+                            <div class="ui buttons">
+                                <a href="@Url.Action("Edit", new { id = course.Id })" class="ui edit-button button">Edit</a>
+                                <div class="or"></div>
+                                <a href="@Url.Action("Delete", new { id = course.Id })" class="ui delete-button button">Delete</a>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         }
     }
 </div>
-
+  
+ <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+    @if (Model.PageCount > 1)
+    {
+        <div class="pagination-container">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+            <div class="page-link">
+                @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page = page, sortOrder = ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter }),
+                new PagedListRenderOptions
+                {
+                    LiElementClasses = new string[] { "page-item" },
+                    PageClasses = new string[] { "page-link" }
+                })
+            </div>
+        </div>
+    }
+</div>
+  
 <div class="ui container add-course-button">
     @if (Model.CurrentUser.Role == AppUserRoles.Admin)
     {
@@ -137,22 +153,6 @@
         }
     }
 </div>
-    </div>
-            <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
-                @if (Model.PageCount > 1)
-                    {
-                        <div class="pagination-container">
-                            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                            <div class="page-link">
-                                @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page = page, sortOrder = ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter}),
-                                    new PagedListRenderOptions {
-                                        LiElementClasses = new string[] { "page-item" },
-                                        PageClasses = new string[] { "page-link" }
-                                    })
-                            </div>
-                        </div>
-                    }
-            </div>    
 
 @if (TempData["Error"] != null)
 {

@@ -29,4 +29,7 @@ public class EditUserViewModel
     
     [Display(Name = "GitHub")]
     public string? GitHub { get; set; }
+
+    [Display(Name = "Update profile image")]
+    public IFormFile? NewProfileImage { get; set; }
 }

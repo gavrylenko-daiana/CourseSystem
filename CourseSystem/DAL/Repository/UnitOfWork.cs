@@ -24,6 +24,7 @@ namespace DAL.Repository
         private Repository<UserActivity> _userActivityRepository;
         private Repository<Notification> _notificationRepository;
         private Repository<ChatMessage> _chatMessageRepository;
+        private Repository<ProfileImage> _profileImageRepository;
 
         public UnitOfWork(ApplicationContext context)
         {
@@ -196,6 +197,19 @@ namespace DAL.Repository
                 }
 
                 return _userGroupsRepository;
+            }
+        }
+
+        public Repository<ProfileImage> ProfileImageRepository
+        {
+            get
+            {
+                if (_profileImageRepository == null)
+                {
+                    _profileImageRepository = new Repository<ProfileImage>(_context);
+                }
+
+                return _profileImageRepository;
             }
         }
 
