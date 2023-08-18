@@ -88,6 +88,10 @@
                         <label asp-for="Role" class="control-label"></label>
                         <input asp-for="Role" class="form-control" id="Role" value="@Model.Role.ToString()" readonly>
                     </div>
+                    <div class="form-group py-2">
+                        <div class="control-label">Activity</div>
+                        @await Html.PartialAsync("~/Views/UserActivity/ActivityForYearPartialView.cshtml")
+                    </div>
                     @if (User.IsInRole(AppUserRoles.Admin.ToString()))
                     {
                         <div class="form-group py-2">
