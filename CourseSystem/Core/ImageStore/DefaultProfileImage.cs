@@ -26,5 +26,15 @@ namespace Core.ImageStore
 
             return (imageName, _avatarsPack[imageName]);
         }
+
+        public static bool IsProfileImageDefault(string imageUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl))
+            {
+                return false;
+            }
+
+            return _avatarsPack.ContainsValue(imageUrl);
+        }
     }
 }

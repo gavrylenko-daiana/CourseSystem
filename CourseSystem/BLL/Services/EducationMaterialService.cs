@@ -28,38 +28,52 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
     {
         try
         {
-            var materialFile = new EducationMaterial()
-            {
-                Name = materialName,
-                Url = url,
-                FileExtension = Path.GetExtension(materialName),
-                MaterialAccess = materialAccess,
-                UploadTime = uploadTime
-            };
+            var allEducationMaterialResult = await GetByPredicate(m => m.Name == materialName || m.Url == url);
 
-            if (group != null)
+            if (!allEducationMaterialResult.IsSuccessful)
             {
-                materialFile.GroupId = group.Id;
-                materialFile.CourseId = group.CourseId;
-
-                await _repository.AddAsync(materialFile);
-                await _unitOfWork.Save();
+                return new Result<bool>(false, $"ErrorMessage - {allEducationMaterialResult.Message}");
             }
-            else if (course != null)
-            {
-                materialFile.CourseId = course.Id;
-                materialFile.Course = course;
 
-                await _repository.AddAsync(materialFile);
-                await _unitOfWork.Save();
+            if (!allEducationMaterialResult.Data.Any())
+            {
+                var materialFile = new EducationMaterial()
+                {
+                    Name = materialName,
+                    Url = url,
+                    FileExtension = Path.GetExtension(materialName),
+                    MaterialAccess = materialAccess,
+                    UploadTime = uploadTime
+                };
+
+                if (group != null && materialAccess.Equals(MaterialAccess.Group))
+                {
+                    materialFile.GroupId = group.Id;
+                    materialFile.CourseId = group.CourseId;
+
+                    await _repository.AddAsync(materialFile);
+                    await _unitOfWork.Save();
+                }
+                else if (course != null && materialAccess.Equals(MaterialAccess.Course))
+                {
+                    materialFile.CourseId = course.Id;
+                    materialFile.Course = course;
+
+                    await _repository.AddAsync(materialFile);
+                    await _unitOfWork.Save();
+                }
+                else
+                {
+                    await _repository.AddAsync(materialFile);
+                    await _unitOfWork.Save();
+                }
+
+                return new Result<bool>(true);
             }
             else
             {
-                await _repository.AddAsync(materialFile);
-                await _unitOfWork.Save();
+                return new Result<bool>(false, $"Education material {materialName} already exist");
             }
-        
-            return new Result<bool>(true);
         }
         catch (Exception ex)
         {
@@ -197,4 +211,24 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
         return new Result<Expression<Func<IQueryable<EducationMaterial>, IOrderedQueryable<EducationMaterial>>>>(true, query);
     }
+
+    public async Task<Result<bool>> ApprovedEducationMaterial(string fileName, string fileUrl)
+    {
+        var educationMaterialsResult = await GetByPredicate(m => m.Url == fileUrl && m.Name == fileName);
+
+        if(!educationMaterialsResult.IsSuccessful)
+        {
+            return new Result<bool>(false, "No such education material");
+        }
+
+        var isApproved = educationMaterialsResult.Data.Any();
+
+        if(isApproved)
+        {
+            return new Result<bool>(false, "Fail is approved by admin");
+        }
+
+        return new Result<bool>(true);
+    }
+       
 }

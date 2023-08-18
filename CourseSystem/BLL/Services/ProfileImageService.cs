@@ -49,19 +49,23 @@ namespace BLL.Services
 
             var profileImage = userProfileImageResult.Data.FirstOrDefault();
             string profileImageName = profileImage.Name;
+            string profileImageUrl = profileImage.Url;
 
             try
             {
                 await _repository.DeleteAsync(profileImage);
                 await _unitOfWork.Save();
 
-                var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(profileImageName, DropboxFolders.ProfileImages.ToString());
-
-                if (!deleteImageDropboxResult.IsSuccessful)
+                if (!DefaultProfileImage.IsProfileImageDefault(profileImageUrl))
                 {
-                    return new Result<bool>(false, $"Failed to delete profile image - Message: {userProfileImageResult.Message}");
-                }
+                    var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(profileImageName, DropboxFolders.ProfileImages.ToString());
 
+                    if (!deleteImageDropboxResult.IsSuccessful)
+                    {
+                        return new Result<bool>(false, $"Failed to delete profile image - Message: {userProfileImageResult.Message}");
+                    }
+                }
+                
                 return new Result<bool>(true, "Successful deletion of the profile picture");
             }
             catch (Exception ex)
@@ -72,7 +76,7 @@ namespace BLL.Services
 
         public async Task<Result<bool>> SetDefaultProfileImage(AppUser user)
         {
-            if(user == null)
+            if (user == null)
             {
                 return new Result<bool>(false, "Invalid user");
             }
@@ -108,7 +112,7 @@ namespace BLL.Services
 
         public async Task<Result<bool>> UpdateProfileImage(AppUser user, IFormFile newProfileImage)
         {
-            if(user == null || newProfileImage == null)
+            if (user == null || newProfileImage == null)
             {
                 return new Result<bool>(false, "Fail to update profile image");
             }
