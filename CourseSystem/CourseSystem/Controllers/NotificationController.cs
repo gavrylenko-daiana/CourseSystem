@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Core.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using Core.Enums;
+using X.PagedList;
 
 namespace UI.Controllers;
 
@@ -23,7 +25,7 @@ public class NotificationController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> ViewAll()
+    public async Task<IActionResult> ViewAll(int? page, NotificationsFilteringParams filteringParam = NotificationsFilteringParams.Default, int? entityId = null)
     {
         var currentUserResult = await _userService.GetCurrentUser(User);
 
@@ -34,18 +36,88 @@ public class NotificationController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var notificationsResult = currentUserResult.Data.Notifications.OrderByDate();
-
-        if (!notificationsResult.IsSuccessful)
+        if (filteringParam != NotificationsFilteringParams.Default)
         {
-            _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}", 
-                currentUserResult.Data.Id, notificationsResult.Message);
-            TempData.TempDataMessage("Error", notificationsResult.Message);
-
-            return RedirectToAction("Index", "Home");
+            ViewBag.CurrentFilterParam = filteringParam;
         }
 
-        return View(notificationsResult.Data);
+        var notifications = new List<Notification>();
+
+        if (entityId != null)
+        {
+            ViewBag.CurrentEntityId = filteringParam;
+
+            switch (filteringParam)
+            {
+                case NotificationsFilteringParams.Course:
+                    var notificationsResult = currentUserResult.Data.Notifications.ByCourse(entityId);
+
+                    if (!notificationsResult.IsSuccessful)
+                    {
+                        _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
+                            currentUserResult.Data.Id, notificationsResult.Message);
+
+                        TempData.TempDataMessage("Error", notificationsResult.Message);
+
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    notifications = notificationsResult.Data;
+                    break;
+                case NotificationsFilteringParams.Group:
+                    notificationsResult = currentUserResult.Data.Notifications.ByGroup(entityId);
+
+                    if (!notificationsResult.IsSuccessful)
+                    {
+                        _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
+                            currentUserResult.Data.Id, notificationsResult.Message);
+
+                        TempData.TempDataMessage("Error", notificationsResult.Message);
+
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    notifications = notificationsResult.Data;
+                    break;
+                case NotificationsFilteringParams.Assignment:
+                    notificationsResult = currentUserResult.Data.Notifications.ByAssignment(entityId);
+
+                    if (!notificationsResult.IsSuccessful)
+                    {
+                        _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
+                            currentUserResult.Data.Id, notificationsResult.Message);
+
+                        TempData.TempDataMessage("Error", notificationsResult.Message);
+
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    notifications = notificationsResult.Data;
+                    break;
+            }
+            
+        }
+        else
+        {
+            var notificationsResult = currentUserResult.Data.Notifications.OrderByDate();
+
+            if (!notificationsResult.IsSuccessful)
+            {
+                _logger.LogError("Notifications fail for user {userId}! Error: {errorMessage}",
+                    currentUserResult.Data.Id, notificationsResult.Message);
+
+                TempData.TempDataMessage("Error", notificationsResult.Message);
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            notifications = notificationsResult.Data;
+        }
+
+        int pageSize = 10;
+        int pageNumber = (page ?? 1);
+
+        return View(notifications.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]
@@ -57,6 +129,7 @@ public class NotificationController : Controller
         {
             _logger.LogError("Failed to get notification by Id {notificationId}! Error: {errorMessage}", 
                 id, notificationResult.Message);
+
             TempData.TempDataMessage("Error", notificationResult.Message);
 
             return RedirectToAction("ViewAll");
