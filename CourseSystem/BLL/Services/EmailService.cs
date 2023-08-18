@@ -110,11 +110,6 @@ namespace BLL.Services
                 var body = new BodyBuilder();
                 emailMessage.Subject = emailData.Subject;
                 body.HtmlBody = emailData.Body;
-                
-                //emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-                //{
-                //    Text = emailData.Body
-                //};
 
                 if(emailData.Attachment != null)
                 {
@@ -305,7 +300,8 @@ namespace BLL.Services
                     };
                     break;
                 default:
-                    return (String.Empty, String.Empty);
+                    parameters = new Dictionary<string, object>();
+                    break;
             }
 
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);

@@ -99,6 +99,19 @@ public class EducationMaterialController : Controller
         }
         
     }
+
+    private object CreateEmailRouteValues(ConfirmEducationMaterial educationMaterialVM)
+    {
+        return new
+        {
+            teacherId = educationMaterialVM.TeacherId,
+            url = educationMaterialVM.FileUrl,
+            name = educationMaterialVM.FileName,
+            materialAccess = educationMaterialVM.MaterialAccess,
+            courseId = educationMaterialVM.CourseId,
+            groupId = educationMaterialVM.GroupId
+        };
+    }
     
     [HttpGet]
     public async Task<IActionResult> IndexMaterials(string materialIds, SortingParam sortOrder, string currentQueryFilter, string searchQuery, int? page)
@@ -328,21 +341,39 @@ public class EducationMaterialController : Controller
     {
         var groupResult = await _groupService.GetById((int)educationMaterialVM.GroupId);
         var courseResult = await _courseService.GetById((int)educationMaterialVM.CourseId);
+
+        if (!groupResult.IsSuccessful || !courseResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", "Fail to get group or course");
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
         var addEducationMaterialResult = await _educationMaterialService.AddEducationMaterial(DateTime.Now, educationMaterialVM.FileName, educationMaterialVM.FileUrl, educationMaterialVM.MaterialAccess, groupResult.Data, courseResult.Data);
 
         if (!addEducationMaterialResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", addEducationMaterialResult.Message);
 
-            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", new
-            {
-                teacherId = educationMaterialVM.TeacherId,
-                url = educationMaterialVM.FileUrl,
-                name = educationMaterialVM.FileName,
-                materialAccess = educationMaterialVM.MaterialAccess,
-                courseId = educationMaterialVM.CourseId,
-                groupId = educationMaterialVM.GroupId
-            });
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var teacherResult = await _userService.GetInfoUserByIdAsync(educationMaterialVM.TeacherId);
+
+        if (!teacherResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", teacherResult.Message);
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var emailResult = await _emailService.SendEmailToAppUsers(EmailType.ApprovedUploadEducationalMaterial, teacherResult.Data);
+
+        if (!emailResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Teacher {teacherResult.Data.FirstName} {teacherResult.Data.LastName} was not informed about the successful download of the file");
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
         }
 
         return RedirectToAction("Index", "Home");
@@ -357,32 +388,16 @@ public class EducationMaterialController : Controller
         {
             TempData.TempDataMessage("Error", approveForDelete.Message);
 
-            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", new
-            {
-                teacherId = educationMaterialVM.TeacherId,
-                url = educationMaterialVM.FileUrl,
-                name = educationMaterialVM.FileName,
-                materialAccess = educationMaterialVM.MaterialAccess,
-                courseId = educationMaterialVM.CourseId,
-                groupId = educationMaterialVM.GroupId
-            });
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
         }
         
         var exureFileExist = await _dropboxService.FileExistsAsync(educationMaterialVM.FileName, educationMaterialVM.MaterialAccess.ToString());
 
         if (!exureFileExist.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", $"File {educationMaterialVM.FileName} was denyed");
+            TempData.TempDataMessage("Error", $"File {educationMaterialVM.FileName} was denied");
 
-            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", new
-            {
-                teacherId = educationMaterialVM.TeacherId,
-                url = educationMaterialVM.FileUrl,
-                name = educationMaterialVM.FileName,
-                materialAccess = educationMaterialVM.MaterialAccess,
-                courseId = educationMaterialVM.CourseId,
-                groupId = educationMaterialVM.GroupId
-            });
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
         }
 
         var deletionResult = await _dropboxService.DeleteFileAsync(educationMaterialVM.FileName, educationMaterialVM.MaterialAccess.ToString());
@@ -391,15 +406,25 @@ public class EducationMaterialController : Controller
         {
             TempData.TempDataMessage("Error", deletionResult.Message);
 
-            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", new
-            {
-                teacherId = educationMaterialVM.TeacherId,
-                url = educationMaterialVM.FileUrl,
-                name = educationMaterialVM.FileName,
-                materialAccess = educationMaterialVM.MaterialAccess,
-                courseId = educationMaterialVM.CourseId,
-                groupId = educationMaterialVM.GroupId
-            });
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var teacherResult = await _userService.GetInfoUserByIdAsync(educationMaterialVM.TeacherId);
+
+        if (!teacherResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", teacherResult.Message);
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var emailResult = await _emailService.SendEmailToAppUsers(EmailType.DeniedUploadEducationalMaterial, teacherResult.Data);
+
+        if (!emailResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Teacher {teacherResult.Data.FirstName} {teacherResult.Data.LastName} was not informed that the file was not uploaded successfully.");
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
         }
 
         return RedirectToAction("Index", "Home");
