@@ -50,23 +50,15 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
                 {
                     materialFile.GroupId = group.Id;
                     materialFile.CourseId = group.CourseId;
-
-                    await _repository.AddAsync(materialFile);
-                    await _unitOfWork.Save();
                 }
                 else if (course != null && materialAccess.Equals(MaterialAccess.Course))
                 {
                     materialFile.CourseId = course.Id;
                     materialFile.Course = course;
+                }
 
-                    await _repository.AddAsync(materialFile);
-                    await _unitOfWork.Save();
-                }
-                else
-                {
-                    await _repository.AddAsync(materialFile);
-                    await _unitOfWork.Save();
-                }
+                await _repository.AddAsync(materialFile);
+                await _unitOfWork.Save();
 
                 return new Result<bool>(true);
             }
