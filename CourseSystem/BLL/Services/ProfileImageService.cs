@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
 using static Dropbox.Api.TeamLog.AccessMethodLogInfo;
 
 namespace BLL.Services
@@ -35,6 +36,38 @@ namespace BLL.Services
             }
 
             return new Result<bool>(false, "An invalid file format has been sent. The file may have the extension .jpeg, .png, .jpg, .gif.");
+        }
+
+        public async Task<Result<bool>> DeleteUserProfileImage(AppUser user)
+        {
+            var userProfileImageResult = await GetByPredicate(p => p.AppUserId == user.Id);
+
+            if (!userProfileImageResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Failed to get profile image - Message: {userProfileImageResult.Message}");
+            }
+
+            var profileImage = userProfileImageResult.Data.FirstOrDefault();
+            string profileImageName = profileImage.Name;
+
+            try
+            {
+                await _repository.DeleteAsync(profileImage);
+                await _unitOfWork.Save();
+
+                var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(profileImageName, DropboxFolders.ProfileImages.ToString());
+
+                if (!deleteImageDropboxResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, $"Failed to delete profile image - Message: {userProfileImageResult.Message}");
+                }
+
+                return new Result<bool>(true, "Successful deletion of the profile picture");
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, $"Failed to delete profile image - Message: {ex.Message}");
+            }            
         }
 
         public async Task<Result<bool>> SetDefaultProfileImage(AppUser user)
