@@ -111,11 +111,11 @@ namespace BLL.Services
                 emailMessage.Subject = emailData.Subject;
                 body.HtmlBody = emailData.Body;
 
-                if(emailData.Attachment != null)
+                if (emailData.Attachment != null)
                 {
                     byte[] attachmentFileByteArray;
 
-                    if(emailData.Attachment.Length > 0)
+                    if (emailData.Attachment.Length > 0)
                     {
                         using (MemoryStream memoryStream = new MemoryStream())
                         {
