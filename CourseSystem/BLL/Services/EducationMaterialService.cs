@@ -216,16 +216,16 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
     {
         var educationMaterialsResult = await GetByPredicate(m => m.Url == fileUrl && m.Name == fileName);
 
-        if(!educationMaterialsResult.IsSuccessful)
+        if (!educationMaterialsResult.IsSuccessful)
         {
-            return new Result<bool>(false, "No such education material");
+            return new Result<bool>(false, "There is no such education material");
         }
 
         var isApproved = educationMaterialsResult.Data.Any();
 
-        if(isApproved)
+        if (isApproved)
         {
-            return new Result<bool>(false, "Fail is approved by admin");
+            return new Result<bool>(false, "This education material is already approved");
         }
 
         return new Result<bool>(true);

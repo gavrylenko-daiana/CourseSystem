@@ -76,12 +76,12 @@ namespace Core.EmailTemplates
 
         public static (string, string) GetEmailSubjectAndBody(EmailType emailType, Dictionary<string, object> placeholderNameSandValues)
         {           
-            if(!SubjectGetter.ContainsKey(emailType) || !BodyGetter.ContainsKey(emailType))
+            if (!SubjectGetter.ContainsKey(emailType) || !BodyGetter.ContainsKey(emailType))
             {
                 return (String.Empty, String.Empty);
             }
 
-            if(placeholderNameSandValues.Count == 0)
+            if (placeholderNameSandValues.Count == 0)
             {
                 return (SubjectGetter[emailType], BodyGetter[emailType]);
             }
@@ -110,7 +110,7 @@ namespace Core.EmailTemplates
 
                 var value = parameter.Value;
 
-                if(value is DateTime date)
+                if (value is DateTime date)
                 {
                     parameters.Add(parameterName, date.ToString("d"));
                 }

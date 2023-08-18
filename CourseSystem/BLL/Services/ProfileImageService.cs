@@ -30,7 +30,7 @@ namespace BLL.Services
             var supportedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
             var fileExtension = System.IO.Path.GetExtension(newProfileImage.FileName);
 
-            if(supportedImageExtensions.Contains(fileExtension))
+            if (supportedImageExtensions.Contains(fileExtension))
             {
                 return new Result<bool>(true);
             }
@@ -121,7 +121,7 @@ namespace BLL.Services
             {
                 var addDropboxResult = await _dropboxService.AddFileAsync(newProfileImage, DropboxFolders.ProfileImages.ToString());
 
-                if(!addDropboxResult.IsSuccessful)
+                if (!addDropboxResult.IsSuccessful)
                 {
                     return new Result<bool>(false, $"Failed to update {nameof(addDropboxResult.Data)} - Message: {addDropboxResult.Message}");
                 }
@@ -158,7 +158,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Fail to get profile image");
             }
 
-            if(profileImageResult.Data.Count == 0)
+            if (profileImageResult.Data.Count == 0)
             {
                 return new Result<bool>(true);
             }

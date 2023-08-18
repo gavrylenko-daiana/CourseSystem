@@ -102,6 +102,11 @@ public class EducationMaterialController : Controller
 
     private object CreateEmailRouteValues(ConfirmEducationMaterial educationMaterialVM)
     {
+        if (educationMaterialVM == null)
+        {
+            return new object();
+        }
+
         return new
         {
             teacherId = educationMaterialVM.TeacherId,

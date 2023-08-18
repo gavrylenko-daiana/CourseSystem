@@ -33,7 +33,7 @@ public class DropboxService : IDropboxService
 
             string uploadPath;
 
-            if(folder == null)
+            if (folder == null)
             {
                 uploadPath = "/" + modifiedFileName;
             }
