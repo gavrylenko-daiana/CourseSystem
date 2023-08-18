@@ -88,25 +88,25 @@
                 <h4 class="ui header">@Model.Name</h4>
 
                 @{
-                    var materialsCourse = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
-                    var materialIds = string.Join(" ", materialsCourse.Select(m => m.Id));
+                    var materialsCourse1 = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+                    var materialIds = string.Join(" ", materialsCourse1.Select(m => m.Id));
                 }
 
                 @if (Model.CurrentUser.Role != AppUserRoles.Student)
                 {
                     <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
                     <a href="@Url.Action("CreateInCourse", "EducationMaterial", new { courseId = Model.Id })" class="ui black basic button mb-3">Upload Education Material</a>
-                }
-                
-                @if (materialsCourse != null && materialsCourse.Any())
-                {
-                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc" >Education Materials</a>
+
+                    @if (materialsCourse1 != null && materialsCourse1.Any())
+                    {
+                        <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds">Education Materials</a>
+                    }
                 }
 
                 @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())
                 {
                     <h5 class="ui header">Groups:</h5>
-                    <div class="ui two stackable cards">
+                    <div class="ui two stackable cards" style="max-height: 270px; overflow-y: auto;">
                         @foreach (var group in Model.CurrentGroups)
                         {
                             <div class="ui card cover-card">
@@ -133,6 +133,29 @@
                     <div class="ui warning message">
                         <p>No groups found for this course.</p>
                     </div>
+                }                  
+
+                @{
+                    var materialsGroup = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
+                    var materialsCourse = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+
+                    var serializedMaterials = JsonSerializer.Serialize(materialsCourse, new JsonSerializerOptions
+                          {
+                              ReferenceHandler = ReferenceHandler.Preserve
+                          });
+                }
+                @if (materialsGroup != null && materialsGroup.Any())
+                {
+                    <div class="ui segment">
+                        <h4 class="ui header">Education Materials:</h4>
+                        <ul class="ui list">
+                            @foreach (var material in materialsGroup)
+                            {
+                                <li>@material.Name</li>
+                                <a class="ui details-button button" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
+                            }
+                        </ul>
+                    </div>
                 }
             </div>
 
@@ -146,7 +169,7 @@
                     @if (Model.UserCourses != null && Model.UserCourses.Any())
                     {
                         <h4 class="ui header">Users:</h4>
-                        <ul class="ui user-list">
+                        <ul class="ui user-list" style="max-height: 100%; overflow-y: auto;">
                             @foreach (var userCourse in Model.UserCourses)
                             {
                                 <li class="user-item">
