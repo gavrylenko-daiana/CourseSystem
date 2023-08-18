@@ -96,11 +96,10 @@
                 {
                     <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
                     <a href="@Url.Action("CreateInCourse", "EducationMaterial", new { courseId = Model.Id })" class="ui black basic button mb-3">Upload Education Material</a>
-
-                    @if (materialsCourse1 != null && materialsCourse1.Any())
-                    {
-                        <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds">Education Materials</a>
-                    }
+                }
+                @if (materialsCourse1 != null && materialsCourse1.Any())
+                {
+                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds">Education Materials</a>
                 }
 
                 @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())
@@ -133,32 +132,8 @@
                     <div class="ui warning message">
                         <p>No groups found for this course.</p>
                     </div>
-                }                  
-
-                @{
-                    var materialsGroup = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Group or MaterialAccess.General).ToList();
-                    var materialsCourse = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
-
-                    var serializedMaterials = JsonSerializer.Serialize(materialsCourse, new JsonSerializerOptions
-                          {
-                              ReferenceHandler = ReferenceHandler.Preserve
-                          });
-                }
-                @if (materialsGroup != null && materialsGroup.Any())
-                {
-                    <div class="ui segment">
-                        <h4 class="ui header">Education Materials:</h4>
-                        <ul class="ui list">
-                            @foreach (var material in materialsGroup)
-                            {
-                                <li>@material.Name</li>
-                                <a class="ui details-button button" asp-controller="EducationMaterial" asp-action="Detail" asp-route-id="@material.Id">Detail</a>
-                            }
-                        </ul>
-                    </div>
                 }
             </div>
-
             <div class="right-container">
                 <div class="ui segment">
                     @if (Model.CurrentUser.Role == AppUserRoles.Admin)
