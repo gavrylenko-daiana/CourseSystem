@@ -64,7 +64,7 @@ public class UserGroupServiceTests
     }
 
     [Fact]
-    public async Task UpdateProgressInUserGroups_ValidUserGroups_ReturnsTrue()
+    public async Task UpdateProgressInUserGroups_ExistentUserGroups_ReturnsTrue()
     {
         var options = new DbContextOptionsBuilder<ApplicationContext>()
             .UseInMemoryDatabase(databaseName: "test_database")
