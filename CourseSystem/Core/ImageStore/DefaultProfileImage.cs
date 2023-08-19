@@ -20,7 +20,7 @@ namespace Core.ImageStore
         private static Random _random = new Random();
         public static (string, string) GetDefaultImageUrl()
         {
-            var index = _random.Next(0, _avatarsPack.Keys.Count - 1);
+            var index = _random.Next(0, _avatarsPack.Keys.Count);
             var keyArray = _avatarsPack.Keys.ToArray();
             var imageName = keyArray[index];
 
