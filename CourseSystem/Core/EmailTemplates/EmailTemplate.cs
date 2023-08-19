@@ -24,7 +24,8 @@ namespace Core.EmailTemplates
             { EmailType.GroupInvitationToStudent, "Group invitation" },
             { EmailType.GetTempPasswordToAdmin, "Login with temporary password" },
             { EmailType.EducationMaterialApproveByAdmin, "Confirm upload educational material" },
-            { EmailType.ApprovedUploadEducationalMaterial, "Educational material confirmation" }
+            { EmailType.ApprovedUploadEducationalMaterial, "Educational material confirmation" },
+            {EmailType.DeniedUploadEducationalMaterial, "Educational material denied"  }
         };
 
         private static Dictionary<EmailType, string> BodyGetter = new()
@@ -68,24 +69,21 @@ namespace Core.EmailTemplates
                                                "<p>Role: {userrole}</p>" +
                                                "<bolt>Temporary Password: {temppassword}</bolt>" + 
                                                "<h3>You need to change password at the first visit</h3>"},
-            //{ EmailType.EducationMaterialApproveByAdmin, @"<h4>Information about Teacher</h4>" + "<hr/>" +
-            //                                            "<p>First name: {firstname}</p>" +
-            //                                            "<p>Last name: {lastname}</p>" +
-            //                                            "<p>Email: {email}</p>" + "<hr/>" +
-            //                                            "<h4>Information about Education Material</h4>" +
-            //                                            "<p>Name: {materialname}</p>" +
-            //                                            "<p>File: {material}</p>" + "<hr/>" +
-            //                                            "<h4>Confirm upload educational material by {firstname} {lastname}, " +
-            //                                            "follow the link: <a href='{callbackurl}'>link</a></h4>"},
-            {EmailType.EducationMaterialApproveByAdmin, @"<h4>Confirm upload educational material by {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4></h4>" },
+            {EmailType.EducationMaterialApproveByAdmin, @"<h4>Confirm uploading of educational material by {firstname} {lastname}, follow the link: <a href='{callbackurl}'>link</a></h4></h4>" },
             { EmailType.ApprovedUploadEducationalMaterial, @"<h4>Educational material that you added was successfully approved by Admin</h4>" },
+            { EmailType.DeniedUploadEducationalMaterial, @"<h4>Educational material that you added was denied by Admin</h4>" },
         };
 
         public static (string, string) GetEmailSubjectAndBody(EmailType emailType, Dictionary<string, object> placeholderNameSandValues)
         {           
-            if(!SubjectGetter.ContainsKey(emailType) || !BodyGetter.ContainsKey(emailType))
+            if (!SubjectGetter.ContainsKey(emailType) || !BodyGetter.ContainsKey(emailType))
             {
                 return (String.Empty, String.Empty);
+            }
+
+            if (placeholderNameSandValues.Count == 0)
+            {
+                return (SubjectGetter[emailType], BodyGetter[emailType]);
             }
 
             var parameters = FillParameters(placeholderNameSandValues);
@@ -112,7 +110,7 @@ namespace Core.EmailTemplates
 
                 var value = parameter.Value;
 
-                if(value is DateTime date)
+                if (value is DateTime date)
                 {
                     parameters.Add(parameterName, date.ToString("d"));
                 }

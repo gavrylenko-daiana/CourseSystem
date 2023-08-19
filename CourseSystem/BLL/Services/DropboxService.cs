@@ -125,7 +125,7 @@ public class DropboxService : IDropboxService
         return new Result<string>(true, $"{fileNameWithoutExtension}-{count}{fileExtension}");
     }
 
-    private async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
+    public async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
     {
         try
         {

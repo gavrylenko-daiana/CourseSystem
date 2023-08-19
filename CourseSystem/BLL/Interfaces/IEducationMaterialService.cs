@@ -14,4 +14,5 @@ public interface IEducationMaterialService : IGenericService<EducationMaterial>
     Task<Result<EducationMaterial>> GetByIdMaterialAsync(int id);
     Task<Result<bool>> DeleteFile(EducationMaterial material);
     Task<Result<List<EducationMaterial>>> GetMaterialsListFromIdsString(string materialIds, SortingParam sortOrder, string searchQuery = null!);
+    Task<Result<bool>> ApprovedEducationMaterial(string fileName, string fileUrl);
 }

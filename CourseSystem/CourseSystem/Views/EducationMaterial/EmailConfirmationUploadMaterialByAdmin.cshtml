@@ -1,0 +1,63 @@
+﻿@using UI.ViewModels.EmailViewModels
+@model ConfirmEducationMaterial
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Course</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+
+        .extra.content form {
+            display: inline-block;
+            margin-right: 10px; /* Add some spacing between the forms */
+        }
+    </style>
+</head>
+<body>
+    <div class="ui container mt-4">
+        <div class="ui centered card" style="width: 500px;">
+            <div class="content">
+                <div class="header">
+                    Delete Course
+                </div>
+            </div>
+            <div class="content">
+                <h5 class="ui header">Approve uploading of material (@Model.FileName)</h5>
+            </div>
+            <div class="extra content">
+                <form class="ui form" asp-action="UploadFile" asp-controller="EducationMaterial" method="post">
+                    <input type="hidden" asp-for="CourseId" />
+                    <input type="hidden" asp-for="GroupId" />
+                    <input type="hidden" asp-for="FileName" />
+                    <input type="hidden" asp-for="FileUrl" />
+                    <input type="hidden" asp-for="TeacherId" />
+                    <input type="hidden" asp-for="MaterialAccess">
+                    <button type="submit" class="ui button">Approve</button>                   
+                </form>
+                <form class="ui form" asp-action="DeleteFile" asp-controller="EducationMaterial" method="post">
+                    <input type="hidden" asp-for="CourseId" />
+                    <input type="hidden" asp-for="GroupId" />
+                    <input type="hidden" asp-for="FileName" />
+                    <input type="hidden" asp-for="FileUrl" />
+                    <input type="hidden" asp-for="TeacherId" />
+                    <input type="hidden" asp-for="MaterialAccess">
+                    <button type="submit" class="ui delete-button button">Deny</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui container mt-4">
+            <div class="ui negative message">
+                <p><b>Sorry!</b> - @TempData["Error"]</p>
+            </div>
+        </div>
+    }
+</body>
+</html>

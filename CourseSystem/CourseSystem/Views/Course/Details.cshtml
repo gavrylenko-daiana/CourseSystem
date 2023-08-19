@@ -150,14 +150,33 @@
                             @foreach (var userCourse in Model.UserCourses)
                             {
                                 <li class="user-item">
-                                    <div class="user-profile">
-                                        <div class="user-details">
+                                        <div class="user-profile" style="display: flex; align-items: center;">
+                                            <div class="user-details" style="display: flex; align-items: center;">
+                                                @if (userCourse.AppUser.ProfileImage != null)
+                                                {
+                                                    <img src="@userCourse.AppUser.ProfileImage.Url" alt="@userCourse.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                                }
+                                            </div>
+                                            <div class="user-button" style="margin-left: auto;">
+                                                <a href="@Url.Action("Detail", "User", new { id = userCourse.AppUser.Id })" class="ui teal basic button view-profile-button" style="width: 175px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    @userCourse.AppUser.FirstName @userCourse.AppUser.LastName - @userCourse.AppUser.Role
+                                                </a>
+                                            </div>
+                                        </div>
+
+
+                                   @* <div class="user-profile">
+                                        <div class="user-details" style="display: flex; align-items: center;">
+                                            @if (@userCourse.AppUser.ProfileImage != null)
+                                            {
+                                                <img src="@userCourse.AppUser.ProfileImage.Url" alt="@userCourse.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 10px;">
+                                            }
                                             <span>@userCourse.AppUser.FirstName @userCourse.AppUser.LastName - @userCourse.AppUser.Role</span>
                                         </div>
                                         <div class="user-button">
                                             <a href="@Url.Action("Detail", "User", new { id = userCourse.AppUser.Id })" class="ui teal basic button view-profile-button">View Profile</a>
                                         </div>
-                                    </div>
+                                    </div>*@
                                 </li>
                             }
                         </ul>
