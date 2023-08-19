@@ -14,12 +14,12 @@ namespace BLL.Services
 {
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
-        private readonly IGroupService _groupService;
-
-        public AssignmentService(UnitOfWork unitOfWork, IGroupService groupService)
+        private readonly IDropboxService _dropboxService;
+        
+        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService)
             : base(unitOfWork, unitOfWork.AssignmentRepository)
         {
-            _groupService = groupService;
+            _dropboxService = dropboxService;
         }
 
         public async Task<Result<bool>> CreateAssignment(Assignment assignment)
@@ -40,7 +40,7 @@ namespace BLL.Services
             }
             catch (Exception ex)
             {
-                return new Result<bool>(false, "Fail to save assignment");
+                return new Result<bool>(false, $"Fail to save assignment. Message - {ex.Message}");
             }
         }
 
@@ -58,6 +58,16 @@ namespace BLL.Services
                 notification.AssignmentId = null;
                 notification.GroupId = null;
                 notification.CourseId = null;
+            }
+
+            foreach (var file in assignment.AssignmentFiles)
+            {
+                var resultDeleteEducationMaterial = await _dropboxService.DeleteFileAsync(file.Name, file.DropboxFolder.ToString());
+
+                if (!resultDeleteEducationMaterial.IsSuccessful)
+                {
+                    return new Result<bool>(false, $"Failed to delete {nameof(assignment)}");
+                }
             }
 
             try

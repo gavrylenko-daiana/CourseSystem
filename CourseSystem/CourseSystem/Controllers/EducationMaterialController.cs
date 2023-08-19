@@ -93,7 +93,7 @@ public class EducationMaterialController : Controller
 
         int pageSize = 8;
         int pageNumber = (page ?? 1);
-        ViewBag.OnePageOfAssignemnts = materialsList.Data;
+        ViewBag.OnePageOfAssignments = materialsList.Data;
 
         return View("Index", materialsList.Data.ToPagedList(pageNumber, pageSize));
     }
@@ -337,8 +337,6 @@ public class EducationMaterialController : Controller
 
             return RedirectToAction("Index", "Course");
         }
-
-        TempData["UploadResult"] = material.Data.Url;
 
         return View(material.Data);
     }

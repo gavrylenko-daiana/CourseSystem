@@ -76,7 +76,7 @@
                                         <div class="ui card">
                                             <div class="content">
                                                 <div class="header">
-                                                    <h4>@answer.Name</h4>
+                                                    <a class="" href="@Url.Action("Index", "AssignmentAnswer", new { fileId = answer.Id })">@answer.Name</a>
                                                 </div>
                                                 <div class="meta">
                                                     <p>Submission time: @answer.CreationTime.ToString("dddd, dd MMMM yyyy HH:mm")</p>
