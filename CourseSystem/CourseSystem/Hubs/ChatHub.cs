@@ -68,7 +68,7 @@ namespace UI.Hubs
             }
             else
             {
-                await Clients.Group(messageResult.Data.AssignmentId.ToString()).SendAsync("Receive", messageResult.Data.Text, $"{currentUserResult.Data.FirstName} {currentUserResult.Data.LastName}", messageResult.Data.Created.ToString("g"));
+                await Clients.Group(messageResult.Data.AssignmentId.ToString()).SendAsync("Receive", messageResult.Data.Text, $"{currentUserResult.Data.FirstName} {currentUserResult.Data.LastName}", messageResult.Data.Created.ToString("g"), currentUserResult.Data.ProfileImage.Url);
             }
         }
 

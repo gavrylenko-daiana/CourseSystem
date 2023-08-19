@@ -30,8 +30,10 @@
         }
 
         .chat-content {
-            display: flex;
-            flex-direction: column;
+            background-color: #f7f7f7;
+            position: relative;
+            padding: 5px;
+            border-radius: 10px;
         }
 
         .chat-text {
@@ -43,14 +45,16 @@
 
         .chat-timestamp {
             font-style: italic;
-            margin-top: 5px;
+            bottom: 5px;
+            right: 8px;
         }
 
         .rounded-circle {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
         }
 
-        /* Adjust these styles as needed */
         #errorMessage {
             color: red;
         }
@@ -97,7 +101,7 @@
                 <p><b>@message.AppUser.FirstName @message.AppUser.LastName :</b></p>
             </div>
             <div id ="text" style="margin-left: 40px; position: relative; padding: 10px; border-radius: 10px; background-color: #f7f7f7;">
-                <p style="margin: 0; padding-bottom: 5px; background-color: #f7f7f7;">@message.Text</p>
+                <p style="margin: 0; padding-bottom: 7px; background-color: #f7f7f7;">@message.Text</p>
                 <i style="position: absolute; bottom: 5px; right: 8px;">@message.Created.ToString("g")</i>
             </div>
 
@@ -129,7 +133,7 @@
 
             document.getElementById("message").value = null;
         });
-        hubConnection.on("Receive", function (message, userName, created) {
+        hubConnection.on("Receive", function (message, userName, created, imageUrl) {
             document.getElementById("errorMessage").innerText = null;
 
             const chatMessageDiv = document.createElement("div");
@@ -138,10 +142,16 @@
             const chatUserDiv = document.createElement("div");
             chatUserDiv.classList.add("chat-user"); 
 
+            const profileImage = document.createElement("img");
+            profileImage.src = imageUrl; 
+            profileImage.alt = "Profile Image";
+            profileImage.classList.add("rounded-circle", "img-fluid"); 
+
             const userNameElem = document.createElement("div");
             userNameElem.textContent = `${userName} : `;
-            userNameElem.classList.add("chat-username"); 
+            userNameElem.classList.add("chat-username");
 
+            chatUserDiv.appendChild(profileImage);
             chatUserDiv.appendChild(userNameElem);
 
             const chatContentDiv = document.createElement("div");
