@@ -1,0 +1,28 @@
+﻿@using Core.Enums;
+@model List<Assignment>
+
+<style>
+    #notifications-menu {
+        max-height: 70vh;
+        overflow: auto;
+    }
+</style>
+<div class="dropdown">
+    <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        assignment
+    </button>
+    <ul class="dropdown-menu" id="notifications-menu">
+        @foreach (var assignment in Model)
+        {
+            <li>
+                @Html.ActionLink(
+                assignment.Name,
+                "ViewAll",
+                "Notification",
+                new { filteringParam = NotificationsFilteringParams.Assignment, entityId = assignment.Id },
+                new { @class = "dropdown-item" })
+            </li>
+        }
+    </ul>
+</div>
+

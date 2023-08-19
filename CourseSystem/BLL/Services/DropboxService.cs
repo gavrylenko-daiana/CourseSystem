@@ -30,10 +30,9 @@ public class DropboxService : IDropboxService
             }
             
             var modifiedFileName = uniquePathResult.Message;
-
             string uploadPath;
 
-            if(folder == null)
+            if (folder == null)
             {
                 uploadPath = "/" + modifiedFileName;
             }
@@ -43,9 +42,8 @@ public class DropboxService : IDropboxService
             }
 
             await using var stream = file.OpenReadStream();
-            var uploadResult =
-                await _dropboxClient.Files.UploadAsync(uploadPath, WriteMode.Overwrite.Instance, body: stream);
-
+            
+            var uploadResult = await _dropboxClient.Files.UploadAsync(uploadPath, WriteMode.Overwrite.Instance, body: stream);
             var linkResult = await GetSharedLinkAsync(uploadResult.PathDisplay);
 
             if (!linkResult.IsSuccessful)
@@ -127,7 +125,7 @@ public class DropboxService : IDropboxService
         return new Result<string>(true, $"{fileNameWithoutExtension}-{count}{fileExtension}");
     }
 
-    private async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
+    public async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
     {
         try
         {

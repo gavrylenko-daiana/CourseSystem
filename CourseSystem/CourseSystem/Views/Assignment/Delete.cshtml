@@ -27,7 +27,7 @@
             <div class="extra content">
                 <form class="ui form" asp-action="DeleteAssignment" asp-controller="Assignment" asp-route-id="@Model.Id" method="post">
                     <button type="submit" class="ui delete-button button">Delete</button>
-                    <a href="@Url.Action("Index", "Assignment", new { groupId = Model.GroupId})" class="ui button" for="success-outlined">Cancel</a>
+                    <a href="@Url.Action("Details", "Assignment", new { assignmentId = Model.Id})" class="ui button" for="success-outlined">Cancel</a>
                 </form>
             </div>
         </div>

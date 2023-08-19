@@ -1,5 +1,6 @@
 ﻿using BLL.Interfaces;
 using Castle.Core.Logging;
+using Core.Enums;
 using Core.Models;
 using Core.NotificationTemplates;
 using DAL.Repository;

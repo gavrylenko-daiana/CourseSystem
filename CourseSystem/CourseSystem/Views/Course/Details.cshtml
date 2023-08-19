@@ -2,7 +2,9 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using BLL.Interfaces
 @model UI.ViewModels.CourseViewModel
+@inject IEducationMaterialService EducationMaterialService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -88,8 +90,8 @@
                 <h4 class="ui header">@Model.Name</h4>
 
                 @{
-                    var materialsCourse1 = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
-                    var materialIds = string.Join(" ", materialsCourse1.Select(m => m.Id));
+                    var materialsCourse = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+                    var materialIds = string.Join(" ", materialsCourse.Select(m => m.Id));
                 }
 
                 @if (Model.CurrentUser.Role != AppUserRoles.Student)
@@ -97,9 +99,9 @@
                     <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
                     <a href="@Url.Action("CreateInCourse", "EducationMaterial", new { courseId = Model.Id })" class="ui black basic button mb-3">Upload Education Material</a>
                 }
-                @if (materialsCourse1 != null && materialsCourse1.Any())
+                @if (materialsCourse != null && materialsCourse.Any())
                 {
-                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds">Education Materials</a>
+                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
                 }
 
                 @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())
@@ -148,14 +150,33 @@
                             @foreach (var userCourse in Model.UserCourses)
                             {
                                 <li class="user-item">
-                                    <div class="user-profile">
-                                        <div class="user-details">
+                                        <div class="user-profile" style="display: flex; align-items: center;">
+                                            <div class="user-details" style="display: flex; align-items: center;">
+                                                @if (userCourse.AppUser.ProfileImage != null)
+                                                {
+                                                    <img src="@userCourse.AppUser.ProfileImage.Url" alt="@userCourse.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                                }
+                                            </div>
+                                            <div class="user-button" style="margin-left: auto;">
+                                                <a href="@Url.Action("Detail", "User", new { id = userCourse.AppUser.Id })" class="ui teal basic button view-profile-button" style="width: 175px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    @userCourse.AppUser.FirstName @userCourse.AppUser.LastName - @userCourse.AppUser.Role
+                                                </a>
+                                            </div>
+                                        </div>
+
+
+                                   @* <div class="user-profile">
+                                        <div class="user-details" style="display: flex; align-items: center;">
+                                            @if (@userCourse.AppUser.ProfileImage != null)
+                                            {
+                                                <img src="@userCourse.AppUser.ProfileImage.Url" alt="@userCourse.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 10px;">
+                                            }
                                             <span>@userCourse.AppUser.FirstName @userCourse.AppUser.LastName - @userCourse.AppUser.Role</span>
                                         </div>
                                         <div class="user-button">
                                             <a href="@Url.Action("Detail", "User", new { id = userCourse.AppUser.Id })" class="ui teal basic button view-profile-button">View Profile</a>
                                         </div>
-                                    </div>
+                                    </div>*@
                                 </li>
                             }
                         </ul>

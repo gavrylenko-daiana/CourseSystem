@@ -1,4 +1,6 @@
 ﻿using BLL.Interfaces;
+using BLL.Services;
+using Core.Enums;
 using Core.Helpers;
 using Core.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +40,22 @@ public class AssignmentAnswerController : Controller
         _notificationService = notificationService;
         _logger = logger;
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> Index(int fileId)
+    {
+        var assignmentAnswer = await _assignmentAnswerService.GetById(fileId);
+
+        if (!assignmentAnswer.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", assignmentAnswer.Message);
+
+            return RedirectToAction("Index", "Group");
+        }
+        
+        return View(assignmentAnswer.Data);
+    }
+
 
     [HttpGet]
     [Authorize(Roles = "Student")]
@@ -71,16 +89,6 @@ public class AssignmentAnswerController : Controller
         var assignmentAnswer = new AssignmentAnswer();
         assignmentAnswerVM.MapTo(assignmentAnswer);
 
-        if (!assignmentAnswerVM.AssignmentAnswerFiles.IsNullOrEmpty())
-        {
-            //logic for files
-            //set the name of file to model
-        }
-
-        assignmentAnswer.Name = "Some file name";
-        assignmentAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
-        assignmentAnswer.Url = "Some URL";
-
         var assignmentResult = await _assignmentService.GetById(assignmentAnswerVM.AssignmentId);
 
         if (!assignmentResult.IsSuccessful)
@@ -100,10 +108,10 @@ public class AssignmentAnswerController : Controller
 
             return RedirectToAction("Login", "Account");
         }
-
-        var answerResult =
-            await _assignmentAnswerService.CreateAssignmentAnswer(assignmentAnswer, assignmentResult.Data, currentUserResult.Data);
-
+        
+        assignmentAnswer.Text = assignmentAnswerVM.AnswerDescription; //markdown
+        var answerResult = await _assignmentAnswerService.CreateAssignmentAnswer(assignmentAnswer, assignmentResult.Data, currentUserResult.Data, assignmentAnswerVM.AssignmentAnswerFiles, DropboxFolders.StudentAssignmentFiles);
+        
         if (!answerResult.IsSuccessful)
         {
             _logger.LogError("Failed to save assignment answer for user {userId}! Errors: {errorMessage}",
@@ -117,13 +125,14 @@ public class AssignmentAnswerController : Controller
         await _activityService.AddSubmittedAssignmentAnswerActivity(currentUserResult.Data, assignmentResult.Data);
 
         await _notificationService.AddSubmittedAssignmentForStudentNotification(assignmentAnswer.UserAssignment);
-        
+
         var teachers = assignmentAnswer.UserAssignment.Assignment.UserAssignments
             .Select(ua => ua.AppUser).Where(user => user.Role == Core.Enums.AppUserRoles.Teacher).ToList();
 
-        foreach (var teacher in teachers )
+        foreach (var teacher in teachers)
         {
-            await _notificationService.AddSubmittedAssignmentForTeacherNotification(teacher, assignmentAnswer.UserAssignment);
+            await _notificationService.AddSubmittedAssignmentForTeacherNotification(teacher,
+                assignmentAnswer.UserAssignment);
         }
 
         return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentResult.Data.Id });
@@ -161,11 +170,12 @@ public class AssignmentAnswerController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> SeeStudentAnswers(int assignmentId, string isMarked, string currentFilter, int? page)
+    public async Task<IActionResult> SeeStudentAnswers(int assignmentId, string isMarked, string currentFilter,
+        int? page)
     {
         ViewBag.AssignmentId = assignmentId;
 
-        if(isMarked != null)
+        if (isMarked != null)
         {
             page = 1;
         }
@@ -193,7 +203,7 @@ public class AssignmentAnswerController : Controller
         {
             var userAssignmentVM = new UserAssignmentViewModel();
             userAssignment.MapTo(userAssignmentVM);
-            
+
             userAssignmentVM.Id = userAssignment.Id;
             userAssignmentVMs.Add(userAssignmentVM);
         }
@@ -272,7 +282,8 @@ public class AssignmentAnswerController : Controller
                 assignmentId, studentId, grade);
             TempData.TempDataMessage("Error", "Grade can't be more than 100 or less than 0");
 
-            return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = assignmentId, studentId = studentId });
+            return RedirectToAction("CheckAnswer", "AssignmentAnswer",
+                new { assignmentId = assignmentId, studentId = studentId });
         }
 
         var assignmentResult = await _assignmentService.GetById(assignmentId);
@@ -300,11 +311,13 @@ public class AssignmentAnswerController : Controller
 
         if (!updateResult.IsSuccessful)
         {
-            _logger.LogError("Failed to update grade to {grade} for userAssignment by Id {userAssignmentId}! Error: {errorMessage}",
+            _logger.LogError(
+                "Failed to update grade to {grade} for userAssignment by Id {userAssignmentId}! Error: {errorMessage}",
                 grade, userAssignment.Id, updateResult.Message);
             TempData.TempDataMessage("Error", updateResult.Message);
 
-            return RedirectToAction("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
+            return RedirectToAction("CheckAnswer", "AssignmentAnswer",
+                new { assignmentId = userAssignment.AssignmentId, studentId = userAssignment.AppUserId });
         }
 
         await _activityService.AddMarkedAssignmentActivity(currentUserResult.Data, userAssignment);
@@ -312,6 +325,7 @@ public class AssignmentAnswerController : Controller
         await _notificationService.AddMarkedAssignmentForStudentNotification(userAssignment);
         await _notificationService.AddMarkedAssignmentForTeacherNotification(currentUserResult.Data, userAssignment);
 
-        return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = userAssignment.AssignmentId });
+        return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer",
+            new { assignmentId = userAssignment.AssignmentId });
     }
 }

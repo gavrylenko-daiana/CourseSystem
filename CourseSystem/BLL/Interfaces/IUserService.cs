@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace BLL.Interfaces;
 
-public interface IUserService
+public interface IUserService : IGenericService<AppUser>
 {
     Task<Result<AppUser>> GetInfoUserByCurrentUserAsync(ClaimsPrincipal user);
     Task<Result<AppUser>> GetInfoUserByIdAsync(string id);
