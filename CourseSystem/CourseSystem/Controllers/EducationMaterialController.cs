@@ -14,6 +14,9 @@ using BLL.Services;
 using Core.EmailTemplates;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using X.PagedList;
+using System.Security.Policy;
+using UI.ViewModels.EmailViewModels;
 
 namespace UI.Controllers;
 
@@ -26,18 +29,19 @@ public class EducationMaterialController : Controller
     private readonly IActivityService _activityService;
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
+    private readonly IDropboxService _dropboxService;
     private readonly ILogger<EducationMaterialController> _logger;
-    private Dictionary<string, IFormFile> _files = new Dictionary<string, IFormFile>();
 
     public EducationMaterialController(IEducationMaterialService educationMaterial, IGroupService groupService,
         ICourseService courseService, IActivityService activityService,
-        IUserService userService, ILogger<EducationMaterialController> logger, IEmailService emailService)
+        IUserService userService, IDropboxService dropboxService, ILogger<EducationMaterialController> logger, IEmailService emailService)
     {
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
         _courseService = courseService;
         _activityService = activityService;
         _userService = userService;
+        _dropboxService = dropboxService;
         _logger = logger;
         _emailService = emailService;
     }
@@ -63,27 +67,76 @@ public class EducationMaterialController : Controller
         return callbackUrl;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> IndexAccess(MaterialAccess access)
+    private async Task SendEmailToAdminToApprove(string teacherId, IFormFile formFile, MaterialAccess materialAccess, AppUser toUser, int? courseId, int? groupId)
     {
-        var materials = await _educationMaterialService.GetAllMaterialByAccessAsync(access);
+        var dropboxTempUploadResult = await _dropboxService.AddFileAsync(formFile, materialAccess.ToString());
 
-        if (!(materials.IsSuccessful && materials.Data.Any()))
+        if (dropboxTempUploadResult.IsSuccessful)
         {
-            _logger.LogError("Failed to retrieve educational materials! Error: {errorMessage}", materials.Message);
+            var callBack = CreateCallBackUrl("EducationMaterial", "EmailConfirmationUploadMaterialByAdmin",
+            new
+            {
+                teacherId = teacherId,
+                url = dropboxTempUploadResult.Data.Url,
+                name = dropboxTempUploadResult.Data.ModifiedFileName,
+                materialAccess = materialAccess,
+                courseId = courseId,
+                groupId = groupId
+            });
 
-            TempData.TempDataMessage("Error", $"Message: {materials.Message}");
-            
-            return RedirectToAction("Index", "Course");
+            var emailResult = await _emailService.SendEmailToAppUsers(EmailType.EducationMaterialApproveByAdmin, toUser, callBack, null, formFile);
+
+            if (!emailResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", emailResult.Message);
+            }
+
+            TempData.TempDataMessage("Error", "Wait for the approve from admin");
         }
-
-        return View("Index", materials.Data);
+        else
+        {
+            TempData.TempDataMessage("Error", dropboxTempUploadResult.Message);
+        }
+        
     }
 
-    [HttpGet]
-    public async Task<IActionResult> IndexMaterials(string materialIds, string sortBy = null!)
+    private object CreateEmailRouteValues(ConfirmEducationMaterial educationMaterialVM)
     {
-        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds);
+        if (educationMaterialVM == null)
+        {
+            return new object();
+        }
+
+        return new
+        {
+            teacherId = educationMaterialVM.TeacherId,
+            url = educationMaterialVM.FileUrl,
+            name = educationMaterialVM.FileName,
+            materialAccess = educationMaterialVM.MaterialAccess,
+            courseId = educationMaterialVM.CourseId,
+            groupId = educationMaterialVM.GroupId
+        };
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> IndexMaterials(string materialIds, SortingParam sortOrder, string currentQueryFilter, string searchQuery, int? page)
+    {
+        ViewBag.CurrentSort = sortOrder;
+        ViewBag.NameSortParam = sortOrder == SortingParam.UploadTimeDesc ? SortingParam.UploadTime : SortingParam.UploadTimeDesc;
+
+        if (searchQuery != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            searchQuery = currentQueryFilter;
+        }
+        
+        ViewBag.CurrentQueryFilter = searchQuery;
+        ViewBag.MaterialIds = materialIds;
+        
+        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds, sortOrder, searchQuery);
         
         if (!materialsList.IsSuccessful)
         {
@@ -92,7 +145,11 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Index", "Course");
         }
 
-        return View("Index", materialsList.Data);
+        int pageSize = 8;
+        int pageNumber = (page ?? 1);
+        ViewBag.OnePageOfAssignments = materialsList.Data;
+
+        return View("Index", materialsList.Data.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]
@@ -149,32 +206,41 @@ public class EducationMaterialController : Controller
             return View(viewModel);
         }
 
-        var groupResult = await _groupService.GetById(viewModel.GroupId);
-
-        if (!groupResult.IsSuccessful)
+        if (currentUserResult.Data.Role == AppUserRoles.Teacher)
         {
-            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
-                viewModel.GroupId, groupResult.Message);
-            
-            TempData.TempDataMessage("Error", $"Message: {groupResult.Message}");
-            
+            await SendEmailToAdminToApprove(currentUserResult.Data.Id, viewModel.UploadFile, viewModel.MaterialAccess, currentUserResult.Data, viewModel.CourseId, viewModel.GroupId);
+
             return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
         }
-
-        var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId, viewModel.CourseId);
-
-        if (!addResult.IsSuccessful)
+        else
         {
-            _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
-            
-            TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-            
-            return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
-        }
+            var groupResult = await _groupService.GetById(viewModel.GroupId);
 
-        await _activityService.AddAttachedEducationalMaterialForGroupActivity(currentUserResult.Data, groupResult.Data);
+            if (!groupResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                    viewModel.GroupId, groupResult.Message);
 
-        return RedirectToAction("Details", "Group", new { id = viewModel.GroupId });
+                TempData.TempDataMessage("Error", $"Message: {groupResult.Message}");
+
+                return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
+            }
+
+            var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId, viewModel.CourseId);
+
+            if (!addResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
+
+                TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
+
+                return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
+            }
+
+            await _activityService.AddAttachedEducationalMaterialForGroupActivity(currentUserResult.Data, groupResult.Data);
+
+            return RedirectToAction("Details", "Group", new { id = viewModel.GroupId });
+        }        
     }
 
     [HttpGet]
@@ -213,15 +279,15 @@ public class EducationMaterialController : Controller
 
             return RedirectToAction("Login", "Account");
         }
-        
-        //if (currentUserResult.Data.Role == AppUserRoles.Teacher)
-        //{
-        //    _files.Add(currentUserResult.Data.Id, viewModel.UploadFile);
-        //    var callBack = CreateCallBackUrl("EducationMaterial", "EmailConfirmationUploadMaterialByAdmin", new { teacherId = currentUserResult.Data.Id });
-        //    await _emailService.SendEmailToAppUsers(EmailType.EducationMaterialApproveByAdmin, currentUserResult.Data, callBack, null, viewModel.UploadFile);
-        //}
-        //else
-        //{
+
+        if (currentUserResult.Data.Role == AppUserRoles.Teacher)
+        {
+            await SendEmailToAdminToApprove(currentUserResult.Data.Id, viewModel.UploadFile, viewModel.MaterialAccess, currentUserResult.Data, viewModel.CourseId, viewModel.SelectedGroupId);
+          
+            return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+        }
+        else
+        {
             var courseResult = await _courseService.GetById(viewModel.CourseId);
 
             if (!courseResult.IsSuccessful)
@@ -247,22 +313,124 @@ public class EducationMaterialController : Controller
             }
 
             await _activityService.AddAttachedEducationalMaterialForCourseActivity(currentUserResult.Data, courseResult.Data);
-        //}
-        
+        }
+
         return RedirectToAction("Details", "Course", new { id = viewModel.CourseId });
     }
 
     [HttpGet]
-    public async Task<IActionResult> EmailConfirmationUploadMaterialByAdmin(string teacherId) //crete view for admin about success
+    public async Task<IActionResult> EmailConfirmationUploadMaterialByAdmin(string teacherId, string url, string name, MaterialAccess materialAccess, int? courseId = null, int? groupId = null) //crete view for =  admin about success
     {
-        //check if such user exist
+        var teacherResult = await _userService.FindByIdAsync(teacherId);
 
-        //get the file from dictionary
-        //add check on containing such key
-        var file = _files[teacherId];
+        if (!teacherResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", teacherResult.Message);
+        }
 
-        //deletion
-        _files.Remove(teacherId);
+        var emailViewModel = new ConfirmEducationMaterial()
+        {
+            TeacherId = teacherId,
+            FileUrl = url,
+            FileName = name,
+            MaterialAccess = materialAccess,
+            CourseId = courseId,
+            GroupId = groupId
+        };     
+
+        return View(emailViewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UploadFile(ConfirmEducationMaterial educationMaterialVM)
+    {
+        var groupResult = await _groupService.GetById((int)educationMaterialVM.GroupId);
+        var courseResult = await _courseService.GetById((int)educationMaterialVM.CourseId);
+
+        if (!groupResult.IsSuccessful || !courseResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", "Fail to get group or course");
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var addEducationMaterialResult = await _educationMaterialService.AddEducationMaterial(DateTime.Now, educationMaterialVM.FileName, educationMaterialVM.FileUrl, educationMaterialVM.MaterialAccess, groupResult.Data, courseResult.Data);
+
+        if (!addEducationMaterialResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", addEducationMaterialResult.Message);
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var teacherResult = await _userService.GetInfoUserByIdAsync(educationMaterialVM.TeacherId);
+
+        if (!teacherResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", teacherResult.Message);
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var emailResult = await _emailService.SendEmailToAppUsers(EmailType.ApprovedUploadEducationalMaterial, teacherResult.Data);
+
+        if (!emailResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Teacher {teacherResult.Data.FirstName} {teacherResult.Data.LastName} was not informed about the successful download of the file");
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        return RedirectToAction("Index", "Home");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteFile(ConfirmEducationMaterial educationMaterialVM)
+    {
+        var approveForDelete = await _educationMaterialService.ApprovedEducationMaterial(educationMaterialVM.FileName, educationMaterialVM.FileUrl);
+
+        if (!approveForDelete.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", approveForDelete.Message);
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+        
+        var exureFileExist = await _dropboxService.FileExistsAsync(educationMaterialVM.FileName, educationMaterialVM.MaterialAccess.ToString());
+
+        if (!exureFileExist.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"File {educationMaterialVM.FileName} was denied");
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var deletionResult = await _dropboxService.DeleteFileAsync(educationMaterialVM.FileName, educationMaterialVM.MaterialAccess.ToString());
+
+        if (!deletionResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", deletionResult.Message);
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var teacherResult = await _userService.GetInfoUserByIdAsync(educationMaterialVM.TeacherId);
+
+        if (!teacherResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", teacherResult.Message);
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
+
+        var emailResult = await _emailService.SendEmailToAppUsers(EmailType.DeniedUploadEducationalMaterial, teacherResult.Data);
+
+        if (!emailResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Teacher {teacherResult.Data.FirstName} {teacherResult.Data.LastName} was not informed that the file was not uploaded successfully.");
+
+            return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+        }
 
         return RedirectToAction("Index", "Home");
     }
@@ -294,31 +462,31 @@ public class EducationMaterialController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess,
-            viewModel.SelectedGroupId, viewModel.SelectedCourseId);
-
-        if (!addResult.IsSuccessful)
+        if (currentUserResult.Data.Role == AppUserRoles.Teacher)
         {
-            _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
+            await SendEmailToAdminToApprove(currentUserResult.Data.Id, viewModel.UploadFile, viewModel.MaterialAccess, currentUserResult.Data, viewModel.SelectedCourseId, viewModel.SelectedGroupId);
 
-            TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
-            
             return RedirectToAction("CreateInGeneral", "EducationMaterial");
         }
+        else
+        {
+            var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess,
+            viewModel.SelectedGroupId, viewModel.SelectedCourseId);
 
-        await _activityService.AddAttachedGeneralEducationalMaterialActivity(currentUserResult.Data);
+            if (!addResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to upload educational material! Error: {errorMessage}", addResult.Message);
 
-        return RedirectToAction("Index", "Course");
+                TempData.TempDataMessage("Error", $"Message: {addResult.Message}");
+
+                return RedirectToAction("CreateInGeneral", "EducationMaterial");
+            }
+
+            await _activityService.AddAttachedGeneralEducationalMaterialActivity(currentUserResult.Data);
+
+            return RedirectToAction("Index", "Course");
+        }
     }
-    
-    // [HttpGet]
-    // public async Task<bool> EmailConfirmationUploadMaterialByTeacher(int teacherId, bool isApproved, string ActionName)
-    // {
-    //     // send to teacher
-    //     isApproved = true;
-    //     
-    //     return RedirectToAction()
-    // }
 
     [HttpGet]
     public async Task<IActionResult> Detail(int id)
@@ -334,8 +502,6 @@ public class EducationMaterialController : Controller
 
             return RedirectToAction("Index", "Course");
         }
-
-        TempData["UploadResult"] = material.Data.Url;
 
         return View(material.Data);
     }

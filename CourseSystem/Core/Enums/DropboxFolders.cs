@@ -9,6 +9,8 @@ namespace Core.Enums
     public enum DropboxFolders
     {
         ProfileImages,
-        CourseBackgroundImages
+        CourseBackgroundImages,
+        StudentAssignmentFiles,
+        TeacherAssignmentFiles
     }
 }

@@ -1,53 +1,108 @@
-﻿@model List<Notification>
+﻿@using BLL.Interfaces;
+@using Core.Helpers;
+@inject IUserService _userService;
+@using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@using X.PagedList.Web.Common
+@model X.PagedList.IPagedList<Notification>
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>User notifications</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card w-100 pb-0">
-                <div class="card-header text-center">
-                    <h4>Your notifications</h4>
-                </div>
-                @if (TempData["Error"] != null)
-                {
-                    <div class="col-md-12 alert alert-danger">
-                        <span><b>Sorry!</b> - @TempData["Error"]</span>
+    <div style="display: flex; align-items: center;">
+        <h3 class="ui header">Your notifications</h3>
+        <div style="flex-grow: 1; text-align: right;">
+            <div class="ui simple dropdown item">
+                <i class="dropdown icon"></i>Find for:
+                <div class="menu">
+                    <div class="item">
+                        <a href="@Url.Action("ViewAll", "Notification", new { filteringParam = NotificationsFilteringParams.Course })"><i class="fa" aria-hidden="true"></i>Course</a>
                     </div>
-                }
-                <div class="card-body">
-                    @foreach (var notification in Model)
-                    {
-                        if (!notification.IsRead)
-                        {
-                            @Html.ActionLink(
-                                notification.Name,
-                                "NotificationDetails",
-                                new { notification.Id },
-                                new { @class = "list-group-item;", @style = "text-decoration: underline;" }
-                                )
-                            ;
-                        }
-                        else
-                        {
-                            @Html.ActionLink(
-                                notification.Name,
-                                "NotificationDetails",
-                                new { notification.Id },
-                                new { @class = "list-group-item;", @style = "text-decoration: none;" }
-                                )
-                            ;
-                        }
-                        <p>@notification.Created.ToString("f")</p>
-                    }
+                    <div class="item">
+                        <a href="@Url.Action("ViewAll", "Notification", new { filteringParam = NotificationsFilteringParams.Group })"><i class="fa" aria-hidden="true"></i>Group</a>
+                    </div>
+                    <div class="item">
+                        <a href="@Url.Action("ViewAll", "Notification", new { filteringParam = NotificationsFilteringParams.Assignment })"><i class="fa" aria-hidden="true"></i>Assignment</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
+        <div>
+            @{
+                var currentUserResult = await _userService.GetCurrentUser(User);
+                
+                switch (ViewBag.CurrentFilterParam)
+                {
+                case NotificationsFilteringParams.Course:
+                    @await Html.PartialAsync("~/Views/Notification/CoursesList.cshtml",
+                        currentUserResult.Data.UserCourses.Select(ua => ua.Course).OrderBy(a => a.Name).ToList());
+                    break;
+
+                case NotificationsFilteringParams.Group:
+                    @await Html.PartialAsync("~/Views/Notification/GroupsList.cshtml",
+                        currentUserResult.Data.UserGroups.Select(ua => ua.Group).OrderBy(a => a.Name).ToList());
+                    break;
+
+                case NotificationsFilteringParams.Assignment:
+                    @await Html.PartialAsync("~/Views/Notification/AssignmentsList.cshtml",
+                        currentUserResult.Data.UserAssignments.Select(ua => ua.Assignment).OrderBy(a => a.Name).ToList());
+                    break;
+                }
+            }
+        </div>
+    </div>
+    
+    
+    <div class="card">
+        @if (TempData["Error"] != null)
+        {
+            <div class="col-md-12 alert alert-danger">
+                <span><b>Sorry!</b> - @TempData["Error"]</span>
+            </div>
+        }
+        <div class="card-body">
+            @foreach (var notification in Model)
+            {
+                <div class="card" style="padding: 10px 5px 0 5px; margin: 5px;">
+                <div style="display: flex; align-items: center;">
+                    @if (!notification.IsRead)
+                    {
+                        <h5><a href="@Url.Action("NotificationDetails", "Notification", new { notification.Id })" style="text-decoration:underline">@notification.Name</a></h5>
+                    }
+                    else
+                    {
+                        <h5><a href="@Url.Action("NotificationDetails", "Notification", new { notification.Id })" style="text-decoration:none">@notification.Name</a></h5>
+                    }
+                    <div style="flex-grow: 1; text-align: right;">
+                        @notification.Created.ToString("f")
+                    </div>
+                </div>
+                </div>
+            }
+        </div>
+    </div>
+    <br />
+    @if(Model.PageCount > 1)
+    {
+        <div style="text-align:center; align-self:center">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+            @Html.PagedListPager(Model, page => Url.Action("ViewAll", new { page = page, filteringParam = ViewBag.CurrentFilterParam, entityId = ViewBag.CurrentEntityId }),
+                new PagedListRenderOptions
+                {
+                    LiElementClasses = new string[] { "page-item" },
+                    PageClasses = new string[] { "page-link" }
+                })
+        </div>
+    }
 </body>
 </html>

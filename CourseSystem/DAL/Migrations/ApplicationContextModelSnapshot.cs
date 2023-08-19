@@ -155,6 +155,13 @@ namespace DAL.Migrations
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("DropboxFolder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileExtension")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -193,6 +200,13 @@ namespace DAL.Migrations
 
                     b.Property<int>("AssignmentId")
                         .HasColumnType("int");
+
+                    b.Property<int>("DropboxFolder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileExtension")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -722,15 +736,15 @@ namespace DAL.Migrations
                         .IsRequired();
 
                     b.HasOne("Core.Models.Assignment", "Assignment")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("AssignmentId");
 
                     b.HasOne("Core.Models.Course", "Course")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("CourseId");
 
                     b.HasOne("Core.Models.Group", "Group")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("GroupId");
 
                     b.Navigation("AppUser");
@@ -896,6 +910,8 @@ namespace DAL.Migrations
 
                     b.Navigation("ChatMessages");
 
+                    b.Navigation("Notifications");
+
                     b.Navigation("UserAssignments");
                 });
 
@@ -905,6 +921,8 @@ namespace DAL.Migrations
 
                     b.Navigation("Groups");
 
+                    b.Navigation("Notifications");
+
                     b.Navigation("UserCourses");
                 });
 
@@ -913,6 +931,8 @@ namespace DAL.Migrations
                     b.Navigation("Assignments");
 
                     b.Navigation("EducationMaterials");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("UserGroups");
                 });

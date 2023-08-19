@@ -1,11 +1,13 @@
 @using Core.Enums
 @using Core.Enums
-@using X.PagedList.Mvc.Core; 
+@using X.PagedList.Mvc.Core;
 @using X.PagedList;
 @using System.Web;
 @using X.PagedList.Web.Common;
 @model X.PagedList.IPagedList<UI.ViewModels.CourseViewModel>
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@using BLL.Interfaces
+@inject IEducationMaterialService EducationMaterialService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,7 +38,7 @@
         
         .cover-card {
             height: 200px; 
-        }                 
+        }    
     </style>
 </head>
 <body>
@@ -55,7 +57,7 @@
             </form>
         </div>
     </div>
-    
+
     <div class="ui compact menu" style="margin-left: 10px;">
         <div class="ui simple dropdown item">
             Sort by
@@ -88,9 +90,12 @@
         @foreach (var course in Model)
         {
             <div class="column">
-                <div class="ui card cover-card" style="background-image: url('@course.Url'); background-size: cover; background-position: center;">
+                <div class="ui card">
+                    <div class="image">
+                        <img src="@course.Url" alt="@course.Name" style="height: 170px; object-fit: cover;">
+                    </div>
                     <div class="content">
-                        <div class="header">@course.Name</div>
+                        <div class="header">@((course.Name.Length > 23) ? $"{course.Name.Substring(0, 20)}..." : course.Name)</div>
                     </div>
                     <div class="extra content">
                         <a href="@Url.Action("Details", new { id = course.Id })" class="ui details-button button">Details</a>
@@ -106,6 +111,7 @@
                 </div>
             </div>
         }
+
     }
 </div>
 
@@ -116,28 +122,40 @@
             Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
             <div class="page-link">
                 @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page = page, sortOrder = ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter }),
-                new PagedListRenderOptions
-                {
-                    LiElementClasses = new string[] { "page-item" },
-                    PageClasses = new string[] { "page-link" }
-                })
+                    new PagedListRenderOptions
+                    {
+                        LiElementClasses = new string[] { "page-item" },
+                        PageClasses = new string[] { "page-link" }
+                    })
             </div>
         </div>
     }
 </div>
 
-@if (User.IsInRole(AppUserRoles.Admin.ToString()))
-{
-    <div class="ui container add-course-button">
+<div class="ui container add-course-button">
+    @if (User.IsInRole(AppUserRoles.Admin.ToString()))
+    {
         <a asp-action="Create" class="ui basic black button">Add New Course</a>
+    }
+</div>
 
-        @if (!User.IsInRole(AppUserRoles.Student.ToString()))
+<div class="ui container add-course-button">
+    @if (!User.IsInRole(AppUserRoles.Student.ToString()))
+    {
+        <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
+    }
+
+    @{
+        var materialsGeneral = await EducationMaterialService.GetAllMaterialByAccessAsync(MaterialAccess.General, SortingParam.UploadTimeDesc);
+
+        @if (materialsGeneral.IsSuccessful && materialsGeneral.Data.Any())
         {
-            <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" class="ui basic black button">Upload Education Material</a>
-            <a asp-action="IndexAccess" asp-controller="EducationMaterial" asp-route-access="@MaterialAccess.General" class="ui basic black button">Education Materials</a>
+            var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
+
+            <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc" class="ui basic black button">Education Materials</a>
         }
-    </div>
-}
+    }
+</div>
 
 @if (TempData["Error"] != null)
 {
@@ -155,4 +173,3 @@
         });
     });
 </script>
-

@@ -10,6 +10,10 @@ using Microsoft.EntityFrameworkCore;
 using UI;
 using Westwind.AspNetCore.Markdown;
 using UI.Hubs;
+using Quartz;
+using Quartz.AspNetCore;
+using static Dropbox.Api.TeamLog.EventCategory;
+using UI.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +36,47 @@ builder.Services.AddScoped<IUserAssignmentService, UserAssignmentService>();
 builder.Services.AddScoped<IEducationMaterialService, EducationMaterialService>();
 builder.Services.AddScoped<IDropboxService, DropboxService>();
 builder.Services.AddScoped<IProfileImageService, ProfileImageService>();
+builder.Services.AddScoped<IAssignmentFileService, AssignmentFileService>();
 builder.Services.Configure<DropboxSettings>(builder.Configuration.GetSection("DropboxSettings"));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+builder.Services.AddScoped<UpdateGroupAccessJob>(); //won't be needed if server is running constantly
+builder.Services.AddScoped<UpdateAssignmentAccessJob>(); //won't be needed if server is running constantly
+
+builder.Services.AddQuartz(q =>
+{
+    q.AddJob<UpdateGroupAccessJob>(opts => opts.WithIdentity(new JobKey("UpdateGroupAccessJob")));
+    q.AddJob<UpdateAssignmentAccessJob>(opts => opts.WithIdentity(new JobKey("UpdateAssignmentAccessJob")));
+
+    q.AddTrigger(opts => opts
+        .ForJob("UpdateGroupAccessJob")
+        .WithIdentity("UpdateGroupAccessJob-OnApplicationStart-trigger")
+        .StartNow()
+    );
+
+    q.AddTrigger(opts => opts
+        .ForJob("UpdateGroupAccessJob")
+        .WithIdentity("UpdateGroupAccessJob-trigger")
+        .WithCronSchedule("0 * * ? * *")
+    );
+
+    q.AddTrigger(opts => opts
+        .ForJob("UpdateAssignmentAccessJob")
+        .WithIdentity("UpdateAssignmentAccessJob-OnApplicationStart-trigger")
+        .StartNow()
+    );
+
+    q.AddTrigger(opts => opts
+        .ForJob("UpdateAssignmentAccessJob")
+        .WithIdentity("UpdateAssignmentAccessJob-trigger")
+        .WithCronSchedule("0 0 * ? * *")
+    );
+});
+
+builder.Services.AddQuartzServer(options =>
+{
+    options.WaitForJobsToComplete = true;
+});
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
 {

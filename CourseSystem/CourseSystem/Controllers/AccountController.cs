@@ -358,6 +358,13 @@ public class AccountController : Controller
 
         if (userResult.IsSuccessful)
         {
+            var deleteResult = await _profileImageService.DeleteUserProfileImage(userResult.Data);
+
+            if (!deleteResult.IsSuccessful)
+            {
+                _logger.LogWarning("Failed to delete user with id {userId}! Error: {errorMessage}", userId, deleteResult.Message);
+            }
+
             await _signInManager.UserManager.DeleteAsync(userResult.Data);
         }
         else

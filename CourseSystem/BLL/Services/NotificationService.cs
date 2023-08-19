@@ -1,7 +1,10 @@
 ﻿using BLL.Interfaces;
+using Castle.Core.Logging;
+using Core.Enums;
 using Core.Models;
 using Core.NotificationTemplates;
 using DAL.Repository;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +15,11 @@ namespace BLL.Services
 {
     public class NotificationService : GenericService<Notification>, INotificationService
     {
-        public NotificationService(UnitOfWork unitOfWork)
+        private readonly ILogger<NotificationService> _logger;
+        public NotificationService(UnitOfWork unitOfWork, ILogger<NotificationService> logger)
                 : base(unitOfWork, unitOfWork.NotificationRepository)
         {
+            _logger = logger;
         }
 
         public async Task<Result<bool>> AddAssignmentIsClosedForStudentNotification(AppUser user, Assignment assignment)
@@ -334,8 +339,12 @@ namespace BLL.Services
         {
             try
             {
+                _logger.LogInformation("Saving notification {notificationName}", notification.Name);
+
                 await _repository.AddAsync(notification);
                 await _unitOfWork.Save();
+
+                _logger.LogInformation("Save successfull");
 
                 return new Result<bool>(true);
             }

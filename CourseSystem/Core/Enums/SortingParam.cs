@@ -13,6 +13,8 @@ namespace Core.Enums
         EndDateDesc,
         EndDate,
         StartDate,
-        StartDateDesc
+        StartDateDesc,
+        UploadTime,
+        UploadTimeDesc
     }
 }

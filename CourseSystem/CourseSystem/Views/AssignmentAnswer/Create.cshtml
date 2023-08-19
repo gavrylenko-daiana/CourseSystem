@@ -33,7 +33,7 @@
             <div class="content">
                 <form method="post" asp-controller="AssignmentAnswer" asp-action="Create" enctype="multipart/form-data" class="ui form">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <input type="hidden" id="AssignmentId" name="AssignmentId" value="@Model.AssignmentId" />
+                    <input type="hidden" asp-for="AssignmentId" value="@Model.AssignmentId">
                     <!-- Assignment Details Inputs -->
                     <div class="form-row form-group">
                         <div class="field">

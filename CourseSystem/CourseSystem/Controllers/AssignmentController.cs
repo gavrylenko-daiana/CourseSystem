@@ -25,10 +25,11 @@ public class AssignmentController : Controller
     private readonly IActivityService _activityService;
     private readonly INotificationService _notificationService;
     private readonly ILogger<AssignmentController> _logger;
+    private readonly IAssignmentFileService _assignmentFileService;
 
     public AssignmentController(IAssignmentService assignmentService, IUserService userService,
         IUserAssignmentService userAssignmentService, IActivityService activityService,
-            INotificationService notificationService, ILogger<AssignmentController> logger)
+            INotificationService notificationService, ILogger<AssignmentController> logger, IAssignmentFileService assignmentFileService)
     {
         _assignmentService = assignmentService;
         _userService = userService;
@@ -36,6 +37,7 @@ public class AssignmentController : Controller
         _activityService = activityService;
         _notificationService = notificationService;
         _logger = logger;
+        _assignmentFileService = assignmentFileService;
     }
 
     [HttpGet]
@@ -149,14 +151,6 @@ public class AssignmentController : Controller
         var assignment = new Assignment();
         LibraryForMapping.MapTo(assignmentVM, assignment);
 
-        if (assignmentVM.AttachedFiles != null)
-        {
-            //logic for loading files to the cloud or this logic can be inside assignmentService
-            TempData.TempDataMessage("Error", "Files uploaded successfully");
-
-            return View(assignmentVM);
-        }
-
         var createResult = await _assignmentService.CreateAssignment(assignment);
 
         if (!createResult.IsSuccessful)
@@ -166,6 +160,18 @@ public class AssignmentController : Controller
             TempData.TempDataMessage("Error", createResult.Message);
 
             return View(assignmentVM);
+        }
+        
+        if (assignmentVM.AttachedFiles != null)
+        {
+            var assignmentFile = await _assignmentFileService.AddAssignmentFile(DropboxFolders.TeacherAssignmentFiles, assignmentVM.AttachedFiles, assignment.Id);
+
+            if (!assignmentFile.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"Message - {assignmentFile.Message}");
+                
+                return View(assignmentVM);
+            }
         }
 
         await _activityService.AddCreatedAssignmentActivity(currentUserResult.Data, assignment);
@@ -218,7 +224,7 @@ public class AssignmentController : Controller
 
         if (!assignmentResult.IsSuccessful)
         {
-            _logger.LogError("Failed to get detailes for assignment by Id {assignmentId}! Error: {errorMessage}",
+            _logger.LogError("Failed to get details for assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentId, assignmentResult.Message);
             TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
 
@@ -245,6 +251,7 @@ public class AssignmentController : Controller
 
             return RedirectToAction("Index", "Assignment", new { groupId = assignmentResult.Data.GroupId });
         }
+        
         assignentDetailsVM.UserAssignment = userAssignemntResult.Data;
 
         if (userAssignemntResult.Data?.AssignmentAnswers == null)
@@ -256,8 +263,7 @@ public class AssignmentController : Controller
             assignentDetailsVM.AssignmentAnswers = userAssignemntResult.Data.AssignmentAnswers;
         }
 
-        //logic for getting assignment files 
-        assignentDetailsVM.AttachedFiles = new List<IFormFile>();
+        assignentDetailsVM.AssignmentFiles = assignmentResult.Data.AssignmentFiles;
 
         return View(assignentDetailsVM);
     }
@@ -279,23 +285,7 @@ public class AssignmentController : Controller
 
         var assigmentVM = new EditAssignmentViewModel();
         assignmentResult.Data.MapTo(assigmentVM);
-
-        var fileCheckBoxes = new List<FileCheckBoxViewModel>();
         
-        foreach (var assignmentFile in assignmentResult.Data.AssignmentFiles)
-        {
-            var checkbox = new FileCheckBoxViewModel
-            {
-                IsActive = true,
-                Description = $"{assignmentFile.Name}",
-                Value = assignmentFile
-            };
-
-            fileCheckBoxes.Add(checkbox);
-        }
-
-        assigmentVM.AttachedFilesCheckBoxes = fileCheckBoxes;
-
         return View(assigmentVM);
     }
 
@@ -307,20 +297,6 @@ public class AssignmentController : Controller
             _logger.LogError("Failed to edit assignment - assignment view model wasn't received!");
 
             return View("Error");
-        }
-
-        if (!ModelState.IsValid)
-        {
-            _logger.LogError("Failed to edit assignment by Id {assignmentId} - invalid input data!", editAssignmentVM.Id);
-
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                _logger.LogError("Error: {errorMessage}", error.ErrorMessage);
-            }
-
-            TempData.TempDataMessage("Error", "Invalid data input");
-
-            return View(editAssignmentVM);
         }
 
         var checkTimeResult =
@@ -338,10 +314,18 @@ public class AssignmentController : Controller
         var assignment = new Assignment();
         editAssignmentVM.MapTo(assignment);
 
-        //AssignmentFiles Part
-        //logic for check if the checkbox files was in the assignmnet before
+        if (editAssignmentVM.NewAddedFiles != null)
+        {
+            var assignmentFile = await _assignmentFileService.AddAssignmentFile(DropboxFolders.TeacherAssignmentFiles, editAssignmentVM.NewAddedFiles, assignment.Id);
 
-        //logic fore saving new attached files
+            if (!assignmentFile.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", $"Message - {assignmentFile.Message}");
+                
+                return View(editAssignmentVM);
+            }
+        }
+        
         var updateAssignmentResult = await _assignmentService.UpdateAssignment(assignment);
 
         if (!updateAssignmentResult.IsSuccessful)

@@ -1,5 +1,6 @@
 ﻿using Core.Enums;
 using System.ComponentModel.DataAnnotations;
+using Core.Models;
 
 
 namespace UI.ViewModels.AssignmentViewModels
@@ -24,9 +25,8 @@ namespace UI.ViewModels.AssignmentViewModels
         [Display(Name = "* Assignment status")]
         public AssignmentAccess AssignmentAccess { get; set; }
         public int GroupId { get; set; }
-        public List<FileCheckBoxViewModel> AttachedFilesCheckBoxes { get; set; } = new List<FileCheckBoxViewModel>();
-        public List<string>? AttachedFilesUrls { get; set; }
-        public List<IFormFile>? NewAddedFiles { get; set; }
+        public List<AssignmentFile> AssignmentFiles { get; set; }
+        public IFormFile? NewAddedFiles { get; set; }
 
     }
 }
