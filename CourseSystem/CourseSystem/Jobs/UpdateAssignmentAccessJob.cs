@@ -8,13 +8,16 @@ namespace UI.Jobs
     public class UpdateAssignmentAccessJob : IJob
     {
         private readonly IAssignmentService _assignmentService;
+        private readonly IGroupService _groupService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<UpdateGroupAccessJob> _logger;
 
-        public UpdateAssignmentAccessJob(IAssignmentService assignmentService, INotificationService notificationService, ILogger<UpdateGroupAccessJob> logger)
+        public UpdateAssignmentAccessJob(IAssignmentService assignmentService, IGroupService groupService,
+            INotificationService notificationService, ILogger<UpdateGroupAccessJob> logger)
         {
             _assignmentService = assignmentService;
             _notificationService = notificationService;
+            _groupService = groupService;
             _logger = logger;
         }
 
@@ -42,7 +45,17 @@ namespace UI.Jobs
                 {
                     assignment.AssignmentAccess = AssignmentAccess.InProgress;
 
-                    foreach (var user in assignment.UserAssignments.Select(ug => ug.AppUser).ToList())
+                    var groupResult = await _groupService.GetById(assignment.GroupId);
+
+                    if (!groupResult.IsSuccessful)
+                    {
+                        _logger.LogError("Failed to add time-related notification for assignment {assignmentId} - related group not found!" +
+                            "Error: {errorMessage}", assignment.Id, assignmentResult.Message);
+
+                        continue;
+                    }
+
+                    foreach (var user in groupResult.Data.UserGroups.Select(ug => ug.AppUser).ToList())
                     {
                         if (user.Role == AppUserRoles.Student)
                         {
@@ -59,7 +72,17 @@ namespace UI.Jobs
                 {
                     assignment.AssignmentAccess = AssignmentAccess.Completed;
 
-                    foreach (var user in assignment.UserAssignments.Select(ug => ug.AppUser).ToList())
+                    var groupResult = await _groupService.GetById(assignment.GroupId);
+
+                    if (!groupResult.IsSuccessful)
+                    {
+                        _logger.LogError("Failed to add time-related notification for assignment {assignmentId} - related group not found!" +
+                            "Error: {errorMessage}", assignment.Id, assignmentResult.Message);
+
+                        continue;
+                    }
+
+                    foreach (var user in groupResult.Data.UserGroups.Select(ug => ug.AppUser).ToList())
                     {
                         if (user.Role == AppUserRoles.Student)
                         {
