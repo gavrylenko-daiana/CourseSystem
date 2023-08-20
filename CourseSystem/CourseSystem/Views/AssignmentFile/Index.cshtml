@@ -31,9 +31,11 @@ else if (supportedVideoExtensions.Contains(fileExtension))
 }
 else if (supportedPdfExtensions.Contains(fileExtension))
 {
+    var url = Model.Url.Replace("dl=0", "raw=1").Replace("dl.dropboxusercontent.com", "www.dropbox.com");
+
     <div id="pdf-container">
-        <object data="@Model.Url" type="application/pdf" width="100%" height="600px">
-            <p>Your browser does not support displaying PDF files. You can <a href="@Model.Url">download file here</a>.</p>
+        <object data="@url" type="application/pdf" width="100%" height="600px">
+            <p>Your browser does not support displaying PDF files. You can <a href="@url">download file here</a>.</p>
         </object>
     </div>
 }
