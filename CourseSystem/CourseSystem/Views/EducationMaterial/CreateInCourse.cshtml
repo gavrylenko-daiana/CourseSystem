@@ -1,7 +1,13 @@
 @using UI.ViewModels;
 @using Core.Enums
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@using BLL.Interfaces
 @model CreateInCourseEducationMaterialViewModel
+@inject IUserService UserService
+
+@{
+    var currentUser = (await UserService.GetCurrentUser(User)).Data;
+}
 
 <!DOCTYPE html>
 
@@ -45,7 +51,10 @@
                 {
                     foreach (var group in Model.Groups)
                     {
-                        <option value="@group.Id">@group.Name</option>
+                        foreach (var userGroup in currentUser.UserGroups.Where(ug => ug.Group != null && ug.GroupId == group.Id))
+                        {
+                            <option value="@userGroup.GroupId">@userGroup.Group.Name</option>
+                        }
                     }
                 }
                 else
