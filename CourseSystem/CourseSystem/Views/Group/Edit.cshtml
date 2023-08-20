@@ -47,6 +47,14 @@
                     </div>
                 </div>
             </form>
+            @if (TempData["Error"] != null)
+            {
+                <div class="ui container">
+                    <div class="ui negative message">
+                        <span>@TempData["Error"]</span>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
