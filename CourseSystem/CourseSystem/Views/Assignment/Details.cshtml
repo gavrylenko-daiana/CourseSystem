@@ -245,7 +245,7 @@
                             <div class="d-inline-block">
                                 @if (Model.UserAssignment != null && !Model.UserAssignment.IsChecked)
                                 {
-                                    <li>@assignmnetAnswer.Name</li>
+                                    <a href="@Url.Action("Index", "AssignmentAnswer", new { fileId = assignmnetAnswer.Id })">@assignmnetAnswer.Name</a>
                                     <a href="@Url.Action("Delete", "AssignmentAnswer", new { assignmentAnswerId = @assignmnetAnswer.Id })" class="ui delete-button button">
                                         Delete
                                     </a>
