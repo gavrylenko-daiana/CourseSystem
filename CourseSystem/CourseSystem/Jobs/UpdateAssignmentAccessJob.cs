@@ -36,15 +36,11 @@ namespace UI.Jobs
                 if (assignment.StartDate > DateTime.Now)
                 {
                     assignment.AssignmentAccess = AssignmentAccess.Planned;
-
-                    await _assignmentService.UpdateAssignment(assignment);
                 }
 
                 if (assignment.StartDate <= DateTime.Now && assignment.AssignmentAccess == AssignmentAccess.Planned)
                 {
                     assignment.AssignmentAccess = AssignmentAccess.InProgress;
-
-                    await _assignmentService.UpdateAssignment(assignment);
 
                     foreach (var user in assignment.UserAssignments.Select(ug => ug.AppUser).ToList())
                     {
@@ -63,8 +59,6 @@ namespace UI.Jobs
                 {
                     assignment.AssignmentAccess = AssignmentAccess.Completed;
 
-                    await _assignmentService.UpdateAssignment(assignment);
-
                     foreach (var user in assignment.UserAssignments.Select(ug => ug.AppUser).ToList())
                     {
                         if (user.Role == AppUserRoles.Student)
@@ -77,6 +71,8 @@ namespace UI.Jobs
                         }
                     }
                 }
+
+                await _assignmentService.UpdateAssignment(assignment);
             }
         }
     }

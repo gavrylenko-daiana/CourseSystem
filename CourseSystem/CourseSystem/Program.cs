@@ -57,7 +57,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob("UpdateGroupAccessJob")
         .WithIdentity("UpdateGroupAccessJob-trigger")
-        .WithCronSchedule("0 * * ? * *")
+        .WithCronSchedule("0 0 * ? * *")
     );
 
     q.AddTrigger(opts => opts
@@ -69,7 +69,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob("UpdateAssignmentAccessJob")
         .WithIdentity("UpdateAssignmentAccessJob-trigger")
-        .WithCronSchedule("0 0 * ? * *")
+        .WithCronSchedule("0 * * ? * *")
     );
 });
 
