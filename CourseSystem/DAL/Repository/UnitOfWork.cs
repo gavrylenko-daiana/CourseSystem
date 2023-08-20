@@ -5,11 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DAL.Repository
 {
     public class UnitOfWork : IDisposable
     {
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ILogger<UnitOfWork> _logger;
         private ApplicationContext _context;
         private Repository<AppUser> _userRepository;
         private Repository<Assignment> _assignmentRepository;
@@ -26,9 +29,11 @@ namespace DAL.Repository
         private Repository<ChatMessage> _chatMessageRepository;
         private Repository<ProfileImage> _profileImageRepository;
 
-        public UnitOfWork(ApplicationContext context)
+        public UnitOfWork(ApplicationContext context, ILoggerFactory loggerFactory)
         {
             _context = context;
+            _loggerFactory = loggerFactory;
+            _logger = new Logger<UnitOfWork>(_loggerFactory);
         }
 
         public Repository<AppUser> UserRepository
@@ -37,7 +42,8 @@ namespace DAL.Repository
             {
                 if (_userRepository == null)
                 {
-                    _userRepository = new Repository<AppUser>(_context);
+                    _userRepository = new Repository<AppUser>(_context, 
+                        new Logger<Repository<AppUser>>(_loggerFactory));
                 }
 
                 return _userRepository;
@@ -50,7 +56,8 @@ namespace DAL.Repository
             {
                 if (_chatMessageRepository == null)
                 {
-                    _chatMessageRepository = new Repository<ChatMessage>(_context);
+                    _chatMessageRepository = new Repository<ChatMessage>(_context, 
+                        new Logger<Repository<ChatMessage>>(_loggerFactory));
                 }
 
                 return _chatMessageRepository;
@@ -63,7 +70,8 @@ namespace DAL.Repository
             {
                 if (_notificationRepository == null)
                 {
-                    _notificationRepository = new Repository<Notification>(_context);
+                    _notificationRepository = new Repository<Notification>(_context, 
+                        new Logger<Repository<Notification>>(_loggerFactory));
                 }
 
                 return _notificationRepository;
@@ -76,7 +84,8 @@ namespace DAL.Repository
             {
                 if (_userActivityRepository == null)
                 {
-                    _userActivityRepository = new Repository<UserActivity>(_context);
+                    _userActivityRepository = new Repository<UserActivity>(_context, 
+                        new Logger<Repository<UserActivity>>(_loggerFactory));
                 }
 
                 return _userActivityRepository;
@@ -89,7 +98,8 @@ namespace DAL.Repository
             {
                 if (_assignmentRepository == null)
                 {
-                    _assignmentRepository = new Repository<Assignment>(_context);
+                    _assignmentRepository = new Repository<Assignment>(_context, 
+                        new Logger<Repository<Assignment>>(_loggerFactory));
                 }
 
                 return _assignmentRepository;
@@ -102,7 +112,8 @@ namespace DAL.Repository
             {
                 if (_assignmentAnswerRepository == null)
                 {
-                    _assignmentAnswerRepository = new Repository<AssignmentAnswer>(_context);
+                    _assignmentAnswerRepository = new Repository<AssignmentAnswer>(_context, 
+                        new Logger<Repository<AssignmentAnswer>>(_loggerFactory));
                 }
 
                 return _assignmentAnswerRepository;
@@ -115,7 +126,8 @@ namespace DAL.Repository
             {
                 if (_assignmentFileRepository == null)
                 {
-                    _assignmentFileRepository = new Repository<AssignmentFile>(_context);
+                    _assignmentFileRepository = new Repository<AssignmentFile>(_context, 
+                        new Logger<Repository<AssignmentFile>>(_loggerFactory));
                 }
 
                 return _assignmentFileRepository;
@@ -128,7 +140,8 @@ namespace DAL.Repository
             {
                 if (_courseRepository == null)
                 {
-                    _courseRepository = new Repository<Course>(_context);
+                    _courseRepository = new Repository<Course>(_context, 
+                        new Logger<Repository<Course>>(_loggerFactory));
                 }
 
                 return _courseRepository;
@@ -141,7 +154,8 @@ namespace DAL.Repository
             {
                 if (_educationMaterialRepository == null)
                 {
-                    _educationMaterialRepository = new Repository<EducationMaterial>(_context);
+                    _educationMaterialRepository = new Repository<EducationMaterial>(_context, 
+                        new Logger<Repository<EducationMaterial>>(_loggerFactory));
                 }
 
                 return _educationMaterialRepository;
@@ -154,7 +168,8 @@ namespace DAL.Repository
             {
                 if (_groupRepository == null)
                 {
-                    _groupRepository = new Repository<Group>(_context);
+                    _groupRepository = new Repository<Group>(_context, 
+                        new Logger<Repository<Group>>(_loggerFactory));
                 }
 
                 return _groupRepository;
@@ -167,7 +182,8 @@ namespace DAL.Repository
             {
                 if (_userAssignmentsRepository == null)
                 {
-                    _userAssignmentsRepository = new Repository<UserAssignments>(_context);
+                    _userAssignmentsRepository = new Repository<UserAssignments>(_context, 
+                        new Logger<Repository<UserAssignments>>(_loggerFactory));
                 }
 
                 return _userAssignmentsRepository;
@@ -180,7 +196,8 @@ namespace DAL.Repository
             {
                 if (_userCoursesRepository == null)
                 {
-                    _userCoursesRepository = new Repository<UserCourses>(_context);
+                    _userCoursesRepository = new Repository<UserCourses>(_context, 
+                        new Logger<Repository<UserCourses>>(_loggerFactory));
                 }
 
                 return _userCoursesRepository;
@@ -193,7 +210,8 @@ namespace DAL.Repository
             {
                 if (_userGroupsRepository == null)
                 {
-                    _userGroupsRepository = new Repository<UserGroups>(_context);
+                    _userGroupsRepository = new Repository<UserGroups>(_context, 
+                        new Logger<Repository<UserGroups>>(_loggerFactory));
                 }
 
                 return _userGroupsRepository;
@@ -206,7 +224,8 @@ namespace DAL.Repository
             {
                 if (_profileImageRepository == null)
                 {
-                    _profileImageRepository = new Repository<ProfileImage>(_context);
+                    _profileImageRepository = new Repository<ProfileImage>(_context, 
+                        new Logger<Repository<ProfileImage>>(_loggerFactory));
                 }
 
                 return _profileImageRepository;
@@ -217,10 +236,14 @@ namespace DAL.Repository
         {
             try
             {
+                _logger.LogInformation("Saving changes to the database");
+
                 return await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
+                _logger.LogError("Failed to save changes to the database! Error: {errorMessage}", ex.Message);
+
                 throw new Exception($"Fail to save changes to the database: {ex.Message}");
             }
         }
