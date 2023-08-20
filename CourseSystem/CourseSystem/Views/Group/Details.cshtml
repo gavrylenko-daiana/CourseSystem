@@ -27,8 +27,8 @@
         }
         
         .user-item {
-        display: flex;
-                    flex-direction: column;
+            display: flex;
+            flex-direction: column;
             border: 1px solid #ccc;
             margin-bottom: 10px;
             padding: 10px;
@@ -110,31 +110,6 @@
                 {
                     <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
                 }
-                
-                @if (Model.Group.GroupAccess == GroupAccess.InProgress)
-                {
-                    <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="ui black basic button">View Assignments</a>
-                }
-                @if (Model.Group.Assignments != null && Model.Group.Assignments.Any())
-                {
-                    <div class="ui segment">
-                        <h4 class="ui header">Assignments:</h4>
-                        <ul class="ui list">
-                            @foreach (var assignment in Model.Group.Assignments)
-                            {
-                                <li>@assignment.Name</li>
-                                <a href="@Url.Action("Details", "Assignment", new { assignmentId = @assignment.Id })" class="ui details-button button">Details</a>
-                                    @*<a class="ui details-button button" asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id">Detail</a>*@
-                            }
-                        </ul>
-                    </div>
-                }
-                else
-                {
-                    <div class="ui warning message">
-                        <p>No assignment found for this group.</p>
-                    </div>
-                }
             </div>
 
             <div class="right-container">
@@ -182,9 +157,12 @@
             </div>
         </div>
         <br/>
-        <div>
-            <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="ui teal basic button view-profile-button">All assignments</a>
-        </div>
+        @if (Model.Group.GroupAccess == GroupAccess.InProgress)
+        {
+            <div>
+                <a href="@Url.Action("Index", "Assignment", new { groupId = Model.Group.Id })" class="ui teal basic button view-profile-button">All assignments</a>
+            </div>
+        }
         @if (TempData["Error"] != null)
         {
             <div class="col-md-12 alert alert-danger">
