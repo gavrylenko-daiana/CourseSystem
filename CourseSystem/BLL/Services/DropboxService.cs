@@ -52,7 +52,7 @@ public class DropboxService : IDropboxService
                 return new Result<(string Url, string ModifiedFileName)>(false, linkResult.Message);
             }
 
-            var url = IsDocumentContentType(file.ContentType) ? linkResult.Message : linkResult.Message.Replace("dl=0", "raw=1");
+            var url = linkResult.Message.Replace("www.dropbox.com", "dl.dropboxusercontent.com");
 
             return new Result<(string Url, string ModifiedFileName)>(true, (url, modifiedFileName));
         }
@@ -97,14 +97,6 @@ public class DropboxService : IDropboxService
         {
             return new Result<string>(false, $"Failed to get url {nameof(pathDisplay)}. ErrorMessage - {ex.Message}");
         }
-    }
-
-    private bool IsDocumentContentType(string contentType)
-    {
-        var isWord = contentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-                     contentType == "application/msword";
-
-        return isWord;
     }
     
     private Result<string> GetNumberedFileName(string fileName, int count)
