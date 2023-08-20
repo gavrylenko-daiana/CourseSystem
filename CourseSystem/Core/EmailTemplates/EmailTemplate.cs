@@ -102,13 +102,12 @@ namespace Core.EmailTemplates
             foreach (var parameter in placeholderNameSandValues)
             {
                 var parameterName = parameter.Key;
+                var value = parameter.Value;
 
-                if (parameterName.Equals(String.Empty))
+                if (parameterName.Equals(String.Empty) || value == null)
                 {
                     break;
                 }
-
-                var value = parameter.Value;
 
                 if (value is DateTime date)
                 {

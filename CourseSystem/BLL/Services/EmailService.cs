@@ -222,90 +222,114 @@ namespace BLL.Services
             }
         }
 
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
+        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Group group = null, 
+            Course course = null, IFormFile material = null, string callBackUrl = null, string tempPassword = null)
         {
             if (appUser == null)
             {
                 return (String.Empty, String.Empty);
             }
 
-            var parameters = new Dictionary<string, object>();
-            
-            switch (emailType)
+            var parameters  = new Dictionary<string, object>()
             {
-                case EmailType.AccountApproveByAdmin:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{lastname}", appUser.LastName },
-                        { @"{email}", appUser.Email },
-                        { @"{userrole}", appUser.Role },
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                case EmailType.UserRegistration:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                case EmailType.ConfirmAdminRegistration:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                case EmailType.ConfirmDeletionByAdmin:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{lastname}", appUser.LastName },
-                        { @"{email}", appUser.Email },
-                        { @"{userrole}", appUser.Role },
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                case EmailType.ConfirmDeletionByUser:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                case EmailType.AccountApproveByUser:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{lastname}", appUser.LastName },
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                case EmailType.GetTempPasswordToAdmin:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{lastname}", appUser.LastName },
-                        { @"{email}", appUser.Email },
-                        { @"{userrole}", appUser.Role },
-                        { @"{temppassword}", tempPassword },
-                    };
-                    break;
-                case EmailType.EducationMaterialApproveByAdmin:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{lastname}", appUser.LastName },
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                default:
-                    parameters = new Dictionary<string, object>();
-                    break;
-            }
+                { @"{firstname}", appUser.FirstName },
+                { @"{lastname}", appUser.LastName },
+                { @"{email}", appUser.Email },
+                { @"{userrole}", appUser.Role },
+                { @"{callbackurl}", callBackUrl },
+                { @"{groupname}", group?.Name },
+                { @"{materialname}", material?.FileName },
+                { @"{material}", material?.ContentType },
+                { @"{coursename}", course?.Name }
+            };
 
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
+
+        //private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
+        //{
+        //    if (appUser == null)
+        //    {
+        //        return (String.Empty, String.Empty);
+        //    }
+
+        //    var parameters = new Dictionary<string, object>();
+            
+        //    switch (emailType)
+        //    {
+        //        case EmailType.AccountApproveByAdmin:
+        //            parameters = new Dictionary<string, object>()
+        //            {
+        //                { @"{firstname}", appUser.FirstName },
+        //                { @"{lastname}", appUser.LastName },
+        //                { @"{email}", appUser.Email },
+        //                { @"{userrole}", appUser.Role },
+        //                { @"{callbackurl}", callBackUrl }
+        //            };
+        //            break;
+        //        case EmailType.UserRegistration:
+        //            parameters = new Dictionary<string, object>()
+        //            {
+        //                { @"{firstname}", appUser.FirstName },
+        //                { @"{callbackurl}", callBackUrl }
+        //            };
+        //            break;
+        //        case EmailType.ConfirmAdminRegistration:
+        //            parameters = new Dictionary<string, object>()
+        //            {
+        //                { @"{callbackurl}", callBackUrl }
+        //            };
+        //            break;
+        //        case EmailType.ConfirmDeletionByAdmin:
+        //            parameters = new Dictionary<string, object>()
+        //            {
+        //                { @"{firstname}", appUser.FirstName },
+        //                { @"{lastname}", appUser.LastName },
+        //                { @"{email}", appUser.Email },
+        //                { @"{userrole}", appUser.Role },
+        //                { @"{callbackurl}", callBackUrl }
+        //            };
+        //            break;
+        //        case EmailType.ConfirmDeletionByUser:
+        //            parameters = new Dictionary<string, object>()
+        //            {
+        //                { @"{firstname}", appUser.FirstName },
+        //                { @"{callbackurl}", callBackUrl }
+        //            };
+        //            break;
+        //        case EmailType.AccountApproveByUser:
+        //            parameters = new Dictionary<string, object>()
+        //            {
+        //                { @"{firstname}", appUser.FirstName },
+        //                { @"{lastname}", appUser.LastName },
+        //                { @"{callbackurl}", callBackUrl }
+        //            };
+        //            break;
+        //        case EmailType.GetTempPasswordToAdmin:
+        //            parameters = new Dictionary<string, object>()
+        //            {
+        //                { @"{firstname}", appUser.FirstName },
+        //                { @"{lastname}", appUser.LastName },
+        //                { @"{email}", appUser.Email },
+        //                { @"{userrole}", appUser.Role },
+        //                { @"{temppassword}", tempPassword },
+        //            };
+        //            break;
+        //        case EmailType.EducationMaterialApproveByAdmin:
+        //            parameters = new Dictionary<string, object>()
+        //            {
+        //                { @"{firstname}", appUser.FirstName },
+        //                { @"{lastname}", appUser.LastName },
+        //                { @"{callbackurl}", callBackUrl }
+        //            };
+        //            break;
+        //        default:
+        //            parameters = new Dictionary<string, object>();
+        //            break;
+        //    }
+
+        //    return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
+        //}
 
         private (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
         {
@@ -406,7 +430,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Fail to send email");
             }
 
-            var emailContent = GetEmailSubjectAndBody(emailType, appUser, callBackUrl, tempPassword);
+            var emailContent = GetEmailSubjectAndBody(emailType, appUser, null, null, null, callBackUrl, tempPassword);
 
             var toEmail = new List<string>();
             var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
