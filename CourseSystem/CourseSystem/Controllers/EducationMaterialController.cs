@@ -396,7 +396,7 @@ public class EducationMaterialController : Controller
             return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
         }
         
-        var exureFileExist = await _dropboxService.FileExistsAsync(educationMaterialVM.FileName, educationMaterialVM.MaterialAccess.ToString());
+        var exureFileExist = await _dropboxService.FileExistsInAnyFolderAsync(educationMaterialVM.FileName);
 
         if (!exureFileExist.IsSuccessful)
         {
