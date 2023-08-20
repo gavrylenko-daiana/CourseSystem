@@ -43,8 +43,6 @@ namespace UI.Jobs
                 {
                     group.GroupAccess = GroupAccess.InProgress;
 
-                    await _groupService.UpdateGroup(group);
-
                     foreach (var user in group.UserGroups.Select(ug => ug.AppUser).ToList())
                     {
                         if (user.Role == AppUserRoles.Student)
@@ -62,6 +60,8 @@ namespace UI.Jobs
                 {
                     group.GroupAccess = GroupAccess.Completed;
                 }
+
+                await _groupService.UpdateGroup(group);
             }
         }
     }
