@@ -1,4 +1,5 @@
 using BLL.Interfaces;
+using Core.EmailTemplates;
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
@@ -331,7 +332,7 @@ public class CourseController : Controller
             new { courseId = courseId, code = code },
             protocol: HttpContext.Request.Scheme);
 
-        var sendResult = await _emailService.SendToTeacherCourseInvitation(teacherResult.Data, courseResult.Data, callbackUrl);
+        var sendResult = await _emailService.SendEmailToAppUsers(EmailType.CourseInvitation, teacherResult.Data, callbackUrl, course: courseResult.Data) ;
 
         if (!sendResult.IsSuccessful)
         {

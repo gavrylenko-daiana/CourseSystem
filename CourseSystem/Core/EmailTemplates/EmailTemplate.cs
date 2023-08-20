@@ -22,7 +22,7 @@ namespace Core.EmailTemplates
             { EmailType.GroupConfirmationByAdmin,  "Group confirmation" },
             { EmailType.ApprovedGroupCreation,  "Group confirmation"},
             { EmailType.GroupInvitationToStudent, "Group invitation" },
-            { EmailType.GetTempPasswordToAdmin, "Login with temporary password" },
+            { EmailType.GetTempPassword, "Login with temporary password" },
             { EmailType.EducationMaterialApproveByAdmin, "Confirm upload educational material" },
             { EmailType.ApprovedUploadEducationalMaterial, "Educational material confirmation" },
             {EmailType.DeniedUploadEducationalMaterial, "Educational material denied"  }
@@ -61,7 +61,7 @@ namespace Core.EmailTemplates
             { EmailType.ApprovedGroupCreation, @"<h4>You get approve for the creation of a group {groupname} of more than 20 people, follow the link: <a href='{callbackurl}'>link</a></h4>" },
             { EmailType.GroupInvitationToStudent, @"<h4>You get invitation to the group {groupname}"+
                 ", follow the link: <a href='{callbackurl}'>link</a></h4>"},     
-            { EmailType.GetTempPasswordToAdmin, @"<h4>You get information about your account</h4>" +
+            { EmailType.GetTempPassword, @"<h4>You get information about your account</h4>" +
                                                "<hr/>" +
                                                "<p>First name: {firstname}</p>" +
                                                "<p>Last name: {lastname}</p>" +
@@ -106,7 +106,7 @@ namespace Core.EmailTemplates
 
                 if (parameterName.Equals(String.Empty) || value == null)
                 {
-                    break;
+                    continue;
                 }
 
                 if (value is DateTime date)

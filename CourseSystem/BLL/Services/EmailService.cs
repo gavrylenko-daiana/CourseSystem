@@ -159,26 +159,14 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Result<bool>> SendToTeacherCourseInvitation(AppUser teacher, Course course, string invitationUrl)
-        {
-            if (teacher == null || course == null)
-            {
-                return new Result<bool>(false, $"Fail to send email invitation to the teacher");
-            }
-
-            var emailContent = GetEmailSubjectAndBody(EmailType.CourseInvitation, teacher, course, invitationUrl);
-
-            return await CreateAndSendEmail(new List<string> { teacher.Email }, emailContent.Item1, emailContent.Item2);
-        }
-
         public async Task<Result<bool>> SendInvitationToStudents(Dictionary<string, string> studentsData, Group group)
         {
             try
             {
                 foreach (var studentData in studentsData)
                 {
-                    var emailContent = GetEmailSubjectAndBody(EmailType.GroupInvitationToStudent, group,
-                        studentData.Value, await _userManager.FindByEmailAsync(studentData.Key));
+                    var emailContent = GetEmailSubjectAndBody(EmailType.GroupInvitationToStudent, 
+                        await _userManager.FindByEmailAsync(studentData.Key), group, null, null ,studentData.Value, null);
                     
                     var result = await CreateAndSendEmail(new List<string> { studentData.Key }, emailContent.Item1, emailContent.Item2);
 
@@ -238,271 +226,39 @@ namespace BLL.Services
                 { @"{userrole}", appUser.Role },
                 { @"{callbackurl}", callBackUrl },
                 { @"{groupname}", group?.Name },
+                { @"{coursename}", course?.Name },
                 { @"{materialname}", material?.FileName },
                 { @"{material}", material?.ContentType },
-                { @"{coursename}", course?.Name }
+                {@"{temppassword}", tempPassword }
+                
             };
 
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
-        }
+        }      
 
-        //private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null)
-        //{
-        //    if (appUser == null)
-        //    {
-        //        return (String.Empty, String.Empty);
-        //    }
-
-        //    var parameters = new Dictionary<string, object>();
-            
-        //    switch (emailType)
-        //    {
-        //        case EmailType.AccountApproveByAdmin:
-        //            parameters = new Dictionary<string, object>()
-        //            {
-        //                { @"{firstname}", appUser.FirstName },
-        //                { @"{lastname}", appUser.LastName },
-        //                { @"{email}", appUser.Email },
-        //                { @"{userrole}", appUser.Role },
-        //                { @"{callbackurl}", callBackUrl }
-        //            };
-        //            break;
-        //        case EmailType.UserRegistration:
-        //            parameters = new Dictionary<string, object>()
-        //            {
-        //                { @"{firstname}", appUser.FirstName },
-        //                { @"{callbackurl}", callBackUrl }
-        //            };
-        //            break;
-        //        case EmailType.ConfirmAdminRegistration:
-        //            parameters = new Dictionary<string, object>()
-        //            {
-        //                { @"{callbackurl}", callBackUrl }
-        //            };
-        //            break;
-        //        case EmailType.ConfirmDeletionByAdmin:
-        //            parameters = new Dictionary<string, object>()
-        //            {
-        //                { @"{firstname}", appUser.FirstName },
-        //                { @"{lastname}", appUser.LastName },
-        //                { @"{email}", appUser.Email },
-        //                { @"{userrole}", appUser.Role },
-        //                { @"{callbackurl}", callBackUrl }
-        //            };
-        //            break;
-        //        case EmailType.ConfirmDeletionByUser:
-        //            parameters = new Dictionary<string, object>()
-        //            {
-        //                { @"{firstname}", appUser.FirstName },
-        //                { @"{callbackurl}", callBackUrl }
-        //            };
-        //            break;
-        //        case EmailType.AccountApproveByUser:
-        //            parameters = new Dictionary<string, object>()
-        //            {
-        //                { @"{firstname}", appUser.FirstName },
-        //                { @"{lastname}", appUser.LastName },
-        //                { @"{callbackurl}", callBackUrl }
-        //            };
-        //            break;
-        //        case EmailType.GetTempPasswordToAdmin:
-        //            parameters = new Dictionary<string, object>()
-        //            {
-        //                { @"{firstname}", appUser.FirstName },
-        //                { @"{lastname}", appUser.LastName },
-        //                { @"{email}", appUser.Email },
-        //                { @"{userrole}", appUser.Role },
-        //                { @"{temppassword}", tempPassword },
-        //            };
-        //            break;
-        //        case EmailType.EducationMaterialApproveByAdmin:
-        //            parameters = new Dictionary<string, object>()
-        //            {
-        //                { @"{firstname}", appUser.FirstName },
-        //                { @"{lastname}", appUser.LastName },
-        //                { @"{callbackurl}", callBackUrl }
-        //            };
-        //            break;
-        //        default:
-        //            parameters = new Dictionary<string, object>();
-        //            break;
-        //    }
-
-        //    return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
-        //}
-
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
-        {
-            if (group == null)
-            {
-                return (String.Empty, String.Empty);
-            }
-
-            var parameters = new Dictionary<string, object>();
-            
-            var groupEmailTypes = new List<EmailType>()
-            {
-                EmailType.GroupConfirmationByAdmin,
-                EmailType.ApprovedGroupCreation,
-                EmailType.GroupInvitationToStudent
-            };
-
-            if (!groupEmailTypes.Contains(emailType))
-            {
-                return (String.Empty, String.Empty);
-            }
-
-            parameters = new Dictionary<string, object>()
-            {
-                { @"{groupname}", group.Name },
-                { @"{callbackurl}", callBackUrl }
-            };
-
-            return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
-        }
-
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, Course course, string callBackUrl = null)
-        {
-            if (appUser == null || course == null)
-            {
-                return (String.Empty, String.Empty);
-            }
-
-            var parameters = new Dictionary<string, object>();
-            
-            switch (emailType)
-            {
-                case EmailType.CourseInvitation:
-                    if (course == null)
-                    {
-                        break;
-                    }
-
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{coursename}", course.Name },
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                default:
-                    return (String.Empty, String.Empty);
-            }
-
-            return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
-        }
-        
-        private (string, string) GetEmailSubjectAndBody(EmailType emailType, AppUser appUser, IFormFile material, string callBackUrl = null)
-        {
-            if (appUser == null || material == null)
-            {
-                return (String.Empty, String.Empty);
-            }
-
-            var parameters = new Dictionary<string, object>();
-            
-            switch (emailType)
-            {
-                case EmailType.EducationMaterialApproveByAdmin:
-                    parameters = new Dictionary<string, object>()
-                    {
-                        { @"{firstname}", appUser.FirstName },
-                        { @"{lastname}", appUser.LastName },
-                        { @"{email}", appUser.Email!},
-                        { @"{materialname}", material.FileName },
-                        { @"{material}", material.ContentType },
-                        { @"{callbackurl}", callBackUrl }
-                    };
-                    break;
-                case EmailType.ApprovedUploadEducationalMaterial:
-                    break;
-                default:
-                    return (String.Empty, String.Empty);
-            }
-
-            return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
-        }
-
-        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null, IFormFile? file = null)
+        public async Task<Result<bool>> SendEmailToAppUsers(EmailType emailType, AppUser appUser, string callBackUrl = null, string tempPassword = null,
+             Group group = null, Course course = null, IFormFile? file = null)
         {
             if (appUser == null)
             {
                 return new Result<bool>(false, "Fail to send email");
             }
 
-            var emailContent = GetEmailSubjectAndBody(emailType, appUser, null, null, null, callBackUrl, tempPassword);
+            var emailContent = GetEmailSubjectAndBody(emailType, appUser, group, course, file, callBackUrl, tempPassword);
 
-            var toEmail = new List<string>();
+           
             var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
+            var toEmail = allAdmins.Select(a => a.Email).ToList();
 
-            switch (emailType)
+            if (emailType.ToString().ToLower().Contains("admin"))
             {
-                case EmailType.ConfirmDeletionByAdmin:
-                    toEmail = allAdmins.Select(a => a.Email).ToList();
-                    break;
-                case EmailType.AccountApproveByAdmin:
-                    toEmail = allAdmins.Select(a => a.Email).ToList();
-                    break;
-                case EmailType.EducationMaterialApproveByAdmin:
-                    toEmail = allAdmins.Select(a => a.Email).ToList();
-                    break;
-                default:
-                    toEmail.Add(appUser.Email);
-                    break;
+                return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2, file);
             }
-
-            return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2, file);
+            else
+            {
+                return await CreateAndSendEmail(new List<string> { appUser.Email}, emailContent.Item1, emailContent.Item2, file);
+            }
+          
         }
-
-        public async Task<Result<bool>> SendEmailGroups(EmailType emailType, Group group, string callBackUrl = null, AppUser appUser = null)
-        {
-            if (group == null)
-            {
-                return new Result<bool>(false, "Fail to send email");
-            }
-
-            var emailContent = GetEmailSubjectAndBody(emailType, group, callBackUrl, appUser);
-
-            var toEmail = new List<string>();
-            var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
-
-            switch (emailType)
-            {
-                case EmailType.GroupConfirmationByAdmin:
-                    toEmail = allAdmins.Select(a => a.Email).ToList();
-                    break;
-                default:
-                    toEmail.Add(appUser.Email);
-                    break;
-            }
-
-            return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
-        }
-        
-        public async Task<Result<bool>> SendEmailMaterial(EmailType emailType, AppUser appUser, IFormFile material, string callBackUrl = null!)
-        {
-            if (appUser == null)
-            {
-                return new Result<bool>(false, "Fail to send email");
-            }
-
-            var emailContent = GetEmailSubjectAndBody(emailType, appUser, material, callBackUrl);
-            
-            var toEmail = new List<string>();
-            var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
-
-            switch (emailType)
-            {
-                case EmailType.EducationMaterialApproveByAdmin:
-                    toEmail = allAdmins.Select(a => a.Email).ToList();
-                    break;
-                default:
-                    toEmail.Add(appUser.Email);
-                    break;
-            }
-            
-            return await CreateAndSendEmail(toEmail, emailContent.Item1, emailContent.Item2);
-        }
-
     }
 }
