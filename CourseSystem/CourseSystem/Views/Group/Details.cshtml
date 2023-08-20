@@ -156,12 +156,17 @@
                         @foreach (var userGroupsWithoutAdmin in Model.UserGroupsWithoutAdmins)
                         {
                             <li class="user-item">
-                                <div class="user-profile">
-                                    <div class="user-details">
-                                        <span>@userGroupsWithoutAdmin.AppUser.FirstName @userGroupsWithoutAdmin.AppUser.LastName - @userGroupsWithoutAdmin.AppUser.Role</span>
+                                <div class="user-profile" style="display: flex; align-items: center;">
+                                    <div class="user-details" style="display: flex; align-items: center;">
+                                        @if (userGroupsWithoutAdmin.AppUser.ProfileImage != null)
+                                        {
+                                            <img src="@userGroupsWithoutAdmin.AppUser.ProfileImage.Url" alt="@userGroupsWithoutAdmin.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                        }
                                     </div>
-                                    <div class="user-button">
-                                        <a href="@Url.Action("Detail", "User", new { id = userGroupsWithoutAdmin.AppUser.Id })" class="ui teal basic button view-profile-button">View Profile</a>
+                                    <div class="user-button" style="margin-left: auto;">
+                                        <a href="@Url.Action("Detail", "User", new { id = userGroupsWithoutAdmin.AppUser.Id })" class="ui teal basic button view-profile-button" style="width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            @userGroupsWithoutAdmin.AppUser.FirstName @userGroupsWithoutAdmin.AppUser.LastName - @userGroupsWithoutAdmin.AppUser.Role
+                                        </a>
                                     </div>
                                 </div>
                             </li>
