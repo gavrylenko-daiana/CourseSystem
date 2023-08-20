@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using Core.Configuration;
+using Core.Enums;
 using Core.Models;
 using DAL.Repository;
 using Dropbox.Api;
@@ -51,7 +52,7 @@ public class DropboxService : IDropboxService
                 return new Result<(string Url, string ModifiedFileName)>(false, linkResult.Message);
             }
 
-            var url = IsDocumentContentType(file.ContentType) ? linkResult.Message : linkResult.Message.Replace("dl=0", "raw=1");
+            var url = linkResult.Message.Replace("www.dropbox.com", "dl.dropboxusercontent.com");
 
             return new Result<(string Url, string ModifiedFileName)>(true, (url, modifiedFileName));
         }
@@ -65,7 +66,7 @@ public class DropboxService : IDropboxService
     {
         int count = 1;
         var modifiedFileName = fileName;
-        var resultExists = await FileExistsAsync(fileName, folder);
+        var resultExists = await FileExistsInAnyFolderAsync(fileName);
 
         while (resultExists.IsSuccessful)
         {
@@ -78,7 +79,7 @@ public class DropboxService : IDropboxService
 
             modifiedFileName = numberedFileNameResult.Message;
             count++;
-            resultExists = await FileExistsAsync(modifiedFileName, folder);
+            resultExists = await FileExistsInAnyFolderAsync(modifiedFileName);
         }
 
         return new Result<string>(true, modifiedFileName);
@@ -96,14 +97,6 @@ public class DropboxService : IDropboxService
         {
             return new Result<string>(false, $"Failed to get url {nameof(pathDisplay)}. ErrorMessage - {ex.Message}");
         }
-    }
-
-    private bool IsDocumentContentType(string contentType)
-    {
-        var isWord = contentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-                     contentType == "application/msword";
-
-        return isWord;
     }
     
     private Result<string> GetNumberedFileName(string fileName, int count)
@@ -125,7 +118,7 @@ public class DropboxService : IDropboxService
         return new Result<string>(true, $"{fileNameWithoutExtension}-{count}{fileExtension}");
     }
 
-    public async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
+    private async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
     {
         try
         {
@@ -144,6 +137,28 @@ public class DropboxService : IDropboxService
         {
             return new Result<bool>(false, $"Failed to get metadata by {nameof(filePath)}");
         }
+    }
+    
+    public async Task<Result<bool>> FileExistsInAnyFolderAsync(string filePath)
+    {
+        var tasks = new List<Task<Result<bool>>>();
+    
+        foreach (DropboxFolders folder in Enum.GetValues(typeof(DropboxFolders)))
+        {
+            tasks.Add(FileExistsAsync(filePath, folder.ToString()));
+        }
+    
+        var results = await Task.WhenAll(tasks);
+    
+        foreach (var result in results)
+        {
+            if (result.IsSuccessful)
+            {
+                return new Result<bool>(true);
+            }
+        }
+    
+        return new Result<bool>(false, $"File '{filePath}' does not exist in any folder.");
     }
 
     public async Task<Result<bool>> DeleteFileAsync(string filePath, string? folder = null)

@@ -84,16 +84,16 @@ namespace BLL.Services
             {
                 if (isMarked.Equals("IsMarked"))
                 {
-                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AssignmentAnswers.Any() && a.AppUser.Role == AppUserRoles.Student && a.IsChecked == true);
+                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AssignmentAnswers.Count != 0 && a.AppUser.Role == AppUserRoles.Student && a.IsChecked == true);
                 }
                 else
                 {
-                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AssignmentAnswers.Any() && a.AppUser.Role == AppUserRoles.Student && a.IsChecked == false);
+                    userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AssignmentAnswers.Count != 0 && a.AppUser.Role == AppUserRoles.Student && a.IsChecked == false);
                 }
             }
             else
             {
-                userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AssignmentAnswers.Any() && a.AppUser.Role == AppUserRoles.Student);
+                userAssignmentsResult = await GetByPredicate(a => a.AssignmentId == assignmentId && a.AssignmentAnswers.Count != 0 && a.AppUser.Role == AppUserRoles.Student);
             }
 
             return userAssignmentsResult;
