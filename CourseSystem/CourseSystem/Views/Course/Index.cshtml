@@ -34,11 +34,7 @@
         .add-course-button {
             margin-top: 20px;
             text-align: center;
-        }
-        
-        .cover-card {
-            height: 200px; 
-        }    
+        }   
     </style>
 </head>
 <body>
@@ -90,7 +86,7 @@
         @foreach (var course in Model)
         {
             <div class="column">
-                <div class="ui card">
+                <div class="ui card cover-card">
                     <div class="image">
                         <img src="@course.Url" alt="@course.Name" style="height: 170px; object-fit: cover;">
                     </div>
