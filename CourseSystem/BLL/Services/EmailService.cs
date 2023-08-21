@@ -166,7 +166,7 @@ namespace BLL.Services
                 foreach (var studentData in studentsData)
                 {
                     var emailContent = GetEmailSubjectAndBody(EmailType.GroupInvitationToStudent, 
-                        await _userManager.FindByEmailAsync(studentData.Key), group, null, null ,studentData.Value, null);
+                        await _userManager.FindByEmailAsync(studentData.Key), group, callBackUrl: studentData.Value);
                     
                     var result = await CreateAndSendEmail(new List<string> { studentData.Key }, emailContent.Item1, emailContent.Item2);
 
