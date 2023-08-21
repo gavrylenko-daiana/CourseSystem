@@ -61,7 +61,7 @@ namespace BLL.Services
 
             var tasks = new List<Task<Result<UserAssignments>>>();
 
-            foreach(var user in allGroupUsers)
+            foreach (var user in allGroupUsers)
             {
                 tasks.Add(CreateUserAssignment(assignment, user));
             }
@@ -70,7 +70,7 @@ namespace BLL.Services
 
             var isSuccsseful = results.Where(r => r.IsSuccessful).ToList();
 
-            if(tasks.Count != isSuccsseful.Count)
+            if (tasks.Count != isSuccsseful.Count)
             {
                 return new Result<bool>(false, $"Fail to create {nameof(isSuccsseful)}");
             }
@@ -89,7 +89,7 @@ namespace BLL.Services
             {
                 var checkUserAssignment = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
 
-                if (checkUserAssignment.Any())
+                if (checkUserAssignment.Count != 0)
                 {
                     return new Result<UserAssignments>(true, checkUserAssignment.FirstOrDefault()!);
                 }
@@ -140,7 +140,7 @@ namespace BLL.Services
         {
             var userAssignemnt = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id && ua.AppUserId == appUser.Id);
 
-            if(userAssignemnt == null)
+            if (userAssignemnt == null)
             {
                 var userAssignmentResult = await CreateUserAssignment(assignment, appUser);
 
