@@ -226,5 +226,31 @@ namespace BLL.Services
 
             return new Result<Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>>>(true, query);
         }
+
+        public async Task<Result<List<Assignment>>> GetAllUserAssignemnts(AppUser appUser)
+        {
+            if (appUser == null)
+            {
+                return new Result<List<Assignment>>(false, $"Invalid {nameof(appUser)}");
+            }
+
+            var allGroupsIds = appUser.UserGroups.Where(ug => !ug.Group.GroupAccess.Equals(GroupAccess.Completed)).Select(ug => ug.GroupId); //or get this data with a help of db
+
+            var allUserAssignemnts = new List<Assignment>();
+
+            foreach(var groupId in allGroupsIds)
+            {
+                var assignemntResult = await GetByPredicate(a => a.GroupId == groupId);
+
+                if (!assignemntResult.IsSuccessful)
+                {
+                    return new Result<List<Assignment>>(false, assignemntResult.Message);
+                }
+
+                allUserAssignemnts.AddRange(assignemntResult.Data);
+            }
+
+            return new Result<List<Assignment>>(true, allUserAssignemnts);
+        }
     }
 }

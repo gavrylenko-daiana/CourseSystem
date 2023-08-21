@@ -92,6 +92,8 @@ public class AssignmentController : Controller
         int pageNumber = (page ?? 1);
         ViewBag.OnePageOfAssignemnts = assignmentsVM;
 
+        //var currentUserResult = await _userService.GetCurrentUser(User);
+        //await _assignmentService.GetAllUserAssignemnts(currentUserResult.Data);
         return View(assignmentsVM.ToPagedList(pageNumber, pageSize));
     }
 
