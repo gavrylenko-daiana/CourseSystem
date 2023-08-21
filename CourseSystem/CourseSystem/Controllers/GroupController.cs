@@ -343,7 +343,7 @@ public class GroupController : Controller
             return View("Index");
         }
 
-        if (selectedStudents.Count > 0)
+        if (selectedStudents.Count > 20)
         {
             _logger.LogInformation("More than 20 students added to group {groupId}!", groupId);
             TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation");
