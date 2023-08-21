@@ -585,7 +585,7 @@ public class AccountController : Controller
             return View(registerAdminViewModel);
         }
 
-        var sendResult = await _emailService.SendTempPasswordToUser(EmailType.GetTempPasswordToAdmin, newAdmin);
+        var sendResult = await _emailService.SendTempPasswordToUser(EmailType.GetTempPassword, newAdmin);
 
         if (!sendResult.IsSuccessful)
         {

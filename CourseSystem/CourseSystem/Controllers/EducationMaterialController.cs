@@ -84,7 +84,7 @@ public class EducationMaterialController : Controller
                 groupId = groupId
             });
 
-            var emailResult = await _emailService.SendEmailToAppUsers(EmailType.EducationMaterialApproveByAdmin, toUser, callBack, null, formFile);
+            var emailResult = await _emailService.SendEmailToAppUsers(EmailType.EducationMaterialApproveByAdmin, toUser, callBack, formFile: formFile);
 
             if (!emailResult.IsSuccessful)
             {

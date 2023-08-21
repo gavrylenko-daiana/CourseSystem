@@ -19,7 +19,7 @@ namespace Core.EmailTemplates
         CourseInvitation,
         GroupConfirmationByAdmin,
         GroupInvitationToStudent,
-        GetTempPasswordToAdmin,
+        GetTempPassword,
         EducationMaterialApproveByAdmin,
         ApprovedUploadEducationalMaterial,
         DeniedUploadEducationalMaterial
