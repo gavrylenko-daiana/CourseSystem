@@ -15,11 +15,13 @@ namespace BLL.Services
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
         private readonly IDropboxService _dropboxService;
+        private readonly IUserAssignmentService _userAssignmentService;
         
-        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService)
+        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService, IUserAssignmentService userAssignmentService)
             : base(unitOfWork, unitOfWork.AssignmentRepository)
         {
             _dropboxService = dropboxService;
+            _userAssignmentService = userAssignmentService;
         }
 
         public async Task<Result<bool>> CreateAssignment(Assignment assignment)
@@ -30,11 +32,18 @@ namespace BLL.Services
             }
 
             SetAssignmentStatus(assignment);
-
+                      
             try
             {
                 await _repository.AddAsync(assignment);
                 await _unitOfWork.Save();
+
+                var userAssignemntsCreationResult = await _userAssignmentService.CreateUserAssignemntsForAllUsersInGroup(assignment);
+
+                if (!userAssignemntsCreationResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, "Fail to create user assignemnts for all users in group");
+                }
 
                 return new Result<bool>(true);
             }

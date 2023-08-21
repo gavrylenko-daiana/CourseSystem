@@ -13,9 +13,11 @@ namespace BLL.Services
 {
     public class UserAssignmentService : GenericService<UserAssignments>, IUserAssignmentService
     {
-        public UserAssignmentService(UnitOfWork unitOfWork)
+        private IUserGroupService _userGroupService;
+        public UserAssignmentService(UnitOfWork unitOfWork, IUserGroupService userGroupService)
             : base(unitOfWork, unitOfWork.UserAssignmentsRepository)
         {
+            _userGroupService = userGroupService;
         }
 
         public async Task<Result<bool>> ChangeUserAssignmentGrade(UserAssignments userAssignment, int newGrade)
@@ -39,6 +41,41 @@ namespace BLL.Services
             {
                 return new Result<bool>(false, "Fail to update assignment");
             }
+        }
+
+        public async Task<Result<bool>> CreateUserAssignemntsForAllUsersInGroup(Assignment assignment)
+        {
+            if (assignment == null)
+            {
+                return new Result<bool>(false, $"Invalid input {nameof(assignment)} data");
+            }      
+
+            var allUserGroupsResult = await _userGroupService.GetByPredicate(ug => ug.GroupId == assignment.GroupId);
+
+            if (!allUserGroupsResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Fail to get {nameof(allUserGroupsResult.Data)}");
+            }
+
+            var allGroupUsers = allUserGroupsResult.Data.Select(ug => ug.AppUser).ToList();
+
+            var tasks = new List<Task<Result<UserAssignments>>>();
+
+            foreach(var user in allGroupUsers)
+            {
+                tasks.Add(CreateUserAssignment(assignment, user));
+            }
+
+            var results = await Task.WhenAll(tasks);
+
+            var isSuccsseful = results.Where(r => r.IsSuccessful).ToList();
+
+            if(tasks.Count != isSuccsseful.Count)
+            {
+                return new Result<bool>(false, $"Fail to create {nameof(isSuccsseful)}");
+            }
+
+            return new Result<bool>(true);
         }
 
         public async Task<Result<UserAssignments>> CreateUserAssignment(Assignment assignment, AppUser appUser)
