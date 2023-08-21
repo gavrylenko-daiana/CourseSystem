@@ -6,6 +6,7 @@ using DAL;
 using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace UnitTests;
@@ -112,10 +113,12 @@ public class GroupServiceTests
         var options = new DbContextOptionsBuilder<ApplicationContext>()
             .UseInMemoryDatabase(databaseName: "test_database")
             .Options;
+        
+        var loggerFactoryMock = new Mock<ILoggerFactory>();
 
         using (var context = new ApplicationContext(options))
         {
-            var unitOfWork = new UnitOfWork(context);
+            var unitOfWork = new UnitOfWork(context, loggerFactoryMock.Object);
             var userGroupServiceMock = new Mock<IUserGroupService>();
             var educationMaterialServiceMock = new Mock<IEducationMaterialService>();
             var userServiceMock = new Mock<IUserService>();

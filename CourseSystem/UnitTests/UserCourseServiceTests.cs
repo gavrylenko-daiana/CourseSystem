@@ -7,6 +7,7 @@ using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace UnitTests;
@@ -16,76 +17,65 @@ public class UserCourseServiceTests
     [Fact]
     public async Task CreateUserCourses_ValidUserCourses_ReturnsTrue()
     {
-        var options = new DbContextOptionsBuilder<ApplicationContext>()
-            .UseInMemoryDatabase(databaseName: "test_database")
-            .Options;
+        var userCourseService = GetUserCourseService();
         
-        using (var context = new ApplicationContext(options))
+        var userCourses = new UserCourses
         {
-            var unitOfWork = new UnitOfWork(context);
-            var userGroupServiceMock = new Mock<IUserGroupService>();
-
-            var userCourseService = new UserCourseService(unitOfWork, userGroupServiceMock.Object);
+            AppUserId = "user123",
+            CourseId = 1
+        }; 
         
-            var userCourses = new UserCourses
-            {
-                AppUserId = "user123",
-                CourseId = 1
-            }; 
+        var result = await userCourseService.CreateUserCourses(userCourses);
         
-            var result = await userCourseService.CreateUserCourses(userCourses);
-        
-            Assert.True(result.IsSuccessful);
-        }
+        Assert.True(result.IsSuccessful);
     }
     
     [Theory]
     [InlineData(null, 1)]
     public async Task CreateUserCourses_InvalidUserCourses_ReturnsFalse(string appUserId, int courseId)
     {
-        var options = new DbContextOptionsBuilder<ApplicationContext>()
-            .UseInMemoryDatabase(databaseName: "test_database")
-            .Options;
+        var userCourseService = GetUserCourseService();
         
-        using (var context = new ApplicationContext(options))
+        var userCourses = new UserCourses
         {
-            var unitOfWork = new UnitOfWork(context);
-            var userGroupServiceMock = new Mock<IUserGroupService>();
-
-            var userCourseService = new UserCourseService(unitOfWork, userGroupServiceMock.Object);
+            AppUserId = "user123",
+            CourseId = 1
+        }; 
         
-            var userCourses = new UserCourses
-            {
-                AppUserId = "user123",
-                CourseId = 1
-            }; 
+        var result = await userCourseService.CreateUserCourses(userCourses);
         
-            var result = await userCourseService.CreateUserCourses(userCourses);
-        
-            Assert.False(result.IsSuccessful);
-        }
+        Assert.False(result.IsSuccessful);
     }
     
     [Fact]
     public async Task CreateUserCourses_NullUserCourses_ReturnsFalse()
     {
+        var userCourseService = GetUserCourseService();
+        
+        UserCourses invalidUserCourses = null;
+            
+        var result = await userCourseService.CreateUserCourses(invalidUserCourses);
+        
+        Assert.False(result.IsSuccessful);
+        Assert.Equal($"userCourses not found", result.Message);
+    }
+    
+    private IUserCourseService GetUserCourseService()
+    {
         var options = new DbContextOptionsBuilder<ApplicationContext>()
             .UseInMemoryDatabase(databaseName: "test_database")
             .Options;
         
+        var loggerFactoryMock = new Mock<ILoggerFactory>();
+
         using (var context = new ApplicationContext(options))
         {
-            var unitOfWork = new UnitOfWork(context);
+            var unitOfWork = new UnitOfWork(context, loggerFactoryMock.Object);
             var userGroupServiceMock = new Mock<IUserGroupService>();
 
             var userCourseService = new UserCourseService(unitOfWork, userGroupServiceMock.Object);
-        
-            UserCourses invalidUserCourses = null;
             
-            var result = await userCourseService.CreateUserCourses(invalidUserCourses);
-        
-            Assert.False(result.IsSuccessful);
-            Assert.Equal($"userCourses not found", result.Message);
+            return userCourseService;
         }
     }
 }

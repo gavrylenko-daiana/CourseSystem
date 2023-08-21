@@ -1,3 +1,4 @@
+using BLL.Interfaces;
 using BLL.Services;
 using Castle.DynamicProxy;
 using Core.Models;
@@ -5,6 +6,7 @@ using DAL;
 using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace UnitTests;
@@ -14,26 +16,18 @@ public class UserGroupServiceTests
     [Fact]
     public async Task CreateUserGroups_ValidUserGroups_ReturnsTrue()
     {
-        var options = new DbContextOptionsBuilder<ApplicationContext>()
-            .UseInMemoryDatabase(databaseName: "test_database")
-            .Options;
-
-        using (var context = new ApplicationContext(options))
+        var userGroupsService = GetUserGroupService();
+        
+        var userGroups = new UserGroups
         {
-            var unitOfWork = new UnitOfWork(context);
-            var userGroupsService = new UserGroupService(unitOfWork);
+            Progress = 0.0, 
+            AppUserId = "user123",
+            GroupId = 1
+        }; 
             
-            var userGroups = new UserGroups
-            {
-                Progress = 0.0, 
-                AppUserId = "user123",
-                GroupId = 1
-            }; 
+        var result = await userGroupsService.CreateUserGroups(userGroups);
             
-            var result = await userGroupsService.CreateUserGroups(userGroups);
-            
-            Assert.True(result.IsSuccessful);
-        }
+        Assert.True(result.IsSuccessful);
     }
     
     [Theory]
@@ -41,54 +35,38 @@ public class UserGroupServiceTests
     [InlineData(0.0, null, 1)]
     public async Task CreateUserGroups_InvalidUserGroups_ReturnsFalse(double? progress, string appUserId, int groupId)
     {
-        var options = new DbContextOptionsBuilder<ApplicationContext>()
-            .UseInMemoryDatabase(databaseName: "test_database")
-            .Options;
-
-        using (var context = new ApplicationContext(options))
+        var userGroupsService = GetUserGroupService();
+        
+        var invalidUserGroups = new UserGroups
         {
-            var unitOfWork = new UnitOfWork(context);
-            var userGroupsService = new UserGroupService(unitOfWork);
-            
-            var invalidUserGroups = new UserGroups
-            {
-                Progress = progress,
-                AppUserId = appUserId,
-                GroupId = groupId
-            }; 
+            Progress = progress,
+            AppUserId = appUserId,
+            GroupId = groupId
+        }; 
         
-            var result = await userGroupsService.CreateUserGroups(invalidUserGroups);
+        var result = await userGroupsService.CreateUserGroups(invalidUserGroups);
         
-            Assert.False(result.IsSuccessful);
-        }
+        Assert.False(result.IsSuccessful);
     }
 
     [Fact]
     public async Task UpdateProgressInUserGroups_ExistentUserGroups_ReturnsTrue()
     {
-        var options = new DbContextOptionsBuilder<ApplicationContext>()
-            .UseInMemoryDatabase(databaseName: "test_database")
-            .Options;
-
-        using (var context = new ApplicationContext(options))
+        var userGroupsService = GetUserGroupService();
+            
+        var userGroups = new UserGroups
         {
-            var unitOfWork = new UnitOfWork(context);
-            var userGroupsService = new UserGroupService(unitOfWork);
+            Progress = 0.0,
+            AppUserId = "user123",
+            GroupId = 1
+        };
             
-            var userGroups = new UserGroups
-            {
-                Progress = 0.0,
-                AppUserId = "user123",
-                GroupId = 1
-            };
+        await userGroupsService.CreateUserGroups(userGroups);
             
-            await userGroupsService.CreateUserGroups(userGroups);
-            
-            var updatedProgress = 0.5;
-            var result = await userGroupsService.UpdateProgressInUserGroups(userGroups, updatedProgress);
+        var updatedProgress = 0.5;
+        var result = await userGroupsService.UpdateProgressInUserGroups(userGroups, updatedProgress);
 
-            Assert.True(result.IsSuccessful);
-        }
+        Assert.True(result.IsSuccessful);
     }
 
     [Theory]
@@ -96,25 +74,35 @@ public class UserGroupServiceTests
     [InlineData(0.0, "12345", 1)]
     public async Task UpdateProgressInUserGroups_NonExistentUserGroups_ReturnsFalse(double? progress, string appUserId, int groupId)
     {
+        var userGroupsService = GetUserGroupService();
+            
+        var nonExistentUserGroups = new UserGroups
+        {
+            Progress = progress,
+            AppUserId = appUserId,
+            GroupId = groupId
+        }; 
+            
+        var result = await userGroupsService.UpdateProgressInUserGroups(nonExistentUserGroups, 0.5);
+
+        Assert.False(result.IsSuccessful);
+    }
+    
+    private IUserGroupService GetUserGroupService()
+    {
         var options = new DbContextOptionsBuilder<ApplicationContext>()
             .UseInMemoryDatabase(databaseName: "test_database")
             .Options;
 
+        var loggerFactoryMock = new Mock<ILoggerFactory>();
+        
         using (var context = new ApplicationContext(options))
         {
-            var unitOfWork = new UnitOfWork(context);
+            var unitOfWork = new UnitOfWork(context, loggerFactoryMock.Object);
+            
             var userGroupsService = new UserGroupService(unitOfWork);
             
-            var nonExistentUserGroups = new UserGroups
-            {
-                Progress = progress,
-                AppUserId = appUserId,
-                GroupId = groupId
-            }; 
-            
-            var result = await userGroupsService.UpdateProgressInUserGroups(nonExistentUserGroups, 0.5);
-
-            Assert.False(result.IsSuccessful);
+            return userGroupsService;
         }
     }
 }

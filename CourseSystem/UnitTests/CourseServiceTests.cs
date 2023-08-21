@@ -8,6 +8,7 @@ using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace UnitTests;
@@ -51,10 +52,12 @@ public class CourseServiceTests
         var options = new DbContextOptionsBuilder<ApplicationContext>()
             .UseInMemoryDatabase(databaseName: "test_database")
             .Options;
+
+        var loggerFactoryMock = new Mock<ILoggerFactory>();
         
         using (var context = new ApplicationContext(options))
         {
-            var unitOfWork = new UnitOfWork(context);
+            var unitOfWork = new UnitOfWork(context, loggerFactoryMock.Object);
             var userCourseServiceMock = new Mock<IUserCourseService>();
             var educationMaterialServiceMock = new Mock<IEducationMaterialService>();
             var groupServiceMock = new Mock<IGroupService>();
