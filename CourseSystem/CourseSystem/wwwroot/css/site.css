@@ -56,3 +56,41 @@ body {
   border: 1px solid #ccc;
   resize: none;
 }
+
+/*User Interface in Index User*/
+.user-profile-index {
+  background-color: #DBFFC5 !important;
+}
+
+.user-profile-index .image-block {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.user-profile-index .ui.grid.equal-height {
+  display: flex;
+  align-items: stretch;
+}
+
+.user-profile-index .ui.grid.equal-height .column {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-profile-index .ui.grid.equal-height .column > .ui.segment {
+  flex: 1;
+}
+
+.user-profile-index .white-text {
+  color: white;
+}
+
+.user-profile-index .white-text:hover {
+  color: white;
+}
+
+.user-profile-index .grey-text {
+  color: grey;
+}
