@@ -2,6 +2,7 @@
 using Core.Enums;
 using Core.Models;
 using DAL.Repository;
+using MailKit.Search;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,13 @@ namespace BLL.Services
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
         private readonly IDropboxService _dropboxService;
+        private readonly IUserAssignmentService _userAssignmentService;
         
-        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService)
+        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService, IUserAssignmentService userAssignmentService)
             : base(unitOfWork, unitOfWork.AssignmentRepository)
         {
             _dropboxService = dropboxService;
+            _userAssignmentService = userAssignmentService;
         }
 
         public async Task<Result<bool>> CreateAssignment(Assignment assignment)
@@ -30,7 +33,7 @@ namespace BLL.Services
             }
 
             SetAssignmentStatus(assignment);
-
+                      
             try
             {
                 await _repository.AddAsync(assignment);
@@ -216,6 +219,44 @@ namespace BLL.Services
             }
 
             return new Result<Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>>>(true, query);
+        }
+
+        public async Task<Result<List<Assignment>>> GetAllUserAssignemnts(AppUser appUser, SortingParam sortOrder, string assignmentAccessFilter = null)
+        {
+            if (appUser == null)
+            {
+                return new Result<List<Assignment>>(false, $"Invalid {nameof(appUser)}");
+            }
+
+            var allGroupsIds = appUser.UserGroups.Where(ug => !ug.Group.GroupAccess.Equals(GroupAccess.Completed)).Select(ug => ug.GroupId); //or get this data with a help of db
+
+            var allUserAssignemnts = new List<Assignment>();
+
+            foreach(var groupId in allGroupsIds)
+            {
+                Result<List<Assignment>> assignmentResult = null;
+
+                var query = GetOrderByExpression(sortOrder);
+
+                if (!string.IsNullOrEmpty(assignmentAccessFilter))
+                {
+                    var tempFilter = Enum.Parse(typeof(AssignmentAccess), assignmentAccessFilter);
+                    assignmentResult = await GetByPredicate(a => a.GroupId == groupId && a.AssignmentAccess.Equals(tempFilter), query.Data);
+                }
+                else
+                {
+                    assignmentResult = await GetByPredicate(a => a.GroupId == groupId, query.Data);
+                }
+
+                if (!assignmentResult.IsSuccessful)
+                {
+                    return new Result<List<Assignment>>(false, assignmentResult.Message);
+                }
+
+                allUserAssignemnts.AddRange(assignmentResult.Data);
+            }
+
+            return new Result<List<Assignment>>(true, allUserAssignemnts);
         }
     }
 }

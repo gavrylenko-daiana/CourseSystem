@@ -13,9 +13,11 @@ namespace BLL.Services
 {
     public class UserAssignmentService : GenericService<UserAssignments>, IUserAssignmentService
     {
-        public UserAssignmentService(UnitOfWork unitOfWork)
+        private IUserGroupService _userGroupService;
+        public UserAssignmentService(UnitOfWork unitOfWork, IUserGroupService userGroupService)
             : base(unitOfWork, unitOfWork.UserAssignmentsRepository)
         {
+            _userGroupService = userGroupService;
         }
 
         public async Task<Result<bool>> ChangeUserAssignmentGrade(UserAssignments userAssignment, int newGrade)
@@ -40,7 +42,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Fail to update assignment");
             }
         }
-
+       
         public async Task<Result<UserAssignments>> CreateUserAssignment(Assignment assignment, AppUser appUser)
         {
             if (assignment == null || appUser == null)
@@ -52,23 +54,25 @@ namespace BLL.Services
             {
                 var checkUserAssignment = await _repository.GetAsync(ua => ua.AppUserId == appUser.Id && ua.AssignmentId == assignment.Id);
 
-                if (checkUserAssignment.Any())
+                if(checkUserAssignment == null || checkUserAssignment.Count == 0)
+                {
+                    var userAssignment = new UserAssignments()
+                    {
+                        Assignment = assignment,
+                        AssignmentId = assignment.Id,
+                        AppUser = appUser,
+                        AppUserId = appUser.Id,
+                    };
+
+                    await _repository.AddAsync(userAssignment);
+                    await _unitOfWork.Save();
+
+                    return new Result<UserAssignments>(true, userAssignment);
+                }
+                else
                 {
                     return new Result<UserAssignments>(true, checkUserAssignment.FirstOrDefault()!);
-                }
-
-                var userAssignment = new UserAssignments()
-                {
-                    Assignment = assignment,
-                    AssignmentId = assignment.Id,
-                    AppUser = appUser,
-                    AppUserId = appUser.Id,
-                };
-
-                await _repository.AddAsync(userAssignment);
-                await _unitOfWork.Save();
-
-                return new Result<UserAssignments>(true, userAssignment);
+                }               
             }
             catch (Exception ex)
             {
@@ -103,7 +107,7 @@ namespace BLL.Services
         {
             var userAssignemnt = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id && ua.AppUserId == appUser.Id);
 
-            if(userAssignemnt == null)
+            if (userAssignemnt == null)
             {
                 var userAssignmentResult = await CreateUserAssignment(assignment, appUser);
 
