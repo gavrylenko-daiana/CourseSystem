@@ -149,13 +149,15 @@ public class CourseService : GenericService<Course>, ICourseService
         }
         
         Result<List<Course>> coursesResult = null;
-        
+
         var courses = currentUser.UserCourses.Select(uc => uc.Course).ToList();
 
         if (!courses.Any())
         {
             return new Result<List<Course>>(true, new List<Course>());
         }
+
+        var backgroundCheckResult = await CheckIsBackgroundExist(courses); //Return data is result for logger message
         
         var query = GetOrderByExpression(sortOrder);
         
@@ -355,6 +357,45 @@ public class CourseService : GenericService<Course>, ICourseService
             }
                 
             return new Result<string>(true, data: backgroundUrlResult.Data.Url);
+        }
+    }
+
+    private async Task<Result<bool>> CheckIsBackgroundExist(List<Course> courses)
+    {
+        if (courses == null)
+        {
+            return new Result<bool>(false, $"Invalid input {nameof(courses)}");
+        }
+
+        if (!courses.Any())
+        {
+            return new Result<bool>(true, $"No {nameof(courses)} for background updating");
+        }
+
+        var coursesWithoutBackgroundImage = courses.Where(c => c.Url.IsNullOrEmpty()).ToList();
+
+        if (!coursesWithoutBackgroundImage.Any())
+        {
+            return new Result<bool>(true, $"Successful {nameof(courses)} background updating");
+        }
+
+        try
+        {
+            foreach (var course in coursesWithoutBackgroundImage)
+            {
+                var randomBackgroundResilt = await GetRandomDefaultBackgroundLink();
+                course.Url = randomBackgroundResilt.Data;
+
+                await _repository.UpdateAsync(course);
+            }
+
+            await _unitOfWork.Save();
+
+            return new Result<bool>(true, $"Successful {nameof(courses)} background updating");
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false, $"Fail to update {nameof(courses)} background");
         }
     }
 }
