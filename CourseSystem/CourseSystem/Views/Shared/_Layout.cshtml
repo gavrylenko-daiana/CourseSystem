@@ -1,11 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - UI </title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/UI.styles.css" asp-append-version="true"/>
     <link
@@ -14,59 +15,56 @@
 </head>
 <body>
 <header>
-    <div class="container">
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CourseSystem</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        @if (!User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Registration</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="User" asp-action="Index">User Profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Course" asp-action="Index">Courses</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Group" asp-action="Index">Groups</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="UserActivity" asp-action="ActivityForMonth">User Activity</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Assignment" asp-action="ViewAll" >All assignments</a>
-                            </li>
-                            <li class="nav-item">
-                                @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+    <div class="ui left demo vertical visible inverted sidebar labeled icon menu" style="background-color: #078c61;">
+        <a class="item" asp-controller="Home" asp-action="Index">
+            <i class="home icon"></i>
+            Home
+        </a>
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <a class="item" asp-controller="Account" asp-action="Login">
+                <i class="sign-in icon"></i>
+                Login
+            </a>
+            <a class="item" asp-controller="Account" asp-action="Register">
+                <i class="user plus icon"></i>
+                Registration
+            </a>
+        }
+        else
+        {
+            <a class="item" asp-controller="User" asp-action="Index">
+                <i class="user icon"></i>
+                User Profile
+            </a>
+            <a class="item" asp-area="" asp-controller="Course" asp-action="Index">
+                <i class="book icon"></i>
+                Courses
+            </a>
+            <a class="item" asp-area="" asp-controller="Group" asp-action="Index">
+                <i class="group icon"></i>
+                Groups
+            </a>
+            <a class="item" asp-controller="UserActivity" asp-action="ActivityForMonth">
+                <i class="chart bar icon"></i>
+                User Activity
+            </a>
+            <a class="item" asp-controller="Assignment" asp-action="ViewAll">
+                <i class="tasks icon"></i>
+                All assignments
+            </a>
+            <div>
+                @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
             </div>
-        </nav>
+            <div class="sign-out-custom-position">
+                <a class="item" asp-controller="Account" asp-action="Logout">
+                    <i class="sign-out icon"></i>
+                    Logout
+                </a>
+            </div>
+        }
     </div>
 </header>
-
 
 <div class="container">
     <main role="main" class="pb-3">

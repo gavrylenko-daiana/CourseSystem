@@ -33,10 +33,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <style>
-        body {
-            background-color: #f7f7f7;
-        }
-
         .cover-card:hover {
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -55,17 +51,6 @@
         .cover-card {
             height: 270px; 
         } 
-         
-        .page-link {
-             background-color: #35DE9C !important;
-             color: white !important; 
-             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        } 
-        
-        .pagination-container {
-            background-color: white; 
-            padding: 3px;
-        }
     </style>
 </head>
 <body>
@@ -207,7 +192,7 @@
                     {
                         <div class="pagination-container">
                             Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                            <div class="page-link">
+                            <div>
                                 @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
                                     new PagedListRenderOptions {
                                         LiElementClasses = new string[] { "page-item" },
