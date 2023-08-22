@@ -1,6 +1,6 @@
 using Core.Models;
 
-namespace UI.ViewModels;
+namespace UI.ViewModels.GroupViewModels;
 
 public class UserGroupViewModel
 {

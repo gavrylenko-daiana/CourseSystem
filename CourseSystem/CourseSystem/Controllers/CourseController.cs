@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using UI.ViewModels;
+using UI.ViewModels.CourseViewModels;
 using X.PagedList;
 
 namespace UI.Controllers;
@@ -257,6 +258,7 @@ public class CourseController : Controller
         courseResult.Data.MapTo(courseViewModel);
 
         courseViewModel.CurrentUser = currentUserResult.Data;
+        courseViewModel.UserCoursesWithoutAdmins = courseResult.Data.UserCourses.Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList();
 
         if (courseViewModel.CurrentUser == null)
         {
