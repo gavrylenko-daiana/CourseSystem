@@ -135,7 +135,7 @@ public class AssignmentController : Controller
             return View(assignmentVM);
         }
 
-        var checkTimeResult = _assignmentService.ValidateTimeInput(assignmentVM.StartDate, assignmentVM.EndDate);
+        var checkTimeResult = await _assignmentService.ValidateTimeInput(assignmentVM.StartDate, assignmentVM.EndDate, assignmentVM.GroupId);
         
         if (!checkTimeResult.IsSuccessful)
         {
@@ -297,8 +297,7 @@ public class AssignmentController : Controller
             return View("Error");
         }
 
-        var checkTimeResult =
-            _assignmentService.ValidateTimeInput(editAssignmentVM.StartDate, editAssignmentVM.EndDate);
+        var checkTimeResult = await _assignmentService.ValidateTimeInput(editAssignmentVM.StartDate, editAssignmentVM.EndDate, editAssignmentVM.GroupId);
         
         if (!checkTimeResult.IsSuccessful)
         {
