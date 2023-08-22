@@ -4,6 +4,7 @@ using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BLL.Services;
 
@@ -45,6 +46,35 @@ public class AssignmentFileService : GenericService<AssignmentFile>, IAssignment
         catch (Exception ex)
         {
             return new Result<AssignmentFile>(false, $"Failed to add assignment file to database. Message: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> DeleteAssignmentFile(int fileId)
+    {
+        try
+        {
+            var fileResult = await GetById(fileId);
+
+            if (!fileResult.IsSuccessful)
+            {
+                return new Result<bool>(false, fileResult.Message);
+            }
+
+            var deleteFileDropboxResult = await _dropboxService.DeleteFileAsync(fileResult.Data.Name, fileResult.Data.DropboxFolder.ToString());
+
+            if (!deleteFileDropboxResult.IsSuccessful)
+            {
+                return new Result<bool>(false, deleteFileDropboxResult.Message);
+            }
+
+            await _repository.DeleteAsync(fileResult.Data);
+            await _unitOfWork.Save();
+
+            return new Result<bool>(true, $"Successful deletion of {nameof(fileResult.Data)}");
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false, $"Fail to delete assignment file");
         }
     }
 }
