@@ -40,14 +40,36 @@
     .activity-table-square{
         border: 1px solid black;
         display:block;
-        width:9px;
-        height:9px;
+        width: 15px;
+        height: 15px;
+        border-radius: 25%; 
     }
 
     .month-link{
         color: black;
         font-size: 11px;
     }
+    
+    .activity-levels {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .activity-level {
+        display: inline-block;
+        margin: 0 10px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: white;
+    } 
+    
+    .card
+    {
+        padding: 3px;
+    }    
 </style>
 
 <div class="card">
@@ -157,11 +179,19 @@
             thisDay = firstDay;
         }
         </table>
+        <div class="activity-levels">
+            <div class="activity-level" style="background-color: #91eda9;">1 activity</div>
+            <div class="activity-level" style="background-color: #32a851;">3-5 activities</div>
+            <div class="activity-level" style="background-color: #047822;">6+ activities</div>
+        </div>
 </div>
 
 <script>
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            placement: 'top', 
+            container: 'body', 
+        });
     });
 </script>
