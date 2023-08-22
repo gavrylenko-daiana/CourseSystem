@@ -1,24 +1,29 @@
 ﻿using BLL.Interfaces;
+using Castle.Core.Logging;
 using Core.ActivityTemplates;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Dropbox.Api.TeamLog.TimeUnit;
 
 namespace BLL.Services
 {
     public class ActivityService : GenericService<UserActivity>, IActivityService
     {
+        private readonly ILogger<ActivityService> _logger;
         private readonly IGroupService _groupService;
-        public ActivityService(UnitOfWork unitOfWork, IGroupService groupService)
+        public ActivityService(UnitOfWork unitOfWork, ILogger<ActivityService> logger, IGroupService groupService)
             : base(unitOfWork, unitOfWork.UserActivityRepository)
         {
+            _logger = logger;
             _groupService = groupService;
         }
 
@@ -26,19 +31,29 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.CreatedAssignment);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (assignment == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - assignment was null!", ActivityType.CreatedAssignment);
+
                 return new Result<bool>(false, $"Invalid {nameof(assignment)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about assignment {assignmentId}",
+                ActivityType.CreatedAssignment, user.Id, assignment.Id);
 
             var groupResult = await _groupService.GetById(assignment.GroupId);
 
             if (!groupResult.IsSuccessful)
             {
-                return new Result<bool>(false);
+                _logger.LogError("Failed to add activity - corresponding group by Id {groupId} not found! Error: {errorMessage}",
+                    assignment.GroupId, groupResult.Message);
+
+                return new Result<bool>(false, "Failed to add activity - corresponding group not found!");
             }
 
             var activity = new UserActivity()
@@ -56,13 +71,20 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.CreatedCourse);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (course == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - course was null!", ActivityType.CreatedCourse);
+
                 return new Result<bool>(false, $"Invalid {nameof(course)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about course {courseId}",
+                ActivityType.CreatedCourse, user.Id, course.Id);
 
             var activity = new UserActivity()
             {
@@ -79,13 +101,20 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.CreatedGroup);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (group == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - group was null!", ActivityType.CreatedGroup);
+
                 return new Result<bool>(false, $"Invalid {nameof(group)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about group {groupId}",
+                ActivityType.CreatedGroup, user.Id, group.Id);
 
             var activity = new UserActivity()
             {
@@ -102,13 +131,20 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.JoinedCourse);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (course == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - course was null!", ActivityType.JoinedCourse);
+
                 return new Result<bool>(false, $"Invalid {nameof(course)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about course {courseId}",
+                ActivityType.JoinedCourse, user.Id, course.Id);
 
             var activity = new UserActivity()
             {
@@ -125,13 +161,20 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.JoinedGroup);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (group == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - group was null!", ActivityType.JoinedGroup);
+
                 return new Result<bool>(false, $"Invalid {nameof(group)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about group {groupId}",
+                ActivityType.JoinedGroup, user.Id, group.Id);
 
             var activity = new UserActivity()
             {
@@ -148,13 +191,20 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.MarkedAssignment);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (userAssignment == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - userAssignment was null!", ActivityType.MarkedAssignment);
+
                 return new Result<bool>(false, $"Invalid {nameof(userAssignment)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about userAssignment {userAssignmentId}",
+                ActivityType.MarkedAssignment, user.Id, userAssignment.Id);
 
             var activity = new UserActivity()
             {
@@ -176,13 +226,20 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.SubmittedAssignmentAnswer);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (assignment == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - assignment was null!", ActivityType.SubmittedAssignmentAnswer);
+
                 return new Result<bool>(false, $"Invalid {nameof(assignment)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about assignment {assignmentId}",
+                ActivityType.SubmittedAssignmentAnswer, user.Id, assignment.Id);
 
             var activity = new UserActivity()
             {
@@ -199,13 +256,20 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.AttachedEducationalMaterialForCourse);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (course == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - course was null!", ActivityType.AttachedEducationalMaterialForCourse);
+
                 return new Result<bool>(false, $"Invalid {nameof(course)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about course {courseId}",
+                ActivityType.AttachedEducationalMaterialForCourse, user.Id, course.Id);
 
             var activity = new UserActivity()
             {
@@ -222,13 +286,20 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.AttachedEducationalMaterialForGroup);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
 
             if (group == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - group was null!", ActivityType.AttachedEducationalMaterialForGroup);
+
                 return new Result<bool>(false, $"Invalid {nameof(group)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId} about group {groupId}",
+                ActivityType.AttachedEducationalMaterialForGroup, user.Id, group.Id);
 
             var activity = new UserActivity()
             {
@@ -245,8 +316,13 @@ namespace BLL.Services
         {
             if (user == null)
             {
+                _logger.LogError("Failed to add {activityType} activity - user was null!", ActivityType.AttachedGeneralEducationalMaterial);
+
                 return new Result<bool>(false, $"Invalid ${nameof(user)}");
             }
+
+            _logger.LogInformation("Forming {activityType} activity for user {userId}",
+                ActivityType.AttachedGeneralEducationalMaterial, user.Id);
 
             var activity = new UserActivity()
             {
@@ -263,13 +339,19 @@ namespace BLL.Services
         {
             try
             {
+                _logger.LogInformation("Saving activity");
+
                 await _repository.AddAsync(activity);
                 await _unitOfWork.Save();
+
+                _logger.LogInformation("Activity saved successfully");
 
                 return new Result<bool>(true);
             }
             catch (Exception ex)
             {
+                _logger.LogError("Failed to save activity! Error: {errorMessage}", ex.Message);
+
                 return new Result<bool>(false, ex.Message);
             }
         }
