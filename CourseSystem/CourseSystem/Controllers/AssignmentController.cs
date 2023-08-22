@@ -2,6 +2,7 @@
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
+using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
@@ -81,8 +82,6 @@ public class AssignmentController : Controller
             {
                 var assignmentVM = new AssignmentViewModel();
                 assignment.MapTo(assignmentVM);
-                
-                assignmentVM.UserAssignment = assignment.UserAssignments.FirstOrDefault(ua => ua.AssignmentId == assignment.Id);
                 assignmentsVM.Add(assignmentVM);
             });
         }
@@ -90,10 +89,7 @@ public class AssignmentController : Controller
         ViewBag.GroupId = groupId;
         int pageSize = 6;
         int pageNumber = (page ?? 1);
-        ViewBag.OnePageOfAssignemnts = assignmentsVM;
 
-        //var currentUserResult = await _userService.GetCurrentUser(User);
-        //await _assignmentService.GetAllUserAssignemnts(currentUserResult.Data);
         return View(assignmentsVM.ToPagedList(pageNumber, pageSize));
     }
 
@@ -338,5 +334,59 @@ public class AssignmentController : Controller
         }
 
         return RedirectToAction("Details", "Assignment", new { assignmentId = editAssignmentVM.Id });
+    }
+
+    public async Task<IActionResult> ViewAll(string currentAccessFilter, SortingParam sortOrder, string assignmentAccessFilter, int? page)
+    {
+        ViewBag.CurrentSort = sortOrder;
+        ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
+        ViewBag.StartDateParam = sortOrder == SortingParam.StartDateDesc ? SortingParam.StartDate : SortingParam.StartDateDesc;
+        ViewBag.EndDateParam = sortOrder == SortingParam.EndDateDesc ? SortingParam.EndDate : SortingParam.EndDateDesc;
+
+        if (assignmentAccessFilter != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            assignmentAccessFilter = currentAccessFilter;
+        }
+
+        ViewBag.CurrentAccessFilter = assignmentAccessFilter;
+
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", currentUserResult.Message);
+
+            return RedirectToAction("Login", "Account");
+        }
+
+        var allUserAssignemntsResult = await _assignmentService.GetAllUserAssignemnts(currentUserResult.Data, sortOrder, assignmentAccessFilter);
+
+        if (!allUserAssignemntsResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", allUserAssignemntsResult.Message);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        var assignmentsVM = new List<AssignmentViewModel>();
+
+        if (allUserAssignemntsResult.Data != null)
+        {
+            allUserAssignemntsResult.Data.ForEach(assignment =>
+            {
+                var assignmentVM = new AssignmentViewModel();
+                assignment.MapTo(assignmentVM);
+                assignmentsVM.Add(assignmentVM);
+            });
+        }
+
+        int pageSize = 6;
+        int pageNumber = (page ?? 1);
+
+        return View(assignmentsVM.ToPagedList(pageNumber, pageSize));
     }
 }

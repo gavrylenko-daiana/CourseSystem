@@ -2,6 +2,7 @@
 using Core.Enums;
 using Core.Models;
 using DAL.Repository;
+using MailKit.Search;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -37,13 +38,6 @@ namespace BLL.Services
             {
                 await _repository.AddAsync(assignment);
                 await _unitOfWork.Save();
-
-                var userAssignemntsCreationResult = await _userAssignmentService.CreateUserAssignemntsForAllUsersInGroup(assignment);
-
-                if (!userAssignemntsCreationResult.IsSuccessful)
-                {
-                    return new Result<bool>(false, "Fail to create user assignemnts for all users in group");
-                }
 
                 return new Result<bool>(true);
             }
@@ -227,7 +221,7 @@ namespace BLL.Services
             return new Result<Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>>>(true, query);
         }
 
-        public async Task<Result<List<Assignment>>> GetAllUserAssignemnts(AppUser appUser)
+        public async Task<Result<List<Assignment>>> GetAllUserAssignemnts(AppUser appUser, SortingParam sortOrder, string assignmentAccessFilter = null)
         {
             if (appUser == null)
             {
@@ -240,14 +234,26 @@ namespace BLL.Services
 
             foreach(var groupId in allGroupsIds)
             {
-                var assignemntResult = await GetByPredicate(a => a.GroupId == groupId);
+                Result<List<Assignment>> assignmentResult = null;
 
-                if (!assignemntResult.IsSuccessful)
+                var query = GetOrderByExpression(sortOrder);
+
+                if (!string.IsNullOrEmpty(assignmentAccessFilter))
                 {
-                    return new Result<List<Assignment>>(false, assignemntResult.Message);
+                    var tempFilter = Enum.Parse(typeof(AssignmentAccess), assignmentAccessFilter);
+                    assignmentResult = await GetByPredicate(a => a.GroupId == groupId && a.AssignmentAccess.Equals(tempFilter), query.Data);
+                }
+                else
+                {
+                    assignmentResult = await GetByPredicate(a => a.GroupId == groupId, query.Data);
                 }
 
-                allUserAssignemnts.AddRange(assignemntResult.Data);
+                if (!assignmentResult.IsSuccessful)
+                {
+                    return new Result<List<Assignment>>(false, assignmentResult.Message);
+                }
+
+                allUserAssignemnts.AddRange(assignmentResult.Data);
             }
 
             return new Result<List<Assignment>>(true, allUserAssignemnts);
