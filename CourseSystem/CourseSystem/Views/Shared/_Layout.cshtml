@@ -21,7 +21,7 @@
 <div class="row">
     <div class="col-md-1">
         <header>
-            <div class="ui left demo vertical visible inverted sidebar labeled icon menu" style="background-color: #078c61;">
+            <div class="ui left demo vertical visible inverted sidebar labeled icon menu" style="background-color: #02af78;">
                 <a class="item" asp-controller="Home" asp-action="Index">
                     <i class="home icon"></i>
                     Home
@@ -57,7 +57,7 @@
                     </a>
                     <a class="item" asp-controller="Assignment" asp-action="ViewAll">
                         <i class="tasks icon"></i>
-                        All assignments
+                        Assignments
                     </a>
                     <div class="sign-out-custom-position">
                         <a class="item" asp-controller="Account" asp-action="Logout">
@@ -69,28 +69,30 @@
             </div>
         </header>
     </div>
-    <div class="col-md-11">
-        <header class="user-header container-fluid" style="background-color: #078c61; position: relative;">
-            @if (User.Identity.IsAuthenticated)
-            {
-                var user = await UserService.GetCurrentUser(User);
-                <div class="ui secondary menu">
+    <header class="user-header container-fluid background-color-header" style="position: relative;">
+        @if (User.Identity.IsAuthenticated)
+        {
+            var user = await UserService.GetCurrentUser(User);
+            <div class="ui secondary menu">
+                <div style="margin-left: 120px;">
                     <a class="navbar-brand text-white item" asp-area="" asp-controller="Home" asp-action="Index">CourseSystem</a>
-                    <div class="right menu">
-                        <div class="item">
-                            @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
-                        </div>
-                        <div class="item" style="margin-right: -15px;">
-                            <img src="@user.Data.ProfileImage.Url" alt="Avatar" class="avatar ui mini rounded-circle img-fluid" style="width: 30px;">
-                        </div>
-                        <div class="item">
-                            <a class="text-white" href="@Url.Action("Index", "User")">@user.Data.FirstName @user.Data.LastName</a>
-                        </div>
+                </div>
+                <div class="right menu">
+                    <div class="item">
+                        @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
+                    </div>
+                    <div class="item" style="margin-right: -15px;">
+                        <img src="@user.Data.ProfileImage.Url" alt="Avatar" class="avatar ui mini rounded-circle img-fluid" style="width: 30px;">
+                    </div>
+                    <div class="item">
+                        <a class="text-white" href="@Url.Action("Index", "User")">@user.Data.FirstName @user.Data.LastName</a>
                     </div>
                 </div>
-            }
-        </header>
+            </div>
+        }
+    </header>
 
+    <div style="margin-left: 55px;">
         <div class="container">
             <main role="main" class="pb-3">
                 @RenderBody()
