@@ -117,6 +117,50 @@ public class GroupService : GenericService<Group>, IGroupService
         }
     }
 
+    public async Task<Result<bool>> DeleteUserFromGroup(Group group, AppUser deletedUser)
+    {
+        if (group == null)
+        {
+            return new Result<bool>(false, $"{nameof(group)} not found");
+        }
+
+        if (deletedUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(deletedUser)} not found");
+        }
+        
+        var delUserGroup = new UserGroups()
+        {
+            AppUserId = deletedUser.Id,
+            GroupId = group.Id
+        };
+        
+        var userGroups = group.UserGroups;
+        
+        try
+        {
+            foreach (var userGroup in userGroups)
+            {
+                if (userGroup.AppUserId == delUserGroup.AppUserId && userGroup.GroupId == delUserGroup.GroupId)
+                {
+                    userGroups.Remove(userGroup);
+
+                    break;
+                }
+            }
+           
+            group.UserGroups = userGroups;
+            
+            await _unitOfWork.Save();
+
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false, $"Failed to delete group {group.Name}. Exception: {ex.Message}");
+        }
+    }
+
     public async Task<Result<bool>> UpdateGroup(Group newGroup)
     {
         if (newGroup == null)
