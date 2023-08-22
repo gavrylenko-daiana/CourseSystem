@@ -744,4 +744,59 @@ public class GroupController : Controller
 
         return RedirectToAction("SelectStudent", "Group", new { id = groupId, approved = true });
     }
+
+    
+    [HttpGet]
+    public async Task<IActionResult> DeleteUserFromGroup(int groupId, string userId)
+    {
+        var userResult = await _userService.FindByIdAsync(userId);
+
+        if (!userResult.IsSuccessful)
+        {
+            _logger.LogWarning("Not found User");
+            ViewData.ViewDataMessage("Error", $"{userResult.Message}");
+
+            return View("Index");
+        }
+        
+        var groupResult = await _groupService.GetById(groupId);
+        
+        if (!groupResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                groupId, groupResult.Message);
+            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
+        
+            return View("Index");
+        }
+
+        var userGroupViewModel = new UserGroupViewModel()
+        {
+            CurrentUser = userResult.Data,
+            Group = groupResult.Data
+        };
+        
+        return View(userGroupViewModel);
+    }
+
+    [HttpPost]
+    [ActionName("DeleteUserFromGroup")]
+    public async Task<IActionResult> DeleteUserFromGroupConfirmed(int groupId, string userId)
+    {
+        var userResult = await _userService.FindByIdAsync(userId);
+        var groupResult = await _groupService.GetById(groupId);
+        
+        var deleteResult = await _groupService.DeleteUserFromGroup(groupResult.Data, userResult.Data);
+        
+        if (!deleteResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to delete group by Id {groupId}! Error: {errorMessage}",
+                groupId, deleteResult.Message);
+            TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+        
+            return View("DeleteUserFromGroup");
+        }
+        
+        return RedirectToAction("Index");
+    }
 }
