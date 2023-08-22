@@ -8,10 +8,10 @@
     <div class="ui grid equal-height" style="display: flex; align-items: stretch;">
         <div class="four wide column">
             <div class="ui segment">
-                <div class="ui icon header">
+                <div class="ui icon header" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
                     @if (Model.ProfileImage != null)
                     {
-                        <div class="image-block" style="text-align: center;">
+                        <div class="image-block">
                             <img src="@Model.ProfileImage.Url" alt="@Model.ProfileImage.Name" class="ui mini rounded-circle img-fluid" style="max-width: 210px; max-height: 210px; display: inline-block; vertical-align: middle;">
                         </div>
                     }
