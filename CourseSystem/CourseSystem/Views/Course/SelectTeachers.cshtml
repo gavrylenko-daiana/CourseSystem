@@ -1,4 +1,8 @@
-@model List<UI.ViewModels.TeacherViewModel>
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@using System.Web;
+@using X.PagedList.Web.Common;
+@model X.PagedList.IPagedList<UI.ViewModels.TeacherViewModel>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -90,9 +94,24 @@
 
             }
         }
-    </div>        
+    </div>
+    
 </div>
-
+    <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+        @if (Model.PageCount > 1)
+        {
+            <div class="pagination-container">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                <div>
+                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new {courseId = ViewBag.SelectTeachersCourseId, page = page }),
+                new PagedListRenderOptions {
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" }
+                })
+                </div>
+            </div>
+        }
+    </div>
 <script>
     document.querySelectorAll('.ui.card').forEach(card => {
         card.addEventListener('click', function () {

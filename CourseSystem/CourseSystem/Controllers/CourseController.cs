@@ -273,7 +273,7 @@ public class CourseController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectTeachers(int courseId)
+    public async Task<IActionResult> SelectTeachers(int courseId, int? page)
     {
         var courseResult = await _courseService.GetById(courseId);
 
@@ -300,8 +300,12 @@ public class CourseController : Controller
                 CourseId = courseId
             })
             .ToList();
-        
-        return View(teachers);
+
+        int pageSize = 9;
+        int pageNumber = (page ?? 1);
+        ViewBag.SelectTeachersCourseId = courseId;
+
+        return View(teachers.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpPost]
