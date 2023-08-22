@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using BLL.Interfaces
+@inject IUserService UserService
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,57 +17,83 @@
         rel="stylesheet">
 </head>
 <body>
-<header>
-    <div class="ui left demo vertical visible inverted sidebar labeled icon menu" style="background-color: #078c61;">
-        <a class="item" asp-controller="Home" asp-action="Index">
-            <i class="home icon"></i>
-            Home
-        </a>
-        @if (!User.Identity.IsAuthenticated)
-        {
-            <a class="item" asp-controller="Account" asp-action="Login">
-                <i class="sign-in icon"></i>
-                Login
-            </a>
-            <a class="item" asp-controller="Account" asp-action="Register">
-                <i class="user plus icon"></i>
-                Registration
-            </a>
-        }
-        else
-        {
-            <a class="item" asp-controller="User" asp-action="Index">
-                <i class="user icon"></i>
-                User Profile
-            </a>
-            <a class="item" asp-area="" asp-controller="Course" asp-action="Index">
-                <i class="book icon"></i>
-                Courses
-            </a>
-            <a class="item" asp-area="" asp-controller="Group" asp-action="Index">
-                <i class="group icon"></i>
-                Groups
-            </a>
-            <a class="item" asp-controller="UserActivity" asp-action="ActivityForMonth">
-                <i class="chart bar icon"></i>
-                User Activity
-            </a>
-            <a class="item" asp-controller="Assignment" asp-action="ViewAll">
-                <i class="tasks icon"></i>
-                All assignments
-            </a>
-            <div>
-                @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
-            </div>
-            <div class="sign-out-custom-position">
-                <a class="item" asp-controller="Account" asp-action="Logout">
-                    <i class="sign-out icon"></i>
-                    Logout
+
+<div class="row">
+    <div class="col-md-1">
+        <header>
+            <div class="ui left demo vertical visible inverted sidebar labeled icon menu" style="background-color: #078c61;">
+                <a class="item" asp-controller="Home" asp-action="Index">
+                    <i class="home icon"></i>
+                    Home
                 </a>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <a class="item" asp-controller="Account" asp-action="Login">
+                        <i class="sign-in icon"></i>
+                        Login
+                    </a>
+                    <a class="item" asp-controller="Account" asp-action="Register">
+                        <i class="user plus icon"></i>
+                        Registration
+                    </a>
+                }
+                else
+                {
+                    <a class="item" asp-controller="User" asp-action="Index">
+                        <i class="user icon"></i>
+                        User Profile
+                    </a>
+                    <a class="item" asp-area="" asp-controller="Course" asp-action="Index">
+                        <i class="book icon"></i>
+                        Courses
+                    </a>
+                    <a class="item" asp-area="" asp-controller="Group" asp-action="Index">
+                        <i class="group icon"></i>
+                        Groups
+                    </a>
+                    <a class="item" asp-controller="UserActivity" asp-action="ActivityForMonth">
+                        <i class="chart bar icon"></i>
+                        User Activity
+                    </a>
+                    <a class="item" asp-controller="Assignment" asp-action="ViewAll">
+                        <i class="tasks icon"></i>
+                        All assignments
+                    </a>
+                    <div class="sign-out-custom-position">
+                        <a class="item" asp-controller="Account" asp-action="Logout">
+                            <i class="sign-out icon"></i>
+                            Logout
+                        </a>
+                    </div>
+                }
             </div>
-        }
+        </header>
     </div>
-</header>
+    <div class="col-md-11">
+        <header class="user-header container-fluid" style="background-color: #078c61; position: relative;">
+            @if (User.Identity.IsAuthenticated)
+            {
+                var user = await UserService.GetCurrentUser(User);
+                <div class="ui horizontal list">
+                    <div class="item">
+                        <a class="navbar-brand text-white" asp-area="" asp-controller="Home" asp-action="Index">CourseSystem</a>
+                    </div>
+                    <div class="item">
+                        <li class="nav-item">
+                            @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
+                        </li>
+                    </div>
+                    <div class="item">
+                        <img src="@user.Data.ProfileImage.Url" alt="Avatar" class="avatar" style="width: 20px;">
+                    </div>
+                    <div class="item">
+                        <a class="text-white" href="@Url.Action("Index", "User")">@user.Data.FirstName @user.Data.LastName</a>
+                    </div>
+                </div>
+            }
+        </header>
+    </div>
+</div>
 
 <div class="container">
     <main role="main" class="pb-3">
@@ -72,11 +101,6 @@
     </main>
 </div>
 
-@* <footer class="border-top footer text-muted"> *@
-@*     <div class="container"> *@
-@*         &copy; 2023 - Course Service *@
-@*     </div> *@
-@* </footer> *@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
