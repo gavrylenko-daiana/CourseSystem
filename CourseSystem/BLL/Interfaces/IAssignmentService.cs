@@ -14,6 +14,6 @@ namespace BLL.Interfaces
         Task<Result<List<Assignment>>> GetGroupAssignments(int groupId, SortingParam sortOrder, string assignmentAccessFilter = null, string searchQuery = null);
         Task<Result<bool>> DeleteAssignment(int assignmentId);
         Task<Result<bool>> UpdateAssignment(Assignment assignment);
-        Result<bool> ValidateTimeInput(DateTime? startDate, DateTime? endDate);
+        Task<Result<bool>> ValidateTimeInput(DateTime? startDate, DateTime? endDate, int groupId);
     }
 }

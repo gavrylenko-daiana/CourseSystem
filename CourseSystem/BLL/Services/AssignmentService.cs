@@ -15,11 +15,13 @@ namespace BLL.Services
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
         private readonly IDropboxService _dropboxService;
+        private readonly IGroupService _groupService;
         
-        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService)
+        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService, IGroupService groupService)
             : base(unitOfWork, unitOfWork.AssignmentRepository)
         {
             _dropboxService = dropboxService;
+            _groupService = groupService;
         }
 
         public async Task<Result<bool>> CreateAssignment(Assignment assignment)
@@ -123,14 +125,26 @@ namespace BLL.Services
             return new Result<List<Assignment>>(true, assignmentResult.Data);
         }
 
-        public Result<bool> ValidateTimeInput(DateTime? startDate, DateTime? endDate)
+        public async Task<Result<bool>> ValidateTimeInput(DateTime? startDate, DateTime? endDate, int groupId)
         {
             startDate ??= DateTime.MinValue;
             endDate ??= DateTime.MaxValue;
 
+            var group = await _groupService.GetById(groupId);
+
+            if (!group.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Group with id: {groupId} does not exists");
+            }
+
             if (startDate > endDate)
             {
-                return new Result<bool>(false, "End date can't be less than start date");
+                return new Result<bool>(false, "Task start date cannot be greater than task end date.");
+            }
+            
+            if (endDate > group.Data.EndDate)
+            {
+                return new Result<bool>(false, "Task end date cannot be greater than the end of the group");
             }
 
             return new Result<bool>(true);
