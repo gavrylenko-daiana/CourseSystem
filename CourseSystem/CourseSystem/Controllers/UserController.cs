@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using UI.ViewModels;
 using UI.ViewModels.EmailViewModels;
 using static Dropbox.Api.Files.ListRevisionsMode;
+using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
 
 namespace UI.Controllers;
 
@@ -303,5 +304,27 @@ public class UserController : Controller
 
             return RedirectToAction("Index", "User");
         }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DeleteProfileImage()
+    {
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Failed to get {nameof(currentUserResult.Data)} - Message: {currentUserResult.Message}");
+
+            return RedirectToAction("Index", "User");
+        }
+
+        var replaceImageResult = await _profileImageService.ReplaceUserProfileImage(currentUserResult.Data);
+
+        if (!replaceImageResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", $"Failed to {replaceImageResult.Message}");
+        }
+
+        return RedirectToAction("Edit", "User");
     }
 }
