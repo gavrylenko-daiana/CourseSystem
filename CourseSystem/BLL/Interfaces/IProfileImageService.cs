@@ -14,5 +14,6 @@ namespace BLL.Interfaces
         Task<Result<bool>> UpdateProfileImage(AppUser user, IFormFile newProfileImage);
         Result<bool> CheckFileExtension(IFormFile newProfileImage);
         Task<Result<bool>> DeleteUserProfileImage(AppUser user);
+        Task<Result<bool>> ReplaceUserProfileImage(AppUser user);
     }
 }

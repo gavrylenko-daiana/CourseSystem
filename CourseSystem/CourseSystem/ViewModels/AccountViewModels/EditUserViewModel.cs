@@ -1,3 +1,4 @@
+using Core.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace UI.ViewModels;
@@ -32,4 +33,5 @@ public class EditUserViewModel
 
     [Display(Name = "Update profile image")]
     public IFormFile? NewProfileImage { get; set; }
+    public ProfileImage? ProfileImage { get; set; }
 }

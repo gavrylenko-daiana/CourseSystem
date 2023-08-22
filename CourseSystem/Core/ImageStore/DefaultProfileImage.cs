@@ -18,9 +18,20 @@ namespace Core.ImageStore
         };
 
         private static Random _random = new Random();
-        public static (string, string) GetDefaultImageUrl()
+        public static (string, string) GetDefaultImageUrl(string? exceptName = null)
         {
             var index = _random.Next(0, _avatarsPack.Keys.Count);
+
+            if (exceptName != null)
+            {
+                var keyArrayExcept = _avatarsPack.Keys.ToList();
+                keyArrayExcept.Remove(exceptName);
+                var indexExcept = _random.Next(0, keyArrayExcept.Count);
+                var imageNameExecpt = keyArrayExcept[indexExcept];
+
+                return (imageNameExecpt, _avatarsPack[imageNameExecpt]);
+            }
+
             var keyArray = _avatarsPack.Keys.ToArray();
             var imageName = keyArray[index];
 

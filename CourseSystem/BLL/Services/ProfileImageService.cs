@@ -62,16 +62,66 @@ namespace BLL.Services
 
                     if (!deleteImageDropboxResult.IsSuccessful)
                     {
-                        return new Result<bool>(false, $"Failed to delete profile image - Message: {userProfileImageResult.Message}");
+                        return new Result<bool>(false, $"Failed to delete profile image - Message: {deleteImageDropboxResult.Message}");
                     }
                 }
-                
+               
                 return new Result<bool>(true, "Successful deletion of the profile picture");
             }
             catch (Exception ex)
             {
                 return new Result<bool>(false, $"Failed to delete profile image - Message: {ex.Message}");
             }            
+        }
+
+        public async Task<Result<bool>> ReplaceUserProfileImage(AppUser user)
+        {
+            if (user == null)
+            {
+                return new Result<bool>(false, "Invalid user");
+            }
+
+            var userProfileImageResult = await GetByPredicate(p => p.AppUserId == user.Id);
+
+            if (!userProfileImageResult.IsSuccessful)
+            {
+                return new Result<bool>(false, $"Failed to get profile image - Message: {userProfileImageResult.Message}");
+            }
+
+            var profileImage = userProfileImageResult.Data.FirstOrDefault();
+
+            (string, string) newProfileImageData;
+
+            if (!DefaultProfileImage.IsProfileImageDefault(user.ProfileImage.Url))
+            {
+                var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(user.ProfileImage.Name, DropboxFolders.ProfileImages.ToString());
+
+                if (!deleteImageDropboxResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, $"Failed to delete profile image - Message: {deleteImageDropboxResult.Message}");
+                }
+
+                newProfileImageData = DefaultProfileImage.GetDefaultImageUrl();
+            }
+            else
+            {
+                newProfileImageData = DefaultProfileImage.GetDefaultImageUrl(profileImage?.Name);               
+            }
+
+            try
+            {
+                profileImage.Name = newProfileImageData.Item1;
+                profileImage.Url = newProfileImageData.Item2;
+
+                await _repository.UpdateAsync(profileImage);
+                await _unitOfWork.Save();
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>(false, $"Failed to replace profile image");
+            }
+
+            return new Result<bool>(true, "Successful replacment of the profile picture");
         }
 
         public async Task<Result<bool>> SetDefaultProfileImage(AppUser user)
