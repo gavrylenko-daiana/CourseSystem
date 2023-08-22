@@ -13,6 +13,5 @@ namespace UI.ViewModels.AssignmentViewModels
         public DateTime EndDate { get; set; }
         public int GroupId { get; set; }
         public AssignmentAccess AssignmentAccess { get; set; }
-        public UserAssignments? UserAssignment { get; set; }
     }
 }

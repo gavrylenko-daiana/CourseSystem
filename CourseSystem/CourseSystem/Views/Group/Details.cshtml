@@ -130,7 +130,7 @@
                     <ul class="ui user-list">
                         @foreach (var userGroupsWithoutAdmin in Model.UserGroupsWithoutAdmins)
                         {
-                            <li class="user-item">
+                            <li class="user-item" style="display: flex; flex-direction: column; align-items: center;">
                                 <div class="user-profile" style="display: flex; align-items: center;">
                                     <div class="user-details" style="display: flex; align-items: center;">
                                         @if (userGroupsWithoutAdmin.AppUser.ProfileImage != null)
@@ -144,10 +144,15 @@
                                         </a>
                                     </div>
                                 </div>
+                                @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                                {
+                                    <a href="@Url.Action("DeleteUserFromGroup", "Group", new { groupId = Model.Group.Id, userId = userGroupsWithoutAdmin.AppUser.Id})" class="ui red" style="margin-top: auto;">Delete user</a>
+                                }
                             </li>
                         }
                     </ul>
                 }
+
                 else
                 {
                     <div class="ui warning message">

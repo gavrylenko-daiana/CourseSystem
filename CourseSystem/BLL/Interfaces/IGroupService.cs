@@ -7,6 +7,7 @@ public interface IGroupService : IGenericService<Group>
 {
     Task<Result<bool>> CreateGroup(Group group, AppUser currentUser);
     Task<Result<bool>> DeleteGroup(int groupId);
+    Task<Result<bool>> DeleteUserFromGroup(Group group, AppUser deletedUser);
     Task<Result<bool>> UpdateGroup(Group newGroup);
     Task<string> CalculateStudentProgressInGroup(Group group, AppUser currentUser);
     Task<string> CalculateGroupProgress(int groupId);
