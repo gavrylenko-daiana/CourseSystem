@@ -1,6 +1,6 @@
 using Core.Models;
 
-namespace UI.ViewModels;
+namespace UI.ViewModels.CourseViewModels;
 
 public class CourseViewModel
 {
@@ -10,6 +10,6 @@ public class CourseViewModel
     public IFormFile UploadImage { get; set; }
     public List<Group> CurrentGroups { get; set; }
     public List<EducationMaterial> EducationMaterials { get; set; }
-    public List<UserCourses> UserCourses { get; set; }
+    public List<UserCourses> UserCoursesWithoutAdmins { get; set; }
     public AppUser CurrentUser { get; set; }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using Core.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using X.PagedList;
 
 namespace UI.Controllers;
 
@@ -52,7 +53,7 @@ public class UserActivityController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> ActivityForDay(DateTime? thisDay)
+    public async Task<IActionResult> ActivityForDay(DateTime? thisDay, int? page)
     {
         var day = thisDay ?? DateTime.Today;
 
@@ -74,10 +75,13 @@ public class UserActivityController : Controller
 
             return RedirectToAction("Index", "Home");
         }
-
+        
+        int pageSize = 12;
+        int pageNumber = (page ?? 1);
         ViewData["DateTime"] = day;
-
-        return View(activitiesResult.Data);
+        ViewBag.ThisDay = day;
+        
+        return View(activitiesResult.Data.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]

@@ -1,6 +1,14 @@
 ﻿@using UI.ViewModels.AssignmentViewModels
 @using Core.Enums
+@using BLL.Services
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using BLL.Interfaces
 @model CreateAssignmentViewModel
+@inject IGroupService GroupService
+
+@{
+    var group = await GroupService.GetById(Model.GroupId);
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,11 +19,6 @@
     <!-- Add Bootstrap CSS link here -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-    <style>
-        body {
-           background-color: #f7f7f7;
-        }
-    </style>
 </head>
 <body>
 @if (TempData["Error"] != null)
@@ -51,12 +54,12 @@
                 <div class="form-row form-group">
                     <div class="field">
                         <label asp-for="StartDate" class="control-label"></label>
-                        <input asp-for="StartDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <input asp-for="StartDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddHours(-24).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
                         <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
                     <div class="field">
                         <label asp-for="EndDate" class="control-label"></label>
-                        <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddHours(-24).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
                         <span asp-validation-for="EndDate" class="text-danger"></span>
                     </div>
                 </div>

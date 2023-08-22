@@ -125,7 +125,7 @@
         {
             <div class="pagination-container">
                 Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                <div class="page-link">
+                <div>
                     @Html.PagedListPager((IPagedList)Model, page => Url.Action("IndexMaterials", new { materialIds = ViewBag.MaterialIds, page = page, sortOrder = ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter }),
                         new PagedListRenderOptions
                         {

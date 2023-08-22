@@ -1,24 +1,17 @@
 html {
   font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+  position: relative;
+  min-height: 100%;
+  /*background-color: #35DE9C !important;*/
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
   margin-bottom: 60px;
+  background-color: #f7f7f7;
 }
 
 .details-button {
@@ -56,3 +49,82 @@ body {
   border: 1px solid #ccc;
   resize: none;
 }
+
+/*User Interface in Index User*/
+.user-profile-index {
+  background-color: #DBFFC5 !important;
+}
+
+.user-profile-index .image-block {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.user-profile-index .ui.grid.equal-height {
+  display: flex;
+  align-items: stretch;
+}
+
+.user-profile-index .ui.grid.equal-height .column {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-profile-index .ui.grid.equal-height .column > .ui.segment {
+  flex: 1;
+}
+
+.user-profile-index .white-text {
+  color: white;
+}
+
+.user-profile-index .white-text:hover {
+  color: white;
+}
+
+.user-profile-index .grey-text {
+  color: grey;
+}
+
+.page-link {
+  background-color: #35DE9C !important;
+  color: white !important;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/*!*/
+
+.notification-icon {
+  font-size: 24px;
+  color: white;
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  left: 20px;
+  min-width: 20px;
+  padding: 3px 6px;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+}
+
+.sign-out-custom-position {
+  position: absolute;
+  transform: translateX(-50%);
+  left: 50%;
+  bottom: 0;
+}
+
+#notifications-menu {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+/*!*/

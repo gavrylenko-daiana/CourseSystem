@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using UI.ViewModels;
 using Group = Core.Models.Group;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using UI.ViewModels.GroupViewModels;
 using X.PagedList;
 
 namespace UI.Controllers;

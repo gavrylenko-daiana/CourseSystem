@@ -53,17 +53,6 @@
         .cover-card {
             height: 270px; 
         } 
-         
-        .page-link {
-             background-color: #35DE9C !important;
-             color: white !important; 
-             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        } 
-        
-        .pagination-container {
-            background-color: white; 
-            padding: 3px;
-        }
     </style>
 </head>
 <body>
@@ -141,7 +130,7 @@
                         {
                             <div class="pagination-container">
                                 Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                                <div class="page-link">
+                                <div>
                                     @Html.PagedListPager((IPagedList)Model, page => Url.Action("SeeStudentAnswers", new {  assignmentId = ViewBag.AssignmentId, page = page, currentFilter = ViewBag.CurrentFilter}),
                                     new PagedListRenderOptions {
                                     LiElementClasses = new string[] { "page-item" },
