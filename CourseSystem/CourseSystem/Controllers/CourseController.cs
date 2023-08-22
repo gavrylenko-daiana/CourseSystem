@@ -293,6 +293,7 @@ public class CourseController : Controller
                 Id = u.Id,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
+                ProfileImage = u.ProfileImage,
                 IsInvited = userCoursesForCourse.Contains(u.Id),
                 CourseId = courseId
             })
