@@ -27,4 +27,17 @@ public class AssignmentFileController : Controller
         
         return View(assignmentFile.Data);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(int fileId, int assignmentId)
+    {
+        var deleteFileResult = await _assignmentFileService.DeleteAssignmentFile(fileId);
+
+        if (!deleteFileResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", deleteFileResult.Message);
+        }
+
+        return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentId });
+    }
 }

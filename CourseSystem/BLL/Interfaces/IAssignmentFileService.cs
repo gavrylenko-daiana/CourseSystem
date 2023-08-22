@@ -8,4 +8,5 @@ namespace BLL.Interfaces;
 public interface IAssignmentFileService : IGenericService<AssignmentFile>
 {
     Task<Result<AssignmentFile>> AddAssignmentFile(DropboxFolders folder, IFormFile file, int assignmentId);
+    Task<Result<bool>> DeleteAssignmentFile(int fileId);
 }
