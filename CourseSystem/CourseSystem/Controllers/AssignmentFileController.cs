@@ -27,4 +27,10 @@ public class AssignmentFileController : Controller
         
         return View(assignmentFile.Data);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(int fileId)
+    {
+        return View();
+    }
 }
