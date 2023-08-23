@@ -297,7 +297,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectStudent(int id, bool approved = false)
+    public async Task<IActionResult> SelectStudent(int id, int? page, bool approved = false)
     {
         var groupResult = await _groupService.GetById(id);
         
@@ -325,8 +325,12 @@ public class GroupController : Controller
         
         ViewBag.GroupId = id;
         ViewBag.Approved = approved;
+        
+        int pageSize = 6;
+        int pageNumber = (page ?? 1);
+        ViewBag.OnePageOfAssignemnts = availableStudents;
 
-        return View(availableStudents);
+        return View(availableStudents.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpPost]
