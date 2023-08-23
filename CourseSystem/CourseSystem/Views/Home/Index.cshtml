@@ -2,7 +2,58 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoga Site</title>
+    <style>
+
+
+    </style>
+</head>
+<body id="home">
+    <div class="home-container">
+        <div class="home-navbar">
+            <div class="home-logo">
+                <img src="https://dl.dropboxusercontent.com/scl/fi/tzn7y0x62ptu2wyodyj72/icons8-100.png?rlkey=jkbz8vzc0053zk9yqmijqt3hs&dl=0" alt="logo">
+            </div>
+        </div>
+        <div class="home-content-row">
+            <div class="home-left-col">
+                <h1 class="home-title">Every artist writes his own autobiography</h1>
+                <p class="home-text">“Computers can destroy people’s memory systems – because there will be no need. You can keep a small computer the size of a cigarette packet in your pocket: it contains everything that you will ever need to know.”</p>
+                <div class="indicator">
+                    <span class="active"></span>
+                    <span class="indicator-span"></span>
+                    <span class="indicator-span"></span>
+                    <span class="indicator-span"></span>
+                </div>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <form asp-action="Login" asp-controller="Account" method="get">
+                        <button type="submit"  class="home-button">
+                            <span >Get Started</span>
+                        </button>
+                    </form>
+                }
+                
+            </div>
+            <div class="home-right-col">
+                <img src="https://dl.dropboxusercontent.com/scl/fi/x80ly7qhl3kt3vxa2dz0n/Developer-activity-bro.png?rlkey=x64wmm65s3c3gf9eyt245yvbe&dl=0" alt="budda">
+            </div>
+
+        </div>
+        <div class="social-links">
+            <a href="https://uk-ua.facebook.com/"><img src="https://dl.dropboxusercontent.com/scl/fi/uat2x441cl974ks4f1ty7/icons8-facebook-messenger-96.png?rlkey=td935vjhqa0t3cux5ch0rrga7&dl=0" alt="facebook"></a>
+            <a href="https://www.instagram.com/"><img src="https://dl.dropboxusercontent.com/scl/fi/rgq5lezt7gw4ky8j3stf3/icons8-instagram-100.png?rlkey=frh00ma5r1er8lwpih2pgmzau&dl=0" alt="instagram"></a>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
