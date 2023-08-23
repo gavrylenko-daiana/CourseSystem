@@ -5,8 +5,10 @@ using Core.Helpers;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
+using Dropbox.Api.TeamLog;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BLL.Services;
 
@@ -15,7 +17,8 @@ public class UserService : GenericService<AppUser>, IUserService
     private readonly UserManager<AppUser> _userManager;
     private readonly IProfileImageService _profileImageService;
 
-    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IProfileImageService profileImageService) 
+    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager,
+        IProfileImageService profileImageService)
         : base(unitOfWork, unitOfWork.UserRepository)
     {
         _userManager = userManager;
@@ -71,7 +74,8 @@ public class UserService : GenericService<AppUser>, IUserService
         return Task.FromResult(user);
     }
 
-    public async Task<Result<bool>> EditUserAsync(ClaimsPrincipal currentUser, AppUser editUserViewModel, IFormFile? newProfileImage = null)
+    public async Task<Result<bool>> EditUserAsync(ClaimsPrincipal currentUser, AppUser editUserViewModel,
+        IFormFile? newProfileImage = null)
     {
         if (editUserViewModel == null)
         {
@@ -98,13 +102,14 @@ public class UserService : GenericService<AppUser>, IUserService
             user.GitHub = editUserViewModel.GitHub!;
             user.Email = editUserViewModel.Email;
 
-            if(newProfileImage != null)
+            if (newProfileImage != null)
             {
                 var updateImageResult = await _profileImageService.UpdateProfileImage(user, newProfileImage);
-                
-                if(!updateImageResult.IsSuccessful)
+
+                if (!updateImageResult.IsSuccessful)
                 {
-                    return new Result<bool>(false, $"Failed to update {nameof(updateImageResult.Data)} - Message: {updateImageResult.Message}");
+                    return new Result<bool>(false,
+                        $"Failed to update {nameof(updateImageResult.Data)} - Message: {updateImageResult.Message}");
                 }
             }
 
@@ -132,7 +137,7 @@ public class UserService : GenericService<AppUser>, IUserService
             if (checkPassword)
             {
                 user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, newPassword);
-                
+
                 await _userManager.UpdateAsync(user);
 
                 return new Result<bool>(true);
@@ -158,7 +163,7 @@ public class UserService : GenericService<AppUser>, IUserService
         }
 
         userResult.Data.PasswordHash = _userManager.PasswordHasher.HashPassword(userResult.Data, newPassword);
-        
+
         await _userManager.UpdateAsync(userResult.Data);
 
         return new Result<bool>(true);
@@ -174,7 +179,7 @@ public class UserService : GenericService<AppUser>, IUserService
         }
 
         userResult.Data.Email = newEmail;
-        
+
         await _userManager.UpdateAsync(userResult.Data);
 
         return new Result<bool>(true);
@@ -233,7 +238,7 @@ public class UserService : GenericService<AppUser>, IUserService
         password.Append(specialChars[random.Next(specialChars.Length)]);
 
         var remainingChars = allowedChars + upperChars + lowerChars + digitChars + specialChars;
-        
+
         for (int i = 0; i < 8; i++)
         {
             password.Append(remainingChars[random.Next(remainingChars.Length)]);
@@ -242,5 +247,20 @@ public class UserService : GenericService<AppUser>, IUserService
         var shuffledPassword = new string(password.ToString().OrderBy(c => random.Next()).ToArray());
 
         return shuffledPassword;
+    }
+
+    public async Task<Result<List<AppUser>>> GetUsersAsync()
+    {
+        try
+        {
+            var users = await _userManager.Users.ToListAsync();
+
+            return new Result<List<AppUser>>(true, users);
+        }
+        catch (Exception ex)
+        {
+            return new Result<List<AppUser>>(false, $"Failed to get all users. Message - {ex.Message}");
+        }
+
     }
 }
