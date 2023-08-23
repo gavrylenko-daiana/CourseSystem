@@ -139,4 +139,26 @@ public class NotificationController : Controller
 
         return View(notificationResult.Data);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> MarkAllAsRead()
+    {
+        var currentUserResult = await _userService.GetCurrentUser(User);
+
+        if (!currentUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Unauthorized user");
+
+            return RedirectToAction("Login", "Account");
+        }
+
+        var notifications = currentUserResult.Data.Notifications.Where(n => !n.IsRead);
+
+        foreach (var notification in notifications)
+        {
+            await _notificationService.MarkAsRead(notification);
+        }
+
+        return PartialView("ViewNew");
+    }
 }
