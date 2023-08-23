@@ -47,6 +47,20 @@
 }
 <div class="ui container">
     <h3 class="ui header">Invite teachers:</h3>
+    <div style="flex-grow: 1; text-align: center;">
+        <div class="ui search" style="margin-right: 10px;">
+            <form method="get" asp-action="SelectTeachers" asp-controller="Course" class="ui form inline">
+                <div class="ui icon input">
+                    <input type="hidden" id="courseId" name="courseId" value="@ViewBag.SelectTeachersCourseId" />
+                    <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;"/>
+                    <button type="submit" style="background: none; border: none; padding: 0;">
+                        <i class="inverted circular search link icon"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <hr class="ui divider">
     <div class="ui stackable three column grid">
         @if (!Model.Any())
@@ -66,12 +80,12 @@
                                 @if (teacher.ProfileImage != null)
                                 {
                                     <img src="@teacher.ProfileImage.Url" alt="@teacher.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
-                                }                                
+                                }
                                 @teacher.FirstName @teacher.LastName
                             </div>
                             <div class="user-button" style="text-align: center;">
                                 <a href="@Url.Action("Detail", "User", new { id = teacher.Id })" class="ui teal basic button view-profile-button" style="width: 175px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 10px;">View Profile</a>
-                            </div>                            
+                            </div>
                             @if (teacher.IsInvited)
                             {
                                 <div style="margin-top: auto;">
@@ -91,27 +105,27 @@
                         </div>
                     </div>
                 </div>
-
             }
         }
     </div>
-    
+
 </div>
-    <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
-        @if (Model.PageCount > 1)
-        {
-            <div class="pagination-container">
-                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                <div>
-                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new {courseId = ViewBag.SelectTeachersCourseId, page = page }),
-                new PagedListRenderOptions {
-                LiElementClasses = new string[] { "page-item" },
-                PageClasses = new string[] { "page-link" }
-                })
-                </div>
+<div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+    @if (Model.PageCount > 1)
+    {
+        <div class="pagination-container">
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+            <div>
+                @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new { courseId = ViewBag.SelectTeachersCourseId, page = page, currentQueryFilter = ViewBag.CurrentQueryFilter }),
+                    new PagedListRenderOptions
+                    {
+                        LiElementClasses = new string[] { "page-item" },
+                        PageClasses = new string[] { "page-link" }
+                    })
             </div>
-        }
-    </div>
+        </div>
+    }
+</div>
 <script>
     document.querySelectorAll('.ui.card').forEach(card => {
         card.addEventListener('click', function () {
