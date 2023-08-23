@@ -21,15 +21,18 @@ public class CourseService : GenericService<Course>, ICourseService
     private readonly IEducationMaterialService _educationMaterialService;
     private readonly IDropboxService _dropboxService;
     private readonly IGroupService _groupService;
+    private readonly UserManager<AppUser> _userManager;
 
     public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
-        IEducationMaterialService educationMaterial, IGroupService groupService, IDropboxService dropboxService)
+        IEducationMaterialService educationMaterial, IGroupService groupService, IDropboxService dropboxService,
+        UserManager<AppUser> userManager)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
         _dropboxService = dropboxService;
+        _userManager = userManager;
     }
 
     public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser, IFormFile uploadFile)
@@ -47,29 +50,25 @@ public class CourseService : GenericService<Course>, ICourseService
         try
         {
             var getUrlResult = await GetBackgroundImageUrl(uploadFile);
-            
+
             if (!getUrlResult.IsSuccessful)
             {
                 return new Result<bool>(false, $"{getUrlResult.Message}");
             }
-            
+
             course.Url = getUrlResult.Data;
 
             await _repository.AddAsync(course);
             await _unitOfWork.Save();
 
-            var userCourse = new UserCourses()
-            {
-                Course = course,
-                AppUser = currentUser,
-            };
+            var admins = await _userManager.GetUsersInRoleAsync("Admin"); // course can be added only by Admin
 
-            var createUserCoursesResult = await _userCourseService.CreateUserCourses(userCourse);
-
-            if (!createUserCoursesResult.IsSuccessful)
+            if (admins.Any())
             {
-                await _repository.DeleteAsync(course);
-                await _unitOfWork.Save();
+                foreach (var admin in admins)
+                {
+                    await _userCourseService.AddUserInCourse(admin, course);
+                }
             }
 
             return new Result<bool>(true);
@@ -101,13 +100,13 @@ public class CourseService : GenericService<Course>, ICourseService
             if (course.EducationMaterials.Any())
             {
                 var educationMaterialsCopy = course.EducationMaterials.ToList();
-            
+
                 foreach (var material in educationMaterialsCopy)
                 {
                     await _educationMaterialService.DeleteFile(material);
                 }
             }
-            
+
             //delete background
 
             await _repository.DeleteAsync(course);
@@ -141,13 +140,14 @@ public class CourseService : GenericService<Course>, ICourseService
         }
     }
 
-    public async Task<Result<List<Course>>> GetUserCourses(AppUser currentUser, SortingParam sortOrder, string searchQuery = null)
+    public async Task<Result<List<Course>>> GetUserCourses(AppUser currentUser, SortingParam sortOrder,
+        string searchQuery = null)
     {
         if (currentUser == null)
         {
             return new Result<List<Course>>(false, $"{nameof(currentUser)} not found");
         }
-        
+
         Result<List<Course>> coursesResult = null;
 
         var courses = currentUser.UserCourses.Select(uc => uc.Course).ToList();
@@ -158,9 +158,9 @@ public class CourseService : GenericService<Course>, ICourseService
         }
 
         var backgroundCheckResult = await CheckIsBackgroundExist(courses); //Return data is result for logger message
-        
+
         var query = GetOrderByExpression(sortOrder);
-        
+
         if (!string.IsNullOrEmpty(searchQuery))
         {
             coursesResult = await GetByPredicate(c => c.Name.Contains(searchQuery) && courses.Contains(c), query);
@@ -169,7 +169,7 @@ public class CourseService : GenericService<Course>, ICourseService
         {
             coursesResult = await GetByPredicate(c => courses.Contains(c), query);
         }
-        
+
         return coursesResult;
     }
 
@@ -197,7 +197,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 $"Failed to update {nameof(course)} by {courseId} with {newName}. Exception: {ex.Message}");
         }
     }
-    
+
     public async Task<Result<bool>> UpdateBackground(int courseId, IFormFile uploadFile)
     {
         var course = await _repository.GetByIdAsync(courseId);
@@ -210,12 +210,12 @@ public class CourseService : GenericService<Course>, ICourseService
         try
         {
             var getUrlResult = await GetBackgroundImageUrl(uploadFile);
-            
+
             if (!getUrlResult.IsSuccessful)
             {
                 return new Result<bool>(false, $"{getUrlResult.Message}");
             }
-            
+
             course.Url = getUrlResult.Data;
 
             await _repository.UpdateAsync(course);
@@ -225,13 +225,14 @@ public class CourseService : GenericService<Course>, ICourseService
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false, $"Failed to update {nameof(course)} by {courseId} with {uploadFile.Name}. Exception: {ex.Message}");
+            return new Result<bool>(false,
+                $"Failed to update {nameof(course)} by {courseId} with {uploadFile.Name}. Exception: {ex.Message}");
         }
     }
 
     public async Task<Result<List<Course>>> GetAllCoursesAsync()
     {
-        var courses = await _repository.GetAllAsync();
+        var courses = await _repository.GetAsync();
 
         if (!courses.Any())
         {
@@ -240,8 +241,9 @@ public class CourseService : GenericService<Course>, ICourseService
 
         return new Result<List<Course>>(true, courses);
     }
-    
-    public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile uploadFile, MaterialAccess materialAccess,
+
+    public async Task<Result<bool>> AddEducationMaterial(DateTime uploadTime, IFormFile uploadFile,
+        MaterialAccess materialAccess,
         int? groupId = null, int? courseId = null)
     {
         var fullPath = await _dropboxService.AddFileAsync(uploadFile, materialAccess.ToString());
@@ -260,7 +262,8 @@ public class CourseService : GenericService<Course>, ICourseService
                 return new Result<bool>(false, $"Message: {groupResult.Message}");
             }
 
-            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
+            var addToGroupResult = await _educationMaterialService.AddEducationMaterial(uploadTime,
+                fullPath.Data.ModifiedFileName, fullPath.Data.Url,
                 MaterialAccess.Group, groupResult.Data);
 
             if (!addToGroupResult.IsSuccessful)
@@ -277,7 +280,8 @@ public class CourseService : GenericService<Course>, ICourseService
                 return new Result<bool>(false, $"Message: {courseResult.Message}");
             }
 
-            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
+            var addToCourseResult = await _educationMaterialService.AddEducationMaterial(uploadTime,
+                fullPath.Data.ModifiedFileName, fullPath.Data.Url,
                 MaterialAccess.Course, null!, courseResult.Data);
 
             if (!addToCourseResult.IsSuccessful)
@@ -288,7 +292,8 @@ public class CourseService : GenericService<Course>, ICourseService
         else if (materialAccess == MaterialAccess.General)
         {
             var addToCourseResult =
-                await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName, fullPath.Data.Url,
+                await _educationMaterialService.AddEducationMaterial(uploadTime, fullPath.Data.ModifiedFileName,
+                    fullPath.Data.Url,
                     MaterialAccess.General);
 
             if (!addToCourseResult.IsSuccessful)
@@ -299,7 +304,7 @@ public class CourseService : GenericService<Course>, ICourseService
 
         return new Result<bool>(true);
     }
-    
+
     private Expression<Func<IQueryable<Course>, IOrderedQueryable<Course>>> GetOrderByExpression(SortingParam sortBy)
     {
         Expression<Func<IQueryable<Course>, IOrderedQueryable<Course>>> query;
@@ -316,7 +321,7 @@ public class CourseService : GenericService<Course>, ICourseService
 
         return query;
     }
-    
+
     private async Task<Result<string>> GetRandomDefaultBackgroundLink()
     {
         var defaultImagesLinks = DefaultBackgroundImages.GetDefaultImagesLinks();
@@ -349,13 +354,14 @@ public class CourseService : GenericService<Course>, ICourseService
         }
         else
         {
-            var backgroundUrlResult = await _dropboxService.AddFileAsync(uploadFile, DropboxFolders.CourseBackgroundImages.ToString());
-                
+            var backgroundUrlResult =
+                await _dropboxService.AddFileAsync(uploadFile, DropboxFolders.CourseBackgroundImages.ToString());
+
             if (!backgroundUrlResult.IsSuccessful)
             {
                 return new Result<string>(false, $"{backgroundUrlResult.Message}");
             }
-                
+
             return new Result<string>(true, data: backgroundUrlResult.Data.Url);
         }
     }
@@ -397,5 +403,38 @@ public class CourseService : GenericService<Course>, ICourseService
         {
             return new Result<bool>(false, $"Fail to update {nameof(courses)} background");
         }
+    }
+
+    public async Task<Result<bool>> AddNewAdminToCourses(AppUser admin)
+    {
+        var courses = await _repository.GetAsync();
+
+        if (courses != null)
+        {
+            foreach (var course in courses)
+            {
+                var userCoursesResult = await _userCourseService.AddUserInCourse(admin, course);
+
+                if (!userCoursesResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, userCoursesResult.Message);
+                }
+
+                if (course.Groups != null)
+                {
+                    foreach (var group in course.Groups)
+                    {
+                        var userGroupsResult = await _groupService.AddAllAdminsAtGroup(group);
+
+                        if (!userGroupsResult.IsSuccessful)
+                        {
+                            return new Result<bool>(false, userGroupsResult.Message);
+                        }
+                    }
+                }
+            }
+        }
+
+        return new Result<bool>(true);
     }
 }

@@ -14,37 +14,6 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         _userGroupService = userGroupService;
     }
 
-    public async Task<Result<bool>> AddTeacherToCourse(Course course, AppUser teacher)
-    {
-        if (course == null)
-        {
-            return new Result<bool>(false, $"{nameof(course)} not found");
-        }
-
-        if (teacher == null)
-        {
-            return new Result<bool>(false, $"{nameof(teacher)} not found");
-        }
-
-        try
-        {
-            var courseTeacher = new UserCourses()
-            {
-                Course = course,
-                AppUser = teacher
-            };
-
-            await _repository.AddAsync(courseTeacher);
-            await _unitOfWork.Save();
-
-            return new Result<bool>(true);
-        }
-        catch (Exception ex)
-        {
-            return new Result<bool>(false, $"Failed to  add teacher to course. Exception: {ex.Message}");
-        }
-    }
-
     public async Task<Result<bool>> AddStudentToGroupAndCourse(UserGroups userGroups)
     {
         if (userGroups == null)
@@ -61,13 +30,7 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
                 return new Result<bool>(true);
             }
 
-            var userCourses = new UserCourses()
-            {
-                AppUser = userGroups.AppUser,
-                Course = userGroups.Group.Course
-            };
-
-            var createUserCoursesResult = await CreateUserCourses(userCourses);
+            var createUserCoursesResult = await AddUserInCourse(userGroups.AppUser, userGroups.Group.Course);
 
             if (!createUserCoursesResult.IsSuccessful)
             {
@@ -78,11 +41,12 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false, $"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false,
+                $"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
         }
     }
 
-    public async Task<Result<bool>> CreateUserCourses(UserCourses userCourses)
+    public async Task<Result<bool>> CreateUserCoursesForTests(UserCourses userCourses)
     {
         if (userCourses == null)
         {
@@ -98,7 +62,77 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false, $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false,
+                $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> AddUserInCourse(AppUser appUser, Course course)
+    {
+        if (appUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(appUser)} not found");
+        }
+
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} not found");
+        }
+
+        var userCourses = new UserCourses
+        {
+            AppUser = appUser,
+            AppUserId = appUser.Id,
+            Course = course,
+            CourseId = course.Id
+        };
+
+        try
+        {
+            if (!await IsUserInCourse(userCourses))
+            {
+                await _repository.AddAsync(userCourses);
+                await _unitOfWork.Save();
+            }
+
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false,
+                $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
+        }
+    }
+
+    private async Task<bool> IsUserInCourse(UserCourses userCourses)
+    {
+        var userCourse = await GetUserCourses(userCourses.AppUserId, userCourses.CourseId);
+
+        return userCourse.Data != null;
+    }
+
+    private async Task<Result<UserCourses>> GetUserCourses(string? userId, int courseId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return new Result<UserCourses>(false, $"{nameof(userId)} not found");
+        }
+
+        if (courseId < 1)
+        {
+            return new Result<UserCourses>(false, $"{nameof(courseId)} not found");
+        }
+
+        try
+        {
+            var userCourses = await _repository.GetAsync();
+            var getUserCourse = userCourses.FirstOrDefault(uc => uc.AppUserId == userId && uc.CourseId == courseId);
+
+            return new Result<UserCourses>(true, getUserCourse!);
+        }
+        catch (Exception ex)
+        {
+            return new Result<UserCourses>(false, $"Message - {ex.Message}");
         }
     }
 }
