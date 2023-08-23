@@ -401,8 +401,19 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectTeachers(int courseId, int groupId, int? page)
+    public async Task<IActionResult> SelectTeachers(int courseId, int groupId, string? searchQuery, string? currentSearchQuery, int? page)
     {
+        if (searchQuery != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            searchQuery = currentSearchQuery;
+        }
+        
+        ViewBag.CurrentQueryFilter = searchQuery!;
+        
         var courseResult = await _courseService.GetById(courseId);
 
         if (!courseResult.IsSuccessful)
@@ -435,6 +446,13 @@ public class GroupController : Controller
             LastName = teacher.LastName,
             IsSelected = false
         }).ToList();
+        
+        if (searchQuery != null)
+        {
+            teachersViewModels = teachersViewModels.Where(t =>
+                t.FirstName.ToLower().Contains(searchQuery.ToLower()) ||
+                t.LastName.ToLower().Contains(searchQuery.ToLower())).ToList();
+        }
 
         ViewBag.SelectTeacherGroupId = groupId;
         ViewBag.SelectTeacherCourseId = courseId;

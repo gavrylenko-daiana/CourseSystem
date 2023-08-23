@@ -18,11 +18,26 @@
 else
 {
     <form method="post" asp-action="ConfirmTeachersSelection">
-        <input type="hidden" name="groupId" value="@ViewBag.SelectTeacherGroupId" />
+        <input type="hidden" name="groupId" value="@ViewBag.SelectTeacherGroupId"/>
         <div class="container mt-4">
             <div class="card">
                 <div class="card-header">
                     Select Teachers
+
+                    <div style="flex-grow: 1; text-align: center;">
+                        <div class="ui search" style="margin-right: 10px;">
+                            <form method="get" asp-action="SelectTeachers" asp-controller="Group" class="ui form inline">
+                                <div class="ui icon input">
+                                    <input type="hidden" id="courseId" name="courseId" value="@ViewBag.SelectTeachersCourseId"/>
+                                    <input type="hidden" id="groupId" name="groupId" value="@ViewBag.SelectTeacherGroupId"/>
+                                    <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;"/>
+                                    <button type="submit" style="background: none; border: none; padding: 0;">
+                                        <i class="inverted circular search link icon"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-body">
@@ -30,9 +45,9 @@ else
                         @for (int i = 0; i < Model.Count; i++)
                         {
                             <li>
-                                <input type="checkbox" asp-for="@Model[i].IsSelected" />
+                                <input type="checkbox" asp-for="@Model[i].IsSelected"/>
                                 @Model[i].FirstName @Model[i].LastName
-                                <input type="hidden" asp-for="@Model[i].Id" />
+                                <input type="hidden" asp-for="@Model[i].Id"/>
                             </li>
                         }
                     </ul>
@@ -48,14 +63,14 @@ else
             <div class="pagination-container">
                 Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
                 <div>
-                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new {courseId = ViewBag.SelectTeacherCourseId, groupId= ViewBag.SelectTeacherGroupId,   page = page }),
-            new PagedListRenderOptions {
-            LiElementClasses = new string[] { "page-item" },
-            PageClasses = new string[] { "page-link" }
-            })
+                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new { courseId = ViewBag.SelectTeacherCourseId, groupId = ViewBag.SelectTeacherGroupId, currentQueryFilter = ViewBag.CurrentQueryFilter, page = page }),
+                        new PagedListRenderOptions
+                        {
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" }
+                        })
                 </div>
             </div>
         }
     </div>
 }
-

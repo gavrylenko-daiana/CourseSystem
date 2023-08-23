@@ -278,8 +278,7 @@ public class CourseController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectTeachers(int courseId, int? page, string? searchQuery,
-        string? currentQueryFilter)
+    public async Task<IActionResult> SelectTeachers(int courseId, int? page, string? searchQuery, string? currentQueryFilter)
     {
         if (searchQuery != null)
         {
