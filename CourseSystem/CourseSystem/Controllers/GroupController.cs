@@ -12,6 +12,7 @@ using Group = Core.Models.Group;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using UI.ViewModels.GroupViewModels;
 using X.PagedList;
+using System.Drawing.Printing;
 
 namespace UI.Controllers;
 
@@ -400,7 +401,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectTeachers(int courseId, int groupId)
+    public async Task<IActionResult> SelectTeachers(int courseId, int groupId, int? page)
     {
         var courseResult = await _courseService.GetById(courseId);
 
@@ -435,9 +436,13 @@ public class GroupController : Controller
             IsSelected = false
         }).ToList();
 
-        ViewBag.GroupId = groupId;
+        ViewBag.SelectTeacherGroupId = groupId;
+        ViewBag.SelectTeacherCourseId = courseId;
 
-        return View(teachersViewModels);
+        int pageSize = 6;
+        int pageNumber = (page ?? 1);
+
+        return View(teachersViewModels.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpPost]
