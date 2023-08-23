@@ -1,8 +1,10 @@
-﻿using BLL.Interfaces;
+﻿using System.Reflection;
+using BLL.Interfaces;
 using Core.Enums;
 using Core.Models;
 using DAL.Repository;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace BLL.Services
 {
@@ -10,12 +12,14 @@ namespace BLL.Services
     {
         private readonly IUserAssignmentService _userAssignmentService;
         private readonly IDropboxService _dropboxService;
+        private readonly ILogger<AssignmentAnswerService> _logger;
 
-        public AssignmentAnswerService(UnitOfWork unitOfWork, IUserAssignmentService userAssignmentService, IDropboxService dropboxService)
+        public AssignmentAnswerService(UnitOfWork unitOfWork, IUserAssignmentService userAssignmentService, IDropboxService dropboxService, ILogger<AssignmentAnswerService> logger)
             : base(unitOfWork, unitOfWork.AssignmentAnswerRepository)
         {
             _userAssignmentService = userAssignmentService;
             _dropboxService = dropboxService;
+            _logger = logger;
         }
 
         public async Task<Result<bool>> CreateAssignmentAnswer(AssignmentAnswer assignmentAnswer, Assignment assignment,
@@ -23,13 +27,20 @@ namespace BLL.Services
         {
             if (assignmentAnswer == null)
             {
+                _logger.LogError("Failed to {action} - {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(assignmentAnswer));
+
                 return new Result<bool>(false, "Invalid assignment answer");
             }
 
+            _logger.LogInformation("Forming {action} for user {userId} about assignmentAnswer {assignmentId}",
+                MethodBase.GetCurrentMethod()?.Name, appUser.Id, assignment.Id);
+            
             var userAssignmentResult = await _userAssignmentService.CreateUserAssignment(assignment, appUser);
 
             if (!userAssignmentResult.IsSuccessful)
             {
+                _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, userAssignmentResult.Message);
+
                 return new Result<bool>(false, "Failed to create user assignment");
             }
 
@@ -66,6 +77,8 @@ namespace BLL.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, ex.Message);
+
                 return new Result<bool>(false, ex.Message);
             }
         }
@@ -74,6 +87,8 @@ namespace BLL.Services
         {
             if (assignmentAnswer == null)
             {
+                _logger.LogError("Failed to {action} - {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(assignmentAnswer));
+
                 return new Result<bool>(false, "Fail to delete answer");
             }
 
@@ -92,6 +107,8 @@ namespace BLL.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, ex.Message);
+
                 return new Result<bool>(false, "Fail to delete answer");
             }
         }
@@ -100,6 +117,8 @@ namespace BLL.Services
         {
             if (assignmentAnswer == null)
             {
+                _logger.LogError("Failed to {action} - {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(assignmentAnswer));
+
                 return new Result<bool>(false, $"Invalid {nameof(assignmentAnswer)} data");
             }
 
@@ -112,6 +131,8 @@ namespace BLL.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, ex.Message);
+
                 return new Result<bool>(false, $"Fail to update {nameof(assignmentAnswer)}. Message - {ex.Message}");
             }
         }
