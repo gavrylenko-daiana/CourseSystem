@@ -12,8 +12,17 @@ using Westwind.AspNetCore.Markdown;
 using UI.Hubs;
 using Quartz;
 using Quartz.AspNetCore;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
+using Serilog.Sinks.SystemConsole.Themes;
 using static Dropbox.Api.TeamLog.EventCategory;
 using UI.Jobs;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console(new CompactJsonFormatter())
+    .CreateLogger(); 
 
 var builder = WebApplication.CreateBuilder(args);
 
