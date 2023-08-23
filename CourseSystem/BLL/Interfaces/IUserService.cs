@@ -15,5 +15,6 @@ public interface IUserService : IGenericService<AppUser>
     Task<Result<AppUser>> GetUserByEmailAsync(string email);
     Task<Result<AppUser>> FindByIdAsync(string id);
     Task<Result<AppUser>> GetCurrentUser(ClaimsPrincipal user);
+    Task<Result<List<AppUser>>> GetUsersAsync();
     string GenerateTemporaryPassword();
 }

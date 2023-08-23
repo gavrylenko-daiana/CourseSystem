@@ -105,7 +105,9 @@ public class CourseController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        return View();
+        var courseViewModel = new CourseViewModel();
+        
+        return View(courseViewModel);
     }
 
     [HttpPost]
@@ -412,7 +414,7 @@ public class CourseController : Controller
             return View("Index");
         }
 
-        var addTeacherToCourseResult = await _userCourseService.AddTeacherToCourse(courseResult.Data, currentUser);
+        var addTeacherToCourseResult = await _userCourseService.AddUserInCourse(currentUser, courseResult.Data);
 
         if (!addTeacherToCourseResult.IsSuccessful)
         {

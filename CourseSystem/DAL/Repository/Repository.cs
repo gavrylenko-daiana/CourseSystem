@@ -27,24 +27,6 @@ namespace DAL.Repository
             _logger = logger;
         }
 
-        public async Task<List<T>> GetAllAsync(int pageNumber = 1, int pageSize = 20)
-        {
-            try
-            {
-                _logger.LogInformation("Retrieving {entityName}s from page {pageNumber}; page size: {pageSize}",
-                    typeof(T).Name, pageNumber, pageSize);
-
-                return await _dbSet.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to retrieve {entityName}s! Error: {errorMessage}",
-                    typeof(T).Name, ex.Message);
-
-                throw new Exception($"Exception message:{ex.Message}");
-            }
-        }
-
         public async Task AddAsync(T item)
         {
             try
