@@ -2,61 +2,115 @@
 @using X.PagedList;
 @using System.Web;
 @using X.PagedList.Web.Common;
-@model X.PagedList.IPagedList<UI.ViewModels.UserSelectionViewModel>
+@model X.PagedList.IPagedList<UI.ViewModels.TeacherViewModel>
 
-@if (TempData["Error"] != null)
-{
-    <div class="col-md-12 alert alert-danger">
-        <span><b>Sorry!</b> - @TempData["Error"]</span>
-    </div>
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Page Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
 
-@if (!Model.Any())
-{
-    <h4>No new teachers for adding</h4>
-}
-else
-{
-    <form method="post" asp-action="ConfirmTeachersSelection">
-        <input type="hidden" name="groupId" value="@ViewBag.SelectTeacherGroupId"/>
-        <div class="container mt-4">
-            <div class="card">
-                <div class="card-header">
-                    Select Teachers
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
 
-                    <div style="flex-grow: 1; text-align: center;">
-                        <div class="ui search" style="margin-right: 10px;">
-                            <form method="get" asp-action="SelectTeachers" asp-controller="Group" class="ui form inline">
-                                <div class="ui icon input">
-                                    <input type="hidden" id="courseId" name="courseId" value="@ViewBag.SelectTeachersCourseId"/>
-                                    <input type="hidden" id="groupId" name="groupId" value="@ViewBag.SelectTeacherGroupId"/>
-                                    <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;"/>
-                                    <button type="submit" style="background: none; border: none; padding: 0;">
-                                        <i class="inverted circular search link icon"></i>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+        .ui.container {
+            margin-top: 20px;
+        }
 
-                <div class="card-body">
-                    <ul>
-                        @for (int i = 0; i < Model.Count; i++)
-                        {
-                            <li>
-                                <input type="checkbox" asp-for="@Model[i].IsSelected"/>
-                                @Model[i].FirstName @Model[i].LastName
-                                <input type="hidden" asp-for="@Model[i].Id"/>
-                            </li>
-                        }
-                    </ul>
-                </div>
+        .add-course-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .cover-card {
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui container">
+            <div class="ui negative message">
+                <span>@TempData["Error"]</span>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary mt-2">Submit</button>
+    }
+    <div class="ui container">
+        <h3 class="ui header">Invite teachers:</h3>
+        <div style="flex-grow: 1; text-align: center;">
+            <div class="ui search" style="margin-right: 10px;">
+                <form method="get" asp-action="SelectTeachers" asp-controller="Group" class="ui form inline">
+                    <div class="ui icon input">
+                        <input type="hidden" id="courseId" name="courseId" value="@ViewBag.SelectTeachersCourseId" />
+                        <input type="hidden" id="groupId" name="groupId" value="@ViewBag.SelectTeachersGroupId" />
+                        <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;" />
+                        <button type="submit" style="background: none; border: none; padding: 0;">
+                            <i class="inverted circular search link icon"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-    </form>
+        <hr class="ui divider">
+        <div class="ui stackable three column grid">
+            @if (!Model.Any())
+            {
+                <div class="column">
+                    <div class="ui warning message">No teachers found.</div>
+                </div>
+            }
+            else
+            {
+                @foreach (var teacher in Model)
+                {
+                    <div class="column">
+                        <div class="ui card cover-card">
+                            <div class="content" style="display: flex; flex-direction: column; justify-content: center;">
+                                <div class="header">
+                                    @if (teacher.ProfileImage != null)
+                                    {
+                                        <img src="@teacher.ProfileImage.Url" alt="@teacher.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                    }
+                                    @teacher.FirstName @teacher.LastName
+                                </div>
+                                <div class="user-button" style="text-align: center;">
+                                    <a href="@Url.Action("Detail", "User", new { id = teacher.Id })" class="ui teal basic button view-profile-button" style="width: 175px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 10px;">View Profile</a>
+                                </div>
+                                @if (teacher.IsInvited)
+                                {
+                                    <div style="margin-top: auto;">
+                                        <span class="ui mini message">Teacher added</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div style="margin-top: auto;">
+                                        <form asp-action="ConfirmTeacherSelection" asp-controller="Group" method="post">
+                                            <input type="hidden" name="teacherId" value="@teacher.Id" />
+                                            <input type="hidden" name="groupId" value="@teacher.GroupId" />
+                                            <button type="submit" class="ui details-button button">Assign teacher to group</button>
+                                        </form>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
     <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
         @if (Model.PageCount > 1)
         {
@@ -64,13 +118,21 @@ else
                 Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
                 <div>
                     @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new { courseId = ViewBag.SelectTeacherCourseId, groupId = ViewBag.SelectTeacherGroupId, currentQueryFilter = ViewBag.CurrentQueryFilter, page = page }),
-                        new PagedListRenderOptions
-                        {
-                            LiElementClasses = new string[] { "page-item" },
-                            PageClasses = new string[] { "page-link" }
-                        })
+                new PagedListRenderOptions
+                {
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" }
+                })
                 </div>
             </div>
         }
     </div>
-}
+    <script>
+        document.querySelectorAll('.ui.card').forEach(card => {
+            card.addEventListener('click', function () {
+                window.location.href = this.querySelector('.ui.view-profile-button').href;
+            });
+        });
+    </script>
+</body>
+</html>
