@@ -4,6 +4,8 @@
 @using X.PagedList;
 @using System.Web;
 @using X.PagedList.Web.Common;
+@using BLL.Interfaces;
+@inject IUserService userService;
 @model X.PagedList.IPagedList<AssignmentViewModel>
 
 
@@ -32,6 +34,15 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js">
+    </script>
     <style>
         body {
             background-color: #f7f7f7;
@@ -77,31 +88,31 @@
                         <div class="item">
                             @if (ViewBag.StartDateParam == SortingParam.StartDate)
                             {
-                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.StartDateParam, currentAccessFilter= ViewBag.CurrentAccessFilter })"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
+                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.StartDateParam, currentAccessFilter= ViewBag.CurrentAccessFilter, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam })"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
                             }
                             else
                             {
-                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.StartDateParam, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
+                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.StartDateParam, currentAccessFilter= ViewBag.CurrentAccessFilter, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
                             }
                         </div>
                         <div class="item">
                             @if (ViewBag.EndDateParam == SortingParam.EndDate)
                             {
-                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.EndDateParam, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
+                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.EndDateParam, currentAccessFilter= ViewBag.CurrentAccessFilter, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
                             }
                             else
                             {
-                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.EndDateParam, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
+                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.EndDateParam, currentAccessFilter= ViewBag.CurrentAccessFilter, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
                             }
                         </div>
                         <div class="item">
                             @if (ViewBag.NameSortParam == SortingParam.Name)
                             {
-                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.NameSortParam, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
+                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.NameSortParam, currentAccessFilter= ViewBag.CurrentAccessFilter, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
                             }
                             else
                             {
-                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.NameSortParam,  currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
+                                <a href="@Url.Action("ViewAll", "Assignment", new { sortOrder = ViewBag.NameSortParam,  currentAccessFilter= ViewBag.CurrentAccessFilter, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
                             }
                         </div>
                     </div>
@@ -115,18 +126,74 @@
                         @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
                         {
                             <div class="item">
-                                <a href="@Url.Action("ViewAll", "Assignment", new { currentAccessFilter = AssignmentAccess.Planned.ToString()})">Planned</a>
+                                <a href="@Url.Action("ViewAll", "Assignment", new { currentAccessFilter = AssignmentAccess.Planned.ToString(), findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})">Planned</a>
                             </div>
                         }
                         <div class="item">
-                            <a href="@Url.Action("ViewAll", "Assignment", new { currentAccessFilter = AssignmentAccess.InProgress.ToString()})">In progress</a>
+                            <a href="@Url.Action("ViewAll", "Assignment", new { currentAccessFilter = AssignmentAccess.InProgress.ToString(), findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})">In progress</a>
                         </div>
                         <div class="item">
-                            <a href="@Url.Action("ViewAll", "Assignment", new {currentAccessFilter = AssignmentAccess.Completed.ToString()})">Completed</a>
+                            <a href="@Url.Action("ViewAll", "Assignment", new {currentAccessFilter = AssignmentAccess.Completed.ToString(), findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})">Completed</a>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="ui compact menu" style="margin-right: 10px;">
+                <div class="ui simple dropdown item">
+                    Find for: @ViewBag.FindForParam
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <div class="item">
+                            <a href="@Url.Action("ViewAll", "Assignment", new { findForFilter = FilterParam.Course })">Course</a>
+                        </div>
+                        <div class="item">
+                            <a href="@Url.Action("ViewAll", "Assignment", new { findForFilter = FilterParam.Group })">Group</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if(ViewBag.FindForParam == FilterParam.Course)
+            {
+                <div class="ui search selection dropdown">
+                    <input type="hidden" name="courseId">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select Course</div>
+                    <div class="menu">
+                        @{
+                            var currentUserResult = await userService.GetCurrentUser(User);
+
+                            if (currentUserResult.IsSuccessful)
+                            {
+                                foreach (var course in currentUserResult.Data.UserCourses.Select(uc => uc.Course))
+                                {
+                                    <a class="item" href="@Url.Action("ViewAll", "Assignment", new { findForId = course.Id, findForFilter = FilterParam.Course, currentAccessFilter= ViewBag.CurrentAccessFilter })">@course.Name</a>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            else if (ViewBag.FindForParam == FilterParam.Group)
+            {
+                <div class="ui search selection dropdown">
+                    <input type="hidden" name="courseId">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select Group</div>
+                    <div class="menu">
+                        @{
+                            var currentUserResult = await userService.GetCurrentUser(User);
+
+                            if (currentUserResult.IsSuccessful)
+                            {
+                                foreach (var group in currentUserResult.Data.UserGroups.Select(uc => uc.Group))
+                                {
+                                    <a class="item" href="@Url.Action("ViewAll", "Assignment", new { findForId = group.Id, findForFilter = FilterParam.Group, currentAccessFilter= ViewBag.CurrentAccessFilter })">@group.Name</a>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            }
         </div>
             
         <hr class="ui divider">
@@ -171,7 +238,9 @@
                 <div class="pagination-container">
                     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
                     <div>
-                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new {page = page, sortOrder =  ViewBag.CurrentSort, currentAccessFilter = ViewBag.CurrentAccessFilter }),
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new {page = page, 
+                            sortOrder =  ViewBag.CurrentSort, currentAccessFilter = ViewBag.CurrentAccessFilter, 
+                            findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam }),
                     new PagedListRenderOptions {
                     LiElementClasses = new string[] { "page-item" },
                     PageClasses = new string[] { "page-link" }
@@ -184,6 +253,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
+    <script>
+        $('.ui.dropdown').dropdown();
+    </script>
     <script>
         $(document).ready(function () {
             $('.ui.dropdown').dropdown();
