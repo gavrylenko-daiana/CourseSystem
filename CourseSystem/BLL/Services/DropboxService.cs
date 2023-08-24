@@ -43,7 +43,7 @@ public class DropboxService : IDropboxService
             }
 
             await using var stream = file.OpenReadStream();
-            
+
             var uploadResult = await _dropboxClient.Files.UploadAsync(uploadPath, WriteMode.Overwrite.Instance, body: stream);
             var linkResult = await GetSharedLinkAsync(uploadResult.PathDisplay);
 
@@ -179,6 +179,57 @@ public class DropboxService : IDropboxService
         catch (Exception ex)
         {
             return new Result<bool>(false, $"Failed to delete file. ErrorMessage - {ex.Message}");
+        }
+    }
+
+    public async Task<Result<Dictionary<string, string>>> GetAllFolderFilesData(DropboxFolders dropboxFolder)
+    {      
+        try
+        {
+            string folderPath = "/" + dropboxFolder.ToString();
+
+            Dictionary<string, string> filesNameAndUrl = new();
+
+            var folderItems = await _dropboxClient.Files.ListFolderAsync(folderPath);
+
+            foreach (var item in folderItems.Entries)
+            {
+                if (item.IsFile)
+                {
+                    
+                    var fileMetadata = (FileMetadata)item;
+                    var existingLinks = await _dropboxClient.Sharing.ListSharedLinksAsync(fileMetadata.PathLower);
+                    var existingLink = existingLinks.Links.FirstOrDefault();
+
+                    string url = null;
+
+                    if (existingLink == null)
+                    {
+                        var sharedLinkResult = await GetSharedLinkAsync(fileMetadata.PathDisplay);
+
+                        if (!sharedLinkResult.IsSuccessful)
+                        {
+                            return new Result<Dictionary<string, string>>(false, sharedLinkResult.Message);
+                        }
+
+                        url = sharedLinkResult.Message;
+                    }
+                    else
+                    {
+                        url = existingLink.Url;
+                    }
+
+                    var tempUrl = url.Replace("www.dropbox.com", "dl.dropboxusercontent.com");
+
+                    filesNameAndUrl.Add(item.Name, tempUrl);
+                }
+            }
+
+            return new Result<Dictionary<string, string>>(true, filesNameAndUrl);
+        }
+        catch (Exception ex)
+        {
+            return new Result<Dictionary<string, string>>(false, "Error listing folder: " + ex.Message);
         }
     }
 }
