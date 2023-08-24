@@ -101,7 +101,7 @@
                             <a href="@Url.Action("NotificationDetails", "Notification", new { notification.Id })" class="notification-link text-black">@notification.Name</a>
                         }
                     </td>
-                    <td>@notification.Created.ToString("f")</td>
+                    <td>@notification.Created.ToString("g")</td>
                 </tr>
             }
             </tbody>
@@ -122,6 +122,7 @@
                         {
                             LiElementClasses = new string[] { "page-item" },
                             PageClasses = new string[] { "page-link" }
+                            MaximumPageNumbersToDisplay = 3
                         })
                 </div>
             </div>
