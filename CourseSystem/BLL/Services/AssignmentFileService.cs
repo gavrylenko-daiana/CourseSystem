@@ -30,7 +30,7 @@ public class AssignmentFileService : GenericService<AssignmentFile>, IAssignment
             
             if (!fullPath.IsSuccessful)
             {
-                _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, fullPath.Message);
+                _logger.LogError("Failed to {action}. Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, fullPath.Message);
 
                 return new Result<AssignmentFile>(false, fullPath.Message);
             }
@@ -47,11 +47,15 @@ public class AssignmentFileService : GenericService<AssignmentFile>, IAssignment
             await _repository.AddAsync(assignmentFile);
             await _unitOfWork.Save();
 
+            _logger.LogInformation("Successfully {action} with {entityName} for assignment by id {entityId}",
+                MethodBase.GetCurrentMethod()?.Name, file.Name, assignmentId);
+            
             return new Result<AssignmentFile>(true, assignmentFile);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, ex.Message);
+            _logger.LogError("Failed to {action} by {entityId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, assignmentId, ex.Message);
 
             return new Result<AssignmentFile>(false, $"Failed to add assignment file to database. Message: {ex.Message}");
         }
@@ -65,7 +69,7 @@ public class AssignmentFileService : GenericService<AssignmentFile>, IAssignment
 
             if (!fileResult.IsSuccessful)
             {
-                _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, fileResult.Message);
+                _logger.LogError("Failed to {action}. Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, fileResult.Message);
 
                 return new Result<bool>(false, fileResult.Message);
             }
@@ -74,19 +78,23 @@ public class AssignmentFileService : GenericService<AssignmentFile>, IAssignment
 
             if (!deleteFileDropboxResult.IsSuccessful)
             {
-                _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, fileResult.Message);
+                _logger.LogError("Failed to {action}. Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, fileResult.Message);
                 
                 return new Result<bool>(false, deleteFileDropboxResult.Message);
             }
 
             await _repository.DeleteAsync(fileResult.Data);
             await _unitOfWork.Save();
+            
+            _logger.LogInformation("Successfully {action} by {entityId}",
+                MethodBase.GetCurrentMethod()?.Name, fileId);
 
             return new Result<bool>(true, $"Successful deletion of {nameof(fileResult.Data)}");
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to {action} - Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, ex.Message);
+            _logger.LogError("Failed to {action} by {entityId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, fileId, ex.Message);
 
             return new Result<bool>(false, $"Fail to delete assignment file");
         }
