@@ -1,6 +1,6 @@
 ﻿@using BLL.Interfaces;
 @using Core.Helpers;
-@inject IUserService _userService;
+@inject IUserService userService;
 @using Core.Enums
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using X.PagedList
@@ -15,70 +15,127 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css"/>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js">
+    </script>
+    <style>
+        .ui.container {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<div class="ui container">
-    <div class="mt-5" style="display: flex; align-items: center;">
-        <div class="ui centered aligned grid" style="margin-left: 2px;">
-            <div class="sixteen wide column mt-3 mb-1 centered aligned grid">
-                <h5 class="text-uppercase">Your notifications</h5>
-            </div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui negative message">
+            <p><b>Sorry!</b> - @TempData["Error"]</p>
         </div>
-
-        <div class="ui compact menu ms-auto" style="margin-right: 10px;">
-            <div class="ui simple dropdown item">
-                Sort by
-                <i class="dropdown icon"></i>
-                <div class="menu">
-                    <div class="item">
-                        <a href="@Url.Action("ViewAll", "Notification", new { filteringParam = NotificationsFilteringParams.Course })"><i class="fa" aria-hidden="true"></i>Course</a>
-                    </div>
-                    <div class="item">
-                        <a href="@Url.Action("ViewAll", "Notification", new { filteringParam = NotificationsFilteringParams.Group })"><i class="fa" aria-hidden="true"></i>Group</a>
-                    </div>
-                    <div class="item">
-                        <a href="@Url.Action("ViewAll", "Notification", new { filteringParam = NotificationsFilteringParams.Assignment })"><i class="fa" aria-hidden="true"></i>Assignment</a>
+    }
+    <div class="ui container">
+        <div style="display: flex; align-items: center;">
+            <h3 class="ui header">Your notifications</h3>
+        </div>
+        <div style="margin-top: 10px;">
+            <div class="ui compact menu" style="margin-right: 10px;">
+                <div class="ui simple dropdown item">
+                    Sort by
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <div class="item">
+                            @if (ViewBag.SortOrder == SortingParam.Created)
+                            {
+                                <a class="text-black" href="@Url.Action("ViewAll", "Notification", new { sortOrder = SortingParam.CreatedDesc, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Recent</a>
+                            }
+                            else
+                            {
+                                <a class="text-black" href="@Url.Action("ViewAll", "Notification", new { sortOrder = SortingParam.Created, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Recent</a>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="ui compact menu" style="margin-right: 10px;">
+                <div class="ui simple dropdown item">
+                    Find for: @ViewBag.FindForParam
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <a class="item" href="@Url.Action("ViewAll", "Notification", new { sortOrder = ViewBag.SortOrder, findForFilter = FilterParam.Course })">Course</a>
+                        <a class="item" href="@Url.Action("ViewAll", "Notification", new { sortOrder = ViewBag.SortOrder, findForFilter = FilterParam.Group })">Group</a>
+                        <a class="item" href="@Url.Action("ViewAll", "Notification", new { sortOrder = ViewBag.SortOrder, findForFilter = FilterParam.Assignment })">Assignment</a>
+                    </div>
+                </div>
+            </div>
+            @if (ViewBag.FindForParam == FilterParam.Course)
+            {
+                <div class="ui search selection dropdown" style="margin-right: 10px;">
+                    <input type="hidden" name="courseId">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select Course</div>
+                    <div class="menu">
+                        @{
+                            var currentUserResult = await userService.GetCurrentUser(User);
 
-        <div>
-            @{
-                var currentUserResult = await _userService.GetCurrentUser(User);
+                            if (currentUserResult.IsSuccessful)
+                            {
+                                foreach (var course in currentUserResult.Data.UserCourses.Select(uc => uc.Course))
+                                {
+                                    <a class="item" href="@Url.Action("ViewAll", "Notification", new { findForId = course.Id, findForFilter = FilterParam.Course, currentAccessFilter=ViewBag.CurrentAccessFilter, sortOrder = ViewBag.SortOrder })">@course.Name</a>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            else if (ViewBag.FindForParam == FilterParam.Group)
+            {
+                <div class="ui search selection dropdown" style="margin-right: 10px;">
+                    <input type="hidden" name="courseId">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select Group</div>
+                    <div class="menu">
+                        @{
+                            var currentUserResult = await userService.GetCurrentUser(User);
 
-                switch (ViewBag.CurrentFilterParam)
-                {
-                    case NotificationsFilteringParams.Course:
-                        @await Html.PartialAsync("~/Views/Notification/CoursesList.cshtml",
-                                   currentUserResult.Data.UserCourses.Select(ua => ua.Course).OrderBy(a => a.Name).ToList())
-                        ;
-                        break;
+                            if (currentUserResult.IsSuccessful)
+                            {
+                                foreach (var group in currentUserResult.Data.UserGroups.Select(uc => uc.Group))
+                                {
+                                    <a class="item" href="@Url.Action("ViewAll", "Notification", new { findForId = group.Id, findForFilter = FilterParam.Group, currentAccessFilter= ViewBag.CurrentAccessFilter, sortOrder = ViewBag.SortOrder })">@group.Name</a>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            else if (ViewBag.FindForParam == FilterParam.Assignment)
+            {
+                <div class="ui search selection dropdown" style="margin-right: 10px;">
+                    <input type="hidden" name="courseId">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select Assignment</div>
+                    <div class="menu">
+                        @{
+                            var currentUserResult = await userService.GetCurrentUser(User);
 
-                    case NotificationsFilteringParams.Group:
-                        @await Html.PartialAsync("~/Views/Notification/GroupsList.cshtml",
-                                   currentUserResult.Data.UserGroups.Select(ua => ua.Group).OrderBy(a => a.Name).ToList())
-                        ;
-                        break;
-
-                    case NotificationsFilteringParams.Assignment:
-                        @await Html.PartialAsync("~/Views/Notification/AssignmentsList.cshtml",
-                                   currentUserResult.Data.UserAssignments.Select(ua => ua.Assignment).OrderBy(a => a.Name).ToList())
-                        ;
-                        break;
-                }
+                            if (currentUserResult.IsSuccessful)
+                            {
+                                foreach (var assignment in currentUserResult.Data.UserGroups.Select(uc => uc.Group).SelectMany(g => g.Assignments))
+                                {
+                                    <a class="item" href="@Url.Action("ViewAll", "Notification", new { findForId = assignment.Id, findForFilter = FilterParam.Assignment, currentAccessFilter= ViewBag.CurrentAccessFilter, sortOrder = ViewBag.SortOrder })">@assignment.Name</a>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
             }
         </div>
-    </div>
-
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span><b>Sorry!</b> - @TempData["Error"]</span>
-        </div>
-    }
-
+        <hr class="ui divider">
     <div class="card-body mt-2">
         <table class="table table-striped">
             <thead style="background-color: #1b6054; color: #fff;">
@@ -117,7 +174,7 @@
                 Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
                 </div>
                 <div>
-                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new { page = page, filteringParam = ViewBag.CurrentFilterParam, entityId = ViewBag.CurrentEntityId }),
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new { page = page, sortOrder = ViewBag.SortOrder, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam }),
                         new PagedListRenderOptions
                         {
                             LiElementClasses = new string[] { "page-item" },
@@ -129,5 +186,8 @@
         }
     </div>
 </div>
+    <script>
+        $('.ui.dropdown').dropdown();
+    </script>
 </body>
 </html>
