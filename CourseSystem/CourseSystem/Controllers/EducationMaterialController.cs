@@ -344,18 +344,48 @@ public class EducationMaterialController : Controller
     [HttpPost]
     public async Task<IActionResult> UploadFile(ConfirmEducationMaterial educationMaterialVM)
     {
-        var groupResult = await _groupService.GetById((int)educationMaterialVM.GroupId);
-        var courseResult = await _courseService.GetById((int)educationMaterialVM.CourseId);
+        var exureFileExist = await _dropboxService.FileExistsInAnyFolderAsync(educationMaterialVM.FileName);
 
-        if (!groupResult.IsSuccessful || !courseResult.IsSuccessful)
+        if (!exureFileExist.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", "Fail to get group or course");
+            TempData.TempDataMessage("Error", $"File {educationMaterialVM.FileName} was denied");
 
             return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
         }
 
-        var addEducationMaterialResult = await _educationMaterialService.AddEducationMaterial(DateTime.Now, educationMaterialVM.FileName, educationMaterialVM.FileUrl, educationMaterialVM.MaterialAccess, groupResult.Data, courseResult.Data);
+        Group? group = null;
+        Course? course = null;
 
+        if (educationMaterialVM.CourseId != 0)
+        {
+            var courseResult = await _courseService.GetById((int)educationMaterialVM.CourseId);
+
+            if (!courseResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", "Fail to get course");
+
+                return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+            }
+
+            course = courseResult.Data;
+        }
+
+        if(educationMaterialVM.GroupId != 0)
+        {
+            var groupResult = await _groupService.GetById((int)educationMaterialVM.GroupId);
+
+            if (!groupResult.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", "Fail to get group");
+
+                return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+            }
+
+            group = groupResult.Data;
+        }
+
+        var addEducationMaterialResult = await _educationMaterialService.AddEducationMaterial(DateTime.Now, educationMaterialVM.FileName, educationMaterialVM.FileUrl, educationMaterialVM.MaterialAccess, group, course);
+        
         if (!addEducationMaterialResult.IsSuccessful)
         {
             TempData.TempDataMessage("Error", addEducationMaterialResult.Message);
