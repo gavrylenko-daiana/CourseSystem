@@ -344,7 +344,7 @@ namespace BLL.Services
                 await _repository.AddAsync(notification);
                 await _unitOfWork.Save();
 
-                _logger.LogInformation("Save successfull");
+                _logger.LogInformation("Save successfully");
 
                 return new Result<bool>(true);
             }
