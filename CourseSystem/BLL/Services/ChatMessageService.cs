@@ -13,9 +13,9 @@ namespace BLL.Services
 {
     public class ChatMessageService : GenericService<ChatMessage>, IChatMessageService
     {
-        private readonly ILogger<AssignmentService> _logger;
+        private readonly ILogger<ChatMessageService> _logger;
         
-        public ChatMessageService(UnitOfWork unitOfWork, ILogger<AssignmentService> logger)
+        public ChatMessageService(UnitOfWork unitOfWork, ILogger<ChatMessageService> logger)
             : base(unitOfWork, unitOfWork.ChatMessageRepository)
         {
             _logger = logger;
