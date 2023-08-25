@@ -11,52 +11,66 @@
 <html>
 <head>
     <title>User activity</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js">
+    </script>
+    <style>
+        .ui.container {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card w-100 pb-0">
-                <div class="card-header text-center">
-                    <h4>Activity for @(date.ToString("D"))</h4>
-                    @{
-                        var thisDay = date.AddDays(-1);
-                    }
-                    @Html.ActionLink(
-                        thisDay.DayOfWeek.ToString(),
-                        "ActivityForDay",
-                        new { thisDay },
-                        new { @class = "link-secondary", @style = "margin-right:35%" }
-                        )
-                    @{
-                        thisDay = date.AddDays(1);
-                    }
-                    @Html.ActionLink(
-                        thisDay.DayOfWeek.ToString(),
-                        "ActivityForDay",
-                        new { thisDay },
-                        new { @class = "link-secondary", @style = "margin-left:35%" }
-                        )
-                </div>
-                @if (TempData["Error"] != null)
-                {
-                    <div class="col-md-12 alert alert-danger">
-                        <span><b>Sorry!</b> - @TempData["Error"]</span>
-                    </div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui negative message">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }
+    <div class="ui container">
+            <h3 style="text-align:center;">Activity for @(date.ToString("D"))</h3>
+                @{
+                    var thisDay = date.AddDays(-1);
                 }
-                <div class="card-body">
+                <a href="@Url.Action("ActivityForDay", "UserActivity", new { thisDay })" class="link-dark" style="margin-right:35%; margin-left:55px; text-decoration:none">
+                    <i class="angle left icon"></i> @thisDay.DayOfWeek.ToString()
+                </a>
+                @{
+                    thisDay = date.AddDays(1);
+                }
+                <a href="@Url.Action("ActivityForDay", "UserActivity", new { thisDay })" class="link-dark" style="margin-left:35%; text-decoration:none">
+                    @thisDay.DayOfWeek.ToString() <i class="angle right icon"></i>
+                </a>
+
+        <div class="card-body mt-2">
+            <table class="table table-striped">
+                <thead style="background-color: #1b6054; color: #fff;">
+                    <tr>
+                        <th>Activity</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
                     @foreach (var activity in Model)
                     {
-                        @Html.ActionLink(
-                            activity.Name,
-                            "ActivityDetails",
-                            new { activity.Id },
-                            new { @class = "list-group-item" }
-                            )
-                    }
-                </div>
-            </div>
-
+                        <tr>
+                            <td>
+                                <a href="@Url.Action("ActivityDetails", "UserActivity", new { activity.Id })" class="notification-link text-black">@activity.Name</a>
+                            </td>
+                            <td>@activity.Created.ToString("t")</td>
+                        </tr>
+                                }
+                </tbody>
+            </table>
             <div class="ui container add-course-button py-4" style="display: flex; justify-content: center; align-items: center;">
                 @if (Model.PageCount > 1)
                 {
@@ -66,18 +80,17 @@
                         </div>
                         <div class="page-link">
                             @Html.PagedListPager((IPagedList)Model, page => Url.Action("ActivityForDay", new { thisDay = ViewBag.ThisDay, page = page }),
-                                new PagedListRenderOptions
-                                {
-                                    LiElementClasses = new string[] { "page-item" },
-                                    PageClasses = new string[] { "page-link" }
-                                })
+                            new PagedListRenderOptions
+                            {
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" },
+                            MaximumPageNumbersToDisplay = 3
+                            })
                         </div>
-                    </div>
+                     </div>
                 }
             </div>
         </div>
     </div>
-</div>
-
 </body>
 </html>
