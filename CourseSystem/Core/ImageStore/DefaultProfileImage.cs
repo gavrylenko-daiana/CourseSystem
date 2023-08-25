@@ -24,7 +24,6 @@ namespace Core.ImageStore
 
             var index = _random.Next(0, resultPack.Keys.Count);
 
-            
             if (exceptName != null)
             {
                 var fileExtension = Path.GetExtension(exceptName);
