@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using BLL.Interfaces;
@@ -7,6 +8,7 @@ using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace BLL.Services;
 
@@ -14,18 +16,23 @@ public class UserService : GenericService<AppUser>, IUserService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly IProfileImageService _profileImageService;
+    private readonly ILogger<UserService> _logger;
 
-    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IProfileImageService profileImageService) 
+    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager, 
+        IProfileImageService profileImageService, ILogger<UserService> logger) 
         : base(unitOfWork, unitOfWork.UserRepository)
     {
         _userManager = userManager;
         _profileImageService = profileImageService;
+        _logger = logger;
     }
 
     public async Task<Result<AppUser>> GetInfoUserByCurrentUserAsync(ClaimsPrincipal currentUser)
     {
         if (currentUser == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
+
             return new Result<AppUser>(false, $"{nameof(currentUser)} does not exist");
         }
 
@@ -75,11 +82,15 @@ public class UserService : GenericService<AppUser>, IUserService
     {
         if (editUserViewModel == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(editUserViewModel));
+
             return new Result<bool>(false, $"{nameof(editUserViewModel)} does not exist");
         }
 
         if (currentUser == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
+
             return new Result<bool>(false, $"{nameof(currentUser)} does not exist");
         }
 
@@ -161,6 +172,9 @@ public class UserService : GenericService<AppUser>, IUserService
         
         await _userManager.UpdateAsync(userResult.Data);
 
+        
+        _logger.LogInformation("Successfully to {action}.", MethodBase.GetCurrentMethod()?.Name);
+
         return new Result<bool>(true);
     }
 
@@ -177,6 +191,8 @@ public class UserService : GenericService<AppUser>, IUserService
         
         await _userManager.UpdateAsync(userResult.Data);
 
+        _logger.LogInformation("Successfully to {action}.", MethodBase.GetCurrentMethod()?.Name);
+        
         return new Result<bool>(true);
     }
 
