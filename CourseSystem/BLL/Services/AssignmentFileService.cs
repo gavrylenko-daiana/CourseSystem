@@ -15,7 +15,7 @@ public class AssignmentFileService : GenericService<AssignmentFile>, IAssignment
     private readonly IDropboxService _dropboxService;
     private readonly ILogger<AssignmentFileService> _logger;
 
-    public AssignmentFileService(UnitOfWork unitOfWork, IDropboxService dropboxService,  ILogger<AssignmentFileService> logger) : base(unitOfWork,
+    public AssignmentFileService(UnitOfWork unitOfWork, IDropboxService dropboxService, ILogger<AssignmentFileService> logger) : base(unitOfWork,
         unitOfWork.AssignmentFileRepository)
     {
         _dropboxService = dropboxService;
