@@ -285,7 +285,7 @@ namespace BLL.Services
             }
             
             _logger.LogInformation("Successfully {action}, query: {query}",
-                MethodBase.GetCurrentMethod()?.Name, query);
+                MethodBase.GetCurrentMethod()?.Name, query.ToString());
 
             return new Result<Expression<Func<IQueryable<Assignment>, IOrderedQueryable<Assignment>>>>(true, query);
         }
