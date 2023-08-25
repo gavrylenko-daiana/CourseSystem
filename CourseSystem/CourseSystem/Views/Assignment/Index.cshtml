@@ -196,7 +196,8 @@
                                 @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
                                     new PagedListRenderOptions {
                                         LiElementClasses = new string[] { "page-item" },
-                                        PageClasses = new string[] { "page-link" }
+                                        PageClasses = new string[] { "page-link" },
+                                        MaximumPageNumbersToDisplay = 3
                                     })
                             </div>
                         </div>

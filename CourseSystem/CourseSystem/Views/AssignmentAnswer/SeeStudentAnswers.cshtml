@@ -8,18 +8,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta charset="utf-8"/>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
     <meta name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no" />
+          content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no"/>
     <meta name="description"
-          content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI." />
-    <meta name="keywords" content="Semantic-UI, Theme, Design, Template" />
-    <meta name="author" content="PPType" />
-    <meta name="theme-color" content="#ffffff" />
+          content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI."/>
+    <meta name="keywords" content="Semantic-UI, Theme, Design, Template"/>
+    <meta name="author" content="PPType"/>
+    <meta name="theme-color" content="#ffffff"/>
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
-          type="text/css" />
+          type="text/css"/>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assignments</title>
@@ -56,101 +56,103 @@
     </style>
 </head>
 <body>
-    @if (TempData["Error"] != null)
-    {
-        <div class="col-md-12 alert alert-danger">
-            <span>@TempData["Error"]</span>
-        </div>
-    }
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span>@TempData["Error"]</span>
+    </div>
+}
 
-    <div class="ui container">
-        <div style="display: flex; align-items: center;">
-            <h3 class="ui header">Students answers</h3>
-            <div class="ui compact menu mb-3" style="margin-left:10px;">
-                <div class="ui simple dropdown item">
-                    Filter by status
-                    <i class="dropdown icon"></i>
-                    <div class="menu">
-                        <div class="item">
-                            <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, currentFilter = "IsMarked"})">Marked</a>
-                        </div>
-                        <div class="item">
-                            <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, currentFilter = "NotMarked"})">Not Marked</a>
-                        </div>
+<div class="ui container">
+    <div style="display: flex; align-items: center;">
+        <h3 class="ui header">Students answers</h3>
+        <div class="ui compact menu mb-3" style="margin-left:10px;">
+            <div class="ui simple dropdown item">
+                Filter by status
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item">
+                        <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, currentFilter = "IsMarked" })">Marked</a>
+                    </div>
+                    <div class="item">
+                        <a href="@Url.Action("SeeStudentAnswers", "AssignmentAnswer", new { assignmentId = ViewBag.AssignmentId, currentFilter = "NotMarked" })">Not Marked</a>
                     </div>
                 </div>
             </div>
         </div>
-            <hr class="ui divider">
-            <div class="ui stackable three column grid assignments-container">
-                @if (Model.Any())
-                {
-                    @foreach (var userAssignment in Model)
-                    {
-                        <div class="column">
-                            <div class="ui card cover-card">
-                                @if (userAssignment.IsChecked)
-                                {
-                                    <div class="card-header bg-transparent border-success">
-                                        Marked
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="card-header bg-transparent border-danger">
-                                        Not Marked
-                                    </div>
-                                }
-                                <div class="content">
-                                    <h5 class="card-title">@userAssignment.AppUser.FirstName @userAssignment.AppUser.LastName</h5>
-                                    @foreach (var answer in userAssignment.AssignmentAnswers)
-                                    {
-                                        <p class="card-text">File: @answer.Name</p>
-                                    }
-                                    <a href="@Url.Action("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.Assignment.Id, studentId = userAssignment.AppUser.Id})" class="ui details-button button">
-                                        Check
-                                    </a>
-                                </div>
-                                <div class="card-footer bg-transparent border-success">
-                                    Grade: @userAssignment.Grade / 100
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
-                else
-                {
-                    <div class="column">
-                        <div class="ui warning message">No students answer found.</div>
-                    </div>
-                }
-                
-                <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
-                    @if (Model.PageCount > 1)
+    </div>
+    <hr class="ui divider">
+    <div class="ui stackable three column grid assignments-container">
+        @if (Model.Any())
+        {
+            @foreach (var userAssignment in Model)
+            {
+                <div class="column">
+                    <div class="ui card cover-card">
+                        @if (userAssignment.IsChecked)
                         {
-                            <div class="pagination-container">
-                                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                                <div>
-                                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SeeStudentAnswers", new {  assignmentId = ViewBag.AssignmentId, page = page, currentFilter = ViewBag.CurrentFilter}),
-                                    new PagedListRenderOptions {
-                                    LiElementClasses = new string[] { "page-item" },
-                                    PageClasses = new string[] { "page-link" }
-                                    })
-                                </div>
+                            <div class="card-header bg-transparent border-success">
+                                Marked
                             </div>
                         }
+                        else
+                        {
+                            <div class="card-header bg-transparent border-danger">
+                                Not Marked
+                            </div>
+                        }
+                        <div class="content">
+                            <h5 class="card-title">@userAssignment.AppUser.FirstName @userAssignment.AppUser.LastName</h5>
+                            @foreach (var answer in userAssignment.AssignmentAnswers)
+                            {
+                                <p class="card-text">File: @answer.Name</p>
+                            }
+                            <a href="@Url.Action("CheckAnswer", "AssignmentAnswer", new { assignmentId = userAssignment.Assignment.Id, studentId = userAssignment.AppUser.Id })" class="ui details-button button">
+                                Check
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-success">
+                            Grade: @userAssignment.Grade / 100
+                        </div>
+                    </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="column">
+                <div class="ui warning message">No students answer found.</div>
+            </div>
+        }
+
+        <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+            @if (Model.PageCount > 1)
+            {
+                <div class="pagination-container">
+                    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                    <div>
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("SeeStudentAnswers", new { assignmentId = ViewBag.AssignmentId, page = page, currentFilter = ViewBag.CurrentFilter }),
+                            new PagedListRenderOptions
+                            {
+                                LiElementClasses = new string[] { "page-item" },
+                                PageClasses = new string[] { "page-link" },
+                                MaximumPageNumbersToDisplay = 3
+                            })
+                    </div>
+                </div>
+            }
         </div>
     </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
-    <script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
+<script>
         $(document).ready(function () {
             $('.ui.dropdown').dropdown();
         });
     </script>
-    <script>
+<script>
         document.querySelectorAll('.ui.card.cover-card').forEach(card => {
             card.addEventListener('click', function () {
                 window.location.href = this.querySelector('.ui.details-button.button').href;
