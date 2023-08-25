@@ -327,16 +327,15 @@ public class GroupController : Controller
         
         ViewBag.GroupId = id;
         ViewBag.Approved = approved;
-        ViewBag.Students = availableStudents;
         
-        int pageSize = 9;
+        int pageSize = 6;
         int pageNumber = (page ?? 1);
         ViewBag.OnePageOfAssignemnts = availableStudents;
 
         return View(availableStudents.ToPagedList(pageNumber, pageSize));
     }
 
-    [HttpGet]
+    [HttpPost]
     public async Task<IActionResult> ConfirmSelection(int groupId, List<UserSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
@@ -510,7 +509,7 @@ public class GroupController : Controller
         return RedirectToAction("SelectTeachers", new { groupId = groupId, courseId = groupResult.Data.CourseId });
     }
 
-    [HttpGet]
+    [HttpPost]
     public async Task<IActionResult> ApprovedSelection(int groupId, List<UserSelectionViewModel> students)
     {
         var selectedStudents = students.Where(s => s.IsSelected).ToList();
