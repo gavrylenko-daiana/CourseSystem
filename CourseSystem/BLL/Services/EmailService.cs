@@ -151,7 +151,6 @@ namespace BLL.Services
 
             var emailContent = GetEmailSubjectAndBody(emailType, appUser, group, course, file, callBackUrl, tempPassword);
 
-           
             var allAdmins = await _userManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
             var toEmail = allAdmins.Select(a => a.Email).ToList();
 
