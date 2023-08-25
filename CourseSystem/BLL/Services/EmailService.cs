@@ -224,7 +224,7 @@ namespace BLL.Services
             return EmailTemplate.GetEmailSubjectAndBody(emailType, parameters);
         }
         
-                private async Task<Result<bool>> SendEmailAsync(EmailData emailData)
+        private async Task<Result<bool>> SendEmailAsync(EmailData emailData)
         {
             try
             {
@@ -276,6 +276,8 @@ namespace BLL.Services
 
                     await client.AuthenticateAsync(_emailSettings.UserName, _emailSettings.Password); //ключ доступа от Гугл
                     await client.SendAsync(emailMessage);
+
+                    _logger.LogInformation("Successfully send email");
 
                     await client.DisconnectAsync(true);
                 }
