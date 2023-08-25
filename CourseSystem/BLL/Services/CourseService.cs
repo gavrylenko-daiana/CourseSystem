@@ -437,4 +437,47 @@ public class CourseService : GenericService<Course>, ICourseService
 
         return new Result<bool>(true);
     }
+
+    public async Task<Result<bool>> DeleteUserFromCourse(Course course, AppUser deletedUser)
+    {
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} not found");
+        }
+
+        if (deletedUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(deletedUser)} not found");
+        }
+
+        try
+        {
+            foreach (var group in course.Groups)
+            {
+                if(group.UserGroups.Any(ug => ug.AppUserId == deletedUser.Id))
+                {
+                    await _groupService.DeleteUserFromGroup(group, deletedUser);
+                }
+            }
+
+            foreach (var userCourse in course.UserCourses)
+            {
+                if (userCourse.AppUserId == deletedUser.Id)
+                {
+                    course.UserCourses.Remove(userCourse);
+
+                    break;
+                }
+            }
+
+            await _repository.UpdateAsync(course);
+            await _unitOfWork.Save();
+
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false, $"Failed to delete user {deletedUser.Id} from course {course.Id}. Exception: {ex.Message}");
+        }
+    }
 }
