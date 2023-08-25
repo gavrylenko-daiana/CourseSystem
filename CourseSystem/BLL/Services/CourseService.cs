@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using BLL.Interfaces;
 using Core.Configuration;
 using Core.Enums;
@@ -9,6 +10,7 @@ using DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using static Org.BouncyCastle.Math.EC.ECCurve;
@@ -21,26 +23,32 @@ public class CourseService : GenericService<Course>, ICourseService
     private readonly IEducationMaterialService _educationMaterialService;
     private readonly IDropboxService _dropboxService;
     private readonly IGroupService _groupService;
+    private readonly ILogger<CourseService> _logger;
 
-    public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
-        IEducationMaterialService educationMaterial, IGroupService groupService, IDropboxService dropboxService)
+    public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService, IEducationMaterialService educationMaterial, 
+        IGroupService groupService, IDropboxService dropboxService, ILogger<CourseService> logger)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
         _educationMaterialService = educationMaterial;
         _groupService = groupService;
         _dropboxService = dropboxService;
+        _logger = logger;
     }
 
     public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser, IFormFile uploadFile)
     {
         if (course == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(course));
+            
             return new Result<bool>(false, $"{nameof(course)} not found");
         }
 
         if (currentUser == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
+
             return new Result<bool>(false, $"{nameof(currentUser)} not found");
         }
 
@@ -57,6 +65,9 @@ public class CourseService : GenericService<Course>, ICourseService
 
             await _repository.AddAsync(course);
             await _unitOfWork.Save();
+            
+            _logger.LogInformation("Successfully {action} with {courseName} with user by {userId}",
+                MethodBase.GetCurrentMethod()?.Name, course.Name, currentUser.Id);
 
             var userCourse = new UserCourses()
             {
@@ -70,12 +81,20 @@ public class CourseService : GenericService<Course>, ICourseService
             {
                 await _repository.DeleteAsync(course);
                 await _unitOfWork.Save();
+                
+                _logger.LogInformation("Successfully delete course after unsuccessfully create userCourse with user by {userId}", currentUser.Id);
             }
 
+            _logger.LogInformation("Successfully {action} and add userCourse with {courseName} with user by {userId}",
+                MethodBase.GetCurrentMethod()?.Name, course.Name, currentUser.Id);
+            
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} and add userCourse with {courseName} with user by {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, course.Name, currentUser.Id, ex.Message);
+            
             return new Result<bool>(false, $"Failed to create {nameof(course)} {course.Id}. Exception: {ex.Message}");
         }
     }
@@ -86,6 +105,8 @@ public class CourseService : GenericService<Course>, ICourseService
 
         if (course == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(course));
+
             return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
         }
 
@@ -107,16 +128,22 @@ public class CourseService : GenericService<Course>, ICourseService
                     await _educationMaterialService.DeleteFile(material);
                 }
             }
-            
+
             //delete background
 
             await _repository.DeleteAsync(course);
             await _unitOfWork.Save();
 
+            _logger.LogInformation("Successfully {action} by id {entityId}",
+                MethodBase.GetCurrentMethod()?.Name, courseId);
+            
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} by id {entityId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, courseId, ex.Message);
+            
             return new Result<bool>(false, $"Failed to delete {nameof(course)} by {courseId}. Exception: {ex.Message}");
         }
     }
@@ -125,6 +152,8 @@ public class CourseService : GenericService<Course>, ICourseService
     {
         if (course == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(course));
+
             return new Result<bool>(false, $"{nameof(course)} was not found");
         }
 
@@ -133,10 +162,16 @@ public class CourseService : GenericService<Course>, ICourseService
             await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
 
+            _logger.LogInformation("Successfully {action} with {entityName}",
+                MethodBase.GetCurrentMethod()?.Name, course.Name);
+            
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} with {entityName}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, course.Name, ex.Message);
+            
             return new Result<bool>(false, $"Failed to update {nameof(course)}. Exception: {ex.Message}");
         }
     }
@@ -145,6 +180,8 @@ public class CourseService : GenericService<Course>, ICourseService
     {
         if (currentUser == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
+
             return new Result<List<Course>>(false, $"{nameof(currentUser)} not found");
         }
         
@@ -154,6 +191,8 @@ public class CourseService : GenericService<Course>, ICourseService
 
         if (!courses.Any())
         {
+            _logger.LogInformation("{listName} is empty", nameof(courses));
+            
             return new Result<List<Course>>(true, new List<Course>());
         }
 
@@ -179,6 +218,8 @@ public class CourseService : GenericService<Course>, ICourseService
 
         if (course == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(course));
+
             return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
         }
 
@@ -188,11 +229,17 @@ public class CourseService : GenericService<Course>, ICourseService
 
             await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
+            
+            _logger.LogInformation("Successfully {action} on {entityName}",
+                MethodBase.GetCurrentMethod()?.Name, course.Name);
 
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} on {entityName}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, course.Name, ex.Message);
+            
             return new Result<bool>(false,
                 $"Failed to update {nameof(course)} by {courseId} with {newName}. Exception: {ex.Message}");
         }
@@ -204,6 +251,8 @@ public class CourseService : GenericService<Course>, ICourseService
 
         if (course == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(course));
+
             return new Result<bool>(false, $"{nameof(course)} by id {courseId} not found");
         }
 
@@ -220,11 +269,17 @@ public class CourseService : GenericService<Course>, ICourseService
 
             await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
+            
+            _logger.LogInformation("Successfully {action} for {courseName} with {fileName}",
+                MethodBase.GetCurrentMethod()?.Name, course.Name, uploadFile.Name);
 
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} for {courseName} with {fileName}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, course.Name, uploadFile.Name, ex.Message);
+            
             return new Result<bool>(false, $"Failed to update {nameof(course)} by {courseId} with {uploadFile.Name}. Exception: {ex.Message}");
         }
     }
@@ -238,6 +293,8 @@ public class CourseService : GenericService<Course>, ICourseService
             return new Result<List<Course>>(false, "Course list is empty");
         }
 
+        _logger.LogInformation("Successfully {action}", MethodBase.GetCurrentMethod()?.Name);
+        
         return new Result<List<Course>>(true, courses);
     }
     
@@ -251,6 +308,8 @@ public class CourseService : GenericService<Course>, ICourseService
             return new Result<bool>(false, $"Failed to upload file: {fullPath.Message}");
         }
 
+        _logger.LogInformation("Material access for {materialAccess}", materialAccess);
+        
         if (materialAccess == MaterialAccess.Group && groupId.HasValue)
         {
             var groupResult = await _groupService.GetById(groupId.Value);
@@ -297,6 +356,9 @@ public class CourseService : GenericService<Course>, ICourseService
             }
         }
 
+        _logger.LogInformation("Successfully {action} with {fileName}",
+            MethodBase.GetCurrentMethod()?.Name, uploadFile.Name);
+        
         return new Result<bool>(true);
     }
     
@@ -314,6 +376,9 @@ public class CourseService : GenericService<Course>, ICourseService
                 break;
         }
 
+        _logger.LogInformation("Successfully {action}, query: {query}",
+            MethodBase.GetCurrentMethod()?.Name, query.ToString());
+        
         return query;
     }
     
@@ -326,10 +391,15 @@ public class CourseService : GenericService<Course>, ICourseService
             var randomIndex = new Random().Next(0, defaultImagesLinks.Count);
             var randomImageLink = defaultImagesLinks[randomIndex];
 
+            _logger.LogInformation("Successfully {action} with random index {randomIndex} - link {randomLink}",
+                MethodBase.GetCurrentMethod()?.Name, randomIndex, randomImageLink);
+            
             return new Result<string>(true, data: randomImageLink);
         }
         else
         {
+            _logger.LogError("Failed to {action}. No default images available", MethodBase.GetCurrentMethod()?.Name);
+            
             return new Result<string>(false, "No default images available");
         }
     }
@@ -364,6 +434,8 @@ public class CourseService : GenericService<Course>, ICourseService
     {
         if (courses == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(courses));
+
             return new Result<bool>(false, $"Invalid input {nameof(courses)}");
         }
 
@@ -383,19 +455,23 @@ public class CourseService : GenericService<Course>, ICourseService
         {
             foreach (var course in coursesWithoutBackgroundImage)
             {
-                var randomBackgroundResilt = await GetRandomDefaultBackgroundLink();
-                course.Url = randomBackgroundResilt.Data;
+                var randomBackgroundResult = await GetRandomDefaultBackgroundLink();
+                course.Url = randomBackgroundResult.Data;
 
                 await _repository.UpdateAsync(course);
             }
 
             await _unitOfWork.Save();
+            
+            _logger.LogInformation("Successfully {action}", MethodBase.GetCurrentMethod()?.Name);
 
             return new Result<bool>(true, $"Successful {nameof(courses)} background updating");
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false, $"Fail to update {nameof(courses)} background");
+            _logger.LogError("Failed to {action}. Error: {errorMsg}", MethodBase.GetCurrentMethod()?.Name, ex.Message);
+            
+            return new Result<bool>(false, $"Fail to update {nameof(courses)} background.");
         }
     }
 }
