@@ -14,6 +14,7 @@ using UI.ViewModels.GroupViewModels;
 using X.PagedList;
 using System.Drawing.Printing;
 using System.Linq;
+using static Dropbox.Api.Team.GroupSelector;
 
 namespace UI.Controllers;
 
@@ -312,9 +313,19 @@ public class GroupController : Controller
             return View("Index");
         }
 
+        var studentsInGroup = groupResult.Data.UserGroups.Where(ug => ug.AppUser.Role != AppUserRoles.Teacher && ug.AppUser.Role != AppUserRoles.Admin).ToList();
+
+        if (studentsInGroup.Count > 20 && !approved)
+        {
+            _logger.LogInformation("More than 20 students added to group {groupId}!", id);
+            TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation or if you already get confiramtion follow the link in the email");
+
+            return View("GetApprove", id);
+        }
+
         var students = await _userManager.GetUsersInRoleAsync("Student");
         var studentsInGroupIds = groupResult.Data.UserGroups.Select(ug => ug.AppUserId);
-        
+
         var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
             .Select(u => new UserSelectionViewModel
             {
@@ -336,10 +347,9 @@ public class GroupController : Controller
         return View(availableStudents.ToPagedList(pageNumber, pageSize));
     }
 
-    [HttpGet]
-    public async Task<IActionResult> ConfirmSelection(int groupId, List<UserSelectionViewModel> students)
+    [HttpPost]
+    public async Task<IActionResult> SendInventationToStudent(int groupId, string studentId)
     {
-        var selectedStudents = students.Where(s => s.IsSelected).ToList();
         var groupResult = await _groupService.GetById(groupId);
 
         if (!groupResult.IsSuccessful)
@@ -351,56 +361,38 @@ public class GroupController : Controller
             return View("Index");
         }
 
-        if (selectedStudents.Count > 20)
-        {
-            _logger.LogInformation("More than 20 students added to group {groupId}!", groupId);
-            TempData.TempDataMessage("Error", "Group cannot be more than 20 students without admin confirmation");
+        var studentResult = await _userService.FindByIdAsync(studentId);
 
-            return View("GetApprove", groupId);
+        if (!studentResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}",
+                studentId, studentResult.Message);
+
+            return View("Index");
         }
-        else
-        {
-            var studentIds = selectedStudents.Select(s => s.Id).ToList();
-            var studentsData = new Dictionary<string, string>();
-            var callBacks = new List<string>();
 
-            foreach (var studentId in studentIds)
-            {
-                var studentResult = await _userService.FindByIdAsync(studentId);
-
-                if (!studentResult.IsSuccessful)
-                {
-                    _logger.LogError("Failed to get user by Id {userId}! Error: {errorMessage}",
-                        studentId, studentResult.Message);
-
-                    continue;
-                    //Temporary solution
-                }
-
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(studentResult.Data);
-                
-                var callbackUrl = Url.Action(
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(studentResult.Data);
+        var callbackUrl = Url.Action(
                     "InvitationToGroup",
                     "Group",
                     new { groupId = groupId, code = code },
                     protocol: HttpContext.Request.Scheme);
-                
-                callBacks.Add(callbackUrl);
-                studentsData.Add(studentResult.Data.Email, callbackUrl);
-            }
 
-            var result = await _emailService.SendInvitationToStudents(studentsData, groupResult.Data);
+        var result = await _emailService.SendEmailToAppUsers(EmailType.GroupInvitationToStudent, studentResult.Data, callbackUrl, group: groupResult.Data);
 
-            if (!result.IsSuccessful)
-            {
-                _logger.LogError("Failed to send emails with invitation to group {groupId}! Error: {errorMessage}",
-                    groupResult.Data.Id, result.Message);
-                TempData.TempDataMessage("Error", result.Message);
-            }
+        if (!result.IsSuccessful)
+        {
+            _logger.LogError("Failed to send emails with invitation to group {groupId}! Error: {errorMessage}",
+                groupResult.Data.Id, result.Message);
+            TempData.TempDataMessage("Error", result.Message);
         }
 
-        return RedirectToAction("Index");
+        TempData.TempDataMessage("Error", $"The invitation was successfully sent to the student {studentResult.Data.FirstName} {studentResult.Data.LastName}. Wait for them to accept the invitation to the group");
+
+        return RedirectToAction("SelectStudent", "Group", new { id = groupId});
     }
+
+
 
     [HttpGet]
     public async Task<IActionResult> SelectTeachers(int courseId, int groupId, string? searchQuery, string? currentSearchQuery, int? page)
@@ -728,9 +720,9 @@ public class GroupController : Controller
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(teacherResult.Data);
         
         var callbackUrl = Url.Action(
-            "ApprovedGroup",
+            "SelectStudent",
             "Group",
-            new { groupId = groupId, code = code },
+            new { id = groupId, approved = true, code = code },
             protocol: HttpContext.Request.Scheme);
 
         var sendEmailResult = await _emailService.SendEmailToAppUsers(EmailType.ApprovedGroupCreation, teacherResult.Data, callbackUrl, group: groupResult.Data);
@@ -743,45 +735,6 @@ public class GroupController : Controller
 
         return View();
     }
-
-
-    [HttpGet]
-    [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> ApprovedGroup(int groupId, string code)
-    {
-        var currentUserResult = await _userService.GetCurrentUser(User);
-
-        if (!currentUserResult.IsSuccessful)
-        {
-            _logger.LogWarning("Unauthorized user");
-
-            return RedirectToAction("Login", "Account");
-        }
-
-        var result = await _userManager.ConfirmEmailAsync(currentUserResult.Data, code);
-
-        if (!result.Succeeded)
-        {
-            _logger.LogError("Failed to confirm email for user {userId} with code {userCode}! Errors: {errorMessages}",
-                currentUserResult.Data.Id, code, result.Errors);
-
-            return View("Error");
-        }
-
-        var groupResult = await _groupService.GetById(groupId);
-
-        if (!groupResult.IsSuccessful)
-        {
-            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
-                groupId, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
-        }
-
-        return RedirectToAction("SelectStudent", "Group", new { id = groupId, approved = true });
-    }
-
     
     [HttpGet]
     public async Task<IActionResult> DeleteUserFromGroup(int groupId, string userId)

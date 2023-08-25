@@ -66,13 +66,21 @@
                                 <div>
                                     @user.FirstName @user.LastName
                                 </div>
-                                <div class="user-button" style="text-align: center;">
-                                    <a href="@Url.Action("Detail", "User", new { id = user.Id })" class="ui teal basic button view-profile-button" style="width: 175px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 10px;">Send Invitation</a>
-                                </div>
+                                    <div style="margin-top: 10px; text-align: center;">
+                                        <form asp-action="SendInventationToStudent" asp-controller="Group" method="post">
+                                            <input type="hidden" name="groupId" value="@ViewBag.GroupId" />
+                                            <input type="hidden" name="studentId" value="@userSelection.Id" />
+                                            <input type="hidden" name="approved" value="@ViewBag.Approved" />
+                                            <button type="submit" class="ui details-button button">Send Invitation</button>
+                                        </form>
+                                    </div>
+                                @*<div class="user-button" style="text-align: center;">
+                                    <a href="@Url.Action("SendInventationToStudent", "Group", new { groupId = ViewBag.GroupId, studentId = userSelection.Id})" class="ui teal basic button view-profile-button" style="width: 175px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 10px;">Send Invitation</a>
+                                </div>*@
                                 @* <div> *@
                                 @*     <input type="checkbox" asp-for="@userSelection.IsSelected"/> *@
                                 @* </div> *@
-                                <input type="hidden" asp-for="@userSelection.Id"/>
+                                @*<input type="hidden" asp-for="@userSelection.Id"/>*@
                             </div>
                         </div>
                     </div>
@@ -89,31 +97,32 @@
     @* { *@
     @*     <a type="submit" class="btn btn-success mt-2" asp-route-students="@Model" asp-route-groupId="@ViewBag.GroupId" asp-action="ConfirmSelection" asp-controller="Group">Submit</a> *@
     @* } *@
-    <div class="ui container add-course-button mt-3" style="display: flex; justify-content: center; align-items: center;">
-        @if (Model.PageCount > 1)
-        {
-            <div class="pagination-container">
-                <div style="text-align:center; align-self:center">
-                    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                </div>
-                <div>
-                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectStudent", new { page = page, sortOrder = ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter }),
-                        new PagedListRenderOptions
-                        {
-                            LiElementClasses = new string[] { "page-item" },
-                            PageClasses = new string[] { "page-link" },
-                            MaximumPageNumbersToDisplay = 3
-                        })
-                </div>
-            </div>
-        }
-    </div>
 
-    <script>
-         document.querySelectorAll('.ui.card').forEach(card => {
-             card.addEventListener('click', function () {
-                 window.location.href = this.querySelector('.ui.view-profile-button').href;
-             });
-         });
-    </script>
 </div>
+<div class="ui container add-course-button mt-3" style="display: flex; justify-content: center; align-items: center;">
+    @if (Model.PageCount > 1)
+    {
+        <div class="pagination-container">
+            <div style="text-align:center; align-self:center">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+            </div>
+            <div>
+                @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectStudent", new { page = page, sortOrder = ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter }),
+            new PagedListRenderOptions
+            {
+            LiElementClasses = new string[] { "page-item" },
+            PageClasses = new string[] { "page-link" },
+            MaximumPageNumbersToDisplay = 3
+            })
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    document.querySelectorAll('.ui.card').forEach(card => {
+        card.addEventListener('click', function () {
+            window.location.href = this.querySelector('.ui.view-profile-button').href;
+        });
+    });
+</script>
