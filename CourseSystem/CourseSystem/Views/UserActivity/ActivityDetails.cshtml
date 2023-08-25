@@ -3,27 +3,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User activity</title>
+    <title>User Activity</title>
+    <style>
+        
+    </style>
 </head>
 <body>
-<div class="container mt-5">
+    <div class="container activity-details-container">
     <div class="row">
         <div class="col-md-6 offset-md-3">
-            <div class="card">
-                <div class="card-header text-center">
-                    <h4>@Model.Name</h4>
+            <div class="card-activity-custom">
+                <div class="card-header-activity-custom" style="border-radius: 20px;">
+                    <h2>@Model.Name</h2>
                 </div>
                 @if (TempData["Error"] != null)
                 {
-                    <div class="col-md-12 alert alert-danger">
+                    <div class="error-message-activity-custom">
                         <span><b>Sorry!</b> - @TempData["Error"]</span>
                     </div>
                 }
-                <div class="card-body">
-                    <p>
+                <div class="card-body-activity-custom">
+                    <p class="activity-text-custom">
                         @Model.Description
                     </p>
-                    <p>
+                    <p class="activity-date-custom">
                         @Model.Created.ToString("f")
                     </p>
                 </div>
