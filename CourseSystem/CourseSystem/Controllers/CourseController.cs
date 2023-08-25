@@ -492,7 +492,7 @@ public class CourseController : Controller
 
     [HttpPost]
     [ActionName("DeleteUserFromCourse")]
-    public async Task<IActionResult> DeleteUserFromGroupConfirmed(int courseId, string userId)
+    public async Task<IActionResult> DeleteUserFromCourseConfirmed(int courseId, string userId)
     {
         var userResult = await _userService.FindByIdAsync(userId);
         var courseResult = await _courseService.GetById(courseId);
@@ -506,7 +506,7 @@ public class CourseController : Controller
 
             TempData.TempDataMessage("Error", $"{deleteResult.Message}");
 
-            return View("DeleteUserFromGroup");
+            return RedirectToAction("DeleteUserFromCourse", new { courseId = courseId, userId = userId });
         }
 
         return RedirectToAction("Index");
