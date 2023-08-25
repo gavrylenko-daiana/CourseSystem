@@ -1,4 +1,5 @@
 using BLL.Interfaces;
+using BLL.Services;
 using Core.EmailTemplates;
 using Core.Enums;
 using Core.Helpers;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using UI.ViewModels;
 using UI.ViewModels.CourseViewModels;
+using UI.ViewModels.GroupViewModels;
 using X.PagedList;
 
 namespace UI.Controllers;
@@ -453,5 +455,60 @@ public class CourseController : Controller
         await _notificationService.AddJoinedCourseNotification(currentUser, courseResult.Data);
 
         return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DeleteUserFromCourse(int courseId, string userId)
+    {
+        var userResult = await _userService.FindByIdAsync(userId);
+
+        if (!userResult.IsSuccessful)
+        {
+            _logger.LogWarning("Not found User");
+            ViewData.ViewDataMessage("Error", $"{userResult.Message}");
+            return View("Index");
+        }
+
+        var courseResult = await _courseService.GetById(courseId);
+
+        if (!courseResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
+            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+
+            return View("Index");
+        }
+
+        var userCourseViewModel = new UserCourseViewModel()
+        {
+            AppUser = userResult.Data,
+            Course = courseResult.Data
+        };
+
+        return View(userCourseViewModel);
+    }
+
+    [HttpPost]
+    [ActionName("DeleteUserFromCourse")]
+    public async Task<IActionResult> DeleteUserFromGroupConfirmed(int courseId, string userId)
+    {
+        var userResult = await _userService.FindByIdAsync(userId);
+        var courseResult = await _courseService.GetById(courseId);
+
+        var deleteResult = await _courseService.DeleteUserFromCourse(courseResult.Data, userResult.Data);
+
+        if (!deleteResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to delete user {userId} from course {courseId}! Error: {errorMessage}",
+                userId, courseId, deleteResult.Message);
+
+            TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+
+            return View("DeleteUserFromGroup");
+        }
+
+        return RedirectToAction("Index");
     }
 }

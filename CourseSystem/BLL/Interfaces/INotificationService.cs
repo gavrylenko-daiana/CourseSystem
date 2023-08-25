@@ -10,6 +10,7 @@ namespace BLL.Interfaces
 {
     public interface INotificationService : IGenericService<Notification>
     {
+        Task<Result<List<Notification>>> GetNotifications(AppUser user, FilterParam findForFilter, int? findForId, SortingParam sortOrder);
         Task<Result<bool>> MarkAsRead(Notification notification);
         Task<Result<bool>> AddCreatedCourseNotification(AppUser user, Course course); //ready
         Task<Result<bool>> AddJoinedCourseNotification(AppUser user, Course course); //ready

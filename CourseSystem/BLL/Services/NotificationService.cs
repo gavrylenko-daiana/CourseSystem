@@ -294,6 +294,40 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
+        public async Task<Result<List<Notification>>> GetNotifications(AppUser user, FilterParam findForFilter, int? findForId, SortingParam sortOrder)
+        {
+            if (user == null)
+            {
+                return new Result<List<Notification>>(false, "Invalid user");
+            }
+
+            var notifications = user.Notifications;
+
+            if (findForFilter == FilterParam.Course && findForId != null)
+            {
+                notifications = notifications.Where(a => a.CourseId == findForId).ToList();
+            }
+            else if (findForFilter == FilterParam.Group && findForId != null)
+            {
+                notifications = notifications.Where(a => a.GroupId == findForId).ToList();
+            }
+            else if (findForFilter == FilterParam.Assignment && findForId != null)
+            {
+                notifications = notifications.Where(a => a.AssignmentId == findForId).ToList();
+            }
+
+            if(sortOrder == SortingParam.Created)
+            {
+                notifications = notifications.OrderBy(n => n.Created).ToList();
+            }
+            else
+            {
+                notifications = notifications.OrderByDescending(n => n.Created).ToList();
+            }
+
+            return new Result<List<Notification>>(true, notifications);
+        }
+
         public async Task<Result<bool>> MarkAsRead(Notification notification)
         {
             if (notification == null)

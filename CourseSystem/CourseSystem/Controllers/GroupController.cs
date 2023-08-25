@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using UI.ViewModels.GroupViewModels;
 using X.PagedList;
 using System.Drawing.Printing;
+using System.Linq;
 
 namespace UI.Controllers;
 
@@ -439,13 +440,18 @@ public class GroupController : Controller
         var teachersInCourse = courseResult.Data.UserCourses.Where(uc => uc.AppUser.Role == AppUserRoles.Teacher).Select(uc => uc.AppUser);
         var teachersNotInGroup = teachersInCourse.Except(groupResult.Data.UserGroups.Select(ug => ug.AppUser));
 
-        var teachersViewModels = teachersNotInGroup.Select(teacher => new UserSelectionViewModel
-        {
-            Id = teacher.Id,
-            FirstName = teacher.FirstName,
-            LastName = teacher.LastName,
-            IsSelected = false
-        }).ToList();
+        var teachersViewModels = teachersInCourse
+            .Select(u => new TeacherViewModel
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                ProfileImage = u.ProfileImage,
+                IsInvited = !teachersNotInGroup.Any(teacher => teacher.Id == u.Id),
+                CourseId = courseId,
+                GroupId = groupId
+            })
+            .ToList();
         
         if (searchQuery != null)
         {
@@ -457,18 +463,15 @@ public class GroupController : Controller
         ViewBag.SelectTeacherGroupId = groupId;
         ViewBag.SelectTeacherCourseId = courseId;
 
-        int pageSize = 6;
+        int pageSize = 9;
         int pageNumber = (page ?? 1);
 
         return View(teachersViewModels.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpPost]
-    public async Task<IActionResult> ConfirmTeachersSelection(int groupId, List<UserSelectionViewModel> teachers)
+    public async Task<IActionResult> ConfirmTeacherSelection(string teacherId, int groupId)
     {
-        var selectedTeachersVM = teachers.Where(s => s.IsSelected).ToList();
-        var selectedTeachersTasks = selectedTeachersVM.Select(s => s.Id).Select(id => _userManager.FindByIdAsync(id));
-        var selectedTeachers = (await Task.WhenAll(selectedTeachersTasks)).ToList();
         var groupResult = await _groupService.GetById(groupId);
 
         if (!groupResult.IsSuccessful)
@@ -480,25 +483,30 @@ public class GroupController : Controller
             return View("Index");
         }
 
-        if (selectedTeachers != null && selectedTeachers.Count > 0)
+        var userResult = await _userService.FindByIdAsync(teacherId);
+
+        if (!groupResult.IsSuccessful)
         {
-            foreach (var teacher in selectedTeachers)
-            {
-                var userGroup = new UserGroups
-                {
-                    AppUser = teacher,
-                    Group = groupResult.Data
-                };
+            _logger.LogError("Failed to get teacher by Id {teacherId}! Error: {errorMessage}",
+                teacherId, groupResult.Message);
+            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
 
-                await _userGroupService.CreateUserGroups(userGroup);
-
-                await _activityService.AddJoinedGroupActivity(teacher, groupResult.Data);
-
-                await _notificationService.AddJoinedGroupNotification(teacher, groupResult.Data);
-            }
+            return View("Index");
         }
 
-        return RedirectToAction("Details", new { id = groupId });
+        var userGroup = new UserGroups
+        {
+            AppUser = userResult.Data,
+            Group = groupResult.Data
+        };
+
+        await _userGroupService.CreateUserGroups(userGroup);
+
+        await _activityService.AddJoinedGroupActivity(userResult.Data, groupResult.Data);
+
+        await _notificationService.AddJoinedGroupNotification(userResult.Data, groupResult.Data);
+
+        return RedirectToAction("SelectTeachers", new { groupId = groupId, courseId = groupResult.Data.CourseId });
     }
 
     [HttpPost]
