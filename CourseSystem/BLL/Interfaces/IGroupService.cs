@@ -11,6 +11,7 @@ public interface IGroupService : IGenericService<Group>
     Task<Result<bool>> UpdateGroup(Group newGroup);
     Task<string> CalculateStudentProgressInGroup(Group group, AppUser currentUser);
     Task<string> CalculateGroupProgress(int groupId);
+    Task<Result<bool>> AddAllAdminsAtGroup(Group group);
     Task<Result<List<Group>>> GetAllGroupsAsync();
     Task<Result<List<Group>>> GetUserGroups(AppUser currentUser, SortingParam sortOrder, string groupAccessFilter = null, string searchQuery = null);
 }

@@ -25,7 +25,7 @@ public class UserCourseServiceTests
             CourseId = 1
         }; 
         
-        var result = await userCourseService.CreateUserCourses(userCourses);
+        var result = await userCourseService.CreateUserCoursesForTests(userCourses);
         
         Assert.True(result.IsSuccessful);
     }
@@ -42,7 +42,7 @@ public class UserCourseServiceTests
             CourseId = 1
         }; 
         
-        var result = await userCourseService.CreateUserCourses(userCourses);
+        var result = await userCourseService.CreateUserCoursesForTests(userCourses);
         
         Assert.False(result.IsSuccessful);
     }
@@ -54,7 +54,7 @@ public class UserCourseServiceTests
         
         UserCourses invalidUserCourses = null;
             
-        var result = await userCourseService.CreateUserCourses(invalidUserCourses);
+        var result = await userCourseService.CreateUserCoursesForTests(invalidUserCourses);
         
         Assert.False(result.IsSuccessful);
         Assert.Equal($"userCourses not found", result.Message);

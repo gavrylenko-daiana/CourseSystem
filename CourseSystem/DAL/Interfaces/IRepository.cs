@@ -10,9 +10,7 @@ namespace DAL.Interfaces
 {
     public interface IRepository<T> where T : class
     {
-        Task<List<T>> GetAllAsync(int pageNumber = 1, int pageSize = 20);
         Task<T> GetByIdAsync(int id);
-
         Task<List<T>> GetAsync(
             Expression<Func<T, bool>> filter = null,
             Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderBy = null);

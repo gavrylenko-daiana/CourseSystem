@@ -4,40 +4,56 @@
 @model UI.ViewModels.FileViewModels.CreateInGroupEducationMaterialViewModel
 
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+</head>
 <body>
-<div class="container py-4">
-    <h1>Upload File to Task</h1>
-    <form method="post" asp-controller="EducationMaterial" asp-action="CreateInGroup" enctype="multipart/form-data">
-        <input type="hidden" asp-for="GroupId"/>
-        <input type="hidden" asp-for="CourseId"/>
-        <input type="hidden" asp-for="Group"/>
-        <input type="hidden" asp-for="Course"/>
-        <input type="hidden" asp-for="TimeUploaded" value="@DateTime.Now">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-            <label asp-for="UploadFile" class="control-label"></label>
-            <input asp-for="UploadFile" type="file" class="form-control">
-            <span asp-validation-for="UploadFile" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="MaterialAccess" class="control-label"></label>
-            <select asp-for="MaterialAccess" class="ui search dropdown form-control">
-                @foreach (var accessValue in Enum.GetValues(typeof(MaterialAccess)))
-                {
-                    <option value="@accessValue">@accessValue</option>
-                }
-            </select>
-            <span asp-validation-for="MaterialAccess" class="text-danger"></span>
-        </div>
-        <div class="py-2">
-            <div class="form-group">
-                <input class="btn btn-outline-primary" type="submit" value="Save"/>
-                <a class="btn btn-outline-dark" asp-controller="Group" asp-action="Details" asp-route-id="@Model.GroupId">Cancel</a>
+<div class="ui container" style="margin-top: 20px;">
+    <div class="ui centered card" style="width: 400px;">
+        <div class="content">
+            <div class="header">
+                Upload File In Group "@Model.Group.Name"
             </div>
         </div>
-    </form>
+        <div class="content">
+            <form method="post" asp-controller="EducationMaterial" asp-action="CreateInGroup" enctype="multipart/form-data" class="ui form">
+                <input type="hidden" asp-for="GroupId"/>
+                <input type="hidden" asp-for="CourseId"/>
+                <input type="hidden" asp-for="Group"/>
+                <input type="hidden" asp-for="Course"/>
+                <input type="hidden" asp-for="TimeUploaded" value="@DateTime.Now">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <!-- File Upload Input -->
+                <div class="field">
+                    <label asp-for="UploadFile">Select File:</label>
+                    <input asp-for="UploadFile" type="file" class="form-control">
+                    <span asp-validation-for="UploadFile" class="text-danger"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="MaterialAccess" class="control-label"></label>
+                    <select asp-for="MaterialAccess" class="ui search dropdown form-control">
+                        @foreach (var accessValue in Enum.GetValues(typeof(MaterialAccess)))
+                        {
+                            <option value="@accessValue">@accessValue</option>
+                        }
+                    </select>
+                    <span asp-validation-for="MaterialAccess" class="text-danger"></span>
+                </div>        
+                <!-- Submit Button -->
+                <div class="field" style="margin-top: 10px;">
+                    <div class="col" style="display: inline-block;">
+                        <input class="ui create-button button" type="submit" value="Upload"/>
+                    </div>
+                    <div class="col" style="display: inline-block;">
+                        <a asp-controller="Group" asp-action="Details" asp-route-id="@Model.GroupId" class="ui button">Cancel</a>
+                    </div>
+                </div>
+            </form>        
+        </div>
+    </div>
 </div>
 
 @if (TempData["Error"] != null)

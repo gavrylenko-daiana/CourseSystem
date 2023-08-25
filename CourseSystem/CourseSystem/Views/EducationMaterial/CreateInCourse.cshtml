@@ -11,66 +11,86 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+</head>
 <body>
-<div class="container py-4">
-    <h1>Upload File to Task</h1>
-    <form method="post" asp-controller="EducationMaterial" asp-action="CreateInCourse" enctype="multipart/form-data">
-        <input type="hidden" asp-for="CourseId"/>
-        <input type="hidden" asp-for="Course"/>
-        <input type="hidden" asp-for="Groups"/>
-        <input type="hidden" asp-for="TimeUploaded" value="@DateTime.Now">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-            <label asp-for="UploadFile" class="control-label"></label>
-            <input asp-for="UploadFile" type="file" class="form-control">
-            <span asp-validation-for="UploadFile" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="MaterialAccess" class="control-label"></label>
-            <select id="materialAccessSelect" asp-for="MaterialAccess" class="form-control">
-                @if (Model.Groups?.Any() != true)
-                {
-                    <option value="@MaterialAccess.General">@MaterialAccess.General</option>
-                    <option value="@MaterialAccess.Course">@MaterialAccess.Course</option>
-                }
-                else
-                {
-                    @foreach (var accessValue in Enum.GetValues(typeof(MaterialAccess)))
-                    {
-                        <option value="@accessValue"> @accessValue </option>
-                    }
-                }
-            </select>
-            <span asp-validation-for="MaterialAccess" class="text-danger"></span>
-        </div>
-        <div class="form-group" id="groupDropdown" style="display:none;">
-            <label asp-for="SelectedGroupId" class="control-label">Select Group</label>
-            <select asp-for="SelectedGroupId" class="form-control">
-                @if (Model.Groups?.Any() == true)
-                {
-                    foreach (var group in Model.Groups)
-                    {
-                        foreach (var userGroup in currentUser.UserGroups.Where(ug => ug.Group != null && ug.GroupId == group.Id))
-                        {
-                            <option value="@userGroup.GroupId">@userGroup.Group.Name</option>
-                        }
-                    }
-                }
-                else
-                {
-                    <option value="" disabled>No groups available</option>
-                }
-            </select>
-            <span asp-validation-for="SelectedGroupId" class="text-danger"></span>
-        </div>
-        <div class="py-2">
-            <div class="form-group">
-                <input class="btn btn-outline-primary" type="submit" value="Save"/>
-                <a class="btn btn-outline-dark" asp-controller="Course" asp-action="Details" asp-route-id="@Model.CourseId">Cancel</a>
+<div class="ui container" style="margin-top: 20px;">
+    <div class="ui centered card" style="width: 400px;">
+        <div class="content">
+            <div class="header">
+                Upload File In Course "@Model.Course.Name"
             </div>
         </div>
-    </form>
+        <div class="content">
+            <form method="post" asp-controller="EducationMaterial" asp-action="CreateInCourse" enctype="multipart/form-data" class="ui form">
+                <input type="hidden" asp-for="CourseId"/>
+                <input type="hidden" asp-for="Course"/><input type="hidden" asp-for="Groups"/>
+                <input type="hidden" asp-for="TimeUploaded" value="@DateTime.Now">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="field">
+                    <label asp-for="UploadFile">Select File:</label>
+                    <input asp-for="UploadFile" type="file" class="form-control">
+                    <span asp-validation-for="UploadFile" class="text-danger"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="MaterialAccess" class="control-label"></label>
+                    <select id="materialAccessSelect" asp-for="MaterialAccess" class="form-control">
+                        @if (Model.Groups?.Any() != true)
+                        {
+                            <option value="@MaterialAccess.General">@MaterialAccess.General</option>
+                            <option value="@MaterialAccess.Course">@MaterialAccess.Course</option>
+                        }
+                        else
+                        {
+                            @foreach (var accessValue in Enum.GetValues(typeof(MaterialAccess)))
+                            {
+                                <option value="@accessValue"> @accessValue </option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="MaterialAccess" class="text-danger"></span>
+                </div>
+                <div class="field" id="groupDropdown" style="display:none;">
+                    <label asp-for="SelectedGroupId" class="control-label">Select Group</label>
+                    <div class="ui fluid search selection dropdown">
+                        <input type="hidden" asp-for="SelectedGroupId">
+                        <i class="dropdown icon"></i>
+                        <div class="default text">Select Group</div>
+                        <div class="menu">
+                            @if (Model.Groups?.Any() == true)
+                            {
+                                foreach (var group in Model.Groups)
+                                {
+                                    foreach (var userGroup in currentUser.UserGroups.Where(ug => ug.Group != null && ug.GroupId == group.Id))
+                                    {
+                                        <div class="item" data-value="@userGroup.GroupId">@userGroup.Group.Name</div>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <div class="disabled item">No groups available</div>
+                            }
+                        </div>
+                    </div>
+                    <span asp-validation-for="SelectedGroupId" class="text-danger"></span>
+                </div>        
+                <!-- Submit Button -->
+                <div class="field" style="margin-top: 10px;">
+                    <div class="col" style="display: inline-block;">
+                        <input class="ui create-button button" type="submit" value="Upload"/>
+                    </div>
+                    <div class="col" style="display: inline-block;">
+                        <a asp-controller="Course" asp-action="Index" class="ui button">Cancel</a>
+                    </div>
+                </div>
+            </form>        
+        </div>
+    </div>
 </div>
 
 @if (TempData["Error"] != null)
@@ -91,6 +111,8 @@
             groupDropdown.style.display = "none";
         }
     });
+    
+    $('.ui.dropdown').dropdown();
 </script>
 
 </body>

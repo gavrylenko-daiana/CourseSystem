@@ -335,12 +335,23 @@ public class AssignmentController : Controller
         return RedirectToAction("Details", "Assignment", new { assignmentId = editAssignmentVM.Id });
     }
 
-    public async Task<IActionResult> ViewAll(string currentAccessFilter, SortingParam sortOrder, string assignmentAccessFilter, int? page)
+    public async Task<IActionResult> ViewAll(string currentAccessFilter, SortingParam sortOrder, 
+        string assignmentAccessFilter, FilterParam findForFilter, int? findForId, int? page)
     {
         ViewBag.CurrentSort = sortOrder;
         ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
         ViewBag.StartDateParam = sortOrder == SortingParam.StartDateDesc ? SortingParam.StartDate : SortingParam.StartDateDesc;
         ViewBag.EndDateParam = sortOrder == SortingParam.EndDateDesc ? SortingParam.EndDate : SortingParam.EndDateDesc;
+
+        if(findForFilter != FilterParam.All)
+        {
+            ViewBag.FindForParam = findForFilter;
+        }
+
+        if (findForId != null)
+        {
+            ViewBag.FindForId = findForId;
+        }
 
         if (assignmentAccessFilter != null)
         {
@@ -375,7 +386,18 @@ public class AssignmentController : Controller
 
         if (allUserAssignemntsResult.Data != null)
         {
-            allUserAssignemntsResult.Data.ForEach(assignment =>
+            var filteredAssignments = allUserAssignemntsResult.Data;
+
+            if (ViewBag.FindForParam == FilterParam.Course && ViewBag.FindForId != null)
+            {
+                filteredAssignments = filteredAssignments.Where(a => a.Group.CourseId == (int)ViewBag.FindForId).ToList();
+            }
+            if (ViewBag.FindForParam == FilterParam.Group && ViewBag.FindForId != null)
+            {
+                filteredAssignments = filteredAssignments.Where(a => a.GroupId == (int)ViewBag.FindForId).ToList();
+            }
+
+            filteredAssignments.ForEach(assignment =>
             {
                 var assignmentVM = new AssignmentViewModel();
                 assignment.MapTo(assignmentVM);

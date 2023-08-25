@@ -12,6 +12,7 @@ using Group = Core.Models.Group;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using UI.ViewModels.GroupViewModels;
 using X.PagedList;
+using System.Drawing.Printing;
 
 namespace UI.Controllers;
 
@@ -297,7 +298,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectStudent(int id, bool approved = false)
+    public async Task<IActionResult> SelectStudent(int id, int? page, bool approved = false)
     {
         var groupResult = await _groupService.GetById(id);
         
@@ -325,8 +326,12 @@ public class GroupController : Controller
         
         ViewBag.GroupId = id;
         ViewBag.Approved = approved;
+        
+        int pageSize = 6;
+        int pageNumber = (page ?? 1);
+        ViewBag.OnePageOfAssignemnts = availableStudents;
 
-        return View(availableStudents);
+        return View(availableStudents.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpPost]
@@ -396,8 +401,19 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectTeachers(int courseId, int groupId)
+    public async Task<IActionResult> SelectTeachers(int courseId, int groupId, string? searchQuery, string? currentSearchQuery, int? page)
     {
+        if (searchQuery != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            searchQuery = currentSearchQuery;
+        }
+        
+        ViewBag.CurrentQueryFilter = searchQuery!;
+        
         var courseResult = await _courseService.GetById(courseId);
 
         if (!courseResult.IsSuccessful)
@@ -430,10 +446,21 @@ public class GroupController : Controller
             LastName = teacher.LastName,
             IsSelected = false
         }).ToList();
+        
+        if (searchQuery != null)
+        {
+            teachersViewModels = teachersViewModels.Where(t =>
+                t.FirstName.ToLower().Contains(searchQuery.ToLower()) ||
+                t.LastName.ToLower().Contains(searchQuery.ToLower())).ToList();
+        }
 
-        ViewBag.GroupId = groupId;
+        ViewBag.SelectTeacherGroupId = groupId;
+        ViewBag.SelectTeacherCourseId = courseId;
 
-        return View(teachersViewModels);
+        int pageSize = 6;
+        int pageNumber = (page ?? 1);
+
+        return View(teachersViewModels.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpPost]

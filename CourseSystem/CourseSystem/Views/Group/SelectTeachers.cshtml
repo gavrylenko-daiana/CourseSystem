@@ -1,4 +1,8 @@
-@model List<UI.ViewModels.UserSelectionViewModel>
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@using System.Web;
+@using X.PagedList.Web.Common;
+@model X.PagedList.IPagedList<UI.ViewModels.UserSelectionViewModel>
 
 @if (TempData["Error"] != null)
 {
@@ -6,28 +10,67 @@
         <span><b>Sorry!</b> - @TempData["Error"]</span>
     </div>
 }
-<form method="post" asp-action="ConfirmTeachersSelection">
-    <input type="hidden" name="groupId" value="@ViewBag.GroupId"/>
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                Select Teachers
-            </div>
 
-            <div class="card-body">
-                <ul>
-                    @for (int i = 0; i < Model.Count; i++)
-                    {
-                        <li>
-                            <input type="checkbox" asp-for="@Model[i].IsSelected"/>
-                            @Model[i].FirstName @Model[i].LastName
-                            <input type="hidden" asp-for="@Model[i].Id"/>
-                        </li>
-                    }
-                </ul>
+@if (!Model.Any())
+{
+    <h4>No new teachers for adding</h4>
+}
+else
+{
+    <form method="post" asp-action="ConfirmTeachersSelection">
+        <input type="hidden" name="groupId" value="@ViewBag.SelectTeacherGroupId"/>
+        <div class="container mt-4">
+            <div class="card">
+                <div class="card-header">
+                    Select Teachers
+
+                    <div style="flex-grow: 1; text-align: center;">
+                        <div class="ui search" style="margin-right: 10px;">
+                            <form method="get" asp-action="SelectTeachers" asp-controller="Group" class="ui form inline">
+                                <div class="ui icon input">
+                                    <input type="hidden" id="courseId" name="courseId" value="@ViewBag.SelectTeachersCourseId"/>
+                                    <input type="hidden" id="groupId" name="groupId" value="@ViewBag.SelectTeacherGroupId"/>
+                                    <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;"/>
+                                    <button type="submit" style="background: none; border: none; padding: 0;">
+                                        <i class="inverted circular search link icon"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <ul>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            <li>
+                                <input type="checkbox" asp-for="@Model[i].IsSelected"/>
+                                @Model[i].FirstName @Model[i].LastName
+                                <input type="hidden" asp-for="@Model[i].Id"/>
+                            </li>
+                        }
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
+        <button type="submit" class="btn btn-primary mt-2">Submit</button>
 
-    <button type="submit" class="btn btn-primary mt-2">Submit</button>
-</form>
+    </form>
+    <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+        @if (Model.PageCount > 1)
+        {
+            <div class="pagination-container">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                <div>
+                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new { courseId = ViewBag.SelectTeacherCourseId, groupId = ViewBag.SelectTeacherGroupId, currentQueryFilter = ViewBag.CurrentQueryFilter, page = page }),
+                        new PagedListRenderOptions
+                        {
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" }
+                        })
+                </div>
+            </div>
+        }
+    </div>
+}

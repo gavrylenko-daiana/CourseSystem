@@ -278,7 +278,7 @@ public class GroupService : GenericService<Group>, IGroupService
 
     public async Task<Result<List<Group>>> GetAllGroupsAsync()
     {
-        var groups = await _repository.GetAllAsync();
+        var groups = await _repository.GetAsync();
 
         if (!groups.Any())
         {
@@ -335,18 +335,22 @@ public class GroupService : GenericService<Group>, IGroupService
         return new Result<List<Group>>(true, userGroups);
     }
 
-    private async Task<Result<bool>> AddAllAdminsAtGroup(Group group)
+    public async Task<Result<bool>> AddAllAdminsAtGroup(Group group)
     {
-        if (group.Course.UserCourses.Any())
+        var userCourses = group.Course.UserCourses;
+        
+        if (userCourses.Count != 0)
         {
-            foreach (var userCourse in group.Course.UserCourses)
+            foreach (var userCourse in userCourses)
             {
                 if (userCourse.AppUser.Role == AppUserRoles.Admin)
                 {
                     var userGroup = new UserGroups()
                     {
                         Group = group,
-                        AppUser = userCourse.AppUser
+                        GroupId = group.Id,
+                        AppUser = userCourse.AppUser,
+                        AppUserId = userCourse.AppUser.Id
                     };
 
                     var createUserGroupResult = await CreateUserGroup(userGroup);
@@ -376,7 +380,7 @@ public class GroupService : GenericService<Group>, IGroupService
 
         return new Result<bool>(true);
     }
-    
+
     private async Task<Result<bool>> SetStudentProgressInUserGroup(Group group, AppUser currentUser, double progress)
     {
         if (group == null)

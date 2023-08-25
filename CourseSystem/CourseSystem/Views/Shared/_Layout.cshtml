@@ -21,7 +21,7 @@
 <div class="row">
     <div class="col-md-1">
         <header>
-            <div class="ui left demo vertical visible inverted sidebar labeled icon menu" style="background-color: #02af78;">
+            <div class="ui left demo vertical visible inverted sidebar labeled icon menu" style="background-color: #12302a;">
                 <a class="item" asp-controller="Home" asp-action="Index">
                     <i class="home icon"></i>
                     Home
@@ -79,7 +79,9 @@
                 </div>
                 <div class="right menu">
                     <div class="item">
-                        @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
+                            <div id="notifications-partial-view">
+                                @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
+                            </div>
                     </div>
                     <div class="item" style="margin-right: -15px;">
                         <img src="@user.Data.ProfileImage.Url" alt="Avatar" class="avatar ui mini rounded-circle img-fluid" style="width: 30px;">

@@ -7,8 +7,10 @@ using DAL;
 using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace UnitTests;
@@ -47,7 +49,7 @@ public class CourseServiceTests
         Assert.Equal($"currentUser not found", result.Message);
     }
 
-    private ICourseService GetCourseService()
+    private ICourseService GetCourseService(UserManager<AppUser> userManager = null)
     {
         var options = new DbContextOptionsBuilder<ApplicationContext>()
             .UseInMemoryDatabase(databaseName: "test_database")
@@ -62,9 +64,18 @@ public class CourseServiceTests
             var educationMaterialServiceMock = new Mock<IEducationMaterialService>();
             var groupServiceMock = new Mock<IGroupService>();
             var dropboxServiceMock = new Mock<IDropboxService>();
+            
+            if (userManager == null)
+            {
+                userManager = new Mock<UserManager<AppUser>>(
+                    Mock.Of<IUserStore<AppUser>>(), Mock.Of<IOptions<IdentityOptions>>(),
+                    Mock.Of<IPasswordHasher<AppUser>>(), new IUserValidator<AppUser>[0],
+                    new IPasswordValidator<AppUser>[0], Mock.Of<ILookupNormalizer>(),
+                    Mock.Of<IdentityErrorDescriber>(), Mock.Of<IServiceProvider>(), Mock.Of<ILogger<UserManager<AppUser>>>()).Object;
+            }
 
             var courseService = new CourseService(unitOfWork, userCourseServiceMock.Object, educationMaterialServiceMock.Object,
-                groupServiceMock.Object, dropboxServiceMock.Object);
+                groupServiceMock.Object, dropboxServiceMock.Object, userManager);
             
             return courseService;
         }

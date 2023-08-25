@@ -21,13 +21,14 @@ public class AccountController : Controller
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IEmailService _emailService;
+    private readonly ICourseService _courseService;
     private readonly IUserService _userService;
     private readonly IProfileImageService _profileImageService;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
         RoleManager<IdentityRole> roleManager, IEmailService emailService, 
-        IUserService userService, IProfileImageService profileImageService, ILogger<AccountController> logger)
+        IUserService userService, IProfileImageService profileImageService, ILogger<AccountController> logger, ICourseService courseService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -36,6 +37,7 @@ public class AccountController : Controller
         _userService = userService;
         _profileImageService = profileImageService;
         _logger = logger;
+        _courseService = courseService;
     }
 
     private async Task CreateAppUserRoles()
@@ -248,7 +250,9 @@ public class AccountController : Controller
 
             if (!roleResult.Succeeded)
             {
-                return View("Error");
+                TempData.TempDataMessage("Error", "Failed to add new user");
+
+                return View(registerViewModel);
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
@@ -567,6 +571,7 @@ public class AccountController : Controller
         var newAdmin = new AppUser();
         registerAdminViewModel.MapTo(newAdmin);
         
+        newAdmin.EmailConfirmed = true;
         newAdmin.UserName = newAdmin.FirstName + newAdmin.LastName;
 
         var newUserResponse = await _userManager.CreateAsync(newAdmin, _userService.GenerateTemporaryPassword());
@@ -581,6 +586,24 @@ public class AccountController : Controller
             }
 
             TempData.TempDataMessage("Error", "Failed to add new admin");
+
+            return View(registerAdminViewModel);
+        }
+        
+        var roleResult = await _userManager.AddToRoleAsync(newAdmin, registerAdminViewModel.Role.ToString());
+
+        if (!roleResult.Succeeded)
+        {
+            TempData.TempDataMessage("Error", "Failed to add new admin");
+
+            return View(registerAdminViewModel);
+        }
+
+        var addAdminToCoursesResult = await _courseService.AddNewAdminToCourses(newAdmin);
+
+        if (!addAdminToCoursesResult.IsSuccessful)
+        {
+            TempData.TempDataMessage("Error", "Failed to add new admin to courses");
 
             return View(registerAdminViewModel);
         }

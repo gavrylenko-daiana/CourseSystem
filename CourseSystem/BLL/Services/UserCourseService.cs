@@ -18,53 +18,12 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         _logger = logger;
     }
 
-    public async Task<Result<bool>> AddTeacherToCourse(Course course, AppUser teacher)
-    {
-        if (course == null)
-        {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(course));
-
-            return new Result<bool>(false, $"{nameof(course)} not found");
-        }
-
-        if (teacher == null)
-        {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(teacher));
-
-            return new Result<bool>(false, $"{nameof(teacher)} not found");
-        }
-
-        try
-        {
-            var courseTeacher = new UserCourses()
-            {
-                Course = course,
-                AppUser = teacher
-            };
-
-            await _repository.AddAsync(courseTeacher);
-            await _unitOfWork.Save();
-
-            _logger.LogInformation("Successfully {action} in course {courseName} for user {userId}",
-                MethodBase.GetCurrentMethod()?.Name, course.Name, teacher.Id);
-            
-            return new Result<bool>(true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Failed to {action} in course {courseName} for user {userId}. Error: {errorMsg}!", 
-                MethodBase.GetCurrentMethod()?.Name, course.Name, teacher.Id, ex.Message);
-            
-            return new Result<bool>(false, $"Failed to  add teacher to course. Exception: {ex.Message}");
-        }
-    }
-
     public async Task<Result<bool>> AddStudentToGroupAndCourse(UserGroups userGroups)
     {
         if (userGroups == null)
         {
             _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userGroups));
-
+         
             return new Result<bool>(false, $"{nameof(userGroups)} not found");
         }
 
@@ -77,17 +36,76 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
                 return new Result<bool>(true);
             }
 
-            var userCourses = new UserCourses()
-            {
-                AppUser = userGroups.AppUser,
-                Course = userGroups.Group.Course
-            };
-
-            var createUserCoursesResult = await CreateUserCourses(userCourses);
+            var createUserCoursesResult = await AddUserInCourse(userGroups.AppUser, userGroups.Group.Course);
 
             if (!createUserCoursesResult.IsSuccessful)
             {
                 return new Result<bool>(false, $"{createUserCoursesResult.Message}");
+            }
+
+            _logger.LogInformation("Successfully {action} in course {courseName} for user {userId}",
+                MethodBase.GetCurrentMethod()?.Name, course.Name, teacher.Id);
+            
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to {action} in course {courseName} for user {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, userGroups.Course.Name, userGroups.AppUser.Id, ex.Message);
+            
+            return new Result<bool>(false, $"Failed to add teacher to course. Exception: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> CreateUserCoursesForTests(UserCourses userCourses)
+    {
+        if (userCourses == null)
+        {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userGroups));
+
+            return new Result<bool>(false, $"{nameof(userGroups)} not found");
+        }
+
+        try
+        {
+            await _repository.AddAsync(userCourses);
+            await _unitOfWork.Save();
+
+            return new Result<bool>(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result<bool>(false,
+                $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> AddUserInCourse(AppUser appUser, Course course)
+    {
+        if (appUser == null)
+        {
+            return new Result<bool>(false, $"{nameof(appUser)} not found");
+        }
+
+        if (course == null)
+        {
+            return new Result<bool>(false, $"{nameof(course)} not found");
+        }
+
+        var userCourses = new UserCourses
+        {
+            AppUser = appUser,
+            AppUserId = appUser.Id,
+            Course = course,
+            CourseId = course.Id
+        };
+
+        try
+        {
+            if (!await IsUserInCourse(userCourses))
+            {
+                await _repository.AddAsync(userCourses);
+                await _unitOfWork.Save();
             }
 
             _logger.LogInformation("Successfully {action} in group {groupName} for user {userId}",
@@ -104,31 +122,43 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         }
     }
 
-    public async Task<Result<bool>> CreateUserCourses(UserCourses userCourses)
+    private async Task<bool> IsUserInCourse(UserCourses userCourses)
     {
-        if (userCourses == null)
-        {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userCourses));
+        var userCourse = await GetUserCourses(userCourses.AppUserId, userCourses.CourseId);
 
-            return new Result<bool>(false, $"{nameof(userCourses)} not found");
+        return userCourse.Data != null;
+    }
+
+    private async Task<Result<UserCourses>> GetUserCourses(string? userId, int courseId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userId));
+            
+            return new Result<UserCourses>(false, $"{nameof(userId)} not found");
+        }
+
+        if (courseId < 1)
+        {
+            return new Result<UserCourses>(false, $"{nameof(courseId)} not found");
         }
 
         try
         {
-            await _repository.AddAsync(userCourses);
-            await _unitOfWork.Save();
-
-            _logger.LogInformation("Successfully {action} in course {courseName} for user {userId}",
-                MethodBase.GetCurrentMethod()?.Name, userCourses.Course.Name, userCourses.AppUser.Id);
+            var userCourses = await _repository.GetAsync();
+            var getUserCourse = userCourses.FirstOrDefault(uc => uc.AppUserId == userId && uc.CourseId == courseId);
             
-            return new Result<bool>(true);
+            _logger.LogInformation("Successfully {action} in course {courseId} for user {userId}",
+                MethodBase.GetCurrentMethod()?.Name, courseId, userId);
+                
+            return new Result<UserCourses>(true, getUserCourse!);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to {action} in course {courseName} for user {userId}. Error: {errorMsg}!", 
-                MethodBase.GetCurrentMethod()?.Name, userCourses.Course.Name, userCourses.AppUser.Id, ex.Message);
-            
-            return new Result<bool>(false, $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
+            _logger.LogError("Failed to {action} in course {courseId} for user {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, courseId, userId, ex.Message);
+                
+            return new Result<UserCourses>(false, $"Message - {ex.Message}");
         }
     }
 }
