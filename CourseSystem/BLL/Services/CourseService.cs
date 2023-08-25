@@ -376,8 +376,7 @@ public class CourseService : GenericService<Course>, ICourseService
                 break;
         }
 
-        _logger.LogInformation("Successfully {action}, query: {query}",
-            MethodBase.GetCurrentMethod()?.Name, query.ToString());
+        _logger.LogInformation("Successfully {action}, query: {query}", MethodBase.GetCurrentMethod()?.Name, query.ToString());
         
         return query;
     }
