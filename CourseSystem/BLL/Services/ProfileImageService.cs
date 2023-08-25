@@ -90,11 +90,12 @@ namespace BLL.Services
             }
 
             var profileImage = userProfileImageResult.Data.FirstOrDefault();
-            var defaultImages = await _dropboxService.GetAllFolderFilesData(DropboxFolders.DefaultProfileImages);
 
             (string, string) newProfileImageData;
 
-            if (!DefaultProfileImage.IsProfileImageDefault(user.ProfileImage.Url, defaultImages.Data))
+            var fileExist = await _dropboxService.FileExistsAsync(profileImage.Name, DropboxFolders.DefaultProfileImages.ToString());
+
+            if (!fileExist.IsSuccessful)
             {
                 var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(user.ProfileImage.Name, DropboxFolders.ProfileImages.ToString());
 
