@@ -15,4 +15,6 @@ public interface ICourseService : IGenericService<Course>
     Task<Result<List<Course>>> GetAllCoursesAsync();
     Task<Result<bool>> AddEducationMaterial(DateTime uploadedTime, IFormFile uploadFile, MaterialAccess materialAccess,
         int? groupId = null, int? courseId = null);
+    Task<Result<bool>> AddNewAdminToCourses(AppUser admin);
+    Task<Result<bool>> DeleteUserFromCourse(Course course, AppUser deletedUser);
 }

@@ -111,7 +111,7 @@ public class EducationMaterialService : GenericService<EducationMaterial>, IEduc
 
     public async Task<Result<List<EducationMaterial>>> GetAllMaterialByAccessAsync(MaterialAccess access, SortingParam sortOrder)
     {
-        var materials = await _repository.GetAllAsync();
+        var materials = await _repository.GetAsync();
         var query = GetOrderByExpression(sortOrder);
 
         if (!materials.Any())

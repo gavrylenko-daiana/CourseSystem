@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Core.Enums
 {
-    public enum NotificationsFilteringParams
+    public enum FilterParam
     {
-        Default,
+        All,
         Course,
         Group,
         Assignment

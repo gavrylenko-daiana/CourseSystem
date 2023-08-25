@@ -1,4 +1,5 @@
 using BLL.Interfaces;
+using BLL.Services;
 using Core.EmailTemplates;
 using Core.Enums;
 using Core.Helpers;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using UI.ViewModels;
 using UI.ViewModels.CourseViewModels;
+using UI.ViewModels.GroupViewModels;
 using X.PagedList;
 
 namespace UI.Controllers;
@@ -46,7 +48,8 @@ public class CourseController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(string currentQueryFilter, SortingParam sortOrder, string searchQuery, int? page)
+    public async Task<IActionResult> Index(string currentQueryFilter, SortingParam sortOrder, string searchQuery,
+        int? page)
     {
         ViewBag.CurrentSort = sortOrder;
         ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
@@ -59,9 +62,9 @@ public class CourseController : Controller
         {
             searchQuery = currentQueryFilter;
         }
-        
+
         ViewBag.CurrentQueryFilter = searchQuery;
-        
+
         var currentUserResult = await _userService.GetCurrentUser(User);
 
         if (!currentUserResult.IsSuccessful)
@@ -77,14 +80,14 @@ public class CourseController : Controller
         {
             _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}",
                 currentUserResult.Data.Id, coursesResult.Message);
-            
+
             TempData.TempDataMessage("Error", $"{coursesResult.Message}");
 
             return View("Index");
         }
-     
-        var coursesVM = new List<CourseViewModel>();  
-        
+
+        var coursesVM = new List<CourseViewModel>();
+
         if (coursesResult.Data != null)
         {
             coursesResult.Data.ForEach(course =>
@@ -98,14 +101,16 @@ public class CourseController : Controller
         int pageSize = 6;
         int pageNumber = (page ?? 1);
         ViewBag.OnePageOfAssignemnts = coursesVM;
-        
+
         return View(coursesVM.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        return View();
+        var courseViewModel = new CourseViewModel();
+
+        return View(courseViewModel);
     }
 
     [HttpPost]
@@ -124,8 +129,9 @@ public class CourseController : Controller
         {
             Name = courseViewModel.Name
         };
-        
-        var createResult = await _courseService.CreateCourse(course, currentUserResult.Data, courseViewModel.UploadImage);
+
+        var createResult =
+            await _courseService.CreateCourse(course, currentUserResult.Data, courseViewModel.UploadImage);
 
         if (!createResult.IsSuccessful)
         {
@@ -166,11 +172,11 @@ public class CourseController : Controller
     public async Task<IActionResult> Edit(CourseViewModel newCourse)
     {
         var updateNameResult = await _courseService.UpdateName(newCourse.Id, newCourse.Name);
-        
+
         if (newCourse.UploadImage != null)
         {
             var updateBackgroundResult = await _courseService.UpdateBackground(newCourse.Id, newCourse.UploadImage);
-            
+
             if (!updateBackgroundResult.IsSuccessful)
             {
                 _logger.LogError("Failed to update course by Id {courseId}! Error: {errorMessage}",
@@ -258,7 +264,8 @@ public class CourseController : Controller
         courseResult.Data.MapTo(courseViewModel);
 
         courseViewModel.CurrentUser = currentUserResult.Data;
-        courseViewModel.UserCoursesWithoutAdmins = courseResult.Data.UserCourses.Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList();
+        courseViewModel.UserCoursesWithoutAdmins = courseResult.Data.UserCourses
+            .Where(ug => ug.AppUser.Role != AppUserRoles.Admin).ToList();
 
         if (courseViewModel.CurrentUser == null)
         {
@@ -273,8 +280,19 @@ public class CourseController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectTeachers(int courseId)
+    public async Task<IActionResult> SelectTeachers(int courseId, int? page, string? searchQuery, string? currentQueryFilter)
     {
+        if (searchQuery != null)
+        {
+            page = 1;
+        }
+        else
+        {
+            searchQuery = currentQueryFilter;
+        }
+
+        ViewBag.CurrentQueryFilter = searchQuery!;
+
         var courseResult = await _courseService.GetById(courseId);
 
         if (!courseResult.IsSuccessful)
@@ -300,8 +318,19 @@ public class CourseController : Controller
                 CourseId = courseId
             })
             .ToList();
-        
-        return View(teachers);
+
+        if (searchQuery != null)
+        {
+            teachers = teachers.Where(t =>
+                t.FirstName.ToLower().Contains(searchQuery.ToLower()) ||
+                t.LastName.ToLower().Contains(searchQuery.ToLower())).ToList();
+        }
+
+        int pageSize = 9;
+        int pageNumber = (page ?? 1);
+        ViewBag.SelectTeachersCourseId = courseId;
+
+        return View(teachers.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpPost]
@@ -335,17 +364,19 @@ public class CourseController : Controller
             new { courseId = courseId, code = code },
             protocol: HttpContext.Request.Scheme);
 
-        var sendResult = await _emailService.SendEmailToAppUsers(EmailType.CourseInvitation, teacherResult.Data, callbackUrl, course: courseResult.Data) ;
+        var sendResult = await _emailService.SendEmailToAppUsers(EmailType.CourseInvitation, teacherResult.Data,
+            callbackUrl, course: courseResult.Data);
 
         if (!sendResult.IsSuccessful)
         {
-            _logger.LogError("Failed to send email with invitation to course {courseId} to teacher {teacherId}! Error: {errorMessage}",
+            _logger.LogError(
+                "Failed to send email with invitation to course {courseId} to teacher {teacherId}! Error: {errorMessage}",
                 courseResult.Data.Id, teacherResult.Data.Id, sendResult.Message);
             TempData.TempDataMessage("Error", sendResult.Message);
 
             return View("SelectTeachers");
         }
-        
+
         return RedirectToAction("Index");
     }
 
@@ -408,7 +439,7 @@ public class CourseController : Controller
             return View("Index");
         }
 
-        var addTeacherToCourseResult = await _userCourseService.AddTeacherToCourse(courseResult.Data, currentUser);
+        var addTeacherToCourseResult = await _userCourseService.AddUserInCourse(currentUser, courseResult.Data);
 
         if (!addTeacherToCourseResult.IsSuccessful)
         {
@@ -424,5 +455,60 @@ public class CourseController : Controller
         await _notificationService.AddJoinedCourseNotification(currentUser, courseResult.Data);
 
         return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DeleteUserFromCourse(int courseId, string userId)
+    {
+        var userResult = await _userService.FindByIdAsync(userId);
+
+        if (!userResult.IsSuccessful)
+        {
+            _logger.LogWarning("Not found User");
+            ViewData.ViewDataMessage("Error", $"{userResult.Message}");
+            return View("Index");
+        }
+
+        var courseResult = await _courseService.GetById(courseId);
+
+        if (!courseResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
+            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
+
+            return View("Index");
+        }
+
+        var userCourseViewModel = new UserCourseViewModel()
+        {
+            AppUser = userResult.Data,
+            Course = courseResult.Data
+        };
+
+        return View(userCourseViewModel);
+    }
+
+    [HttpPost]
+    [ActionName("DeleteUserFromCourse")]
+    public async Task<IActionResult> DeleteUserFromGroupConfirmed(int courseId, string userId)
+    {
+        var userResult = await _userService.FindByIdAsync(userId);
+        var courseResult = await _courseService.GetById(courseId);
+
+        var deleteResult = await _courseService.DeleteUserFromCourse(courseResult.Data, userResult.Data);
+
+        if (!deleteResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to delete user {userId} from course {courseId}! Error: {errorMessage}",
+                userId, courseId, deleteResult.Message);
+
+            TempData.TempDataMessage("Error", $"{deleteResult.Message}");
+
+            return View("DeleteUserFromGroup");
+        }
+
+        return RedirectToAction("Index");
     }
 }

@@ -9,6 +9,7 @@ using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Collections.Concurrent;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace BLL.Services;
@@ -17,7 +18,8 @@ public class DropboxService : IDropboxService
 {
     private readonly DropboxClient _dropboxClient;
     private readonly ILogger<DropboxService> _logger;
-    
+    private ConcurrentDictionary<string, string> _cacheImages = new ();
+
     public DropboxService(IOptions<DropboxSettings> config, ILogger<DropboxService> logger)
     {
         _dropboxClient = new DropboxClient(config.Value.AccessToken);
@@ -48,7 +50,7 @@ public class DropboxService : IDropboxService
             }
 
             await using var stream = file.OpenReadStream();
-            
+
             var uploadResult = await _dropboxClient.Files.UploadAsync(uploadPath, WriteMode.Overwrite.Instance, body: stream);
             var linkResult = await GetSharedLinkAsync(uploadResult.PathDisplay);
 
@@ -193,8 +195,8 @@ public class DropboxService : IDropboxService
 
         return new Result<string>(true, $"{fileNameWithoutExtension}-{count}{fileExtension}");
     }
-    
-    private async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
+
+    public async Task<Result<bool>> FileExistsAsync(string filePath, string? folder = null)
     {
         try
         {
@@ -219,4 +221,61 @@ public class DropboxService : IDropboxService
             return new Result<bool>(false, $"Failed to get metadata by {nameof(filePath)}");
         }
     }
+
+    public async Task<Result<Dictionary<string, string>>> GetAllFolderFilesData(DropboxFolders dropboxFolder)
+    {
+        try
+        {
+            string folderPath = "/" + dropboxFolder.ToString();
+
+            var folderItems = await _dropboxClient.Files.ListFolderAsync(folderPath);
+            var tasks = new List<Task>();
+
+            foreach (var item in folderItems.Entries)
+            {
+                if (item.IsFile && !_cacheImages.ContainsKey(item.Name))
+                {
+                    tasks.Add(ProcessFileItemAsync(item));
+                }
+            }
+
+            await Task.WhenAll(tasks);
+
+            return new Result<Dictionary<string, string>>(true, _cacheImages.ToDictionary(kv => kv.Key, kv => kv.Value));
+        }
+        catch (Exception ex)
+        {
+            return new Result<Dictionary<string, string>>(false, "Error listing folder: " + ex.Message);
+        }
+    }
+
+    private async Task ProcessFileItemAsync(Metadata item)
+    {
+        var fileMetadata = (FileMetadata)item;
+        var existingLinks = await _dropboxClient.Sharing.ListSharedLinksAsync(fileMetadata.PathLower);
+        var existingLink = existingLinks.Links.FirstOrDefault();
+
+        string url = null;
+
+        if (existingLink == null)
+        {
+            var sharedLinkResult = await GetSharedLinkAsync(fileMetadata.PathDisplay);
+
+            if (sharedLinkResult.IsSuccessful)
+            {
+                url = sharedLinkResult.Message;
+            }
+        }
+        else
+        {
+            url = existingLink.Url;
+        }
+
+        if (url != null)
+        {
+            var tempUrl = url.Replace("www.dropbox.com", "dl.dropboxusercontent.com");
+            _cacheImages.TryAdd(item.Name, tempUrl);
+        }
+    }
+
 }

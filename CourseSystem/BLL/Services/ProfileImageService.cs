@@ -60,6 +60,7 @@ namespace BLL.Services
                 return new Result<bool>(false, $"Failed to get profile image - Message: {userProfileImageResult.Message}");
             }
 
+            var defaultImages = await _dropboxService.GetAllFolderFilesData(DropboxFolders.DefaultProfileImages);
             var profileImage = userProfileImageResult.Data.FirstOrDefault();
             string profileImageName = profileImage.Name;
             string profileImageUrl = profileImage.Url;
@@ -71,7 +72,7 @@ namespace BLL.Services
 
                 _logger.LogInformation("Successfully {action} for user {userId}",MethodBase.GetCurrentMethod()?.Name, user.Id);
                 
-                if (!DefaultProfileImage.IsProfileImageDefault(profileImageUrl))
+                if (!DefaultProfileImage.IsProfileImageDefault(profileImageUrl, defaultImages.Data))
                 {
                     var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(profileImageName, DropboxFolders.ProfileImages.ToString());
 
@@ -115,7 +116,9 @@ namespace BLL.Services
 
             (string, string) newProfileImageData;
 
-            if (!DefaultProfileImage.IsProfileImageDefault(user.ProfileImage.Url))
+            var fileExist = await _dropboxService.FileExistsAsync(profileImage.Name, DropboxFolders.DefaultProfileImages.ToString());
+
+            if (!fileExist.IsSuccessful)
             {
                 var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(user.ProfileImage.Name, DropboxFolders.ProfileImages.ToString());
 
@@ -124,11 +127,11 @@ namespace BLL.Services
                     return new Result<bool>(false, $"Failed to delete profile image - Message: {deleteImageDropboxResult.Message}");
                 }
 
-                newProfileImageData = DefaultProfileImage.GetDefaultImageUrl();
+                newProfileImageData = await GetAvatarsPack();
             }
             else
             {
-                newProfileImageData = DefaultProfileImage.GetDefaultImageUrl(profileImage?.Name);               
+                newProfileImageData = await GetAvatarsPack(profileImage?.Name);               
             }
 
             try
@@ -161,7 +164,7 @@ namespace BLL.Services
 
                 return new Result<bool>(false, "Invalid user");
             }
-
+            
             var isNotDefaultImageResult = await IsNotDefaultProfileImage(user);
 
             if (!isNotDefaultImageResult.IsSuccessful)
@@ -169,7 +172,8 @@ namespace BLL.Services
                 return new Result<bool>(true);
             }
 
-            var imageNameAndUrl = DefaultProfileImage.GetDefaultImageUrl();
+            var imageNameAndUrl = await GetAvatarsPack();
+
             var profileImage = new ProfileImage()
             {
                 AppUser = user,
@@ -261,6 +265,24 @@ namespace BLL.Services
             }
 
             return new Result<bool>(false);
+        }
+
+        private async Task<(string, string)> GetAvatarsPack(string? exceptName = null)
+        {
+            (string, string) imageNameAndUrl;
+
+            var dynemicAvatarsPackResult = await _dropboxService.GetAllFolderFilesData(DropboxFolders.DefaultProfileImages);
+
+            if (!dynemicAvatarsPackResult.IsSuccessful)
+            {
+                imageNameAndUrl = DefaultProfileImage.GetDefaultImageUrl(exceptName);
+            }
+            else
+            {
+                imageNameAndUrl = DefaultProfileImage.GetDefaultImageUrl(exceptName, dynemicAvatarsPack: dynemicAvatarsPackResult.Data);
+            }
+
+            return imageNameAndUrl;
         }
     }
 }
