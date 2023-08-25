@@ -186,7 +186,7 @@ public class AssignmentAnswerController : Controller
 
         ViewBag.CurrentFilter = isMarked;
 
-        var userAssignmentsResult = await _userAssignmentService.GetAllUserAssignemnts(assignmentId, isMarked);
+        var userAssignmentsResult = await _userAssignmentService.GetAllUserAssignments(assignmentId, isMarked);
 
         if (!userAssignmentsResult.IsSuccessful)
         {

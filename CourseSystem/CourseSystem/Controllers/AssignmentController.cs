@@ -241,7 +241,7 @@ public class AssignmentController : Controller
             return RedirectToAction("Index", "Assignment", new { groupId = assignmentResult.Data.GroupId});
         }
 
-        var userAssignemntResult = await _userAssignmentService.GetUserAssignemnt(assignmentResult.Data, currentUserResult.Data);
+        var userAssignemntResult = await _userAssignmentService.GetUserAssignment(assignmentResult.Data, currentUserResult.Data);
         
         if (!userAssignemntResult.IsSuccessful)
         {
