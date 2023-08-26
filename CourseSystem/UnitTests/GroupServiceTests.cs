@@ -122,8 +122,9 @@ public class GroupServiceTests
             var userGroupServiceMock = new Mock<IUserGroupService>();
             var educationMaterialServiceMock = new Mock<IEducationMaterialService>();
             var userServiceMock = new Mock<IUserService>();
+            var loggerMock = new Mock<ILogger<GroupService>>();
 
-            var groupService = new GroupService(unitOfWork, userGroupServiceMock.Object, educationMaterialServiceMock.Object, userServiceMock.Object);
+            var groupService = new GroupService(unitOfWork, userGroupServiceMock.Object, educationMaterialServiceMock.Object, userServiceMock.Object, loggerMock.Object);
 
             return groupService;
         }

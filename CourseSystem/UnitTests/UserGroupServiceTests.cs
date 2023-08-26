@@ -99,8 +99,9 @@ public class UserGroupServiceTests
         using (var context = new ApplicationContext(options))
         {
             var unitOfWork = new UnitOfWork(context, loggerFactoryMock.Object);
+            var loggerMock = new Mock<ILogger<UserGroupService>>();
             
-            var userGroupsService = new UserGroupService(unitOfWork);
+            var userGroupsService = new UserGroupService(unitOfWork, loggerMock.Object);
             
             return userGroupsService;
         }

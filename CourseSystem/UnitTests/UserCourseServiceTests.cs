@@ -71,9 +71,10 @@ public class UserCourseServiceTests
         using (var context = new ApplicationContext(options))
         {
             var unitOfWork = new UnitOfWork(context, loggerFactoryMock.Object);
+            var loggerMock = new Mock<ILogger<UserCourseService>>();
             var userGroupServiceMock = new Mock<IUserGroupService>();
 
-            var userCourseService = new UserCourseService(unitOfWork, userGroupServiceMock.Object);
+            var userCourseService = new UserCourseService(unitOfWork, userGroupServiceMock.Object, loggerMock.Object);
             
             return userCourseService;
         }

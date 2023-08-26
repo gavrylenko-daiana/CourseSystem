@@ -64,6 +64,7 @@ public class CourseServiceTests
             var educationMaterialServiceMock = new Mock<IEducationMaterialService>();
             var groupServiceMock = new Mock<IGroupService>();
             var dropboxServiceMock = new Mock<IDropboxService>();
+            var loggerMock = new Mock<ILogger<CourseService>>();
             
             if (userManager == null)
             {
@@ -75,7 +76,7 @@ public class CourseServiceTests
             }
 
             var courseService = new CourseService(unitOfWork, userCourseServiceMock.Object, educationMaterialServiceMock.Object,
-                groupServiceMock.Object, dropboxServiceMock.Object, userManager);
+                groupServiceMock.Object, dropboxServiceMock.Object, userManager, loggerMock.Object);
             
             return courseService;
         }
