@@ -80,12 +80,12 @@
                         </div>
                         <div class="page-link">
                             @Html.PagedListPager((IPagedList)Model, page => Url.Action("ActivityForDay", new { thisDay = ViewBag.ThisDay, page = page }),
-                            new PagedListRenderOptions
-                            {
-                            LiElementClasses = new string[] { "page-item" },
-                            PageClasses = new string[] { "page-link" },
-                            MaximumPageNumbersToDisplay = 3
-                            })
+                                new PagedListRenderOptions
+                                {
+                                    LiElementClasses = new string[] { "page-item" },
+                                    PageClasses = new string[] { "page-link" },
+                                    MaximumPageNumbersToDisplay = 3
+                                })
                         </div>
                      </div>
                 }
