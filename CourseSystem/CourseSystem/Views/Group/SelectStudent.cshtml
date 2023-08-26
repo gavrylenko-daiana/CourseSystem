@@ -29,21 +29,20 @@
     }
 </style>
 
-@if (TempData["Error"] != null)
-{
-    <div class="ui negative message">
-        <i class="close icon"></i>
-        <div class="header">
-            Sorry!
-        </div>
-        <p>@TempData["Error"]</p>
-    </div>
-}
-
 <div class="ui container mt-4">
     <h3 class="ui header">Invite students:</h3>
 
     <hr class="ui divider">
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui negative message">
+            <i class="close icon"></i>
+            <div class="header">
+                Attention!
+            </div>
+            <p>@TempData["Error"]</p>
+        </div>
+    }
     <div class="ui stackable three column grid">
         @if (!Model.Any())
         {
