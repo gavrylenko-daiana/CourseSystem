@@ -1,23 +1,29 @@
+using System.Reflection;
 using BLL.Interfaces;
 using Core.Models;
 using DAL.Repository;
+using Microsoft.Extensions.Logging;
 
 namespace BLL.Services;
 
 public class UserCourseService : GenericService<UserCourses>, IUserCourseService
 {
     private readonly IUserGroupService _userGroupService;
+    private readonly ILogger<UserCourseService> _logger;
 
-    public UserCourseService(UnitOfWork unitOfWork, IUserGroupService userGroupService)
+    public UserCourseService(UnitOfWork unitOfWork, IUserGroupService userGroupService, ILogger<UserCourseService> logger)
         : base(unitOfWork, unitOfWork.UserCoursesRepository)
     {
         _userGroupService = userGroupService;
+        _logger = logger;
     }
 
     public async Task<Result<bool>> AddStudentToGroupAndCourse(UserGroups userGroups)
     {
         if (userGroups == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userGroups));
+         
             return new Result<bool>(false, $"{nameof(userGroups)} not found");
         }
 
@@ -37,12 +43,17 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
                 return new Result<bool>(false, $"{createUserCoursesResult.Message}");
             }
 
+            _logger.LogInformation("Successfully {action} in course {courseName} for user {userId}",
+                MethodBase.GetCurrentMethod()?.Name, course.Name, teacher.Id);
+            
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,
-                $"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
+            _logger.LogError("Failed to {action} in course {courseName} for user {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, userGroups.Course.Name, userGroups.AppUser.Id, ex.Message);
+            
+            return new Result<bool>(false, $"Failed to add teacher to course. Exception: {ex.Message}");
         }
     }
 
@@ -50,7 +61,9 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
     {
         if (userCourses == null)
         {
-            return new Result<bool>(false, $"{nameof(userCourses)} not found");
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userGroups));
+
+            return new Result<bool>(false, $"{nameof(userGroups)} not found");
         }
 
         try
@@ -95,12 +108,17 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
                 await _unitOfWork.Save();
             }
 
+            _logger.LogInformation("Successfully {action} in group {groupName} for user {userId}",
+                MethodBase.GetCurrentMethod()?.Name, userGroups.Group.Name, userGroups.AppUser.Id);
+            
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,
-                $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
+            _logger.LogError("Failed to {action} in group {groupName} for user {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, userGroups.Group.Name, userGroups.AppUser.Id, ex.Message);
+            
+            return new Result<bool>(false, $"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
         }
     }
 
@@ -115,6 +133,8 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userId));
+            
             return new Result<UserCourses>(false, $"{nameof(userId)} not found");
         }
 
@@ -127,11 +147,17 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         {
             var userCourses = await _repository.GetAsync();
             var getUserCourse = userCourses.FirstOrDefault(uc => uc.AppUserId == userId && uc.CourseId == courseId);
-
+            
+            _logger.LogInformation("Successfully {action} in course {courseId} for user {userId}",
+                MethodBase.GetCurrentMethod()?.Name, courseId, userId);
+                
             return new Result<UserCourses>(true, getUserCourse!);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} in course {courseId} for user {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, courseId, userId, ex.Message);
+                
             return new Result<UserCourses>(false, $"Message - {ex.Message}");
         }
     }

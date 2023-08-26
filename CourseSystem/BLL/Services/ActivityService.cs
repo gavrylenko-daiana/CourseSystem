@@ -20,6 +20,7 @@ namespace BLL.Services
     {
         private readonly ILogger<ActivityService> _logger;
         private readonly IGroupService _groupService;
+        
         public ActivityService(UnitOfWork unitOfWork, ILogger<ActivityService> logger, IGroupService groupService)
             : base(unitOfWork, unitOfWork.UserActivityRepository)
         {

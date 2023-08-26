@@ -1,10 +1,12 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using BLL.Interfaces;
 using Core.Enums;
 using Core.Helpers;
 using Core.Models;
 using DAL.Repository;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace BLL.Services;
 
@@ -13,30 +15,38 @@ public class GroupService : GenericService<Group>, IGroupService
     private readonly IUserGroupService _userGroupService;
     private readonly IEducationMaterialService _educationMaterial;
     private readonly IUserService _userService;
+    private readonly ILogger<GroupService> _logger;
 
-    public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService, 
-        IEducationMaterialService educationMaterial, IUserService userService) 
+    public GroupService(UnitOfWork unitOfWork, IUserGroupService userGroupService, IEducationMaterialService educationMaterial, 
+        IUserService userService, ILogger<GroupService> logger) 
             : base(unitOfWork, unitOfWork.GroupRepository)
     {
         _userGroupService = userGroupService;
         _educationMaterial = educationMaterial;
         _userService = userService;
+        _logger = logger;
     }
 
     public async Task<Result<bool>> CreateGroup(Group group, AppUser currentUser)
     {
         if (group == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(group));
+
             return new Result<bool>(false, $"{nameof(group)} not found");
         }
 
         if (currentUser == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
+
             return new Result<bool>(false, $"{nameof(currentUser)} not found");
         }
 
         if (group.StartDate > group.EndDate)
         {
+            _logger.LogError("Failed to {action}. Start date must be less than end date", MethodBase.GetCurrentMethod()?.Name);
+
             return new Result<bool>(false, $"Start date must be less than end date");
         }
 
@@ -69,11 +79,17 @@ public class GroupService : GenericService<Group>, IGroupService
                     return new Result<bool>(false, $"{createUserGroupResult.Message}");
                 }
             }
+            
+            _logger.LogInformation("Successfully {action} with {groupName} with user by {userId}",
+                MethodBase.GetCurrentMethod()?.Name, group.Name, currentUser.Id);
 
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} with {groupName} with user by {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, group.Name, currentUser.Id, ex.Message);
+            
             return new Result<bool>(false, $"Failed to create group {group.Name}. Exception: {ex.Message}");
         }
     }
@@ -84,6 +100,8 @@ public class GroupService : GenericService<Group>, IGroupService
 
         if (group == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(group));
+
             return new Result<bool>(false, $"Group by id {groupId} not found");
         }
 
@@ -109,10 +127,15 @@ public class GroupService : GenericService<Group>, IGroupService
             await _repository.DeleteAsync(group);
             await _unitOfWork.Save();
 
+            _logger.LogInformation("Successfully {action} by {entityId}",MethodBase.GetCurrentMethod()?.Name, groupId);
+            
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action}  by {entityId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, groupId, ex.Message);
+            
             return new Result<bool>(false, $"Failed to delete group by id {groupId}. Exception: {ex.Message}");
         }
     }
@@ -121,11 +144,15 @@ public class GroupService : GenericService<Group>, IGroupService
     {
         if (group == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(group));
+
             return new Result<bool>(false, $"{nameof(group)} not found");
         }
 
         if (deletedUser == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(deletedUser));
+
             return new Result<bool>(false, $"{nameof(deletedUser)} not found");
         }
         
@@ -153,10 +180,16 @@ public class GroupService : GenericService<Group>, IGroupService
             
             await _unitOfWork.Save();
 
+            _logger.LogInformation("Successfully {action} with group {groupName} and user by {userId}",
+                MethodBase.GetCurrentMethod()?.Name, group.Name, deletedUser.Id);
+
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} with group {groupName} and user by {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, group.Name, deletedUser.Id, ex.Message);
+            
             return new Result<bool>(false, $"Failed to delete group {group.Name}. Exception: {ex.Message}");
         }
     }
@@ -165,11 +198,15 @@ public class GroupService : GenericService<Group>, IGroupService
     {
         if (newGroup == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(newGroup));
+
             return new Result<bool>(false, $"{nameof(newGroup)} not found");
         }
 
         if (newGroup.StartDate > newGroup.EndDate)
         {
+            _logger.LogError("Failed to {action}. Start date must be less than end date", MethodBase.GetCurrentMethod()?.Name);
+
             return new Result<bool>(false, $"Start date must be less than end date");
         }
 
@@ -182,11 +219,16 @@ public class GroupService : GenericService<Group>, IGroupService
 
             await _repository.UpdateAsync(group);
             await _unitOfWork.Save();
+            
+            _logger.LogInformation("Successfully {action} with group {groupName}", MethodBase.GetCurrentMethod()?.Name, newGroup.Name);
 
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
+            _logger.LogError("Failed to {action} with group {groupName}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, newGroup.Name, ex.Message);
+            
             return new Result<bool>(false, $"Failed to update group {newGroup.Id}. Exception: {ex.Message}");
         }
     }
@@ -207,6 +249,8 @@ public class GroupService : GenericService<Group>, IGroupService
         var averageProgress = (int)((double)completedAssignments / totalAssignments * 100);
         var strAverageProgress = $"{averageProgress:0.##}";
 
+        _logger.LogInformation("Successfully {action} {result}%", MethodBase.GetCurrentMethod()?.Name, strAverageProgress);
+        
         return strAverageProgress;
     }
 
@@ -227,6 +271,8 @@ public class GroupService : GenericService<Group>, IGroupService
         
         var strGroupProgress = $"{groupProgress:0.##}";
         
+        _logger.LogInformation("Successfully {action} {result}%", MethodBase.GetCurrentMethod()?.Name, strGroupProgress);
+
         return strGroupProgress;
     }
 
@@ -236,6 +282,8 @@ public class GroupService : GenericService<Group>, IGroupService
 
         if (!groups.Any())
         {
+            _logger.LogError("Failed to {action}, {entity} is empty!", MethodBase.GetCurrentMethod()?.Name, nameof(groups));
+
             return new Result<List<Group>>(false, "Group list is empty");
         }
 
@@ -281,6 +329,9 @@ public class GroupService : GenericService<Group>, IGroupService
         
         var userGroups = await CheckStartAndEndGroupDate(groupResult.Data);
 
+        _logger.LogInformation("Successfully {action} for user by {userId} sort by {sortOrder}%", 
+            MethodBase.GetCurrentMethod()?.Name, currentUser.Id, sortOrder);
+        
         return new Result<List<Group>>(true, userGroups);
     }
 
@@ -334,11 +385,15 @@ public class GroupService : GenericService<Group>, IGroupService
     {
         if (group == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(group));
+
             return new Result<bool>(false, $"{nameof(group)} not found");
         }
         
         if (currentUser == null)
         {
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
+
             return new Result<bool>(false, $"{nameof(currentUser)} not found");
         }
     
@@ -352,6 +407,9 @@ public class GroupService : GenericService<Group>, IGroupService
             return new Result<bool>(false, $"{updateProgressResult.Message}");
         }
     
+        _logger.LogInformation("Successfully {action} for user by {userId} in group {groupName}", 
+            MethodBase.GetCurrentMethod()?.Name, currentUser.Id, group.Name);
+        
         return new Result<bool>(true);
     }
     
@@ -366,6 +424,8 @@ public class GroupService : GenericService<Group>, IGroupService
 
         await _unitOfWork.Save();
 
+        _logger.LogInformation("Successfully {action} for groups",MethodBase.GetCurrentMethod()?.Name);
+        
         return groups;
     }
     
@@ -385,6 +445,9 @@ public class GroupService : GenericService<Group>, IGroupService
         {
             group.GroupAccess = GroupAccess.Completed;
         }
+        
+        _logger.LogInformation("Successfully {action} - status {groupAccess}", 
+            MethodBase.GetCurrentMethod()?.Name, group.GroupAccess);
     }
     
     private Expression<Func<IQueryable<Group>, IOrderedQueryable<Group>>> GetOrderByExpression(SortingParam sortBy)
@@ -412,6 +475,8 @@ public class GroupService : GenericService<Group>, IGroupService
                 query = q => q.OrderBy(q => q.Name);
                 break;
         }
+
+        _logger.LogInformation("Successfully {action}, query: {query}", MethodBase.GetCurrentMethod()?.Name, query.ToString());
 
         return query;
     }
