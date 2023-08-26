@@ -32,8 +32,7 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid assignment answer");
             }
 
-            _logger.LogInformation("Forming {action} for user {userId} about assignmentAnswer {assignmentId}",
-                MethodBase.GetCurrentMethod()?.Name, appUser.Id, assignment.Id);
+            _logger.LogInformation("Forming assignmentAnswer for user {userId} and about assignment {assignmentId}",appUser.Id, assignment.Id);
             
             var userAssignmentResult = await _userAssignmentService.CreateUserAssignment(assignment, appUser);
 
