@@ -323,10 +323,20 @@ public class GroupController : Controller
             return View("GetApprove", id);
         }
 
-        var students = await _userManager.GetUsersInRoleAsync("Student");
+        var studentsResult = await _userService.GetUsersInRoleAsync("Student", searchQuery);
+
+        if (!studentsResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get students by role {userRole} and search query {searchQuery}! Error: {errorMessage}",
+                "Student", searchQuery, groupResult.Message);
+            ViewData.ViewDataMessage("Error", $"{studentsResult.Message}");
+
+            return View("Index");
+        }
+
         var studentsInGroupIds = groupResult.Data.UserGroups.Select(ug => ug.AppUserId);
 
-        var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
+        var availableStudents = studentsResult.Data.Where(s => !studentsInGroupIds.Contains(s.Id))
             .Select(u => new UserSelectionViewModel
             {
                 Id = u.Id,
@@ -335,13 +345,6 @@ public class GroupController : Controller
                 IsSelected = false
             })
             .ToList();
-
-        if (searchQuery != null)
-        {
-            availableStudents = availableStudents.Where(s =>
-                s.FirstName.ToLower().Contains(searchQuery.ToLower()) ||
-                s.LastName.ToLower().Contains(searchQuery.ToLower())).ToList();
-        }
 
         ViewBag.GroupId = id;
         ViewBag.Approved = approved;

@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Core.Enums;
+using MailKit.Search;
+using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
 
 namespace BLL.Services;
 
@@ -277,5 +280,33 @@ public class UserService : GenericService<AppUser>, IUserService
             return new Result<List<AppUser>>(false, $"Failed to get all users. Message - {ex.Message}");
         }
 
+    }
+
+    public async Task<Result<IList<AppUser>>> GetUsersInRoleAsync(string role, string? searchQuery = null)
+    {
+        try
+        {
+            if (role == null)
+            {
+                _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(role));
+
+                return new Result<IList<AppUser>>(false, $"{nameof(role)} was null");
+            }
+
+            var users = await _userManager.GetUsersInRoleAsync(role);
+
+            if (searchQuery != null)
+            {
+                users = users.Where(s =>
+                    s.FirstName.ToLower().Contains(searchQuery.ToLower()) ||
+                    s.LastName.ToLower().Contains(searchQuery.ToLower())).ToList();
+            }
+
+            return new Result<IList<AppUser>>(true, users);
+        }
+        catch (Exception ex)
+        {
+            return new Result<IList<AppUser>>(false, $"Failed to get users in role {role}");
+        }
     }
 }
