@@ -24,9 +24,8 @@ namespace BLL.Services
         private readonly IDropboxService _dropboxService;
         private readonly ILogger<ProfileImageService> _logger;
 
-        public ProfileImageService(UnitOfWork unitOfWork, IRepository<ProfileImage> repository, 
-            IDropboxService dropboxService, ILogger<ProfileImageService> logger) 
-            : base(unitOfWork, repository)
+        public ProfileImageService(UnitOfWork unitOfWork, IDropboxService dropboxService, ILogger<ProfileImageService> logger) 
+            : base(unitOfWork, unitOfWork.ProfileImageRepository)
         {
             _dropboxService = dropboxService;
             _logger = logger;
@@ -37,7 +36,7 @@ namespace BLL.Services
             var supportedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
             var fileExtension = System.IO.Path.GetExtension(newProfileImage.FileName);
 
-            if (supportedImageExtensions.Contains(fileExtension))
+            if (supportedImageExtensions.Contains(fileExtension.ToLower()))
             {
                 _logger.LogInformation("Successfully {action} with file {entityName}",
                     MethodBase.GetCurrentMethod()?.Name, newProfileImage.Name);
