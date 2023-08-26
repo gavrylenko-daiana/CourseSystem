@@ -300,7 +300,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectStudent(int id, int? page, bool approved = false)
+    public async Task<IActionResult> SelectStudent(int id, int? page, string? searchQuery, bool approved = false)
     {
         var groupResult = await _groupService.GetById(id);
         
@@ -335,10 +335,18 @@ public class GroupController : Controller
                 IsSelected = false
             })
             .ToList();
-        
+
+        if (searchQuery != null)
+        {
+            availableStudents = availableStudents.Where(s =>
+                s.FirstName.ToLower().Contains(searchQuery.ToLower()) ||
+                s.LastName.ToLower().Contains(searchQuery.ToLower())).ToList();
+        }
+
         ViewBag.GroupId = id;
         ViewBag.Approved = approved;
         ViewBag.Students = availableStudents;
+        ViewBag.SearchQuery = searchQuery;
         
         int pageSize = 9;
         int pageNumber = (page ?? 1);
