@@ -300,7 +300,7 @@ public class GroupController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SelectStudent(int id, int? page, bool approved = false)
+    public async Task<IActionResult> SelectStudent(int id, int? page, string? searchQuery, bool approved = false)
     {
         var groupResult = await _groupService.GetById(id);
         
@@ -323,10 +323,20 @@ public class GroupController : Controller
             return View("GetApprove", id);
         }
 
-        var students = await _userManager.GetUsersInRoleAsync("Student");
+        var studentsResult = await _userService.GetUsersInRoleAsync("Student", searchQuery);
+
+        if (!studentsResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get students by role {userRole} and search query {searchQuery}! Error: {errorMessage}",
+                "Student", searchQuery, groupResult.Message);
+            ViewData.ViewDataMessage("Error", $"{studentsResult.Message}");
+
+            return View("Index");
+        }
+
         var studentsInGroupIds = groupResult.Data.UserGroups.Select(ug => ug.AppUserId);
 
-        var availableStudents = students.Where(s => !studentsInGroupIds.Contains(s.Id))
+        var availableStudents = studentsResult.Data.Where(s => !studentsInGroupIds.Contains(s.Id))
             .Select(u => new UserSelectionViewModel
             {
                 Id = u.Id,
@@ -335,10 +345,11 @@ public class GroupController : Controller
                 IsSelected = false
             })
             .ToList();
-        
+
         ViewBag.GroupId = id;
         ViewBag.Approved = approved;
         ViewBag.Students = availableStudents;
+        ViewBag.SearchQuery = searchQuery;
         
         int pageSize = 9;
         int pageNumber = (page ?? 1);

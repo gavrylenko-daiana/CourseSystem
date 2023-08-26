@@ -31,7 +31,19 @@
 
 <div class="ui container mt-4">
     <h3 class="ui header">Invite students:</h3>
-
+    <div style="flex-grow: 1; text-align: center;">
+        <div class="ui search" style="margin-right: 10px;">
+            <form method="get" asp-action="SelectStudent" asp-controller="Group" class="ui form inline">
+                <div class="ui icon input">
+                    <input type="hidden" id="id" name="id" value="@ViewBag.GroupId" />
+                    <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;" />
+                    <button type="submit" style="background: none; border: none; padding: 0;">
+                        <i class="inverted circular search link icon"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
     <hr class="ui divider">
     @if (TempData["Error"] != null)
     {
@@ -108,7 +120,7 @@
                 Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
             </div>
             <div>
-                @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectStudent", new { page = page, sortOrder = ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter }),
+                @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectStudent", new { page = page, searchQuery = ViewBag.SearchQuery }),
             new PagedListRenderOptions
             {
             LiElementClasses = new string[] { "page-item" },

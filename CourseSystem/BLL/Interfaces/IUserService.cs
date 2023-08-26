@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Core.Enums;
 using Core.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -16,5 +17,6 @@ public interface IUserService : IGenericService<AppUser>
     Task<Result<AppUser>> FindByIdAsync(string id);
     Task<Result<AppUser>> GetCurrentUser(ClaimsPrincipal user);
     Task<Result<List<AppUser>>> GetUsersAsync();
+    Task<Result<IList<AppUser>>> GetUsersInRoleAsync(string role, string? searchQuary = null);
     string GenerateTemporaryPassword();
 }
