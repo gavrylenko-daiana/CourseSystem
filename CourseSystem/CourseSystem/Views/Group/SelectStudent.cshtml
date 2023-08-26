@@ -31,13 +31,15 @@
 
 @if (TempData["Error"] != null)
 {
-    <div class="col-md-12 alert alert-danger">
-        <span>@TempData["Error"]</span>
+    <div class="ui negative message">
+        <i class="close icon"></i>
+        <div class="header">
+            Sorry!
+        </div>
+        <p>@TempData["Error"]</p>
     </div>
 }
 
-<input type="hidden" name="groupId" value="@ViewBag.GroupId"/>
-<input type="hidden" name="students" value="@ViewBag.Students">
 <div class="ui container mt-4">
     <h3 class="ui header">Invite students:</h3>
 
@@ -70,7 +72,7 @@
                                         <form asp-action="SendInventationToStudent" asp-controller="Group" method="post">
                                             <input type="hidden" name="groupId" value="@ViewBag.GroupId" />
                                             <input type="hidden" name="studentId" value="@userSelection.Id" />
-                                            <input type="hidden" name="approved" value="@ViewBag.Approved" />
+                                            <input type="hidden" name="page" value="@Model.PageNumber" />
                                             <button type="submit" class="ui details-button button">Send Invitation</button>
                                         </form>
                                     </div>

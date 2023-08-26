@@ -348,7 +348,7 @@ public class GroupController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendInventationToStudent(int groupId, string studentId)
+    public async Task<IActionResult> SendInventationToStudent(int groupId, string studentId, int? page)
     {
         var groupResult = await _groupService.GetById(groupId);
 
@@ -389,7 +389,7 @@ public class GroupController : Controller
 
         TempData.TempDataMessage("Error", $"The invitation was successfully sent to the student {studentResult.Data.FirstName} {studentResult.Data.LastName}. Wait for them to accept the invitation to the group");
 
-        return RedirectToAction("SelectStudent", "Group", new { id = groupId});
+        return RedirectToAction("SelectStudent", "Group", new { id = groupId, page});
     }
 
 
