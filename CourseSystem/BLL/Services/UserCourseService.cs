@@ -43,15 +43,15 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
                 return new Result<bool>(false, $"{createUserCoursesResult.Message}");
             }
 
-            _logger.LogInformation("Successfully {action} in course {courseName} for user {userId}",
-                MethodBase.GetCurrentMethod()?.Name, course.Name, teacher.Id);
+            _logger.LogInformation("Successfully {action} in group {groupName} for user {userId}",
+                MethodBase.GetCurrentMethod()?.Name, userGroups.Group.Name, userGroups.AppUser.Id);
             
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to {action} in course {courseName} for user {userId}. Error: {errorMsg}!", 
-                MethodBase.GetCurrentMethod()?.Name, userGroups.Course.Name, userGroups.AppUser.Id, ex.Message);
+            _logger.LogError("Failed to {action} in group {groupName} for user {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, userGroups.Group.Name, userGroups.AppUser.Id, ex.Message);
             
             return new Result<bool>(false, $"Failed to add teacher to course. Exception: {ex.Message}");
         }
@@ -61,9 +61,9 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
     {
         if (userCourses == null)
         {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userGroups));
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(userCourses));
 
-            return new Result<bool>(false, $"{nameof(userGroups)} not found");
+            return new Result<bool>(false, $"{nameof(userCourses)} not found");
         }
 
         try
@@ -75,8 +75,7 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
         }
         catch (Exception ex)
         {
-            return new Result<bool>(false,
-                $"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false,$"Failed to create {nameof(userCourses)} {userCourses.Id}. Exception: {ex.Message}");
         }
     }
 
@@ -108,17 +107,18 @@ public class UserCourseService : GenericService<UserCourses>, IUserCourseService
                 await _unitOfWork.Save();
             }
 
-            _logger.LogInformation("Successfully {action} in group {groupName} for user {userId}",
-                MethodBase.GetCurrentMethod()?.Name, userGroups.Group.Name, userGroups.AppUser.Id);
+            _logger.LogInformation("Successfully {action} in course {courseName} for user {userId}",
+                MethodBase.GetCurrentMethod()?.Name, course.Name, appUser.Id);
             
             return new Result<bool>(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to {action} in group {groupName} for user {userId}. Error: {errorMsg}!", 
-                MethodBase.GetCurrentMethod()?.Name, userGroups.Group.Name, userGroups.AppUser.Id, ex.Message);
+            _logger.LogError("Failed to {action} in course {courseName} for user {userId}. Error: {errorMsg}!", 
+                MethodBase.GetCurrentMethod()?.Name, course.Name, appUser.Id, ex.Message);
             
-            return new Result<bool>(false, $"Failed to add student in group and course {userGroups.Id}. Exception: {ex.Message}");
+            return new Result<bool>(false, 
+                $"Failed to add student with id {appUser.Id} in course {course.Name}. Exception: {ex.Message}");
         }
     }
 
