@@ -64,6 +64,7 @@ public class CourseServiceTests
             var educationMaterialServiceMock = new Mock<IEducationMaterialService>();
             var groupServiceMock = new Mock<IGroupService>();
             var dropboxServiceMock = new Mock<IDropboxService>();
+            var courseBackgroundService = new Mock<ICourseBackgroundImageService>();
             var loggerMock = new Mock<ILogger<CourseService>>();
             
             if (userManager == null)
@@ -75,7 +76,7 @@ public class CourseServiceTests
                     Mock.Of<IdentityErrorDescriber>(), Mock.Of<IServiceProvider>(), Mock.Of<ILogger<UserManager<AppUser>>>()).Object;
             }
 
-            var courseService = new CourseService(unitOfWork, userCourseServiceMock.Object, educationMaterialServiceMock.Object,
+            var courseService = new CourseService(unitOfWork, userCourseServiceMock.Object, educationMaterialServiceMock.Object, courseBackgroundService.Object,
                 groupServiceMock.Object, dropboxServiceMock.Object, userManager, loggerMock.Object);
             
             return courseService;
