@@ -71,6 +71,10 @@ public class CourseService : GenericService<Course>, ICourseService
                 {
                     _logger.LogError("Failed to {action}! Error: {ErrorMsg}",
                         MethodBase.GetCurrentMethod()?.Name, setBackgroundResult.Message);
+
+                    await _repository.DeleteAsync(course);
+
+                    return new Result<bool>(false, $"Failed to create {nameof(course)} - failed to add background image");
                 }
             }
             else
@@ -81,6 +85,10 @@ public class CourseService : GenericService<Course>, ICourseService
                 {
                     _logger.LogError("Failed to {action}! Error: {ErrorMsg}",
                         MethodBase.GetCurrentMethod()?.Name, setBackgroundResult.Message);
+
+                    await _repository.DeleteAsync(course);
+
+                    return new Result<bool>(false, $"Failed to create {nameof(course)} - failed to add background image");
                 }
             }
             
@@ -439,7 +447,7 @@ public class CourseService : GenericService<Course>, ICourseService
                     _logger.LogError("Failed to {action}! Error: {ErrorMsg}",
                         MethodBase.GetCurrentMethod()?.Name, setBackgroundResult.Message);
 
-                    continue;
+                    return new Result<bool>(false, $"Fail to update {nameof(course)} {course.Id} background.");
                 }
             }
             
