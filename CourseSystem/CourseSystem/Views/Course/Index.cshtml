@@ -88,7 +88,7 @@
             <div class="column">
                 <div class="ui card cover-card">
                     <div class="image">
-                        <img src="@course.Url" alt="@course.Name" style="height: 170px; object-fit: cover;">
+                        <img src="@course.BackgroundImage.Url" alt="@course.Name" style="height: 170px; object-fit: cover;">
                     </div>
                     <div class="content">
                         <div class="header">@((course.Name.Length > 23) ? $"{course.Name.Substring(0, 20)}..." : course.Name)</div>

@@ -46,6 +46,7 @@ builder.Services.AddScoped<IEducationMaterialService, EducationMaterialService>(
 builder.Services.AddScoped<IDropboxService, DropboxService>();
 builder.Services.AddScoped<IProfileImageService, ProfileImageService>();
 builder.Services.AddScoped<IAssignmentFileService, AssignmentFileService>();
+builder.Services.AddScoped<ICourseBackgroundImageService, CourseBackgroundImageService>();
 builder.Services.Configure<DropboxSettings>(builder.Configuration.GetSection("DropboxSettings"));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
