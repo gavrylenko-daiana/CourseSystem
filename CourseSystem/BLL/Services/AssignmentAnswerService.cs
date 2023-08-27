@@ -4,6 +4,7 @@ using Core.Enums;
 using Core.Models;
 using DAL.Repository;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace BLL.Services
@@ -94,9 +95,17 @@ namespace BLL.Services
 
                 return new Result<bool>(false, "Fail to delete answer");
             }
-
             try
             {
+                var deleteFileDropboxResult = await _dropboxService.DeleteFileAsync(assignmentAnswer.Name, assignmentAnswer.DropboxFolder.ToString());
+
+                if (!deleteFileDropboxResult.IsSuccessful)
+                {
+                    _logger.LogError("Failed to {action}. Error: {errorMsg}!", MethodBase.GetCurrentMethod()?.Name, deleteFileDropboxResult.Message);
+
+                    return new Result<bool>(false, deleteFileDropboxResult.Message);
+                }
+
                 await _repository.DeleteAsync(assignmentAnswer);
 
                 if (assignmentAnswer.UserAssignment.AssignmentAnswers.Count() == 1)

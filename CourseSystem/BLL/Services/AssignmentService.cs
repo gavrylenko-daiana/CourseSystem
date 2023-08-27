@@ -18,16 +18,19 @@ namespace BLL.Services
     public class AssignmentService : GenericService<Assignment>, IAssignmentService
     {
         private readonly IDropboxService _dropboxService;
-        private readonly IUserAssignmentService _userAssignmentService;
+        private readonly IAssignmentAnswerService _assignmentAnswerService;
+        private readonly IAssignmentFileService _assignmentFileService;
         private readonly IGroupService _groupService;
         private readonly ILogger<AssignmentService> _logger;
         
-        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService, IUserAssignmentService userAssignmentService, 
+        public AssignmentService(UnitOfWork unitOfWork, IDropboxService dropboxService,
+            IAssignmentAnswerService assignmentAnswerService, IAssignmentFileService assignmentFileService,
             IGroupService groupService, ILogger<AssignmentService> logger)
             : base(unitOfWork, unitOfWork.AssignmentRepository)
         {
             _dropboxService = dropboxService;
-            _userAssignmentService = userAssignmentService;
+            _assignmentAnswerService = assignmentAnswerService;
+            _assignmentFileService = assignmentFileService;
             _groupService = groupService;
             _logger = logger;
         }
@@ -80,15 +83,28 @@ namespace BLL.Services
                 notification.CourseId = null;
             }
 
-            foreach (var file in assignment.AssignmentFiles)
+            foreach (var file in assignment.AssignmentFiles.ToList())
             {
-                var resultDeleteEducationMaterial = await _dropboxService.DeleteFileAsync(file.Name, file.DropboxFolder.ToString());
+                var resultDeleteEducationMaterial = await _assignmentFileService.DeleteAssignmentFile(file.Id);
 
                 if (!resultDeleteEducationMaterial.IsSuccessful)
                 {
                     _logger.LogError("Failed to {action}. Error: {errorMsg}!", 
                         MethodBase.GetCurrentMethod()?.Name, resultDeleteEducationMaterial.Message);
                     
+                    return new Result<bool>(false, $"Failed to delete {nameof(assignment)}");
+                }
+            }
+
+            foreach (var answer in assignment.UserAssignments.SelectMany(ua => ua.AssignmentAnswers).ToList())
+            {
+                var deleteAssignmentAnswersResult =  await _assignmentAnswerService.DeleteAssignmentAnswer(answer);
+
+                if (!deleteAssignmentAnswersResult.IsSuccessful)
+                {
+                    _logger.LogError("Failed to {action}. Error: {errorMsg}!",
+                        MethodBase.GetCurrentMethod()?.Name, deleteAssignmentAnswersResult.Message);
+
                     return new Result<bool>(false, $"Failed to delete {nameof(assignment)}");
                 }
             }
