@@ -13,6 +13,7 @@ public static class DefaultBackgroundImages
         };
 
     private static Random _random = new Random();
+
     public static (string, string) GetRandomDefaultImage()
     {
         var index = _random.Next(0, _avatarsPack.Keys.Count);

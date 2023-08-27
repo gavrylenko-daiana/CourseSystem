@@ -26,22 +26,6 @@ namespace BLL.Services
             _logger = logger;
         }
 
-        private bool CheckFileExtension(IFormFile newBackgroundImage)
-        {
-            var supportedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-            var fileExtension = Path.GetExtension(newBackgroundImage.FileName);
-
-            if (supportedImageExtensions.Contains(fileExtension.ToLower()))
-            {
-                return true;
-            }
-
-            _logger.LogError("Failed to {action} with file {entityName}. An invalid file format!",
-                MethodBase.GetCurrentMethod()?.Name, newBackgroundImage.Name);
-
-            return false;
-        }
-
         public async Task<Result<bool>> DeleteCourseBackgroundImage(Course course)
         {
             if (course == null)
@@ -257,6 +241,22 @@ namespace BLL.Services
 
                 return new Result<bool>(false, "Invalid user");
             }
+        }
+
+        private bool CheckFileExtension(IFormFile newBackgroundImage)
+        {
+            var supportedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var fileExtension = Path.GetExtension(newBackgroundImage.FileName);
+
+            if (supportedImageExtensions.Contains(fileExtension.ToLower()))
+            {
+                return true;
+            }
+
+            _logger.LogError("Failed to {action} with file {entityName}. An invalid file format!",
+                MethodBase.GetCurrentMethod()?.Name, newBackgroundImage.Name);
+
+            return false;
         }
     }
 }
