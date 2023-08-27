@@ -258,24 +258,5 @@ namespace BLL.Services
                 return new Result<bool>(false, "Invalid user");
             }
         }
-
-        public async Task<Result<bool>> HasBackgroundImage(Course course)
-        {
-            if (course == null)
-            {
-                _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(course));
-
-                return new Result<bool>(false, "Fail to update profile image");
-            }
-
-            var CourseBackgroundImageResult = await GetByPredicate(bg => bg.CourseId == course.Id);
-
-            if (!CourseBackgroundImageResult.IsSuccessful)
-            {
-                return new Result<bool>(false, $"Failed to get course background - Message: {CourseBackgroundImageResult.Message}");
-            }
-
-            return new Result<bool>(true, data: CourseBackgroundImageResult.Data.Any());
-        }
     }
 }

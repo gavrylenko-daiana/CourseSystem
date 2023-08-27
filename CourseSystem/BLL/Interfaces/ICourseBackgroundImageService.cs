@@ -14,6 +14,5 @@ namespace BLL.Interfaces
         Task<Result<bool>> UpdateBackgroundImage(Course course, IFormFile newCourseBackground);
         Task<Result<bool>> SetDefaultBackgroundImage(Course course);
         Task<Result<bool>> SetCustomBackgroundImage(Course course, IFormFile courseBackground);
-        Task<Result<bool>> HasBackgroundImage(Course course);
     }
 }
