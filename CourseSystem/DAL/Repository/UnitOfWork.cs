@@ -28,12 +28,27 @@ namespace DAL.Repository
         private Repository<Notification> _notificationRepository;
         private Repository<ChatMessage> _chatMessageRepository;
         private Repository<ProfileImage> _profileImageRepository;
+        private Repository<CourseBackgroundImage> _courseBackgroundImageRepository;
 
         public UnitOfWork(ApplicationContext context, ILoggerFactory loggerFactory)
         {
             _context = context;
             _loggerFactory = loggerFactory;
             _logger = new Logger<UnitOfWork>(_loggerFactory);
+        }
+
+        public Repository<CourseBackgroundImage> CourseBackgroundImageRepository
+        {
+            get
+            {
+                if (_courseBackgroundImageRepository == null)
+                {
+                    _courseBackgroundImageRepository = new Repository<CourseBackgroundImage>(_context,
+                        new Logger<Repository<CourseBackgroundImage>>(_loggerFactory));
+                }
+
+                return _courseBackgroundImageRepository;
+            }
         }
 
         public Repository<AppUser> UserRepository
