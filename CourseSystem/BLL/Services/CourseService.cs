@@ -3,7 +3,7 @@ using System.Reflection;
 using BLL.Interfaces;
 using Core.Configuration;
 using Core.Enums;
-using Core.Helpers;
+using Core.ImageStore;
 using Core.Models;
 using DAL.Interfaces;
 using DAL.Repository;
@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using static System.Net.WebRequestMethods;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace BLL.Services;
@@ -21,25 +22,28 @@ public class CourseService : GenericService<Course>, ICourseService
 {
     private readonly IUserCourseService _userCourseService;
     private readonly IEducationMaterialService _educationMaterialService;
+    private readonly ICourseBackgroundImageService _courseBackgroundImageService;
     private readonly IDropboxService _dropboxService;
     private readonly IGroupService _groupService;
     private readonly ILogger<CourseService> _logger;
     private readonly UserManager<AppUser> _userManager;
 
     public CourseService(UnitOfWork unitOfWork, IUserCourseService userCourseService,
-        IEducationMaterialService educationMaterial, IGroupService groupService, IDropboxService dropboxService, 
+        IEducationMaterialService educationMaterial, ICourseBackgroundImageService courseBackgroundImageService,
+        IGroupService groupService, IDropboxService dropboxService, 
         UserManager<AppUser> userManager, ILogger<CourseService> logger)
         : base(unitOfWork, unitOfWork.CourseRepository)
     {
         _userCourseService = userCourseService;
         _educationMaterialService = educationMaterial;
+        _courseBackgroundImageService = courseBackgroundImageService;
         _groupService = groupService;
         _dropboxService = dropboxService;
         _logger = logger;
         _userManager = userManager;
     }
 
-    public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser, IFormFile uploadFile)
+    public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser, IFormFile uploadFile = null)
     {
         if (course == null)
         {
@@ -57,17 +61,28 @@ public class CourseService : GenericService<Course>, ICourseService
 
         try
         {
-            var getUrlResult = await GetBackgroundImageUrl(uploadFile);
-
-            if (!getUrlResult.IsSuccessful)
-            {
-                return new Result<bool>(false, $"{getUrlResult.Message}");
-            }
-
-            course.Url = getUrlResult.Data;
-
             await _repository.AddAsync(course);
-            await _unitOfWork.Save();
+
+            if (uploadFile == null)
+            {
+                var setBackgroundResult = await _courseBackgroundImageService.SetDefaultBackgroundImage(course);
+
+                if (!setBackgroundResult.IsSuccessful)
+                {
+                    _logger.LogError("Failed to {action}! Error: {ErrorMsg}",
+                        MethodBase.GetCurrentMethod()?.Name, setBackgroundResult.Message);
+                }
+            }
+            else
+            {
+                var setBackgroundResult = await _courseBackgroundImageService.SetCustomBackgroundImage(course, uploadFile);
+
+                if (!setBackgroundResult.IsSuccessful)
+                {
+                    _logger.LogError("Failed to {action}! Error: {ErrorMsg}",
+                        MethodBase.GetCurrentMethod()?.Name, setBackgroundResult.Message);
+                }
+            }
             
             _logger.LogInformation("Successfully {action} with {courseName} with user by {userId}",
                 MethodBase.GetCurrentMethod()?.Name, course.Name, currentUser.Id);
@@ -126,7 +141,15 @@ public class CourseService : GenericService<Course>, ICourseService
                 }
             }
 
-            //delete background
+            var deleteBackgroundResult = await _courseBackgroundImageService.DeleteCourseBackgroundImage(course);
+
+            if (!deleteBackgroundResult.IsSuccessful)
+            {
+                _logger.LogError("Failed to {action}! Error: {ErrorMsg}", 
+                    MethodBase.GetCurrentMethod()?.Name, deleteBackgroundResult.Message);
+
+                return new Result<bool>(false, $"Failed to delete {nameof(course)} by Id {courseId} - failed to delete background");
+            }
 
             await _repository.DeleteAsync(course);
             await _unitOfWork.Save();
@@ -194,7 +217,7 @@ public class CourseService : GenericService<Course>, ICourseService
             return new Result<List<Course>>(true, new List<Course>());
         }
 
-        var backgroundCheckResult = await CheckIsBackgroundExist(courses); //Return data is result for logger message
+        var backgroundCheckResult = await CheckIfBackgroundsExist(courses); //Return data is result for logger message
 
         var query = GetOrderByExpression(sortOrder);
 
@@ -256,14 +279,15 @@ public class CourseService : GenericService<Course>, ICourseService
 
         try
         {
-            var getUrlResult = await GetBackgroundImageUrl(uploadFile);
+            var updateBackgroundResult = await _courseBackgroundImageService.UpdateBackgroundImage(course, uploadFile);
 
-            if (!getUrlResult.IsSuccessful)
+            if (!updateBackgroundResult.IsSuccessful)
             {
-                return new Result<bool>(false, $"{getUrlResult.Message}");
-            }
+                _logger.LogError("Failed to {action}! Error: {ErrorMsg}",
+                    MethodBase.GetCurrentMethod()?.Name, updateBackgroundResult.Message);
 
-            course.Url = getUrlResult.Data;
+                return new Result<bool>(false, $"Failed to update {nameof(course)}");
+            }
 
             await _repository.UpdateAsync(course);
             await _unitOfWork.Save();
@@ -383,56 +407,7 @@ public class CourseService : GenericService<Course>, ICourseService
         return query;
     }
 
-    private async Task<Result<string>> GetRandomDefaultBackgroundLink()
-    {
-        var defaultImagesLinks = DefaultBackgroundImages.GetDefaultImagesLinks();
-
-        if (defaultImagesLinks.Count > 0)
-        {
-            var randomIndex = new Random().Next(0, defaultImagesLinks.Count);
-            var randomImageLink = defaultImagesLinks[randomIndex];
-
-            _logger.LogInformation("Successfully {action} with random index {randomIndex} - link {randomLink}",
-                MethodBase.GetCurrentMethod()?.Name, randomIndex, randomImageLink);
-            
-            return new Result<string>(true, data: randomImageLink);
-        }
-        else
-        {
-            _logger.LogError("Failed to {action}. No default images available", MethodBase.GetCurrentMethod()?.Name);
-            
-            return new Result<string>(false, "No default images available");
-        }
-    }
-
-    private async Task<Result<string>> GetBackgroundImageUrl(IFormFile uploadFile)
-    {
-        if (uploadFile == null)
-        {
-            var backgroundUrlResult = await GetRandomDefaultBackgroundLink();
-
-            if (!backgroundUrlResult.IsSuccessful)
-            {
-                return new Result<string>(false, $"{backgroundUrlResult.Message}");
-            }
-
-            return new Result<string>(true, data: backgroundUrlResult.Data);
-        }
-        else
-        {
-            var backgroundUrlResult =
-                await _dropboxService.AddFileAsync(uploadFile, DropboxFolders.CourseBackgroundImages.ToString());
-
-            if (!backgroundUrlResult.IsSuccessful)
-            {
-                return new Result<string>(false, $"{backgroundUrlResult.Message}");
-            }
-
-            return new Result<string>(true, data: backgroundUrlResult.Data.Url);
-        }
-    }
-
-    private async Task<Result<bool>> CheckIsBackgroundExist(List<Course> courses)
+    private async Task<Result<bool>> CheckIfBackgroundsExist(List<Course> courses)
     {
         if (courses == null)
         {
@@ -446,7 +421,7 @@ public class CourseService : GenericService<Course>, ICourseService
             return new Result<bool>(true, $"No {nameof(courses)} for background updating");
         }
 
-        var coursesWithoutBackgroundImage = courses.Where(c => c.Url.IsNullOrEmpty()).ToList();
+        var coursesWithoutBackgroundImage = courses.Where(c => c.BackgroundImage == null).ToList();
 
         if (!coursesWithoutBackgroundImage.Any())
         {
@@ -457,13 +432,16 @@ public class CourseService : GenericService<Course>, ICourseService
         {
             foreach (var course in coursesWithoutBackgroundImage)
             {
-                var randomBackgroundResult = await GetRandomDefaultBackgroundLink();
-                course.Url = randomBackgroundResult.Data;
+                var setBackgroundResult = await _courseBackgroundImageService.SetDefaultBackgroundImage(course);
 
-                await _repository.UpdateAsync(course);
+                if (!setBackgroundResult.IsSuccessful)
+                {
+                    _logger.LogError("Failed to {action}! Error: {ErrorMsg}",
+                        MethodBase.GetCurrentMethod()?.Name, setBackgroundResult.Message);
+
+                    continue;
+                }
             }
-
-            await _unitOfWork.Save();
             
             _logger.LogInformation("Successfully {action}", MethodBase.GetCurrentMethod()?.Name);
 
