@@ -1,21 +1,11 @@
 ﻿using BLL.Interfaces;
-using Core.Configuration;
 using Core.Enums;
 using Core.ImageStore;
 using Core.Models;
-using DAL.Interfaces;
 using DAL.Repository;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
-using static Dropbox.Api.TeamLog.AccessMethodLogInfo;
+using System.Reflection;
 
 namespace BLL.Services
 {
@@ -115,22 +105,15 @@ namespace BLL.Services
 
             (string, string) newProfileImageData;
 
-            var fileExist = await _dropboxService.FileExistsAsync(profileImage.Name, DropboxFolders.DefaultProfileImages.ToString());
+            var deletionResult = await DeleteCustomProfileImage(profileImage);
 
-            if (!fileExist.IsSuccessful)
+            if (deletionResult.IsSuccessful)
             {
-                var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(user.ProfileImage.Name, DropboxFolders.ProfileImages.ToString());
-
-                if (!deleteImageDropboxResult.IsSuccessful)
-                {
-                    return new Result<bool>(false, $"Failed to delete profile image - Message: {deleteImageDropboxResult.Message}");
-                }
-
                 newProfileImageData = await GetAvatarsPack();
             }
             else
             {
-                newProfileImageData = await GetAvatarsPack(profileImage?.Name);               
+                newProfileImageData = await GetAvatarsPack(profileImage?.Name);
             }
 
             try
@@ -153,7 +136,7 @@ namespace BLL.Services
                 MethodBase.GetCurrentMethod()?.Name, user.Id);
             
             return new Result<bool>(true, "Successful replacement of the profile picture");
-        }
+        }       
 
         public async Task<Result<bool>> SetDefaultProfileImage(AppUser user)
         {
@@ -210,6 +193,13 @@ namespace BLL.Services
 
             try
             {
+                var deleteResult = await DeleteCustomProfileImage(user.ProfileImage);
+
+                if (!deleteResult.IsSuccessful)
+                {
+                    _logger.LogError("Failed to delete {entity} with id - {profileImageId} from dropbox", nameof(user.ProfileImage), user.ProfileImage.Id);
+                }
+
                 var addDropboxResult = await _dropboxService.AddFileAsync(newProfileImage, DropboxFolders.ProfileImages.ToString());
 
                 if (!addDropboxResult.IsSuccessful)
@@ -282,6 +272,29 @@ namespace BLL.Services
             }
 
             return imageNameAndUrl;
+        }
+        private async Task<Result<bool>> DeleteCustomProfileImage(ProfileImage profileImage)
+        {
+            if (profileImage == null)
+            {
+                return new Result<bool>(false, $"Invalid {nameof(profileImage)}");
+            }
+
+            var fileExist = await _dropboxService.FileExistsAsync(profileImage.Name, DropboxFolders.ProfileImages.ToString());
+
+            if (fileExist.IsSuccessful)
+            {
+                var deleteImageDropboxResult = await _dropboxService.DeleteFileAsync(profileImage.Name, DropboxFolders.ProfileImages.ToString());
+
+                if (!deleteImageDropboxResult.IsSuccessful)
+                {
+                    return new Result<bool>(false, $"Failed to delete profile image - Message: {deleteImageDropboxResult.Message}");
+                }
+
+                return new Result<bool>(true, $"Successful deletion of the {nameof(profileImage)}");
+            }
+
+            return new Result<bool>(false, $"{nameof(profileImage)} doesn't exist in folder");
         }
     }
 }
