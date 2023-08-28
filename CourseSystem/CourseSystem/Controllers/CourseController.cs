@@ -48,58 +48,65 @@ public class CourseController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(string currentQueryFilter, SortingParam sortOrder, string searchQuery, int? page)
     {
-        ViewBag.CurrentSort = sortOrder;
-        ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
-
-        if (searchQuery != null)
+        try
         {
-            page = 1;
-        }
-        else
-        {
-            searchQuery = currentQueryFilter;
-        }
-        
-        ViewBag.CurrentQueryFilter = searchQuery;
-        
-        var currentUserResult = await _userService.GetCurrentUser(User);
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParam = sortOrder == SortingParam.NameDesc ? SortingParam.Name : SortingParam.NameDesc;
 
-        if (!currentUserResult.IsSuccessful)
-        {
-            _logger.LogWarning("Unauthorized user");
-
-            return RedirectToAction("Login", "Account");
-        }
-
-        var coursesResult = await _courseService.GetUserCourses(currentUserResult.Data, sortOrder, searchQuery);
-
-        if (!coursesResult.IsSuccessful)
-        {
-            _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}",
-                currentUserResult.Data.Id, coursesResult.Message);
-            
-            TempData.TempDataMessage("Error", $"{coursesResult.Message}");
-
-            return View("Index");
-        }
-     
-        var coursesVM = new List<CourseViewModel>();  
-        
-        if (coursesResult.Data != null)
-        {
-            coursesResult.Data.ForEach(course =>
+            if (searchQuery != null)
             {
-                var courseVM = new CourseViewModel();
-                course.MapTo(courseVM);
-                coursesVM.Add(courseVM);
-            });
-        }
+                page = 1;
+            }
+            else
+            {
+                searchQuery = currentQueryFilter;
+            }
 
-        int pageSize = 6;
-        int pageNumber = (page ?? 1);
-        ViewBag.OnePageOfAssignemnts = coursesVM;
-        
-        return View(coursesVM.ToPagedList(pageNumber, pageSize));
+            ViewBag.CurrentQueryFilter = searchQuery;
+
+            var currentUserResult = await _userService.GetCurrentUser(User);
+
+            if (!currentUserResult.IsSuccessful)
+            {
+                _logger.LogWarning("Unauthorized user");
+
+                return RedirectToAction("Login", "Account");
+            }
+
+            var coursesResult = await _courseService.GetUserCourses(currentUserResult.Data, sortOrder, searchQuery);
+
+            if (!coursesResult.IsSuccessful)
+            {
+                _logger.LogError("Courses fail for user {userId}! Error: {errorMessage}",
+                    currentUserResult.Data.Id, coursesResult.Message);
+
+                TempData.TempDataMessage("Error", $"{coursesResult.Message}");
+
+                return View("Index");
+            }
+
+            var coursesVM = new List<CourseViewModel>();
+
+            if (coursesResult.Data != null)
+            {
+                coursesResult.Data.ForEach(course =>
+                {
+                    var courseVM = new CourseViewModel();
+                    course.MapTo(courseVM);
+                    coursesVM.Add(courseVM);
+                });
+            }
+
+            int pageSize = 6;
+            int pageNumber = (page ?? 1);
+            ViewBag.OnePageOfAssignemnts = coursesVM;
+
+            return View(coursesVM.ToPagedList(pageNumber, pageSize));
+        } 
+        catch (Exception ex) 
+        { 
+        }
+        return View();
     }
 
     [HttpGet]
