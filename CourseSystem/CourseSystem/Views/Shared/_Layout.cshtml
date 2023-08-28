@@ -108,6 +108,18 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+
+<script>
+    $(document).ready(function () {
+        var docHeight = $(window).height();
+        var footerHeight = $('#footer').height();
+        var footerTop = $('#footer').position().top + footerHeight;
+        
+        if (footerTop < docHeight) 
+            $('#footer').css('margin-top', 10 + (docHeight - footerTop) + 'px');
+    });
+</script>
+
 @await RenderSectionAsync("Scripts", false)
 </body>
 </html>
