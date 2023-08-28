@@ -135,21 +135,31 @@ public class EducationMaterialController : Controller
         
         ViewBag.CurrentQueryFilter = searchQuery;
         ViewBag.MaterialIds = materialIds;
-        
-        var materialsList = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds, sortOrder, searchQuery);
-        
-        if (!materialsList.IsSuccessful)
-        {
-            TempData.TempDataMessage("Error", materialsList.Message);
-            
-            return RedirectToAction("Index", "Course");
-        }
+        List<EducationMaterial> materialsList;
 
+        if (string.IsNullOrEmpty(materialIds))
+        {
+            materialsList = new List<EducationMaterial>();
+        }
+        else
+        {
+            var educationMaterials = await _educationMaterialService.GetMaterialsListFromIdsString(materialIds, sortOrder, searchQuery);
+
+            if (!educationMaterials.IsSuccessful)
+            {
+                TempData.TempDataMessage("Error", educationMaterials.Message);
+
+                return RedirectToAction("Index", "Course");
+            }
+
+            materialsList = educationMaterials.Data;
+        }
+        
         int pageSize = 8;
         int pageNumber = (page ?? 1);
-        ViewBag.OnePageOfAssignments = materialsList.Data;
+        ViewBag.OnePageOfAssignments = materialsList;
 
-        return View("Index", materialsList.Data.ToPagedList(pageNumber, pageSize));
+        return View("Index", materialsList.ToPagedList(pageNumber, pageSize));
     }
 
     [HttpGet]
