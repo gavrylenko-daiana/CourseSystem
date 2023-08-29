@@ -46,7 +46,7 @@ namespace Core.NotificationTemplates
                 "Assignment activity starts on {4:dddd, dd MMMM yyyy}, at {4:HH:mm}. " +
                 "It ends on {5:dddd, dd MMMM yyyy}, at {5:HH:mm}. " +
                 "While assignment is active your students will be able to attach their solutions to it for you to grade." },
-            {NotificationType.SubmittedAssignmentForStudent, "You submitted a solution for assignment \"{0}\". " +
+            {NotificationType.SubmittedAssignmentForStudent, "You submitted a solution for assignment <a href=\"{1}\">\"{0}\"</a>. " +
                 "Please, wait till your teacher marks it - you will receive corresponding notification as soon as it happens." },
             {NotificationType.SubmittedAssignmentForTeacher, "{0} {1} submitted a solution for your assignment \"{2}\". " +
                 "Please, check and mark it." },

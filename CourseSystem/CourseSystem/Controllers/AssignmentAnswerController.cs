@@ -6,10 +6,12 @@ using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
 using X.PagedList;
+using LinkGenerator = Core.Helpers.LinkGenerator;
 
 namespace UI.Controllers;
 
@@ -23,6 +25,7 @@ public class AssignmentAnswerController : Controller
     private readonly IActivityService _activityService;
     private readonly INotificationService _notificationService;
     private readonly ILogger<AssignmentAnswerController> _logger;
+    private readonly IUrlHelperFactory _urlHelperFactory;
 
     public AssignmentAnswerController(IAssignmentService assignmentService,
         IAssignmentAnswerService assignmentAnswerService,
@@ -30,7 +33,8 @@ public class AssignmentAnswerController : Controller
         IUserService userService,
         IActivityService activityService,
         INotificationService notificationService,
-        ILogger<AssignmentAnswerController> logger)
+        ILogger<AssignmentAnswerController> logger,
+        IUrlHelperFactory urlHelperFactory)
     {
         _assignmentService = assignmentService;
         _assignmentAnswerService = assignmentAnswerService;
@@ -39,6 +43,7 @@ public class AssignmentAnswerController : Controller
         _activityService = activityService;
         _notificationService = notificationService;
         _logger = logger;
+        _urlHelperFactory = urlHelperFactory;
     }
     
     [HttpGet]
@@ -124,7 +129,8 @@ public class AssignmentAnswerController : Controller
 
         await _activityService.AddSubmittedAssignmentAnswerActivity(currentUserResult.Data, assignmentResult.Data);
 
-        await _notificationService.AddSubmittedAssignmentForStudentNotification(assignmentAnswer.UserAssignment);
+        await _notificationService.AddSubmittedAssignmentForStudentNotification(assignmentAnswer.UserAssignment,
+            LinkGenerator.GenerateAssignmentAnswerLink(_urlHelperFactory,this, assignmentAnswer));
 
         var teachers = assignmentAnswer.UserAssignment.Assignment.UserAssignments
             .Select(ua => ua.AppUser).Where(user => user.Role == Core.Enums.AppUserRoles.Teacher).ToList();

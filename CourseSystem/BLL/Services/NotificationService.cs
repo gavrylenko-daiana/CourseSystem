@@ -263,7 +263,7 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddSubmittedAssignmentForStudentNotification(UserAssignments userAssignment)
+        public async Task<Result<bool>> AddSubmittedAssignmentForStudentNotification(UserAssignments userAssignment, string callback)
         {
             if (userAssignment == null)
             {
@@ -271,7 +271,8 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.SubmittedAssignmentForStudent, DateTime.Now, userAssignment.AppUser,
-                userAssignment.Assignment.Group.Course, userAssignment.Assignment.Group, userAssignment.Assignment, userAssignment.Assignment.Name);
+                userAssignment.Assignment.Group.Course, userAssignment.Assignment.Group, userAssignment.Assignment, 
+                userAssignment.Assignment.Name, callback);
 
             return await SaveNotification(notification);
         }
