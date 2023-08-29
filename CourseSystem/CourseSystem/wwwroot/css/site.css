@@ -375,3 +375,13 @@ body {
 }
 
 /*Reset Password page END*/
+
+.footer-custom {
+    margin-top: 50px;
+}
+
+.pagination-container-custom {
+    position: fixed;
+    bottom: 0;
+    margin-bottom: 130px;
+}
