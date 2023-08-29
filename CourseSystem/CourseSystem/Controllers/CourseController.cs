@@ -458,7 +458,8 @@ public class CourseController : Controller
 
         await _activityService.AddJoinedCourseActivity(currentUser, courseResult.Data);
 
-        await _notificationService.AddJoinedCourseNotification(currentUser, courseResult.Data);
+        await _notificationService.AddJoinedCourseNotification(currentUser, courseResult.Data, 
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, courseResult.Data));
 
         return View();
     }
