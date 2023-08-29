@@ -394,7 +394,7 @@ public class EducationMaterialController : Controller
             group = groupResult.Data;
         }
 
-        var addEducationMaterialResult = await _educationMaterialService.AddEducationMaterial(DateTime.Now, educationMaterialVM.FileName, educationMaterialVM.FileUrl, educationMaterialVM.MaterialAccess, group, course);
+        var addEducationMaterialResult = await _educationMaterialService.AddEducationMaterial(DateTime.UtcNow, educationMaterialVM.FileName, educationMaterialVM.FileUrl, educationMaterialVM.MaterialAccess, group, course);
         
         if (!addEducationMaterialResult.IsSuccessful)
         {
