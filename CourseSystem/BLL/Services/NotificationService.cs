@@ -208,7 +208,7 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group)
+        public async Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group, string callbackForGroup, string callbackForCourse)
         {
             if (user == null)
             {
@@ -222,7 +222,7 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.JoinedGroup,
                 DateTime.Now, user, group.Course, group, null, 
-                    group.Name, group.Course.Name, group.StartDate, group.EndDate);
+                    group.Name, group.Course.Name, group.StartDate, group.EndDate, callbackForGroup, callbackForCourse);
 
             return await SaveNotification(notification);
         }

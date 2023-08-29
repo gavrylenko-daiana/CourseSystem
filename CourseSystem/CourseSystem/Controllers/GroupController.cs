@@ -515,7 +515,9 @@ public class GroupController : Controller
 
         await _activityService.AddJoinedGroupActivity(userResult.Data, groupResult.Data);
 
-        await _notificationService.AddJoinedGroupNotification(userResult.Data, groupResult.Data);
+        await _notificationService.AddJoinedGroupNotification(userResult.Data, groupResult.Data, 
+            LinkGenerator.GenerateGroupLink(_urlHelperFactory,this, groupResult.Data),
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, groupResult.Data.Course));
 
         return RedirectToAction("SelectTeachers", new { groupId = groupId, courseId = groupResult.Data.CourseId });
     }
@@ -655,7 +657,9 @@ public class GroupController : Controller
         
         await _activityService.AddJoinedGroupActivity(currentUserResult.Data, groupResult.Data);
 
-        await _notificationService.AddJoinedGroupNotification(currentUserResult.Data, groupResult.Data);
+        await _notificationService.AddJoinedGroupNotification(currentUserResult.Data, groupResult.Data,
+            LinkGenerator.GenerateGroupLink(_urlHelperFactory,this, groupResult.Data),
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, groupResult.Data.Course));
 
         var inventationVM = new InventationViewModel()
         {
