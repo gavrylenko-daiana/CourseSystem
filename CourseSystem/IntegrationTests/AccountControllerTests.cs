@@ -17,11 +17,6 @@ public class AccountControllerTests
     {
         using var client = _fixture.CreateClient();
         
-        var multipartContent = new MultipartFormDataContent();
-        
-        multipartContent.Add(new StringContent("emailaddress"), _fixture.Admin.User.Email!);
-        multipartContent.Add(new StringContent("password"), _fixture.Admin.Password);
-
         var response = await client.PostAsync($"Account/Login?emailaddress={_fixture.Admin.User.Email!}&password={_fixture.Admin.Password}", null);
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
