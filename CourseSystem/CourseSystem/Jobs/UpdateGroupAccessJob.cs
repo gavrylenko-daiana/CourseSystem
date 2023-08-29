@@ -85,7 +85,8 @@ namespace UI.Jobs
                         
                         if (user.Role == AppUserRoles.Student)
                         {
-                            await _notificationService.AddGroupStartedForStudentNotification(user, group);
+                            await _notificationService.AddGroupStartedForStudentNotification(user, group,
+                                LinkGenerator.GenerateGroupLink(_urlHelperFactory, groupController, group));
                         }
                         else if (user.Role == AppUserRoles.Teacher)
                         {

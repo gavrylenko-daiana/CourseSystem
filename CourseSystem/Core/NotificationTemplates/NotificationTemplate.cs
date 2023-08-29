@@ -40,7 +40,7 @@ namespace Core.NotificationTemplates
                 "It ends on {3:dddd, dd MMMM yyyy}, at {3:HH:mm}." },
             {NotificationType.GroupStartedForTeacher, "Education is starting in the group <a href=\"{1}\">\"{0}\"</a>. " +
                 "Now your students have access to its educational materials and assignments." },
-            {NotificationType.GroupStartedForStudent, "Education is starting in the group \"{0}\". " +
+            {NotificationType.GroupStartedForStudent, "Education is starting in the group <a href=\"{1}\">\"{0}\"</a>. " +
                 "Now you have access to its educational materials and assignments." },
             {NotificationType.CreatedAssignment, "You created a new assignment <a href=\"{2}\">\"{0}\"</a> for group <a href=\"{3}\">\"{1}\"</a>. " +
                 "Assignment activity starts on {4:dddd, dd MMMM yyyy}, at {4:HH:mm}. " +
