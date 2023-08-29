@@ -273,7 +273,7 @@ body {
 }
 
 .home-left-col, .home-right-col {
-    flex-basis: 50%;
+    /*flex-basis: 50%;*/
 }
 
 .home-title {
