@@ -21,16 +21,16 @@ public static class LinkGenerator
             protocol: controller.Request.Scheme);
     }
     
-    public static string GenerateGroupLink(IUrlHelperFactory urlHelperFactory, ControllerBase controller, Course course)
+    public static string GenerateGroupLink(IUrlHelperFactory urlHelperFactory, ControllerBase controller, Group group)
     {
         var urlHelper = urlHelperFactory.GetUrlHelper(controller.ControllerContext);
 
         return urlHelper.Action(
             "Details",
-            "Course",
+            "Group",
             new
             {
-                id = course.Id
+                id = group.Id
             },
             protocol: controller.Request.Scheme);
     }
