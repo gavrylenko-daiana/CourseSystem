@@ -257,7 +257,6 @@ body {
 }
 
 .home-container {
-    height: 100vh;
     width: 100%;
     position: relative;
 }
@@ -375,13 +374,3 @@ body {
 }
 
 /*Reset Password page END*/
-
-.footer-custom {
-    margin-top: 50px;
-}
-
-.pagination-container-custom {
-    position: fixed;
-    bottom: 0;
-    margin-bottom: 130px;
-}
