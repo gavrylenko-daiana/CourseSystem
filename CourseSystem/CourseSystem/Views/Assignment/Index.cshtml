@@ -76,7 +76,20 @@
                     </form>
                 </div>            
             </div>
-            
+            @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+            {
+                <div class="ui compact menu" style="margin-right: 10px;">
+                    <div class="ui simple dropdown item">
+                        Actions:
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            <div class="item">
+                                <a href="@Url.Action("Create", "Assignment", new { groupId = ViewBag.GroupId })">Create new Assignment</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
             <div class="ui compact menu" style="margin-right: 10px;">
                 <div class="ui simple dropdown item">
                     Sort by
@@ -146,12 +159,6 @@
             </div>
         </div>     
         <hr class="ui divider">
-        @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
-        {
-            <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
-                <a href="@Url.Action("Create", "Assignment", new { groupId = ViewBag.GroupId })" class="ui basic black button">Create new Assignment</a>
-            </div>
-        }
         <div class="ui stackable three column grid assignments-container">
             @if (Model.Any())
             {
