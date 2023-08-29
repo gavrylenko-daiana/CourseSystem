@@ -33,7 +33,11 @@
         
         .cover-card {
             height: 110px; 
-        }             
+        }     
+        
+        #fixedPagination {
+            margin-top: 138px;
+        }        
     </style>
 </head>
 <body>
@@ -107,21 +111,40 @@
     </div>
 
 </div>
+
 <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
     @if (Model.PageCount > 1)
     {
-        <div class="pagination-container">
-            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-            <div>
+        if (Model.Count <= Model.PageSize / 2)
+        {
+            <div id="fixedPagination" class="pagination-container">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                <div>
                 @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new { courseId = ViewBag.SelectTeachersCourseId, page = page, currentQueryFilter = ViewBag.CurrentQueryFilter }),
-                    new PagedListRenderOptions
-                    {
-                        LiElementClasses = new string[] { "page-item" },
-                        PageClasses = new string[] { "page-link" },
-                        MaximumPageNumbersToDisplay = 3
-                    })
+                        new PagedListRenderOptions
+                        {
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" },
+                            MaximumPageNumbersToDisplay = 3
+                        })
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="pagination-container">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                <div>
+                @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new { courseId = ViewBag.SelectTeachersCourseId, page = page, currentQueryFilter = ViewBag.CurrentQueryFilter }),
+                        new PagedListRenderOptions
+                        {
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" },
+                            MaximumPageNumbersToDisplay = 3
+                        })
+                </div>
+            </div>
+        }
     }
 </div>
 <script>
