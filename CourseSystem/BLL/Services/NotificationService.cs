@@ -98,7 +98,8 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddCreatedAssignmentNotification(AppUser user, Assignment assignment)
+        public async Task<Result<bool>> AddCreatedAssignmentNotification(AppUser user, Assignment assignment, 
+            string callbackForAssignment, string callbackForGroup)
         {
             if (user == null)
             {
@@ -112,7 +113,8 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.CreatedAssignment,
                 DateTime.Now, user, assignment.Group.Course, assignment.Group,
-                    assignment, assignment.Name, assignment.Group.Name, assignment.StartDate, assignment.EndDate);
+                    assignment, assignment.Name, assignment.Group.Name, callbackForAssignment, 
+                callbackForGroup, assignment.StartDate, assignment.EndDate);
 
             return await SaveNotification(notification);
         }

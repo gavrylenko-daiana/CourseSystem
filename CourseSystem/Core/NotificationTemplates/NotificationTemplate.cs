@@ -42,9 +42,9 @@ namespace Core.NotificationTemplates
                 "Now your students have access to its educational materials and assignments." },
             {NotificationType.GroupStartedForStudent, "Education is starting in the group \"{0}\". " +
                 "Now you have access to its educational materials and assignments." },
-            {NotificationType.CreatedAssignment, "You created a new assignment \"{0}\" for group \"{1}\". " +
-                "Assignment activity starts on {2:dddd, dd MMMM yyyy}, at {2:HH:mm}. " +
-                "It ends on {3:dddd, dd MMMM yyyy}, at {3:HH:mm}. " +
+            {NotificationType.CreatedAssignment, "You created a new assignment <a href=\"{2}\">\"{0}\"</a> for group <a href=\"{3}\">\"{1}\"</a>. " +
+                "Assignment activity starts on {4:dddd, dd MMMM yyyy}, at {4:HH:mm}. " +
+                "It ends on {5:dddd, dd MMMM yyyy}, at {5:HH:mm}. " +
                 "While assignment is active your students will be able to attach their solutions to it for you to grade." },
             {NotificationType.SubmittedAssignmentForStudent, "You submitted a solution for assignment \"{0}\". " +
                 "Please, wait till your teacher marks it - you will receive corresponding notification as soon as it happens." },
