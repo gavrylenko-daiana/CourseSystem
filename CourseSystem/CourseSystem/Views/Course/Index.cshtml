@@ -35,6 +35,7 @@
             margin-top: 20px;
             text-align: center;
         }   
+
     </style>
 </head>
 <body>
@@ -53,8 +54,38 @@
             </form>
         </div>
     </div>
+        <div class="ui compact menu" style="margin-right: 10px;">
+            <div class="ui simple dropdown item">
+                Actions
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    @if (User.IsInRole(AppUserRoles.Admin.ToString()))
+                    {
+                        <div class="item">
+                            <a asp-action="Create">Add New Course</a>
+                        </div>
+                    }
+                    @if (!User.IsInRole(AppUserRoles.Student.ToString()))
+                    {
 
+                        <div class="item">
+                            <a asp-action="CreateInGeneral" asp-controller="EducationMaterial">Upload Education Material</a>
+                        </div>
+                    }
+                    <div class="item">
+
+                        @{
+                            var materialsGeneral = await EducationMaterialService.GetAllMaterialByAccessAsync(MaterialAccess.General, SortingParam.UploadTimeDesc);
+                            var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
+
+                            <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     <div class="ui compact menu" style="margin-left: 10px;">
+            
         <div class="ui simple dropdown item">
             Sort by
             <i class="dropdown icon"></i>
@@ -129,7 +160,7 @@
     }
 </div>
 
-<div class="ui container add-course-button">
+@*<div class="ui container add-course-button">
     @if (User.IsInRole(AppUserRoles.Admin.ToString()))
     {
         <a asp-action="Create" class="ui basic black button">Add New Course</a>
@@ -146,10 +177,10 @@
         var materialsGeneral = await EducationMaterialService.GetAllMaterialByAccessAsync(MaterialAccess.General, SortingParam.UploadTimeDesc);
             var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
 
-            <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc" class="ui basic black button">Education Materials</a>
+        <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc" class="ui basic black button">Education Materials</a>
     }
 </div>
-
+*@
 @if (TempData["Error"] != null)
 {
     <div class="ui negative message">
