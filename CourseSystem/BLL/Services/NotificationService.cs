@@ -174,7 +174,7 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group)
+        public async Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group, string callback)
         {
             if (user == null)
             {
@@ -187,7 +187,7 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.GroupStartedForTeacher, group.StartDate, 
-                user, group.Course, group, null, group.Name);
+                user, group.Course, group, null, group.Name, callback);
 
             return await SaveNotification(notification);
         }
