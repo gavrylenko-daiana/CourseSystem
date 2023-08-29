@@ -15,7 +15,9 @@ internal class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var dbContext = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ApplicationContext>));
 
             if (dbContext != null)
+            {
                 services.Remove(dbContext);
+            }
 
             var serviceProvider = new ServiceCollection()
                 .AddEntityFrameworkInMemoryDatabase()
@@ -28,6 +30,7 @@ internal class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseInternalServiceProvider(serviceProvider);
                 options.UseLazyLoadingProxies();
             });
+            
             var sp = services.BuildServiceProvider();
 
             using (var scope = sp.CreateScope())

@@ -1,3 +1,4 @@
+using BLL.Interfaces;
 using Core.Enums;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +33,9 @@ namespace IntegrationTests;
             {
                 AllowAutoRedirect = false
             });
+            
             _clients.Add(client);
+            
             return client;
         }
 
@@ -40,6 +43,7 @@ namespace IntegrationTests;
         {
             using var scope = _factory.Services.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+            
             var user = new AppUser
             {
                 Email = email,
@@ -48,11 +52,28 @@ namespace IntegrationTests;
                 LastName = "testlastname",
                 UserName = "testname_testlastname"
             };
+            
             await userManager.CreateAsync(user, password);
             var createdUser = await userManager.FindByEmailAsync(email);
+            
             return createdUser!;
         }
+        
+        public async Task<Course> CreateCourse(string name, AppUser currentUser)
+        {
+            using var scope = _factory.Services.CreateScope();
+            var courseService = scope.ServiceProvider.GetRequiredService<ICourseService>();
+            
+            var course = new Course
+            {
+                Name = name
+            };
 
+            await courseService.CreateCourse(course, currentUser);
+
+            return course;
+        }
+        
         public void Dispose()
         {
             _factory?.Dispose();
@@ -65,7 +86,7 @@ namespace IntegrationTests;
         public async Task InitializeAsync()
         {
             var adminPassword = "!!Dragon77";
-            Admin = (await CreateUser("alexeysafonov01@gmail.com", adminPassword, AppUserRoles.Admin), adminPassword);
+            Admin = (await CreateUser("dayana01001@gmail.com", adminPassword, AppUserRoles.Admin), adminPassword);
         }
 
         public Task DisposeAsync()

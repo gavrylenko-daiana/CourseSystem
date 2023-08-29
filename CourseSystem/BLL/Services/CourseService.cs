@@ -43,7 +43,7 @@ public class CourseService : GenericService<Course>, ICourseService
         _userManager = userManager;
     }
 
-    public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser, IFormFile uploadFile = null)
+    public async Task<Result<bool>> CreateCourse(Course course, AppUser currentUser, IFormFile uploadFile = null!)
     {
         if (course == null)
         {
