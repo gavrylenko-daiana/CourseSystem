@@ -34,4 +34,18 @@ public static class LinkGenerator
             },
             protocol: controller.Request.Scheme);
     }
+    
+    public static string GenerateAssignmentLink(IUrlHelperFactory urlHelperFactory, ControllerBase controller, Assignment assignment)
+    {
+        var urlHelper = urlHelperFactory.GetUrlHelper(controller.ControllerContext);
+
+        return urlHelper.Action(
+            "Details",
+            "Assignment",
+            new
+            {
+                assignmentId = assignment.Id
+            },
+            protocol: controller.Request.Scheme);
+    }
 }
