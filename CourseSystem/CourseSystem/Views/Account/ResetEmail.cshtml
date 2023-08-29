@@ -1,53 +1,4 @@
 @model UI.ViewModels.NewEmailViewModel
-        
-@*<div class="container">
-    <div class="py-4">
-        <div class="col-md-6">
-            <p>
-                <h1>Write in the mail the code will come to</h1>
-            </p>
-            <div class="py-2">
-                @if (TempData["Error"] != null)
-                {
-                    <div class="col-md-12 alert alert-danger">
-                        <span><b>Sorry!</b> - @TempData["Error"]</span>
-                    </div>
-                }
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <p class="text-success">@TempData["SuccessMessage"]</p>
-                }
-                <form method="post" asp-controller="Account" asp-action="ResetEmail">
-                    <input type="hidden" asp-for="Email" value="@Model.Email"/>
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="form-group">
-                        <label asp-for="NewEmail" class="control-label"></label>
-                        <input asp-for="NewEmail" class="form-control">
-                        <span asp-validation-for="NewEmail" class="text-danger"></span>
-                    </div>
-                    @if (!User.Identity.IsAuthenticated)
-                    {
-                        <div class="py-2">
-                            <div class="form-group">
-                                <input class="btn btn-outline-primary" type="submit" value="Update email"/>
-                                <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Login">Cancel</a>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="py-2">
-                            <div class="form-group">
-                                <input class="btn btn-outline-primary" type="submit" value="Update email"/>
-                                <a class="btn btn-outline-dark" asp-controller="User" asp-action="Index">Cancel</a>
-                            </div>
-                        </div>
-                    }
-                </form>
-            </div>
-        </div>
-    </div>
-</div>*@
 
 <!DOCTYPE html>
 <html lang="en">
@@ -74,11 +25,15 @@
             justify-content: center;
             align-items: center;
         }
+
+        .center-aligned-input {
+            text-align: center;
+        }
     </style>
 </head>
 <body class="reset-email-body">
     <div class="main-container-email-reset">
-        <div class="ui centered card" style="width:50%;">
+        <div class="ui centered card" style="width:40%;">
             <div class="content">
                 <div class="header mt-3">
                     <h3 class="ui center aligned header">
@@ -91,8 +46,8 @@
                     <input type="hidden" asp-for="Email" value="@Model.Email" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
-                        <label asp-for="NewEmail" class="control-label"></label>
-                        <input asp-for="NewEmail" class="form-control">
+                        <label asp-for="NewEmail" class="control-label mb-2"></label>
+                        <input asp-for="NewEmail" class="form-control center-aligned-input">
                         <span asp-validation-for="NewEmail" class="text-danger"></span>
                     </div>
                     <div class="ui buttons mt-3">
