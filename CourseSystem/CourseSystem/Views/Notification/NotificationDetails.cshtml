@@ -21,7 +21,14 @@
                 }
                 <div class="card-body-notification-custom">
                     <p class="notification-text-notification-custom">
+                    @if (Model.Course == null || Model.Group == null || Model.Assignment == null)
+                    {
+                        <p class="notification-text-notification-custom">Unfortunately that entity no longer exists</p>
+                    }
+                    else
+                    {
                         @Html.Raw(Model.Description)
+                    }
                     </p>
                     <p class="notification-date-notification-custom">
                         Date: @Model.Created.ToString("f")
