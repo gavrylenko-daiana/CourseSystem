@@ -328,7 +328,9 @@ public class AssignmentAnswerController : Controller
 
         await _activityService.AddMarkedAssignmentActivity(currentUserResult.Data, userAssignment);
 
-        await _notificationService.AddMarkedAssignmentForStudentNotification(userAssignment);
+        await _notificationService.AddMarkedAssignmentForStudentNotification(userAssignment,
+            LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentResult.Data));
+        
         await _notificationService.AddMarkedAssignmentForTeacherNotification(currentUserResult.Data, userAssignment,
             LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentResult.Data));
 

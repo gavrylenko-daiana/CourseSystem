@@ -52,7 +52,7 @@ namespace Core.NotificationTemplates
                 "Please, check and mark it." },
             {NotificationType.MarkedAssignmentForTeacher, "You marked the solution {0} {1} submitted for assignment <a href=\"{4}\">\"{2}\"</a>. " +
                 "His/her grade: {3}/100." },
-            {NotificationType.MarkedAssignmentForStudent, "The solution you submitted for assignment \"{0}\" was marked. " +
+            {NotificationType.MarkedAssignmentForStudent, "The solution you submitted for assignment <a href=\"{2}\">\"{0}\"</a> was marked. " +
                 "Your grade: {1}/100." },
             {NotificationType.AssignmentIsOpenForTeacher, "Your assignment \"{0}\" for group \"{1}\" is open for submitting solutions. " +
                 "It will be open until {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
