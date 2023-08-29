@@ -355,3 +355,15 @@ body {
 }
 
 /*Home page - END*/
+
+.login-customn-position {
+    position: absolute !important;
+    top: 45%;
+    transform: translateY(-50%);
+}
+
+.register-customn-position {
+    position: absolute !important;
+    top: 48%;
+    transform: translateY(-50%);
+}
