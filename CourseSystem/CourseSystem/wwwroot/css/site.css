@@ -15,7 +15,7 @@ body {
 }
 
 .details-button {
-    background-color: #35DE9C !important;
+    background-color: #3CB371 !important;
     color: white !important;
 }
 
@@ -25,13 +25,13 @@ body {
 }
 
 .delete-button {
-    background-color: #FF8093 !important;
-    color: black !important;
+    background-color: #B22222 !important;
+    color: white !important;
 }
 
 .create-button {
-    background-color: #9EFF7A !important;
-    color: black !important;
+    background-color: #2E8B57 !important;
+    color: white !important;
 }
 
 .details-button:hover,
