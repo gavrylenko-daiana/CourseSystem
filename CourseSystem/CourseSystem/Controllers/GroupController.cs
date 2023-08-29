@@ -187,7 +187,9 @@ public class GroupController : Controller
 
         await _activityService.AddCreatedGroupActivity(currentUserResult.Data, group);
 
-        await _notificationService.AddCreatedGroupNotification(currentUserResult.Data, group);
+        await _notificationService.AddCreatedGroupNotification(currentUserResult.Data, group, 
+            LinkGenerator.GenerateGroupLink(_urlHelperFactory,this, group),
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, group.Course));
 
         return RedirectToAction("Details", "Group", new { id = group.Id });
     }

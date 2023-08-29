@@ -13,8 +13,8 @@ namespace BLL.Interfaces
         Task<Result<List<Notification>>> GetNotifications(AppUser user, FilterParam findForFilter, int? findForId, SortingParam sortOrder);
         Task<Result<bool>> MarkAsRead(Notification notification);
         Task<Result<bool>> AddCreatedCourseNotification(AppUser user, Course course, string callback);
-        Task<Result<bool>> AddJoinedCourseNotification(AppUser user, Course course, string callback); //ready
-        Task<Result<bool>> AddCreatedGroupNotification(AppUser user, Group group); //ready
+        Task<Result<bool>> AddJoinedCourseNotification(AppUser user, Course course, string callback); 
+        Task<Result<bool>> AddCreatedGroupNotification(AppUser user, Group group, string callbackForGroup, string callbackForCourse); 
         Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group); //ready
         Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group); //ready
         Task<Result<bool>> AddGroupStartedForStudentNotification(AppUser user, Group group); //ready
