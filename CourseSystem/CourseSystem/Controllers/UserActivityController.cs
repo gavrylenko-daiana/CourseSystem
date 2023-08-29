@@ -26,7 +26,7 @@ public class UserActivityController : Controller
     [HttpGet]
     public async Task<IActionResult> ActivityForMonth(DateTime? dateTime = null)
     {
-        var month = dateTime ?? DateTime.Now;
+        var month = dateTime ?? DateTime.UtcNow;
 
         var currentUserResult = await _userService.GetCurrentUser(User);
 

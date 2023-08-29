@@ -44,8 +44,8 @@ public class GroupServiceTests
     {
         var group = new Group()
         {
-            StartDate = DateTime.Now.AddDays(1),
-            EndDate = DateTime.Now
+            StartDate = DateTime.UtcNow.AddDays(1),
+            EndDate = DateTime.UtcNow
         };
 
         var mockUser = new Mock<AppUser>();

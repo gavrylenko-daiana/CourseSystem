@@ -49,7 +49,7 @@ namespace BLL.Services
                 AppUser = appUser,
                 Assignment = assignment,
                 Text = text,
-                Created = DateTime.Now,
+                Created = DateTime.UtcNow,
             };
 
             try

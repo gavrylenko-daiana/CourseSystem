@@ -35,13 +35,13 @@
                     
                     <div class="field">
                         <label>@Html.LabelFor(model => model.StartDate)</label>
-                        @Html.TextBoxFor(model => model.StartDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), required = "required" })
+                        @Html.TextBoxFor(model => model.StartDate, new { @class = "form-control", type = "date", min = DateTime.UtcNow.ToString("yyyy-MM-dd"), required = "required" })
                         @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
                     </div>
                     
                     <div class="field">
                         <label>@Html.LabelFor(model => model.EndDate)</label>
-                        @Html.TextBoxFor(model => model.EndDate, new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd"), required = "required" })
+                        @Html.TextBoxFor(model => model.EndDate, new { @class = "form-control", type = "date", min = DateTime.UtcNow.ToString("yyyy-MM-dd"), required = "required" })
                         @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
                     </div>
                     

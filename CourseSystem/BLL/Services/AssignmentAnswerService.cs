@@ -65,7 +65,7 @@ namespace BLL.Services
             }
             
             assignmentAnswer.UserAssignment = userAssignmentResult.Data;
-            assignmentAnswer.CreationTime = DateTime.Now;
+            assignmentAnswer.CreationTime = DateTime.UtcNow;
             assignmentAnswer.DropboxFolder = folder;
             
             try

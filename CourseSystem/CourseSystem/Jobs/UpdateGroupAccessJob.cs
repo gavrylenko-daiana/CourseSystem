@@ -34,12 +34,12 @@ namespace UI.Jobs
 
             foreach (var group in groupsResult.Data)
             {
-                if (group.StartDate > DateTime.Now)
+                if (group.StartDate > DateTime.UtcNow)
                 {
                     group.GroupAccess = GroupAccess.Planned;
                 }
 
-                if (group.StartDate <= DateTime.Now && group.GroupAccess == GroupAccess.Planned)
+                if (group.StartDate <= DateTime.UtcNow && group.GroupAccess == GroupAccess.Planned)
                 {
                     group.GroupAccess = GroupAccess.InProgress;
 
@@ -56,7 +56,7 @@ namespace UI.Jobs
                     }
                 }
 
-                if (group.EndDate < DateTime.Now)
+                if (group.EndDate < DateTime.UtcNow)
                 {
                     group.GroupAccess = GroupAccess.Completed;
                 }

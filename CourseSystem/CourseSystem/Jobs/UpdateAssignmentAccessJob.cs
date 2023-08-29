@@ -36,12 +36,12 @@ namespace UI.Jobs
 
             foreach (var assignment in assignmentResult.Data)
             {
-                if (assignment.StartDate > DateTime.Now)
+                if (assignment.StartDate > DateTime.UtcNow)
                 {
                     assignment.AssignmentAccess = AssignmentAccess.Planned;
                 }
 
-                if (assignment.StartDate <= DateTime.Now && assignment.AssignmentAccess == AssignmentAccess.Planned)
+                if (assignment.StartDate <= DateTime.UtcNow && assignment.AssignmentAccess == AssignmentAccess.Planned)
                 {
                     assignment.AssignmentAccess = AssignmentAccess.InProgress;
 
@@ -68,7 +68,7 @@ namespace UI.Jobs
                     }
                 }
 
-                if (assignment.EndDate < DateTime.Now && assignment.AssignmentAccess == AssignmentAccess.InProgress)
+                if (assignment.EndDate < DateTime.UtcNow && assignment.AssignmentAccess == AssignmentAccess.InProgress)
                 {
                     assignment.AssignmentAccess = AssignmentAccess.Completed;
 

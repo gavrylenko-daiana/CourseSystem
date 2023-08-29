@@ -10,7 +10,7 @@
     var currentUserResult = await _userService.GetCurrentUser(User);
     var activities = currentUserResult.Data.UserActivities;
 
-    var firstDay = DateTime.Now.AddYears(-1);
+    var firstDay = DateTime.UtcNow.AddYears(-1);
 
     while(firstDay.DayOfWeek != DayOfWeek.Monday)
     {
@@ -78,7 +78,7 @@
             @{
                 var monthCounter = thisDay;
 
-                while(monthCounter < DateTime.Now)
+                while(monthCounter < DateTime.UtcNow)
                 {
                     var widthCounter = 0;
                     var thisMonth = monthCounter.Month;
@@ -139,7 +139,7 @@
                     thisDay = thisDay.AddDays(7);
                 }
 
-                if (thisDay < DateTime.Now)
+                if (thisDay < DateTime.UtcNow)
                 {
                         var todayActivities = activities.ForDate(thisDay).Data;
                         if (todayActivities.Count == 0)

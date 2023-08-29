@@ -60,7 +60,7 @@
                 
                 <div class="form-group">
                     <label asp-for="BirthDate" class="control-label"></label>
-                    <input asp-for="BirthDate" class="form-control" placeholder="BirthDate" type="date" min="@DateTime.Now.AddYears(-80).ToString("yyyy-MM-dd")" max="@DateTime.Now.AddYears(-6).ToString("yyyy-MM-dd")">
+                    <input asp-for="BirthDate" class="form-control" placeholder="BirthDate" type="date" min="@DateTime.UtcNow.AddYears(-80).ToString("yyyy-MM-dd")" max="@DateTime.UtcNow.AddYears(-6).ToString("yyyy-MM-dd")">
                     <span asp-validation-for="BirthDate" class="text-danger"></span>
                 </div>
                 

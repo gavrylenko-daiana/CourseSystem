@@ -29,7 +29,7 @@
             <form method="post" asp-controller="EducationMaterial" asp-action="CreateInCourse" enctype="multipart/form-data" class="ui form">
                 <input type="hidden" asp-for="CourseId"/>
                 <input type="hidden" asp-for="Course"/><input type="hidden" asp-for="Groups"/>
-                <input type="hidden" asp-for="TimeUploaded" value="@DateTime.Now">
+                <input type="hidden" asp-for="TimeUploaded" value="@DateTime.UtcNow">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="field">
                     <label asp-for="UploadFile">Select File:</label>

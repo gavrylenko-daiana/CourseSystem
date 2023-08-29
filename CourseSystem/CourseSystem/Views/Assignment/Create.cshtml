@@ -59,7 +59,7 @@
                     </div>
                     <div class="field">
                         <label asp-for="EndDate" class="control-label"></label>
-                        <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddHours(-24).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <input asp-for="EndDate" class="form-control" min="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddHours(-24).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
                         <span asp-validation-for="EndDate" class="text-danger"></span>
                     </div>
                 </div>

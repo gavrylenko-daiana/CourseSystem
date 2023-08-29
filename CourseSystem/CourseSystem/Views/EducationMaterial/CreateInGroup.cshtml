@@ -24,7 +24,7 @@
                 <input type="hidden" asp-for="CourseId"/>
                 <input type="hidden" asp-for="Group"/>
                 <input type="hidden" asp-for="Course"/>
-                <input type="hidden" asp-for="TimeUploaded" value="@DateTime.Now">
+                <input type="hidden" asp-for="TimeUploaded" value="@DateTime.UtcNow">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <!-- File Upload Input -->
                 <div class="field">

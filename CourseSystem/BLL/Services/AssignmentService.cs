@@ -254,17 +254,17 @@ namespace BLL.Services
 
         private void SetAssignmentStatus(Assignment assignment)
         {
-            if (assignment.StartDate > DateTime.Now)
+            if (assignment.StartDate > DateTime.UtcNow)
             {
                 assignment.AssignmentAccess = AssignmentAccess.Planned;
             }
 
-            if (assignment.StartDate <= DateTime.Now)
+            if (assignment.StartDate <= DateTime.UtcNow)
             {
                 assignment.AssignmentAccess = AssignmentAccess.InProgress;
             }
 
-            if (assignment.EndDate < DateTime.Now)
+            if (assignment.EndDate < DateTime.UtcNow)
             {
                 assignment.AssignmentAccess = AssignmentAccess.Completed;
             }

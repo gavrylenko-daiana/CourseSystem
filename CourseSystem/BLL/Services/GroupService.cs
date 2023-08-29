@@ -431,17 +431,17 @@ public class GroupService : GenericService<Group>, IGroupService
     
     private void SetGroupStatus(Group group)
     {
-        if (group.StartDate > DateTime.Now)
+        if (group.StartDate > DateTime.UtcNow)
         {
             group.GroupAccess = GroupAccess.Planned;
         }
 
-        if (group.StartDate <= DateTime.Now)
+        if (group.StartDate <= DateTime.UtcNow)
         {
             group.GroupAccess = GroupAccess.InProgress;
         }
 
-        if (group.EndDate < DateTime.Now)
+        if (group.EndDate < DateTime.UtcNow)
         {
             group.GroupAccess = GroupAccess.Completed;
         }
