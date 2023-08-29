@@ -9,10 +9,12 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc.Routing;
 using UI.ViewModels;
 using UI.ViewModels.CourseViewModels;
 using UI.ViewModels.GroupViewModels;
 using X.PagedList;
+using LinkGenerator = Core.Helpers.LinkGenerator;
 
 namespace UI.Controllers;
 
@@ -27,6 +29,7 @@ public class CourseController : Controller
     private readonly IActivityService _activityService;
     private readonly INotificationService _notificationService;
     private readonly ILogger<CourseController> _logger;
+    private readonly IUrlHelperFactory _urlHelperFactory;
 
     public CourseController(ICourseService courseService,
         UserManager<AppUser> userManager,
@@ -35,7 +38,8 @@ public class CourseController : Controller
         IUserService userService,
         IActivityService activityService,
         INotificationService notificationService,
-        ILogger<CourseController> logger)
+        ILogger<CourseController> logger,
+        IUrlHelperFactory urlHelperFactory)
     {
         _courseService = courseService;
         _userManager = userManager;
@@ -45,6 +49,7 @@ public class CourseController : Controller
         _activityService = activityService;
         _notificationService = notificationService;
         _logger = logger;
+        _urlHelperFactory = urlHelperFactory;
     }
 
     [HttpGet]
@@ -142,8 +147,9 @@ public class CourseController : Controller
         }
 
         await _activityService.AddCreatedCourseActivity(currentUserResult.Data, course);
-
-        await _notificationService.AddCreatedCourseNotification(currentUserResult.Data, course);
+        
+        await _notificationService.AddCreatedCourseNotification(currentUserResult.Data, course, 
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, course));
 
         return RedirectToAction("Index");
     }
@@ -452,7 +458,8 @@ public class CourseController : Controller
 
         await _activityService.AddJoinedCourseActivity(currentUser, courseResult.Data);
 
-        await _notificationService.AddJoinedCourseNotification(currentUser, courseResult.Data);
+        await _notificationService.AddJoinedCourseNotification(currentUser, courseResult.Data, 
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, courseResult.Data));
 
         return View();
     }
