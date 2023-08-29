@@ -95,7 +95,7 @@ body {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
-/*!*/
+/*Notification page START*/
 
 .notification-icon {
     font-size: 24px;
@@ -179,6 +179,10 @@ body {
     margin-top: 20px;
 }
 
+/*Notification page END*/
+
+/*Activity page START*/
+
 .activity-details-container {
     position: absolute;
     top: 45%;
@@ -233,7 +237,9 @@ body {
     margin-top: 20px;
 }
 
-/*!*/
+/*Activity page END*/
+
+/*Header bg-color START*/
 
 .background-color-header {
     /*background-color: #078c61; !important;*/
@@ -241,6 +247,8 @@ body {
     /*background-color: #02af78;*/
     background-color: #12302a;
 }
+
+/*Header bg-color END*/
 
 /*Home page - START*/
 #home {
@@ -355,3 +363,15 @@ body {
 }
 
 /*Home page - END*/
+
+/*Reset Password page START*/
+
+.main-container-reset-password {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+}
+
+/*Reset Password page END*/
