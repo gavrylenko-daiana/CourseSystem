@@ -117,7 +117,7 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddCreatedCourseNotification(AppUser user, Course course)
+        public async Task<Result<bool>> AddCreatedCourseNotification(AppUser user, Course course, string callback)
         {
             if (user == null)
             {
@@ -130,7 +130,7 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.CreatedCourse, DateTime.Now, user, 
-                course, null, null, course.Name);
+                course, null, null,callback, course.Name);
 
             return await SaveNotification(notification);
         }

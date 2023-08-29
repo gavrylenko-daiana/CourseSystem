@@ -32,6 +32,7 @@ namespace Core.NotificationTemplates
         {
             {NotificationType.CreatedCourse, "You created a new course - \"{0}\"." },
             {NotificationType.JoinedCourse, "You joined a new course - \"{0}\"." },
+            {NotificationType.CreatedCourse, "You created a new course - <a href=\"{0}\">\"{1}\"</a>." },
             {NotificationType.CreatedGroup, "You created a new group, \"{0}\", in course \"{1}\". " +
                 "Education in it starts on {2:dddd, dd MMMM yyyy}. " +
                 "It ends on {3:dddd, dd MMMM yyyy}." },
