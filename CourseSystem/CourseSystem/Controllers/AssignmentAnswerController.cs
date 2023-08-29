@@ -329,7 +329,8 @@ public class AssignmentAnswerController : Controller
         await _activityService.AddMarkedAssignmentActivity(currentUserResult.Data, userAssignment);
 
         await _notificationService.AddMarkedAssignmentForStudentNotification(userAssignment);
-        await _notificationService.AddMarkedAssignmentForTeacherNotification(currentUserResult.Data, userAssignment);
+        await _notificationService.AddMarkedAssignmentForTeacherNotification(currentUserResult.Data, userAssignment,
+            LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentResult.Data));
 
         return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer",
             new { assignmentId = userAssignment.AssignmentId });

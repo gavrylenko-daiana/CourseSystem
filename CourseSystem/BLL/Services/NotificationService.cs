@@ -243,8 +243,7 @@ namespace BLL.Services
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user,
-            UserAssignments userAssignment)
+        public async Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment, string callback)
         {
             if (user == null)
             {
@@ -258,7 +257,8 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.MarkedAssignmentForTeacher, DateTime.Now, user,
                 userAssignment.Assignment.Group.Course, userAssignment.Assignment.Group, userAssignment.Assignment,
-                    userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, userAssignment.Grade);
+                    userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, 
+                userAssignment.Grade, callback);
 
             return await SaveNotification(notification);
         }

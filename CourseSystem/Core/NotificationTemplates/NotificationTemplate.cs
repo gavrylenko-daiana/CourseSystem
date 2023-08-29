@@ -50,7 +50,7 @@ namespace Core.NotificationTemplates
                 "Please, wait till your teacher marks it - you will receive corresponding notification as soon as it happens." },
             {NotificationType.SubmittedAssignmentForTeacher, "{0} {1} submitted a solution for your assignment <a href=\"{3}\">\"{2}\"</a> " +
                 "Please, check and mark it." },
-            {NotificationType.MarkedAssignmentForTeacher, "You marked the solution {0} {1} submitted for assignment \"{2}\". " +
+            {NotificationType.MarkedAssignmentForTeacher, "You marked the solution {0} {1} submitted for assignment <a href=\"{4}\">\"{2}\"</a>. " +
                 "His/her grade: {3}/100." },
             {NotificationType.MarkedAssignmentForStudent, "The solution you submitted for assignment \"{0}\" was marked. " +
                 "Your grade: {1}/100." },
