@@ -17,9 +17,8 @@ namespace IntegrationTests;
     public class ControllerFixture : IAsyncLifetime
     {
         private readonly WebApplicationFactory<Program> _factory;
-
         private readonly List<HttpClient> _clients = new();
-
+        
         public (AppUser User, string Password) Admin { get; private set; }
 
         public ControllerFixture()
@@ -77,6 +76,7 @@ namespace IntegrationTests;
         public void Dispose()
         {
             _factory?.Dispose();
+            
             foreach (var client in _clients)
             {
                 client?.Dispose();
