@@ -25,7 +25,7 @@ public class AccountControllerTests
         var response = await client.PostAsync($"Account/Login?emailaddress={_fixture.Admin.User.Email!}&password={_fixture.Admin.Password}", null);
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-        Assert.Equal("User/Index", response.Headers.Location!.AbsolutePath);
+        Assert.Equal("/User", response.Headers.Location!.OriginalString);
     }
     
     [Fact]
