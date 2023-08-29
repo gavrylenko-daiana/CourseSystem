@@ -256,11 +256,6 @@ body {
     padding: 0;
 }
 
-.home-container {
-    width: 100%;
-    position: relative;
-}
-
 .home-logo img {
     width: 30px;
     cursor: pointer;
