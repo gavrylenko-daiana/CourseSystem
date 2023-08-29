@@ -54,15 +54,15 @@ namespace Core.NotificationTemplates
                 "His/her grade: {3}/100." },
             {NotificationType.MarkedAssignmentForStudent, "The solution you submitted for assignment <a href=\"{2}\">\"{0}\"</a> was marked. " +
                 "Your grade: {1}/100." },
-            {NotificationType.AssignmentIsOpenForTeacher, "Your assignment \"{0}\" for group \"{1}\" is open for submitting solutions. " +
+            {NotificationType.AssignmentIsOpenForTeacher, "Your assignment <a href=\"{3}\">\"{0}\"</a> for group <a href=\"{4}\">\"{1}\"</a> is open for submitting solutions. " +
                 "It will be open until {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
                 "After that your students won't be able to submit their solutions, but you will still be able to grade them." },
-            {NotificationType.AssignmentIsOpenForStudent, "Assignment \"{0}\" in group \"{1}\" is open for submitting solutions. " +
+            {NotificationType.AssignmentIsOpenForStudent, "Assignment <a href=\"{2}\">\"{0}\"</a> in group <a href=\"{3}\">\"{1}\"</a> is open for submitting solutions. " +
                 "It will be open until {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
                 "After that you won't be able to submit your solutions." },
-            {NotificationType.AssignmentIsClosedForTeacher, "Your assignment \"{0}\" for group \"{1}\" is closed for submitting solutions. " +
+            {NotificationType.AssignmentIsClosedForTeacher, "Your assignment <a href=\"{2}\">\"{0}\"</a> for group <a href=\"{3}\">\"{1}\"</a> is closed for submitting solutions. " +
                 "Now your students are unable to submit new solutions, but you can still grade them if you haven't done so yet." },
-            {NotificationType.AssignmentIsClosedForStudent, "Assignment \"{0}\" in group \"{1}\" is closed for submitting solutions. " +
+            {NotificationType.AssignmentIsClosedForStudent, "Assignment <a href=\"{2}\">\"{0}\"</a> in group <a href=\"{3}\">\"{1}\"</a> is closed for submitting solutions. " +
                 "If you had successfully submitted your solution, but didn't get your grade yet - try to wait some more, as your teacher can still be checking it. " +
                 "If you haven't submitted your solution in time, please, contact your teacher." }
         };

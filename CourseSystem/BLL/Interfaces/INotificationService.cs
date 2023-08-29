@@ -23,9 +23,9 @@ namespace BLL.Interfaces
         Task<Result<bool>> AddSubmittedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment, string callback); //ready
         Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment, string callback); //ready
         Task<Result<bool>> AddMarkedAssignmentForStudentNotification(UserAssignments userAssignment, string callback); //ready
-        Task<Result<bool>> AddAssignmentIsOpenForTeacherNotification(AppUser user, Assignment assignment); //ready
-        Task<Result<bool>> AddAssignmentIsOpenForStudentNotification(AppUser user, Assignment assignment); //ready
-        Task<Result<bool>> AddAssignmentIsClosedForTeacherNotification(AppUser user, Assignment assignment); //ready
-        Task<Result<bool>> AddAssignmentIsClosedForStudentNotification(AppUser user, Assignment assignment); //ready
+        Task<Result<bool>> AddAssignmentIsOpenForTeacherNotification(AppUser user, Assignment assignment, string callbackForAssignment, string callbackForGroup); //ready
+        Task<Result<bool>> AddAssignmentIsOpenForStudentNotification(AppUser user, Assignment assignment, string callbackForAssignment, string callbackForGroup); //ready
+        Task<Result<bool>> AddAssignmentIsClosedForTeacherNotification(AppUser user, Assignment assignment, string callbackForAssignment, string callbackForGroup); //ready
+        Task<Result<bool>> AddAssignmentIsClosedForStudentNotification(AppUser user, Assignment assignment, string callbackForAssignment, string callbackForGroup); //ready
     }
 }
