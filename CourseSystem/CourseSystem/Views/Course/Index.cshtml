@@ -54,36 +54,38 @@
             </form>
         </div>
     </div>
-
-    <div class="ui compact menu" style="margin-left: 10px;">
-            <div class="ui simple dropdown item" style="background-color: #6E7F72">
+        <div class="ui compact menu" style="margin-right: 10px;">
+            <div class="ui simple dropdown item">
                 Actions
-            <i class="dropdown icon"></i>
-            <div class="menu">
+                <i class="dropdown icon"></i>
+                <div class="menu">
                     @if (User.IsInRole(AppUserRoles.Admin.ToString()))
                     {
                         <div class="item">
-                            <a asp-action="Create" style="color: #12302a;">Add New Course</a>
+                            <a asp-action="Create">Add New Course</a>
                         </div>
                     }
                     @if (!User.IsInRole(AppUserRoles.Student.ToString()))
                     {
 
                         <div class="item">
-                            <a asp-action="CreateInGeneral" asp-controller="EducationMaterial" style="color: #12302a;">Upload Education Material</a>
+                            <a asp-action="CreateInGeneral" asp-controller="EducationMaterial">Upload Education Material</a>
                         </div>
                     }
-                <div class="item">
-                       
-                    @{
-                        var materialsGeneral = await EducationMaterialService.GetAllMaterialByAccessAsync(MaterialAccess.General, SortingParam.UploadTimeDesc);
-                        var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
+                    <div class="item">
 
-                            <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc" style="color: #12302a;">Education Materials</a>
-                    }
+                        @{
+                            var materialsGeneral = await EducationMaterialService.GetAllMaterialByAccessAsync(MaterialAccess.General, SortingParam.UploadTimeDesc);
+                            var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
+
+                            <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
+    <div class="ui compact menu" style="margin-left: 10px;">
+            
         <div class="ui simple dropdown item">
             Sort by
             <i class="dropdown icon"></i>
