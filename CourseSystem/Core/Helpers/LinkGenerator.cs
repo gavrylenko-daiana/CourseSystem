@@ -48,18 +48,4 @@ public static class LinkGenerator
             },
             protocol: controller.Request.Scheme);
     }
-    
-    public static string GenerateAssignmentAnswerLink(IUrlHelperFactory urlHelperFactory, ControllerBase controller, AssignmentAnswer assignmentAnswer)
-    {
-        var urlHelper = urlHelperFactory.GetUrlHelper(controller.ControllerContext);
-
-        return urlHelper.Action(
-            "Index",
-            "AssignmentAnswer",
-            new
-            {
-                fileId = assignmentAnswer.Id
-            },
-            protocol: controller.Request.Scheme);
-    }
 }
