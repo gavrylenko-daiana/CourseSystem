@@ -6,10 +6,12 @@ using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
 using X.PagedList;
+using LinkGenerator = Core.Helpers.LinkGenerator;
 
 namespace UI.Controllers;
 
@@ -23,6 +25,7 @@ public class AssignmentAnswerController : Controller
     private readonly IActivityService _activityService;
     private readonly INotificationService _notificationService;
     private readonly ILogger<AssignmentAnswerController> _logger;
+    private readonly IUrlHelperFactory _urlHelperFactory;
 
     public AssignmentAnswerController(IAssignmentService assignmentService,
         IAssignmentAnswerService assignmentAnswerService,
@@ -30,7 +33,8 @@ public class AssignmentAnswerController : Controller
         IUserService userService,
         IActivityService activityService,
         INotificationService notificationService,
-        ILogger<AssignmentAnswerController> logger)
+        ILogger<AssignmentAnswerController> logger,
+        IUrlHelperFactory urlHelperFactory)
     {
         _assignmentService = assignmentService;
         _assignmentAnswerService = assignmentAnswerService;
@@ -39,6 +43,7 @@ public class AssignmentAnswerController : Controller
         _activityService = activityService;
         _notificationService = notificationService;
         _logger = logger;
+        _urlHelperFactory = urlHelperFactory;
     }
     
     [HttpGet]
@@ -124,15 +129,16 @@ public class AssignmentAnswerController : Controller
 
         await _activityService.AddSubmittedAssignmentAnswerActivity(currentUserResult.Data, assignmentResult.Data);
 
-        await _notificationService.AddSubmittedAssignmentForStudentNotification(assignmentAnswer.UserAssignment);
+        await _notificationService.AddSubmittedAssignmentForStudentNotification(assignmentAnswer.UserAssignment,
+            LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentAnswer.UserAssignment.Assignment));
 
         var teachers = assignmentAnswer.UserAssignment.Assignment.UserAssignments
             .Select(ua => ua.AppUser).Where(user => user.Role == Core.Enums.AppUserRoles.Teacher).ToList();
 
         foreach (var teacher in teachers)
         {
-            await _notificationService.AddSubmittedAssignmentForTeacherNotification(teacher,
-                assignmentAnswer.UserAssignment);
+            await _notificationService.AddSubmittedAssignmentForTeacherNotification(teacher, assignmentAnswer.UserAssignment,
+                LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentAnswer.UserAssignment.Assignment));
         }
 
         return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentResult.Data.Id });
@@ -322,8 +328,11 @@ public class AssignmentAnswerController : Controller
 
         await _activityService.AddMarkedAssignmentActivity(currentUserResult.Data, userAssignment);
 
-        await _notificationService.AddMarkedAssignmentForStudentNotification(userAssignment);
-        await _notificationService.AddMarkedAssignmentForTeacherNotification(currentUserResult.Data, userAssignment);
+        await _notificationService.AddMarkedAssignmentForStudentNotification(userAssignment,
+            LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentResult.Data));
+        
+        await _notificationService.AddMarkedAssignmentForTeacherNotification(currentUserResult.Data, userAssignment,
+            LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentResult.Data));
 
         return RedirectToAction("SeeStudentAnswers", "AssignmentAnswer",
             new { assignmentId = userAssignment.AssignmentId });

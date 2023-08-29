@@ -30,39 +30,39 @@ namespace Core.NotificationTemplates
 
         private static readonly Dictionary<NotificationType, string> _descriptionDictionary = new()
         {
-            {NotificationType.CreatedCourse, "You created a new course - \"{0}\"." },
-            {NotificationType.JoinedCourse, "You joined a new course - \"{0}\"." },
-            {NotificationType.CreatedGroup, "You created a new group, \"{0}\", in course \"{1}\". " +
-                "Education in it starts on {2:dddd, dd MMMM yyyy}. " +
-                "It ends on {3:dddd, dd MMMM yyyy}." },
-            {NotificationType.JoinedGroup, "You joined a new group, \"{0}\", in course \"{1}\"." +
+            {NotificationType.CreatedCourse, "You created a new course - <a href=\"{0}\">\"{1}\"</a>." },
+            {NotificationType.JoinedCourse, "You joined a new course - <a href=\"{0}\">\"{1}\"</a>." },
+            {NotificationType.CreatedGroup, "You created a new group <a href=\"{2}\">\"{0}\"</a>, in course <a href=\"{3}\">\"{1}\"</a>. " +
+                "Education in it starts on {4:dddd, dd MMMM yyyy}. " +
+                "It ends on {5:dddd, dd MMMM yyyy}." },
+            {NotificationType.JoinedGroup, "You joined a new group, <a href=\"{4}\">\"{0}\"</a>, in course <a href=\"{5}\">\"{1}\"</a>. " +
                 "Education in it starts on {2:dddd, dd MMMM yyyy}, at {2:HH:mm}. " +
                 "It ends on {3:dddd, dd MMMM yyyy}, at {3:HH:mm}." },
-            {NotificationType.GroupStartedForTeacher, "Education is starting in the group \"{0}\". " +
+            {NotificationType.GroupStartedForTeacher, "Education is starting in the group <a href=\"{1}\">\"{0}\"</a>. " +
                 "Now your students have access to its educational materials and assignments." },
-            {NotificationType.GroupStartedForStudent, "Education is starting in the group \"{0}\". " +
+            {NotificationType.GroupStartedForStudent, "Education is starting in the group <a href=\"{1}\">\"{0}\"</a>. " +
                 "Now you have access to its educational materials and assignments." },
-            {NotificationType.CreatedAssignment, "You created a new assignment \"{0}\" for group \"{1}\". " +
-                "Assignment activity starts on {2:dddd, dd MMMM yyyy}, at {2:HH:mm}. " +
-                "It ends on {3:dddd, dd MMMM yyyy}, at {3:HH:mm}. " +
+            {NotificationType.CreatedAssignment, "You created a new assignment <a href=\"{2}\">\"{0}\"</a> for group <a href=\"{3}\">\"{1}\"</a>. " +
+                "Assignment activity starts on {4:dddd, dd MMMM yyyy}, at {4:HH:mm}. " +
+                "It ends on {5:dddd, dd MMMM yyyy}, at {5:HH:mm}. " +
                 "While assignment is active your students will be able to attach their solutions to it for you to grade." },
-            {NotificationType.SubmittedAssignmentForStudent, "You submitted a solution for assignment \"{0}\". " +
+            {NotificationType.SubmittedAssignmentForStudent, "You submitted a solution for assignment <a href=\"{1}\">\"{0}\"</a>. " +
                 "Please, wait till your teacher marks it - you will receive corresponding notification as soon as it happens." },
-            {NotificationType.SubmittedAssignmentForTeacher, "{0} {1} submitted a solution for your assignment \"{2}\". " +
+            {NotificationType.SubmittedAssignmentForTeacher, "{0} {1} submitted a solution for your assignment <a href=\"{3}\">\"{2}\"</a> " +
                 "Please, check and mark it." },
-            {NotificationType.MarkedAssignmentForTeacher, "You marked the solution {0} {1} submitted for assignment \"{2}\". " +
+            {NotificationType.MarkedAssignmentForTeacher, "You marked the solution {0} {1} submitted for assignment <a href=\"{4}\">\"{2}\"</a>. " +
                 "His/her grade: {3}/100." },
-            {NotificationType.MarkedAssignmentForStudent, "The solution you submitted for assignment \"{0}\" was marked. " +
+            {NotificationType.MarkedAssignmentForStudent, "The solution you submitted for assignment <a href=\"{2}\">\"{0}\"</a> was marked. " +
                 "Your grade: {1}/100." },
-            {NotificationType.AssignmentIsOpenForTeacher, "Your assignment \"{0}\" for group \"{1}\" is open for submitting solutions. " +
+            {NotificationType.AssignmentIsOpenForTeacher, "Your assignment <a href=\"{3}\">\"{0}\"</a> for group <a href=\"{4}\">\"{1}\"</a> is open for submitting solutions. " +
                 "It will be open until {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
                 "After that your students won't be able to submit their solutions, but you will still be able to grade them." },
-            {NotificationType.AssignmentIsOpenForStudent, "Assignment \"{0}\" in group \"{1}\" is open for submitting solutions. " +
+            {NotificationType.AssignmentIsOpenForStudent, "Assignment <a href=\"{2}\">\"{0}\"</a> in group <a href=\"{3}\">\"{1}\"</a> is open for submitting solutions. " +
                 "It will be open until {2:dddd, dd MMMM yyyy}, {2:HH:mm}. " +
                 "After that you won't be able to submit your solutions." },
-            {NotificationType.AssignmentIsClosedForTeacher, "Your assignment \"{0}\" for group \"{1}\" is closed for submitting solutions. " +
+            {NotificationType.AssignmentIsClosedForTeacher, "Your assignment <a href=\"{2}\">\"{0}\"</a> for group <a href=\"{3}\">\"{1}\"</a> is closed for submitting solutions. " +
                 "Now your students are unable to submit new solutions, but you can still grade them if you haven't done so yet." },
-            {NotificationType.AssignmentIsClosedForStudent, "Assignment \"{0}\" in group \"{1}\" is closed for submitting solutions. " +
+            {NotificationType.AssignmentIsClosedForStudent, "Assignment <a href=\"{2}\">\"{0}\"</a> in group <a href=\"{3}\">\"{1}\"</a> is closed for submitting solutions. " +
                 "If you had successfully submitted your solution, but didn't get your grade yet - try to wait some more, as your teacher can still be checking it. " +
                 "If you haven't submitted your solution in time, please, contact your teacher." }
         };

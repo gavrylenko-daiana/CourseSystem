@@ -1,58 +1,88 @@
 @model UI.ViewModels.NewEmailViewModel
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Reset Email</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        .reset-email-body {
+            background-color: #f7f7f7;
+        }
+
+        .main-container-email-reset {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 70vh;
+        }
+
+        .buttons {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .center-aligned-input {
+            text-align: center;
+        }
+    </style>
 </head>
-<body>
-<div class="container">
-    <div class="py-4">
-        <div class="col-md-6">
-            <p>
-                <h1>Write in the mail the code will come to</h1>
-            </p>
-            <div class="py-2">
+<body class="reset-email-body">
+    <div class="main-container-email-reset">
+        <div class="ui centered card" style="width:40%;">
+            <div class="content">
+                <div class="header mt-3">
+                    <h3 class="ui center aligned header">
+                        Write in the mail the code will come to
+                    </h3>
+                </div>
+            </div>
+            <div class="content" style="text-align: center;">
+                <form method="post" asp-controller="Account" asp-action="ResetEmail">
+                    <input type="hidden" asp-for="Email" value="@Model.Email" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="NewEmail" class="control-label mb-2"></label>
+                        <input asp-for="NewEmail" class="form-control center-aligned-input">
+                        <span asp-validation-for="NewEmail" class="text-danger"></span>
+                    </div>
+                    <div class="ui buttons mt-3">
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <button class="ui edit-button button" type="submit">Update email</button>
+                            <div class="or"></div>
+                            <a class="ui button btn-outline-dark" asp-controller="Account" asp-action="Login">Cancel</a>
+                        }
+                        else
+                        {
+                            <button class="ui edit-button button" type="submit">Update email</button>
+                            <div class="or"></div>
+                            <a class="ui button btn-outline-dark" asp-controller="User" asp-action="Index">Cancel</a>
+                        }
+                    </div>
+                </form>
                 @if (TempData["Error"] != null)
                 {
-                    <div class="col-md-12 alert alert-danger">
-                        <span><b>Sorry!</b> - @TempData["Error"]</span>
+                    <div class="ui container mt-3">
+                        <div class="ui negative message">
+                            <p><b>Sorry!</b> - @TempData["Error"]</p>
+                        </div>
                     </div>
                 }
                 @if (TempData["SuccessMessage"] != null)
                 {
-                    <p class="text-success">@TempData["SuccessMessage"]</p>
-                }
-                <form method="post" asp-controller="Account" asp-action="ResetEmail">
-                    <input type="hidden" asp-for="Email" value="@Model.Email"/>
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="form-group">
-                        <label asp-for="NewEmail" class="control-label"></label>
-                        <input asp-for="NewEmail" class="form-control">
-                        <span asp-validation-for="NewEmail" class="text-danger"></span>
+                    <div class="ui container mt-3">
+                        <div class="ui positive message">
+                            <p class="text-success">@TempData["SuccessMessage"]</p>
+                        </div>
                     </div>
-                    @if (!User.Identity.IsAuthenticated)
-                    {
-                        <div class="py-2">
-                            <div class="form-group">
-                                <input class="btn btn-outline-primary" type="submit" value="Update email"/>
-                                <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Login">Cancel</a>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="py-2">
-                            <div class="form-group">
-                                <input class="btn btn-outline-primary" type="submit" value="Update email"/>
-                                <a class="btn btn-outline-dark" asp-controller="User" asp-action="Index">Cancel</a>
-                            </div>
-                        </div>
-                    }
-                </form>
+                }
             </div>
         </div>
     </div>
-</div>
 </body>
 </html>

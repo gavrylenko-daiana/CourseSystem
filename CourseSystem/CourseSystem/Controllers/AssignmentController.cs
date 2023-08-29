@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.IdentityModel.Tokens;
 using UI.ViewModels;
 using UI.ViewModels.AssignmentViewModels;
 using X.PagedList;
 using static Dropbox.Api.Files.ListRevisionsMode;
 using static Dropbox.Api.Team.GroupSelector;
+using LinkGenerator = Core.Helpers.LinkGenerator;
 
 
 namespace UI.Controllers;
@@ -27,10 +29,12 @@ public class AssignmentController : Controller
     private readonly INotificationService _notificationService;
     private readonly ILogger<AssignmentController> _logger;
     private readonly IAssignmentFileService _assignmentFileService;
+    private readonly IUrlHelperFactory _urlHelperFactory;
 
     public AssignmentController(IAssignmentService assignmentService, IUserService userService,
         IUserAssignmentService userAssignmentService, IActivityService activityService,
-            INotificationService notificationService, ILogger<AssignmentController> logger, IAssignmentFileService assignmentFileService)
+        INotificationService notificationService, ILogger<AssignmentController> logger, IAssignmentFileService assignmentFileService,
+        IUrlHelperFactory urlHelperFactory)
     {
         _assignmentService = assignmentService;
         _userService = userService;
@@ -39,6 +43,7 @@ public class AssignmentController : Controller
         _notificationService = notificationService;
         _logger = logger;
         _assignmentFileService = assignmentFileService;
+        _urlHelperFactory = urlHelperFactory;
     }
 
     [HttpGet]
@@ -174,7 +179,9 @@ public class AssignmentController : Controller
 
         await _activityService.AddCreatedAssignmentActivity(currentUserResult.Data, assignment);
 
-        await _notificationService.AddCreatedAssignmentNotification(currentUserResult.Data, assignment);
+        await _notificationService.AddCreatedAssignmentNotification(currentUserResult.Data, assignment, 
+            LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignment),
+            LinkGenerator.GenerateGroupLink(_urlHelperFactory,this, assignment.Group));
 
         return RedirectToAction("Index", "Assignment", new { groupId = assignmentVM.GroupId });
     }

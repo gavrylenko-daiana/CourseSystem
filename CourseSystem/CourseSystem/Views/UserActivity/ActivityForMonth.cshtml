@@ -70,13 +70,13 @@
         @{
             var dateTime = date.AddMonths(-1);
         }
-        <a class="link-light" style = "margin-right:35%; text-decoration:none;" href="@Url.Action("ActivityForMonth", "UserActivity", new { dateTime })">
+        <a class="link-light" style="margin-right:35%; text-decoration:none;" href="@Url.Action("ActivityForMonth", "UserActivity", new { dateTime })">
             <i class="angle left icon"></i> @Month[dateTime.Month - 1]
         </a>
         @{
             dateTime = date.AddMonths(1);
         }
-        <a class="link-light" style = "margin-left:35%; text-decoration:none;" href="@Url.Action("ActivityForMonth", "UserActivity", new { dateTime })">
+        <a class="link-light" style="margin-left:35%; text-decoration:none;" href="@Url.Action("ActivityForMonth", "UserActivity", new { dateTime })">
             @Month[dateTime.Month - 1] <i class="angle right icon"></i>
         </a>
     </div>
@@ -106,60 +106,60 @@
                 </div>
             </div>
             <div class="row align-items-center">
-                    @{
-                        var thisDay = new DateTime(date.Year, date.Month, 1);
-                        var lastDay = thisDay.AddMonths(1).AddDays(-1);
-                        for (var i = 0; i < (int)thisDay.DayOfWeek; i++)
-                        {
-                            <div class="col"></div>
-                        }
-                        var targetMonth = date.Month;
-                        while (thisDay.Month == targetMonth)
-                        {
-                            <div class="col">
-                                <a class="activity-calendar-day-block btn btn-outline-light" href="@Url.Action("ActivityForDay", "UserActivity", new { thisDay })">
-                                    <b>@thisDay.Day.ToString()</b>
-                                    @if (Model.Where(a => a.Created.Day == thisDay.Day).ToList().Any())
-                                    {
+                @{
+                    var thisDay = new DateTime(date.Year, date.Month, 1);
+                    var lastDay = thisDay.AddMonths(1).AddDays(-1);
+                    for (var i = 0; i < (int)thisDay.DayOfWeek; i++)
+                    {
+                        <div class="col"></div>
+                    }
+                    var targetMonth = date.Month;
+                    while (thisDay.Month == targetMonth)
+                    {
+                        <div class="col">
+                            <a class="activity-calendar-day-block btn btn-outline-light" href="@Url.Action("ActivityForDay", "UserActivity", new { thisDay })">
+                                <b>@thisDay.Day.ToString()</b>
+                                @if (Model.Where(a => a.Created.Day == thisDay.Day).ToList().Any())
+                                {
                                     var todayActivities = Model.Where(a => a.Created.Day == thisDay.Day).ToList();
                                     string titleText = null;
-                                        @if(todayActivities.Count == 1)
-                                        {
-                                            titleText = "1 activity";
-                                        }
-                                        else
-                                        {
-                                            titleText = $"{todayActivities.Count} activities";
-                                        }
-                                        <div class="activity-block-count-bar" data-bs-toggle="tooltip" data-bs-placement="top" title="@titleText on @thisDay.ToString("D")">
-                                    <i class="circle icon olive tiny"></i>
-                                    @if (todayActivities.Count >= 2)
+                                    @if (todayActivities.Count == 1)
                                     {
-                                        <i class="circle icon green tiny"></i>
+                                        titleText = "1 activity";
                                     }
-                                    @if (todayActivities.Count > 5)
+                                    else
                                     {
-                                        <i class="circle icon teal tiny"></i>
+                                        titleText = $"{todayActivities.Count} activities";
                                     }
+                                    <div class="activity-block-count-bar" data-bs-toggle="tooltip" data-bs-placement="top" title="@titleText on @thisDay.ToString("D")">
+                                        <i class="circle icon olive tiny"></i>
+                                        @if (todayActivities.Count >= 2)
+                                        {
+                                            <i class="circle icon green tiny"></i>
+                                        }
+                                        @if (todayActivities.Count > 5)
+                                        {
+                                            <i class="circle icon teal tiny"></i>
+                                        }
                                     </div>
                                 }
-                                </a>
-                            </div>
+                            </a>
+                        </div>
 
-                            if (thisDay.DayOfWeek == DayOfWeek.Saturday)
-                            {
-                                @:</div>
-                                @:<div class="row align-items-center">
-                            }
-
-                            thisDay = thisDay.AddDays(1);
-                        }
-                        while (thisDay.DayOfWeek != DayOfWeek.Sunday)
+                        if (thisDay.DayOfWeek == DayOfWeek.Saturday)
                         {
-                                <div class="col"></div>
-                            thisDay = thisDay.AddDays(1);
+                            @:</div>
+                            @:<div class="row align-items-center">
                         }
+
+                        thisDay = thisDay.AddDays(1);
                     }
+                    while (thisDay.DayOfWeek != DayOfWeek.Sunday)
+                    {
+                        <div class="col"></div>
+                        thisDay = thisDay.AddDays(1);
+                    }
+                }
             </div>
             <div class="row align-items-center">
                 <div class="col">
@@ -174,8 +174,8 @@
             </div>
         </div>
     </div>
-    </div>
-    <script>
+</div>
+<script>
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl, {
@@ -185,4 +185,6 @@
     });
 </script>
 </body>
+<div style="margin-top: 600px">
+</div>
 </html>
