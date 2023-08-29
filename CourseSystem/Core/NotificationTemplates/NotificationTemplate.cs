@@ -48,7 +48,7 @@ namespace Core.NotificationTemplates
                 "While assignment is active your students will be able to attach their solutions to it for you to grade." },
             {NotificationType.SubmittedAssignmentForStudent, "You submitted a solution for assignment <a href=\"{1}\">\"{0}\"</a>. " +
                 "Please, wait till your teacher marks it - you will receive corresponding notification as soon as it happens." },
-            {NotificationType.SubmittedAssignmentForTeacher, "{0} {1} submitted a solution for your assignment \"{2}\". " +
+            {NotificationType.SubmittedAssignmentForTeacher, "{0} {1} submitted a solution for your assignment <a href=\"{3}\">\"{2}\"</a> " +
                 "Please, check and mark it." },
             {NotificationType.MarkedAssignmentForTeacher, "You marked the solution {0} {1} submitted for assignment \"{2}\". " +
                 "His/her grade: {3}/100." },

@@ -137,8 +137,8 @@ public class AssignmentAnswerController : Controller
 
         foreach (var teacher in teachers)
         {
-            await _notificationService.AddSubmittedAssignmentForTeacherNotification(teacher,
-                assignmentAnswer.UserAssignment);
+            await _notificationService.AddSubmittedAssignmentForTeacherNotification(teacher, assignmentAnswer.UserAssignment,
+                LinkGenerator.GenerateAssignmentAnswerLink(_urlHelperFactory,this, assignmentAnswer));
         }
 
         return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentResult.Data.Id });
