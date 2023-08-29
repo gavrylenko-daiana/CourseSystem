@@ -130,7 +130,7 @@ public class AssignmentAnswerController : Controller
         await _activityService.AddSubmittedAssignmentAnswerActivity(currentUserResult.Data, assignmentResult.Data);
 
         await _notificationService.AddSubmittedAssignmentForStudentNotification(assignmentAnswer.UserAssignment,
-            LinkGenerator.GenerateAssignmentAnswerLink(_urlHelperFactory,this, assignmentAnswer));
+            LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentAnswer.UserAssignment.Assignment));
 
         var teachers = assignmentAnswer.UserAssignment.Assignment.UserAssignments
             .Select(ua => ua.AppUser).Where(user => user.Role == Core.Enums.AppUserRoles.Teacher).ToList();
@@ -138,7 +138,7 @@ public class AssignmentAnswerController : Controller
         foreach (var teacher in teachers)
         {
             await _notificationService.AddSubmittedAssignmentForTeacherNotification(teacher, assignmentAnswer.UserAssignment,
-                LinkGenerator.GenerateAssignmentAnswerLink(_urlHelperFactory,this, assignmentAnswer));
+                LinkGenerator.GenerateAssignmentLink(_urlHelperFactory,this, assignmentAnswer.UserAssignment.Assignment));
         }
 
         return RedirectToAction("Details", "Assignment", new { assignmentId = assignmentResult.Data.Id });
