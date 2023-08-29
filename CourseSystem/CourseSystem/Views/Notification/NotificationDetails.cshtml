@@ -21,7 +21,7 @@
                 }
                 <div class="card-body-notification-custom">
                     <p class="notification-text-notification-custom">
-                        @Model.Description
+                        @Html.Raw(Model.Description)
                     </p>
                     <p class="notification-date-notification-custom">
                         Date: @Model.Created.ToString("f")
