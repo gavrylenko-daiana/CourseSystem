@@ -111,7 +111,7 @@
 <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
     @if (Model.PageCount > 1)
     {
-        <div class="pagination-container">
+        <div class="pagination-container-custom">
             Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
             <div>
                 @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectTeachers", new { courseId = ViewBag.SelectTeacherCourseId, groupId = ViewBag.SelectTeacherGroupId, currentQueryFilter = ViewBag.CurrentQueryFilter, page = page }),
@@ -131,6 +131,6 @@
                 window.location.href = this.querySelector('.ui.view-profile-button').href;
             });
         });
-    </script>
+</script>
 </body>
 </html>
