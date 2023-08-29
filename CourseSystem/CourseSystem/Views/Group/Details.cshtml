@@ -125,7 +125,7 @@
                 @if (Model.UserGroupsWithoutAdmins != null && Model.UserGroupsWithoutAdmins.Any())
                 {
                     <h4 class="ui header">Users:</h4>
-                    <ul class="ui user-list">
+                    <ul class="ui user-list" style="overflow-y: auto; height: 400px; width: 275px">
                         @foreach (var userGroupsWithoutAdmin in Model.UserGroupsWithoutAdmins)
                         {
                             <li class="user-item" style="display: flex; flex-direction: column; align-items: center;">

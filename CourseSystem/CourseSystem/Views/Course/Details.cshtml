@@ -144,7 +144,7 @@
                     @if (Model.UserCoursesWithoutAdmins != null && Model.UserCoursesWithoutAdmins.Any())
                     {
                         <h4 class="ui header">Users:</h4>
-                        <ul class="ui user-list" style="max-height: 100%; overflow-y: auto;">
+                        <ul class="ui user-list" style="overflow-y: auto; height: 400px; width: 250px">
                             @foreach (var userCourse in Model.UserCoursesWithoutAdmins)
                             {
                                     <li class="user-item" style="display: flex; flex-direction: column; align-items: center;">
