@@ -214,7 +214,7 @@ public class AssignmentAnswerController : Controller
             userAssignmentVMs.Add(userAssignmentVM);
         }
 
-        int pageSize = 4;
+        int pageSize = 6;
         int pageNumber = (page ?? 1);
 
         return View(userAssignmentVMs.ToPagedList(pageNumber, pageSize));
