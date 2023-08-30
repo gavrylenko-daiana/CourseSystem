@@ -66,6 +66,10 @@
         .cover-card {
             height: 270px;
         }
+        
+        #fixedPagination {
+            margin-top: 200px;
+        }
     </style>
 </head>
 <body>
@@ -235,23 +239,44 @@
     <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
         @if (Model.PageCount > 1)
         {
-            <div class="pagination-container">
-                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                <div>
-                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new
-                    {
-                        page = page,
-                        sortOrder = ViewBag.CurrentSort, currentAccessFilter = ViewBag.CurrentAccessFilter,
-                        findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam
-                    }),
-                        new PagedListRenderOptions
+            if (Model.Count <= Model.PageSize / 2)
+            {
+                <div id="fixedPagination" class="pagination-container">
+                    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                    <div>
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new
+                        {
+                            page = page,
+                            sortOrder = ViewBag.CurrentSort, currentAccessFilter = ViewBag.CurrentAccessFilter,
+                            findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam
+                        }), new PagedListRenderOptions
                         {
                             LiElementClasses = new string[] { "page-item" },
                             PageClasses = new string[] { "page-link" },
                             MaximumPageNumbersToDisplay = 3
                         })
+                    </div>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="pagination-container">
+                    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                    <div>
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new
+                        {
+                            page = page,
+                            sortOrder = ViewBag.CurrentSort, currentAccessFilter = ViewBag.CurrentAccessFilter,
+                            findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam
+                        }), new PagedListRenderOptions
+                        {
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" },
+                            MaximumPageNumbersToDisplay = 3
+                        })
+                    </div>
+                </div>
+            }
         }
     </div>
 </div>

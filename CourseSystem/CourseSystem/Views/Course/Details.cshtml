@@ -99,10 +99,8 @@
                     <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
                     <a href="@Url.Action("CreateInCourse", "EducationMaterial", new { courseId = Model.Id })" class="ui black basic button mb-3">Upload Education Material</a>
                 }
-                @if (materialsCourse != null && materialsCourse.Any())
-                {
-                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
-                }
+
+                <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
 
                 @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())
                 {
@@ -146,7 +144,7 @@
                     @if (Model.UserCoursesWithoutAdmins != null && Model.UserCoursesWithoutAdmins.Any())
                     {
                         <h4 class="ui header">Users:</h4>
-                        <ul class="ui user-list" style="max-height: 100%; overflow-y: auto;">
+                        <ul class="ui user-list" style="overflow-y: auto; height: 400px; width: 250px">
                             @foreach (var userCourse in Model.UserCoursesWithoutAdmins)
                             {
                                     <li class="user-item" style="display: flex; flex-direction: column; align-items: center;">

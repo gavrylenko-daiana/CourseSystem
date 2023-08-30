@@ -106,28 +106,24 @@
                     <a class="ui black basic button mb-3" asp-controller="EducationMaterial" asp-action="CreateInGroup" asp-route-groupId="@Model.Group.Id">Upload education material</a>
                 }
 
-                @if (materialsGroup != null && materialsGroup.Any())
-                {
-                    <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
-                }
+                <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
+
             </div>
 
-            <div class="right-container">
-                <div class="ui center aligned">
+            <div class="right-container ui segment">
                     @if (Model.CurrentUser.Role != AppUserRoles.Student)
                     {
-                        <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="ui black basic button mb-3">Add student in group</a>
+                        <a href="@Url.Action("SelectStudent", "Group", new { id = Model.Group.Id })" class="ui black basic button mb-3">Add student to group</a>
                         @if (Model.CurrentUser.Role == AppUserRoles.Admin)
                         {
-                            <a href="@Url.Action("SelectTeachers", "Group", new { courseId = Model.Group.CourseId, groupId = Model.Group.Id })" class="ui black basic button">Add teacher in group</a>
+                            <a href="@Url.Action("SelectTeachers", "Group", new { courseId = Model.Group.CourseId, groupId = Model.Group.Id })" class="ui black basic button">Add teacher to group</a>
                         }
                     }
-                </div>
 
                 @if (Model.UserGroupsWithoutAdmins != null && Model.UserGroupsWithoutAdmins.Any())
                 {
                     <h4 class="ui header">Users:</h4>
-                    <ul class="ui user-list">
+                    <ul class="ui user-list" style="overflow-y: auto; height: 400px; width: 275px">
                         @foreach (var userGroupsWithoutAdmin in Model.UserGroupsWithoutAdmins)
                         {
                             <li class="user-item" style="display: flex; flex-direction: column; align-items: center;">

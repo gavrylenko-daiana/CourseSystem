@@ -50,6 +50,10 @@
         .cover-card {
             height: 270px; 
         } 
+        
+        #fixedPagination {
+            margin-top: 200px;
+        }
     </style>
 </head>
 <body>
@@ -75,7 +79,20 @@
                     </form>
                 </div>            
             </div>
-            
+            @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+            {
+                <div class="ui compact menu" style="margin-right: 10px;">
+                    <div class="ui simple dropdown item">
+                        Actions:
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            <div class="item">
+                                <a href="@Url.Action("Create", "Assignment", new { groupId = ViewBag.GroupId })">Create new Assignment</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
             <div class="ui compact menu" style="margin-right: 10px;">
                 <div class="ui simple dropdown item">
                     Sort by
@@ -144,7 +161,7 @@
                 </div>
             </div>
         </div>     
-        <hr class="ui divider"> 
+        <hr class="ui divider">
         <div class="ui stackable three column grid assignments-container">
             @if (Model.Any())
             {
@@ -179,29 +196,42 @@
                 </div>
             }        
         </div>
-        
-            <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
-                    @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
-                    {
+
+        <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+            @if (Model.PageCount > 1)
+            {
+                if (Model.Count <= Model.PageSize / 2)
+                {
+                    <div id="fixedPagination" class="pagination-container">
+                        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
                         <div>
-                            <a href="@Url.Action("Create", "Assignment", new { groupId = ViewBag.GroupId })" class="ui basic black button">Create new Assignment</a>
+                            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
+                                new PagedListRenderOptions
+                                {
+                                    LiElementClasses = new string[] { "page-item" },
+                                    PageClasses = new string[] { "page-link" },
+                                    MaximumPageNumbersToDisplay = 3
+                                })
                         </div>
-                    }
-                    @if (Model.PageCount > 1)
-                    {
-                        <div class="pagination-container">
-                            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-                            <div>
-                                @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
-                                    new PagedListRenderOptions {
-                                        LiElementClasses = new string[] { "page-item" },
-                                        PageClasses = new string[] { "page-link" },
-                                        MaximumPageNumbersToDisplay = 3
-                                    })
-                            </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="pagination-container">
+                        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                        <div>
+                            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
+                                new PagedListRenderOptions
+                                {
+                                    LiElementClasses = new string[] { "page-item" },
+                                    PageClasses = new string[] { "page-link" },
+                                    MaximumPageNumbersToDisplay = 3
+                                })
                         </div>
-                    }
-            </div>
+                    </div>
+                }
+            }
+        </div>
     </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

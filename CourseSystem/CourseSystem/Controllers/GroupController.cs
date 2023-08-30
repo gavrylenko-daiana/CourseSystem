@@ -14,7 +14,9 @@ using UI.ViewModels.GroupViewModels;
 using X.PagedList;
 using System.Drawing.Printing;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.Routing;
 using static Dropbox.Api.Team.GroupSelector;
+using LinkGenerator = Core.Helpers.LinkGenerator;
 
 namespace UI.Controllers;
 
@@ -31,6 +33,7 @@ public class GroupController : Controller
     private readonly IActivityService _activityService;
     private readonly INotificationService _notificationService;
     private readonly ILogger<GroupController> _logger;
+    private readonly IUrlHelperFactory _urlHelperFactory;
 
     public GroupController(IGroupService groupService, ICourseService courseService,
         UserManager<AppUser> userManager,
@@ -40,7 +43,8 @@ public class GroupController : Controller
         IUserService userService,
         IActivityService activityService,
         INotificationService notificationService,
-        ILogger<GroupController> logger)
+        ILogger<GroupController> logger, 
+        IUrlHelperFactory urlHelperFactory)
     {
         _groupService = groupService;
         _courseService = courseService;
@@ -52,6 +56,7 @@ public class GroupController : Controller
         _activityService = activityService;
         _notificationService = notificationService;
         _logger = logger;
+        _urlHelperFactory = urlHelperFactory;
     }
 
     [HttpGet]
@@ -182,7 +187,9 @@ public class GroupController : Controller
 
         await _activityService.AddCreatedGroupActivity(currentUserResult.Data, group);
 
-        await _notificationService.AddCreatedGroupNotification(currentUserResult.Data, group);
+        await _notificationService.AddCreatedGroupNotification(currentUserResult.Data, group, 
+            LinkGenerator.GenerateGroupLink(_urlHelperFactory,this, group),
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, group.Course));
 
         return RedirectToAction("Details", "Group", new { id = group.Id });
     }
@@ -508,7 +515,9 @@ public class GroupController : Controller
 
         await _activityService.AddJoinedGroupActivity(userResult.Data, groupResult.Data);
 
-        await _notificationService.AddJoinedGroupNotification(userResult.Data, groupResult.Data);
+        await _notificationService.AddJoinedGroupNotification(userResult.Data, groupResult.Data, 
+            LinkGenerator.GenerateGroupLink(_urlHelperFactory,this, groupResult.Data),
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, groupResult.Data.Course));
 
         return RedirectToAction("SelectTeachers", new { groupId = groupId, courseId = groupResult.Data.CourseId });
     }
@@ -638,16 +647,19 @@ public class GroupController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        if(course != null)
+        if (course != null)
         {
             await _activityService.AddJoinedCourseActivity(currentUserResult.Data, course);
 
-            await _notificationService.AddJoinedCourseNotification(currentUserResult.Data, course);
+            await _notificationService.AddJoinedCourseNotification(currentUserResult.Data, course,
+                LinkGenerator.GenerateCourseLink(_urlHelperFactory, this, course));
         }
         
         await _activityService.AddJoinedGroupActivity(currentUserResult.Data, groupResult.Data);
 
-        await _notificationService.AddJoinedGroupNotification(currentUserResult.Data, groupResult.Data);
+        await _notificationService.AddJoinedGroupNotification(currentUserResult.Data, groupResult.Data,
+            LinkGenerator.GenerateGroupLink(_urlHelperFactory,this, groupResult.Data),
+            LinkGenerator.GenerateCourseLink(_urlHelperFactory,this, groupResult.Data.Course));
 
         var inventationVM = new InventationViewModel()
         {

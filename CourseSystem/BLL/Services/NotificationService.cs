@@ -22,7 +22,8 @@ namespace BLL.Services
             _logger = logger;
         }
 
-        public async Task<Result<bool>> AddAssignmentIsClosedForStudentNotification(AppUser user, Assignment assignment)
+        public async Task<Result<bool>> AddAssignmentIsClosedForStudentNotification(AppUser user, Assignment assignment, 
+            string callbackForAssignment, string callbackForGroup)
         {
             if (user == null)
             {
@@ -36,12 +37,13 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.AssignmentIsClosedForStudent,
                 assignment.EndDate, user, assignment.Group.Course, assignment.Group,
-                    assignment, assignment.Name, assignment.Group.Name);
+                    assignment, assignment.Name, assignment.Group.Name, callbackForAssignment, callbackForGroup);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddAssignmentIsClosedForTeacherNotification(AppUser user, Assignment assignment)
+        public async Task<Result<bool>> AddAssignmentIsClosedForTeacherNotification(AppUser user, Assignment assignment, 
+            string callbackForAssignment, string callbackForGroup)
         {
             if (user == null)
             {
@@ -55,12 +57,13 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.AssignmentIsClosedForTeacher,
                 assignment.EndDate, user, assignment.Group.Course, assignment.Group,
-                    assignment, assignment.Name, assignment.Group.Name);
+                    assignment, assignment.Name, assignment.Group.Name, callbackForAssignment, callbackForGroup);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddAssignmentIsOpenForStudentNotification(AppUser user, Assignment assignment)
+        public async Task<Result<bool>> AddAssignmentIsOpenForStudentNotification(AppUser user, Assignment assignment, 
+            string callbackForAssignment, string callbackForGroup)
         {
             if (user == null)
             {
@@ -74,12 +77,13 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.AssignmentIsOpenForStudent,
                 assignment.StartDate, user, assignment.Group.Course, assignment.Group,
-                    assignment, assignment.Name, assignment.Group.Name, assignment.EndDate);
+                    assignment, assignment.Name, assignment.Group.Name, assignment.EndDate, callbackForAssignment, callbackForGroup);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddAssignmentIsOpenForTeacherNotification(AppUser user, Assignment assignment)
+        public async Task<Result<bool>> AddAssignmentIsOpenForTeacherNotification(AppUser user, Assignment assignment, 
+            string callbackForAssignment, string callbackForGroup)
         {
             if (user == null)
             {
@@ -93,12 +97,13 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.AssignmentIsOpenForTeacher,
                 assignment.StartDate, user, assignment.Group.Course, assignment.Group,
-                    assignment, assignment.Name, assignment.Group.Name, assignment.EndDate);
+                    assignment, assignment.Name, assignment.Group.Name, assignment.EndDate, callbackForAssignment, callbackForGroup);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddCreatedAssignmentNotification(AppUser user, Assignment assignment)
+        public async Task<Result<bool>> AddCreatedAssignmentNotification(AppUser user, Assignment assignment, 
+            string callbackForAssignment, string callbackForGroup)
         {
             if (user == null)
             {
@@ -112,12 +117,13 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.CreatedAssignment,
                 DateTime.Now, user, assignment.Group.Course, assignment.Group,
-                    assignment, assignment.Name, assignment.Group.Name, assignment.StartDate, assignment.EndDate);
+                    assignment, assignment.Name, assignment.Group.Name, callbackForAssignment, 
+                callbackForGroup, assignment.StartDate, assignment.EndDate);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddCreatedCourseNotification(AppUser user, Course course)
+        public async Task<Result<bool>> AddCreatedCourseNotification(AppUser user, Course course, string callback)
         {
             if (user == null)
             {
@@ -130,12 +136,12 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.CreatedCourse, DateTime.Now, user, 
-                course, null, null, course.Name);
+                course, null, null,callback, course.Name);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddCreatedGroupNotification(AppUser user, Group group)
+        public async Task<Result<bool>> AddCreatedGroupNotification(AppUser user, Group group, string callbackForGroup, string callbackForCourse)
         {
             if (user == null)
             {
@@ -149,12 +155,12 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.CreatedGroup,
                 DateTime.Now, user, group.Course, group, null, 
-                    group.Name, group.Course.Name, group.StartDate, group.EndDate);
+                    group.Name, group.Course.Name, callbackForGroup, callbackForCourse, group.StartDate, group.EndDate);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddGroupStartedForStudentNotification(AppUser user, Group group)
+        public async Task<Result<bool>> AddGroupStartedForStudentNotification(AppUser user, Group group, string callback)
         {
             if (user == null)
             {
@@ -167,12 +173,12 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.GroupStartedForStudent, group.StartDate, 
-                user, group.Course, group, null, group.Name);
+                user, group.Course, group, null, group.Name, callback);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group)
+        public async Task<Result<bool>> AddGroupStartedForTeacherNotification(AppUser user, Group group, string callback)
         {
             if (user == null)
             {
@@ -185,12 +191,12 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.GroupStartedForTeacher, group.StartDate, 
-                user, group.Course, group, null, group.Name);
+                user, group.Course, group, null, group.Name, callback);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddJoinedCourseNotification(AppUser user, Course course)
+        public async Task<Result<bool>> AddJoinedCourseNotification(AppUser user, Course course, string callback)
         {
             if (user == null)
             {
@@ -203,12 +209,12 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.JoinedCourse, DateTime.Now, 
-                user, course, null, null, course.Name);
+                user, course, null, null, callback, course.Name);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group)
+        public async Task<Result<bool>> AddJoinedGroupNotification(AppUser user, Group group, string callbackForGroup, string callbackForCourse)
         {
             if (user == null)
             {
@@ -222,12 +228,12 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.JoinedGroup,
                 DateTime.Now, user, group.Course, group, null, 
-                    group.Name, group.Course.Name, group.StartDate, group.EndDate);
+                    group.Name, group.Course.Name, group.StartDate, group.EndDate, callbackForGroup, callbackForCourse);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddMarkedAssignmentForStudentNotification(UserAssignments userAssignment)
+        public async Task<Result<bool>> AddMarkedAssignmentForStudentNotification(UserAssignments userAssignment, string callback)
         {
             if (userAssignment == null)
             {
@@ -236,13 +242,12 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.MarkedAssignmentForStudent,
                 DateTime.Now, userAssignment.AppUser, userAssignment.Assignment.Group.Course, userAssignment.Assignment.Group,
-                    userAssignment.Assignment, userAssignment.Assignment.Name, userAssignment.Grade);
+                    userAssignment.Assignment, userAssignment.Assignment.Name, userAssignment.Grade, callback);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user,
-            UserAssignments userAssignment)
+        public async Task<Result<bool>> AddMarkedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment, string callback)
         {
             if (user == null)
             {
@@ -256,12 +261,13 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.MarkedAssignmentForTeacher, DateTime.Now, user,
                 userAssignment.Assignment.Group.Course, userAssignment.Assignment.Group, userAssignment.Assignment,
-                    userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, userAssignment.Grade);
+                    userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, 
+                userAssignment.Grade, callback);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddSubmittedAssignmentForStudentNotification(UserAssignments userAssignment)
+        public async Task<Result<bool>> AddSubmittedAssignmentForStudentNotification(UserAssignments userAssignment, string callback)
         {
             if (userAssignment == null)
             {
@@ -269,13 +275,13 @@ namespace BLL.Services
             }
 
             var notification = await CreateNotification(NotificationType.SubmittedAssignmentForStudent, DateTime.Now, userAssignment.AppUser,
-                userAssignment.Assignment.Group.Course, userAssignment.Assignment.Group, userAssignment.Assignment, userAssignment.Assignment.Name);
+                userAssignment.Assignment.Group.Course, userAssignment.Assignment.Group, userAssignment.Assignment, 
+                userAssignment.Assignment.Name, callback);
 
             return await SaveNotification(notification);
         }
 
-        public async Task<Result<bool>> AddSubmittedAssignmentForTeacherNotification(AppUser user,
-            UserAssignments userAssignment)
+        public async Task<Result<bool>> AddSubmittedAssignmentForTeacherNotification(AppUser user, UserAssignments userAssignment, string callback)
         {
             if (user == null)
             {
@@ -289,7 +295,7 @@ namespace BLL.Services
 
             var notification = await CreateNotification(NotificationType.SubmittedAssignmentForTeacher, DateTime.Now, user,
                 userAssignment.Assignment.Group.Course, userAssignment.Assignment.Group, userAssignment.Assignment,
-                    userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name);
+                    userAssignment.AppUser.LastName, userAssignment.AppUser.FirstName, userAssignment.Assignment.Name, callback);
 
             return await SaveNotification(notification);
         }

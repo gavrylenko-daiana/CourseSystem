@@ -55,12 +55,12 @@
                 <div class="form-row form-group">
                     <div class="field">
                         <label asp-for="StartDate" class="control-label"></label>
-                        <input asp-for="StartDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddHours(-24).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <input asp-for="StartDate" class="form-control" min="@group.Data.StartDate.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddMinutes(-1).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
                         <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
                     <div class="field">
                         <label asp-for="EndDate" class="control-label"></label>
-                        <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddHours(-24).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddMinutes(-1).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
                         <span asp-validation-for="EndDate" class="text-danger"></span>
                     </div>
                 </div>
