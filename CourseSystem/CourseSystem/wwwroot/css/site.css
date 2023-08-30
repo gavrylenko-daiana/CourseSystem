@@ -90,7 +90,7 @@ body {
 }
 
 .page-link {
-    background-color: #35DE9C !important;
+    background-color: #1b6054 !important;
     color: white !important;
 }
 
@@ -273,7 +273,7 @@ body {
 }
 
 .home-left-col, .home-right-col {
-    flex-basis: 50%;
+    /*flex-basis: 50%;*/
 }
 
 .home-title {
