@@ -73,14 +73,15 @@ namespace IntegrationTests;
             return course;
         }
 
-        public async Task<Assignment> CreateGroup(int courseId, string name, DateTime startDate, DateTime endDate, GroupAccess groupAccess, AppUser appUser)
+        public async Task<Group> CreateGroup(Course course, string name, DateTime startDate, DateTime endDate, GroupAccess groupAccess, AppUser appUser)
         {
             using var scope = _factory.Services.CreateScope();
             var assignmentService = scope.ServiceProvider.GetRequiredService<IGroupService>();
 
             var group = new Group()
             {
-                CourseId = courseId,
+                CourseId = course.Id,
+                Course = course,
                 Name = name,
                 StartDate = startDate,
                 EndDate = endDate,
@@ -92,15 +93,15 @@ namespace IntegrationTests;
             return group;
         }
 
-        public async Task<Assignment> CreateAssignment(int groupId, string name, string description,  DateTime startDate, DateTime endDate, AssignmentAccess assignmentAccess )
+        public async Task<Assignment> CreateAssignment(Group group, string name, DateTime startDate, DateTime endDate, AssignmentAccess assignmentAccess )
         {
             using var scope = _factory.Services.CreateScope();
             var assignmentService = scope.ServiceProvider.GetRequiredService<IAssignmentService>();
 
             var assignment = new Assignment()
             {
-                GroupId = groupId,
-                Description = description,
+                GroupId = group.Id,
+                Group = group,
                 Name = name,
                 StartDate = startDate,
                 EndDate = endDate,
