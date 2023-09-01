@@ -106,6 +106,17 @@ builder.Services.AddIdentity<AppUser, IdentityRole>().
     .AddEntityFrameworkStores<ApplicationContext>().AddSignInManager<SignInManager<AppUser>>();
 builder.Services.AddScoped<UserManager<AppUser>>();
 
+
+builder.Services.AddAuthentication()
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration.GetSection("GoogleAuthSettings")
+            .GetValue<string>("ClientId");
+
+        googleOptions.ClientSecret = builder.Configuration.GetSection("GoogleAuthSettings")
+            .GetValue<string>("ClientSecret");
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
