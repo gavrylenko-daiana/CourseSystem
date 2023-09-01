@@ -231,7 +231,6 @@ public class AccountController : Controller
 
         else
         {
-            // Get the email claim value
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 
             if (email != null)
