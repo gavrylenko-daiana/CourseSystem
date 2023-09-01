@@ -1,0 +1,111 @@
+﻿@using UI.ViewModels
+@using Core.Enums
+@using Core.Models
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<AppUser> UserManager
+
+@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+    var userAdmins = await UserManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no" />
+    <meta name="description"
+          content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI." />
+    <meta name="keywords" content="Semantic-UI, Theme, Design, Template" />
+    <meta name="author" content="PPType" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Register</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          type="text/css" />
+    <style type="text/css">
+        body {
+            background-color: #EBF4EC;
+            -webkit-font-smoothing: antialiased;
+            -moz-font-smoothing: grayscale;
+        }
+
+            body > .ui.grid {
+                height: 100%;
+            }
+
+        .column {
+            max-width: 450px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui middle aligned center aligned grid">
+        <div class="column external-register-customn-position">
+            <h2 class="ui teal center aligned header">
+                <h1 class="text-black">
+                    Hello, @Model.FirstName @Model.LastName
+                </h1>
+            </h2>
+            <form class="ui large form" asp-action="ExternalRegister">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="ui stacked segment">
+                    <h2>You are almost all set!</h2>
+                    <h2>Choose your role:</h2>
+                    <input asp-for="FirstName" value="@Model.FirstName" type="hidden">
+                    <input asp-for="LastName" value="@Model.LastName" type="hidden">
+                    <input asp-for="Email" value="@Model.Email" type="hidden">
+                    @if (userAdmins.Count() != 0)
+                    {
+                        @foreach (var priorityValue in Enum.GetValues(typeof(AppUserRoles)))
+                        {
+                            if ((int)priorityValue != 0)
+                            {
+                                <input asp-for="Role" value="@priorityValue" class="btn btn-outline-success" type="submit" style="width:100%; margin:10px 0;" />
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <option value="@AppUserRoles.Admin">@AppUserRoles.Admin</option>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="ui negative message">
+                            <i class="close icon"></i>
+                            <div class="header">
+                                Sorry!
+                            </div>
+                            <p>@TempData["Error"]</p>
+                        </div>
+                    }
+                    @if (ViewData["Error"] != null)
+                    {
+                        <div class="ui negative message">
+                            <i class="close icon"></i>
+                            <div class="header">
+                                Sorry!
+                            </div>
+                            <p>@ViewData["Error"]</p>
+                        </div>
+                    }
+                </div>
+                <div class="ui error message"></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('.ui.selection.dropdown').dropdown();
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
+</body>
+</html>

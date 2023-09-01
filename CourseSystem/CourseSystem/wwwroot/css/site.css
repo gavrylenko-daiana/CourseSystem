@@ -369,12 +369,17 @@ body {
 
 .register-customn-position {
     position: absolute !important;
-    top: 48%;
+    top: 45%;
+    transform: translateY(-50%);
+}
+
+.external-register-customn-position {
+    position: absolute !important;
+    top: 42%;
     transform: translateY(-50%);
 }
 
 /*Reset Password page START*/
-
 .main-container-reset-password {
     display: flex;
     flex-direction: column;
