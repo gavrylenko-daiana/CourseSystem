@@ -81,7 +81,7 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Login(string returnUrl)
+    public async Task<IActionResult> Login()
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
