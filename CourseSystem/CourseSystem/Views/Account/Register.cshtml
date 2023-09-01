@@ -146,6 +146,18 @@
               </div>
               <div class="ui error message"></div>
           </form>
+            <form method="post" asp-action="ExternalLogin">
+                <div>
+                    @foreach (var provider in Model.ExternalLogins)
+                    {
+                        <button type="submit" class="btn btn-outline-success" style="width:100%"
+                                name="provider" value="@provider.Name"
+                                title="Register with your @provider.DisplayName account">
+                            Register with your @provider.DisplayName account
+                        </button>
+                    }
+                </div>
+            </form>
       </div>
     </div>
     <script>

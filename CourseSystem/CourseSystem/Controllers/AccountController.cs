@@ -12,6 +12,7 @@ using UI.ViewModels.EmailViewModels;
 using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
 using Core.ImageStore;
 using static Dropbox.Api.TeamLog.AccessMethodLogInfo;
+using System.Security.Claims;
 
 namespace UI.Controllers;
 
@@ -80,7 +81,7 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Login()
+    public async Task<IActionResult> Login()
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
@@ -89,7 +90,10 @@ public class AccountController : Controller
             return RedirectToAction("Logout", "Account");
         }
 
-        var login = new LoginViewModel();
+        var login = new LoginViewModel()
+        {
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList()
+        };
 
         return View(login);
     }
@@ -97,6 +101,8 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(LoginViewModel loginViewModel)
     {
+        loginViewModel.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
         if (!ModelState.IsValid)
         {
             _logger.LogWarning("Failed to log in user - invalid input!");
@@ -184,10 +190,194 @@ public class AccountController : Controller
         return View(loginViewModel);
     }
 
-    [HttpGet]
-    public IActionResult Register()
+    [HttpPost]
+    public IActionResult ExternalLogin(string provider)
     {
-        var register = new RegisterViewModel();
+        var redirectUrl = Url.Action("ExternalLoginCallback", "Account");
+
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+
+        return new ChallengeResult(provider, properties);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExternalLoginCallback(string remoteError = null)
+    {
+        if (remoteError != null)
+        {
+            _logger.LogError("Error from external provider: {errorMessgae}", remoteError);
+
+            ViewData.ViewDataMessage("Error", "Something went wrong. Please try again.");
+            return RedirectToAction("Login");
+        }
+
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+
+        if (info == null)
+        {
+            _logger.LogError("Error loading external login information.");
+
+            ViewData.ViewDataMessage("Error", "Something went wrong. Please try again.");
+            return RedirectToAction("Login");
+        }
+
+        var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider,
+            info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+
+        if (signInResult.Succeeded)
+        {
+            return RedirectToAction("Index", "User");
+        }
+
+        else
+        {
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+            if (email != null)
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    var registerVM = new RegisterViewModel()
+                    {
+                        FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName),
+                        LastName = info.Principal.FindFirstValue(ClaimTypes.Surname),
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                    };
+
+                    return View("ExternalRegistration", registerVM);
+                }
+
+                if (user.Role != AppUserRoles.Admin)
+                {
+                    if (!await _userManager.IsEmailConfirmedAsync(user))
+                    {
+                        _logger.LogWarning("User with not verified email {userEmail} tried to log in!", email);
+
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
+
+                        if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
+                        {
+                            await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
+
+                            TempData.TempDataMessage("Error", "Your ADMIN account is not verified, we sent email for confirmation again");
+                        }
+                        else
+                        {
+                            await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
+
+                            TempData.TempDataMessage("Error", "Admin hasn't verified your email yet, we sent email for confirmation again");
+                        }
+
+                        return RedirectToAction("Login");
+                    }
+                }
+                
+                await _signInManager.SignInAsync(user, isPersistent: false);
+
+                return RedirectToAction("Index", "User");
+            }
+
+            TempData.TempDataMessage("Error", "Something went wrong. Please try again.");
+            return RedirectToAction("Login");
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ExternalRegister(RegisterViewModel registerViewModel)
+    {
+        var userResult = await _userService.GetUserByEmailAsync(registerViewModel.Email);
+
+        if (userResult.IsSuccessful)
+        {
+            _logger.LogWarning("Failed to register user by email {userEmail}! Error: user with this email already exists: {userId}",
+                registerViewModel.Email, userResult.Data.Id);
+
+            TempData.TempDataMessage("Error", "This email is already in use");
+
+            return RedirectToAction("Register");
+        }
+
+        var newUser = new AppUser();
+        registerViewModel.MapTo(newUser);
+
+        newUser.UserName = registerViewModel.FirstName + registerViewModel.LastName;
+
+        var newUserResponse = await _userManager.CreateAsync(newUser);
+
+        await CreateAppUserRoles();
+
+        var imageUserResult = await _profileImageService.SetDefaultProfileImage(newUser);
+
+        if (!imageUserResult.IsSuccessful)
+        {
+            _logger.LogWarning("Failed to set profile image", imageUserResult.Data);
+        }
+
+        if (newUserResponse.Succeeded)
+        {
+            var roleResult = await _userManager.AddToRoleAsync(newUser, registerViewModel.Role.ToString());
+
+            if (!roleResult.Succeeded)
+            {
+                TempData.TempDataMessage("Error", "Failed to add new user");
+
+                return RedirectToAction("Register");
+            }
+
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
+
+            if (registerViewModel.Role != AppUserRoles.Admin)
+            {
+                await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, newUser, callbackUrl);
+
+                TempData.TempDataMessage("Error", "Please, wait for registration confirmation from the admin");
+
+                return RedirectToAction("Register");
+            }
+            else
+            {
+                var emailSentResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, newUser, callbackUrl);
+
+                if (!emailSentResult.IsSuccessful)
+                {
+                    TempData.TempDataMessage("Error", emailSentResult.Message);
+                }
+
+                TempData.TempDataMessage("Error", "To complete your ADMIN registration, check your email and follow the link provided in the email");
+
+                return RedirectToAction("Register");
+            }
+        }
+        else
+        {
+            _logger.LogError("Failed to register user!");
+
+            var errorMessages = string.Empty;
+
+            foreach (var error in newUserResponse.Errors)
+            {
+                errorMessages += $"{error.Description}{Environment.NewLine}";
+
+                _logger.LogWarning("Error: {errorMessage}", error.Description);
+            }
+
+            TempData.TempDataMessage("Error", errorMessages);
+
+            return RedirectToAction("Register");
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Register()
+    {
+        var register = new RegisterViewModel()
+        {
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList()
+        };
 
         return View(register);
     }

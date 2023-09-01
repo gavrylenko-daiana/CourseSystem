@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Core.Enums;
+using Microsoft.AspNetCore.Authentication;
 
 namespace UI.ViewModels;
 
@@ -32,4 +33,6 @@ public class RegisterViewModel
     [Required(ErrorMessage = "Role is required")]
     [Display(Name = "• Role •")]
     public AppUserRoles Role { get; set; }
+
+    public IList<AuthenticationScheme> ExternalLogins { get; set; }
 }
