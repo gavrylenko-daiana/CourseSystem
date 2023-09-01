@@ -70,12 +70,15 @@
         }
         else
         {
-            <div class="ui warning message">You don't have any new messages.</div>
+            <li>
+                <div class="ui warning message">You don't have any new messages.</div>
+            </li>
         }
     </ul>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     $(document).ready(function () {
         $("#mark-notifications-as-read").click(function () {
