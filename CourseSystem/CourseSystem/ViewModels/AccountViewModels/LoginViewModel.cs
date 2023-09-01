@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using System.ComponentModel.DataAnnotations;
 
 namespace UI.ViewModels;
@@ -13,4 +14,6 @@ public class LoginViewModel
     [Display(Name = "• Password •")]
     [DataType(DataType.Password)]
     public string Password { get; set; }
+
+    public IList<AuthenticationScheme> ExternalLogins { get; set; }
 }
