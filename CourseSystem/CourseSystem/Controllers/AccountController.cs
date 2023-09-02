@@ -385,6 +385,8 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
     {
+        registerViewModel.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
         if (!ModelState.IsValid)
         {
             _logger.LogWarning("Failed to register user - invalid input!");
