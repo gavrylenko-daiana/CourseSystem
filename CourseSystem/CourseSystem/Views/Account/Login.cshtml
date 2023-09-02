@@ -83,6 +83,19 @@
               </div>
               <div class="ui error message"></div>
           </form>
+            <form method="post" asp-action="ExternalLogin">
+                <div>
+                    @foreach (var provider in Model.ExternalLogins)
+                    {
+                        <button type="submit" class="btn btn-outline-success" style="width:100%"
+                                name="provider" value="@provider.Name"
+                                title="Login using your @provider.DisplayName account">
+                            Login using your @provider.DisplayName account
+                        </button>
+                    }
+                </div>
+            </form>
+          @*<devsite-iframe><iframe src="https://developers.google.com/frame/identity/gsi/web/guides/overview_c694146549f8825c2cecf7d7dadc1e8efa13ce99ecf67bf5bf88acc0ba4b65f8.frame" class="framebox inherit-locale " allow="clipboard-write https://developers-dot-devsite-v2-prod.appspot.com" allowfullscreen is-upgraded></iframe></devsite-iframe>*@
           <div class="ui message">New to us?<a asp-controller="Account" asp-action="Register"> Sign up</a></div>
           <div class="ui message">Forgot password?<a asp-controller="Account" asp-action="ForgotPassword"> Change password</a></div>
       </div>
