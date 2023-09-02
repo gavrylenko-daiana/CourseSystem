@@ -34,5 +34,5 @@ public class RegisterViewModel
     [Display(Name = "• Role •")]
     public AppUserRoles Role { get; set; }
 
-    public IList<AuthenticationScheme> ExternalLogins { get; set; }
+    public IList<AuthenticationScheme>? ExternalLogins { get; set; }
 }
