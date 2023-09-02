@@ -42,52 +42,6 @@ public class AccountController : Controller
         _courseService = courseService;
     }
 
-    private string GetCyrilicToLatingTranslation(string cyrilic)
-    {
-        var converter = new Conversion();
-
-        return converter.RussianCyrillicToLatin(cyrilic);
-    }
-
-    private async Task CreateAppUserRoles()
-    {
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Admin.ToString()))
-        {
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Admin.ToString()));
-        }
-
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Teacher.ToString()))
-        {
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Teacher.ToString()));
-        }
-
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Student.ToString()))
-        {
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
-        }
-    }
-
-    private string CreateCallBackUrl(string code, string controllerName, string actionName, object routeValues)
-    {
-        if (controllerName.IsNullOrEmpty() || actionName.IsNullOrEmpty())
-        {
-            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
-        }
-
-        if (routeValues == null)
-        {
-            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
-        }
-
-        var callbackUrl = Url.Action(
-            actionName,
-            controllerName,
-            routeValues,
-            protocol: HttpContext.Request.Scheme);
-
-        return callbackUrl;
-    }
-
     [HttpGet]
     public async Task<IActionResult> Login()
     {
@@ -966,5 +920,51 @@ public class AccountController : Controller
 
             return View("Error");
         }
+    }
+
+    private string GetCyrilicToLatingTranslation(string cyrilic)
+    {
+        var converter = new Conversion();
+
+        return converter.RussianCyrillicToLatin(cyrilic);
+    }
+
+    private async Task CreateAppUserRoles()
+    {
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Admin.ToString()))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Admin.ToString()));
+        }
+
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Teacher.ToString()))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Teacher.ToString()));
+        }
+
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Student.ToString()))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
+        }
+    }
+
+    private string CreateCallBackUrl(string code, string controllerName, string actionName, object routeValues)
+    {
+        if (controllerName.IsNullOrEmpty() || actionName.IsNullOrEmpty())
+        {
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+        }
+
+        if (routeValues == null)
+        {
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+        }
+
+        var callbackUrl = Url.Action(
+            actionName,
+            controllerName,
+            routeValues,
+            protocol: HttpContext.Request.Scheme);
+
+        return callbackUrl;
     }
 }
