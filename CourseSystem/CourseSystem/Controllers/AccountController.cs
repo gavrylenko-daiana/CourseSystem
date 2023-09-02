@@ -13,6 +13,7 @@ using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
 using Core.ImageStore;
 using static Dropbox.Api.TeamLog.AccessMethodLogInfo;
 using System.Security.Claims;
+using Conversion = Cyrillic.Convert.Conversion;
 
 namespace UI.Controllers;
 
@@ -39,45 +40,6 @@ public class AccountController : Controller
         _profileImageService = profileImageService;
         _logger = logger;
         _courseService = courseService;
-    }
-
-    private async Task CreateAppUserRoles()
-    {
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Admin.ToString()))
-        {
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Admin.ToString()));
-        }
-
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Teacher.ToString()))
-        {
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Teacher.ToString()));
-        }
-
-        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Student.ToString()))
-        {
-            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
-        }
-    }
-
-    private string CreateCallBackUrl(string code, string controllerName, string actionName, object routeValues)
-    {
-        if (controllerName.IsNullOrEmpty() || actionName.IsNullOrEmpty())
-        {
-            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
-        }
-
-        if (routeValues == null)
-        {
-            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
-        }
-
-        var callbackUrl = Url.Action(
-            actionName,
-            controllerName,
-            routeValues,
-            protocol: HttpContext.Request.Scheme);
-
-        return callbackUrl;
     }
 
     [HttpGet]
@@ -302,8 +264,10 @@ public class AccountController : Controller
 
         var newUser = new AppUser();
         registerViewModel.MapTo(newUser);
+        newUser.FirstName = GetCyrilicToLatingTranslation(registerViewModel.FirstName);
+        newUser.LastName = GetCyrilicToLatingTranslation(registerViewModel.LastName);
 
-        newUser.UserName = registerViewModel.FirstName + registerViewModel.LastName;
+        newUser.UserName = newUser.FirstName + newUser.LastName + (char)new Random().Next(0, 100);
 
         var newUserResponse = await _userManager.CreateAsync(newUser);
 
@@ -423,7 +387,10 @@ public class AccountController : Controller
         var newUser = new AppUser();
         registerViewModel.MapTo(newUser);
 
-        newUser.UserName = registerViewModel.FirstName + registerViewModel.LastName;
+        newUser.FirstName = GetCyrilicToLatingTranslation(registerViewModel.FirstName);
+        newUser.LastName = GetCyrilicToLatingTranslation(registerViewModel.LastName);
+
+        newUser.UserName = newUser.FirstName + newUser.LastName + (char)new Random().Next(0, 100);
 
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 
@@ -953,5 +920,51 @@ public class AccountController : Controller
 
             return View("Error");
         }
+    }
+
+    private string GetCyrilicToLatingTranslation(string cyrilic)
+    {
+        var converter = new Conversion();
+
+        return converter.RussianCyrillicToLatin(cyrilic);
+    }
+
+    private async Task CreateAppUserRoles()
+    {
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Admin.ToString()))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Admin.ToString()));
+        }
+
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Teacher.ToString()))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Teacher.ToString()));
+        }
+
+        if (!await _roleManager.RoleExistsAsync(AppUserRoles.Student.ToString()))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(AppUserRoles.Student.ToString()));
+        }
+    }
+
+    private string CreateCallBackUrl(string code, string controllerName, string actionName, object routeValues)
+    {
+        if (controllerName.IsNullOrEmpty() || actionName.IsNullOrEmpty())
+        {
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+        }
+
+        if (routeValues == null)
+        {
+            return Url.ActionLink("Index", "Home", protocol: HttpContext.Request.Scheme) ?? string.Empty;
+        }
+
+        var callbackUrl = Url.Action(
+            actionName,
+            controllerName,
+            routeValues,
+            protocol: HttpContext.Request.Scheme);
+
+        return callbackUrl;
     }
 }
