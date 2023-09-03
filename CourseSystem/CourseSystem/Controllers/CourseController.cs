@@ -163,9 +163,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 id, courseResult.Message);
-            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
         }
 
         var courseVM = new CourseViewModel();
@@ -214,9 +213,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 id, courseResult.Message);
-            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
         }
 
         return View(courseResult.Data);
@@ -257,9 +255,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 id, courseResult.Message);
-            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
         }
 
         var currentGroups = courseResult.Data.Groups
@@ -305,9 +302,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
-            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
         }
 
         var userCoursesForCourse = courseResult.Data.UserCourses.Select(uc => uc.AppUserId).ToList();
@@ -349,9 +345,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
-            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
         }
 
         if (!teacherResult.IsSuccessful)
@@ -406,9 +401,8 @@ public class CourseController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
-            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
         }
 
         var courseTeachers = courseResult.Data.UserCourses.Select(c => c.AppUserId).ToList();
@@ -473,6 +467,7 @@ public class CourseController : Controller
         {
             _logger.LogWarning("Not found User");
             ViewData.ViewDataMessage("Error", $"{userResult.Message}");
+            
             return View("Index");
         }
 
@@ -483,9 +478,7 @@ public class CourseController : Controller
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
 
-            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
         }
 
         var userCourseViewModel = new UserCourseViewModel()
@@ -502,7 +495,24 @@ public class CourseController : Controller
     public async Task<IActionResult> DeleteUserFromCourseConfirmed(int courseId, string userId)
     {
         var userResult = await _userService.FindByIdAsync(userId);
+        
+        if (!userResult.IsSuccessful)
+        {
+            _logger.LogWarning("Not found User");
+            ViewData.ViewDataMessage("Error", $"{userResult.Message}");
+            
+            return View("Index");
+        }
+        
         var courseResult = await _courseService.GetById(courseId);
+        
+        if (!courseResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
+                courseId, courseResult.Message);
+
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
+        }
 
         var deleteResult = await _courseService.DeleteUserFromCourse(courseResult.Data, userResult.Data);
 

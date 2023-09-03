@@ -78,9 +78,7 @@ public class NotificationController : Controller
             _logger.LogError("Failed to get notification by Id {notificationId}! Error: {errorMessage}", 
                 id, notificationResult.Message);
 
-            TempData.TempDataMessage("Error", notificationResult.Message);
-
-            return RedirectToAction("ViewAll");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Notification });
         }
 
         await _notificationService.MarkAsRead(notificationResult.Data);

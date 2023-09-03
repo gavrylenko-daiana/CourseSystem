@@ -1,0 +1,42 @@
+@model UI.ViewModels.GeneralViewModels.EntityViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.2/semantic.min.css">
+  <style>
+    body {
+      background-color: #f0f0f0; 
+    }
+    .card-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin-top: 100px;
+    }
+    .custom-card {
+      background-color: #ffffff; 
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .custom-header {
+      color: #4682B4; 
+    }
+  </style>
+  <title>Nonexistent Entity</title>
+</head>
+<body>
+<div class="ui container card-container">
+  <div class="custom-card">
+    <div class="content">
+      <h5 class="header custom-header">That entity no longer exists</h5>
+      <p>Unfortunately, this @Model.EntityType.ToString() was removed or never existed</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -172,9 +172,7 @@ public class EducationMaterialController : Controller
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
             
-            TempData.TempDataMessage("Error", $"Message - {groupResult.Message}");
-            
-            return RedirectToAction("Index", "Group");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group });
         }
 
         var materialViewModel = new CreateInGroupEducationMaterialViewModel
@@ -231,9 +229,7 @@ public class EducationMaterialController : Controller
                 _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                     viewModel.GroupId, groupResult.Message);
 
-                TempData.TempDataMessage("Error", $"Message: {groupResult.Message}");
-
-                return RedirectToAction("CreateInGroup", "EducationMaterial", new { groupId = viewModel.GroupId });
+                return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group });
             }
 
             var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile, viewModel.MaterialAccess, viewModel.GroupId, viewModel.CourseId);
@@ -263,9 +259,7 @@ public class EducationMaterialController : Controller
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
             
-            TempData.TempDataMessage("Error", $"Message - {courseResult.Message}");
-            
-            return RedirectToAction("Index", "Course");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
         }
 
         var materialViewModel = new CreateInCourseEducationMaterialViewModel
@@ -305,9 +299,7 @@ public class EducationMaterialController : Controller
                 _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                     viewModel.CourseId, courseResult.Message);
 
-                TempData.TempDataMessage("Error", $"Message: {courseResult.Message}");
-
-                return RedirectToAction("CreateInCourse", "EducationMaterial", new { courseId = viewModel.CourseId });
+                return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
             }
 
             var addResult = await _courseService.AddEducationMaterial(viewModel.TimeUploaded, viewModel.UploadFile,
@@ -372,9 +364,7 @@ public class EducationMaterialController : Controller
 
             if (!courseResult.IsSuccessful)
             {
-                TempData.TempDataMessage("Error", "Fail to get course");
-
-                return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+                return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course });
             }
 
             course = courseResult.Data;
@@ -386,9 +376,7 @@ public class EducationMaterialController : Controller
 
             if (!groupResult.IsSuccessful)
             {
-                TempData.TempDataMessage("Error", "Fail to get group");
-
-                return RedirectToAction("EmailConfirmationUploadMaterialByAdmin", "EducationMaterial", CreateEmailRouteValues(educationMaterialVM));
+                return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group });
             }
 
             group = groupResult.Data;
@@ -538,9 +526,7 @@ public class EducationMaterialController : Controller
             _logger.LogError("Failed to get educational material by Id {materialId}! Error: {errorMessage}",
                 id, material.Message);
 
-            TempData.TempDataMessage("Error", $"Message: {material.Message}");
-
-            return RedirectToAction("Index", "Course");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.EducationMaterial });
         }
 
         return View(material.Data);
@@ -556,9 +542,7 @@ public class EducationMaterialController : Controller
             _logger.LogError("Failed to get educational material by Id {materialId}! Error: {errorMessage}",
                 id, fileToDelete.Message);
 
-            TempData.TempDataMessage("Error", $"Message: {fileToDelete.Message}");
-
-            return RedirectToAction("Detail", "EducationMaterial", new { id = id });
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.EducationMaterial });
         }
 
         var deleteResult = await _educationMaterialService.DeleteFile(fileToDelete.Data);

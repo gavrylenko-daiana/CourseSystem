@@ -134,8 +134,7 @@ public class GroupController : Controller
         
         if (!courseResult.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", $"{courseResult.Message}");
-            return View("Index");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course});
         }
         
         var groupViewModel = new GroupViewModel
@@ -154,9 +153,8 @@ public class GroupController : Controller
         if (!courseResult.IsSuccessful)
         {
             _logger.LogError("Course Id wasn't given");
-            TempData.TempDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course});
         }
 
         var currentUserResult = await _userService.GetCurrentUser(User);
@@ -203,9 +201,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+             return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
         
         var currentUserResult = await _userService.GetCurrentUser(User);
@@ -240,9 +237,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var groupViewModel = new GroupViewModel();
@@ -280,9 +276,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         return View(groupResult.Data);
@@ -315,9 +310,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var studentsInGroup = groupResult.Data.UserGroups.Where(ug => ug.AppUser.Role != AppUserRoles.Teacher && ug.AppUser.Role != AppUserRoles.Admin).ToList();
@@ -374,9 +368,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var studentResult = await _userService.FindByIdAsync(studentId);
@@ -432,9 +425,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                 courseId, courseResult.Message);
-            ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course});
         }
 
         var groupResult = await _groupService.GetById(groupId);
@@ -443,9 +435,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var teachersInCourse = courseResult.Data.UserCourses.Where(uc => uc.AppUser.Role == AppUserRoles.Teacher).Select(uc => uc.AppUser);
@@ -489,9 +480,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var userResult = await _userService.FindByIdAsync(teacherId);
@@ -532,9 +522,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var studentIds = selectedStudents.Select(s => s.Id).ToList();
@@ -607,9 +596,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var userGroup = new UserGroups()
@@ -620,7 +608,7 @@ public class GroupController : Controller
 
         Course course = null;
 
-        if(!currentUserResult.Data.UserCourses.Any(uc => uc.CourseId == groupResult.Data.CourseId))
+        if (!currentUserResult.Data.UserCourses.Any(uc => uc.CourseId == groupResult.Data.CourseId))
         {
             var courseResult = await _courseService.GetById(groupResult.Data.CourseId);
 
@@ -628,9 +616,8 @@ public class GroupController : Controller
             {
                 _logger.LogError("Failed to get course by Id {courseId}! Error: {errorMessage}",
                     groupResult.Data.CourseId, courseResult.Message);
-                ViewData.ViewDataMessage("Error", $"{courseResult.Message}");
-
-                return View("Index");
+                
+                return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Course});
             }
 
             course = courseResult.Data;
@@ -680,9 +667,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 id, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var currentTeacherResult = await _userService.GetCurrentUser(User);
@@ -726,9 +712,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var teacherResult = await _userService.FindByIdAsync(teacherId);
@@ -778,9 +763,8 @@ public class GroupController : Controller
         {
             _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
                 groupId, groupResult.Message);
-            ViewData.ViewDataMessage("Error", $"{groupResult.Message}");
-        
-            return View("Index");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
         }
 
         var userGroupViewModel = new UserGroupViewModel()
@@ -797,7 +781,24 @@ public class GroupController : Controller
     public async Task<IActionResult> DeleteUserFromGroupConfirmed(int groupId, string userId)
     {
         var userResult = await _userService.FindByIdAsync(userId);
+        
+        if (!userResult.IsSuccessful)
+        {
+            _logger.LogWarning("Not found User");
+            ViewData.ViewDataMessage("Error", $"{userResult.Message}");
+
+            return View("Index");
+        }
+        
         var groupResult = await _groupService.GetById(groupId);
+        
+        if (!groupResult.IsSuccessful)
+        {
+            _logger.LogError("Failed to get group by Id {groupId}! Error: {errorMessage}",
+                groupId, groupResult.Message);
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Group});
+        }
         
         var deleteResult = await _groupService.DeleteUserFromGroup(groupResult.Data, userResult.Data);
         

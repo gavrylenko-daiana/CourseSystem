@@ -1,4 +1,5 @@
 using BLL.Interfaces;
+using Core.Enums;
 using Core.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,9 +21,7 @@ public class AssignmentFileController : Controller
 
         if (!assignmentFile.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", assignmentFile.Message);
-
-            return RedirectToAction("Index", "Group");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.AssignmentFile });
         }
         
         return View(assignmentFile.Data);

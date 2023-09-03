@@ -3,6 +3,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using Core.Enums;
 using Core.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using X.PagedList;
@@ -93,9 +94,8 @@ public class UserActivityController : Controller
         {
             _logger.LogError("Failed to get notification by Id {activityId}! Error: {errorMessage}", 
                 id, activityResult.Message);
-            TempData.TempDataMessage("Error", $"{activityResult.Message}");
-
-            return RedirectToAction("Index", "Home");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Activity });
         }
 
         return View(activityResult.Data);
