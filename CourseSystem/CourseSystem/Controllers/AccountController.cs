@@ -272,7 +272,7 @@ public class AccountController : Controller
         var usersResult = await _userService.GetByPredicate(au => au.UserName.StartsWith(username));
         var userNames = usersResult.Data.Select(u => u.UserName).ToList();
 
-        if (userNames.Count != 0)
+        if (userNames.Contains(username))
         {
             var counter = 1;
 
@@ -412,7 +412,7 @@ public class AccountController : Controller
         var usersResult = await _userService.GetByPredicate(au => au.UserName.StartsWith(username));
         var userNames = usersResult.Data.Select(u => u.UserName).ToList();
 
-        if (userNames.Count != 0)
+        if (userNames.Contains(username))
         {
             var counter = 1;
 
