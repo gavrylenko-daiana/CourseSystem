@@ -17,7 +17,7 @@
     <div class="ui container" style="margin-top: 20px;">
         <div class="ui grid equal-height" style="display: flex; align-items: stretch;">
             <div class="four wide column">
-                <div class="ui segment">
+                <div class="ui segment with-shadow">
                     <div class="ui icon header" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
                         @if (Model.ProfileImage != null)
                         {
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <div class="twelve wide column">
-                <div class="ui segment">
+                <div class="ui segment with-shadow">
                     <div class="ui right floated small delete-button button">
                         <a asp-controller="User" asp-action="Delete" class="white-text">
                             <i class="trash icon"></i>
@@ -98,7 +98,7 @@
     <div class="ui container py-2" style="margin-top:20px;">
         <div class="ui grid">
             <div class="column">
-                <div class="ui segment">
+                <div class="ui segment with-shadow">
                     <h3 class="ui header">Activity</h3>
                     <div class="activity-container">
                         @await Html.PartialAsync("~/Views/UserActivity/ActivityForYearPartialView.cshtml")
