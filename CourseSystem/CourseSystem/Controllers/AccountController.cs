@@ -267,7 +267,24 @@ public class AccountController : Controller
         newUser.FirstName = GetCyrilicToLatingTranslation(registerViewModel.FirstName);
         newUser.LastName = GetCyrilicToLatingTranslation(registerViewModel.LastName);
 
-        newUser.UserName = newUser.FirstName + newUser.LastName + (char)new Random().Next(0, 100);
+        var username = newUser.FirstName + newUser.LastName;
+
+        var usersResult = await _userService.GetByPredicate(au => au.UserName.StartsWith(username));
+        var userNames = usersResult.Data.Select(u => u.UserName).ToList();
+
+        if (userNames.Contains(username))
+        {
+            var counter = 1;
+
+            while (userNames.Contains(username + counter))
+            {
+                counter++;
+            }
+
+            username = username + counter;
+        }
+
+        newUser.UserName = username;
 
         var newUserResponse = await _userManager.CreateAsync(newUser);
 
@@ -390,7 +407,24 @@ public class AccountController : Controller
         newUser.FirstName = GetCyrilicToLatingTranslation(registerViewModel.FirstName);
         newUser.LastName = GetCyrilicToLatingTranslation(registerViewModel.LastName);
 
-        newUser.UserName = newUser.FirstName + newUser.LastName + (char)new Random().Next(0, 100);
+        var username = newUser.FirstName + newUser.LastName;
+
+        var usersResult = await _userService.GetByPredicate(au => au.UserName.StartsWith(username));
+        var userNames = usersResult.Data.Select(u => u.UserName).ToList();
+
+        if (userNames.Contains(username))
+        {
+            var counter = 1;
+
+            while (userNames.Contains(username + counter))
+            {
+                counter++;
+            }
+
+            username = username + counter;
+        }
+
+        newUser.UserName = username;
 
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 
