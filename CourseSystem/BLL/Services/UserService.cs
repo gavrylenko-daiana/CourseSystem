@@ -23,8 +23,8 @@ public class UserService : GenericService<AppUser>, IUserService
     private readonly IProfileImageService _profileImageService;
     private readonly ILogger<UserService> _logger;
 
-    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager, 
-        IProfileImageService profileImageService, ILogger<UserService> logger) 
+    public UserService(UnitOfWork unitOfWork, UserManager<AppUser> userManager,
+        IProfileImageService profileImageService, ILogger<UserService> logger)
         : base(unitOfWork, unitOfWork.UserRepository)
     {
         _userManager = userManager;
@@ -36,7 +36,8 @@ public class UserService : GenericService<AppUser>, IUserService
     {
         if (currentUser == null)
         {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name,
+                nameof(currentUser));
 
             return new Result<AppUser>(false, $"{nameof(currentUser)} does not exist");
         }
@@ -88,14 +89,16 @@ public class UserService : GenericService<AppUser>, IUserService
     {
         if (editUserViewModel == null)
         {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(editUserViewModel));
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name,
+                nameof(editUserViewModel));
 
             return new Result<bool>(false, $"{nameof(editUserViewModel)} does not exist");
         }
 
         if (currentUser == null)
         {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name,
+                nameof(currentUser));
 
             return new Result<bool>(false, $"{nameof(currentUser)} does not exist");
         }
@@ -179,7 +182,6 @@ public class UserService : GenericService<AppUser>, IUserService
 
         await _userManager.UpdateAsync(userResult.Data);
 
-        
         _logger.LogInformation("Successfully to {action}.", MethodBase.GetCurrentMethod()?.Name);
 
         return new Result<bool>(true);
@@ -199,7 +201,7 @@ public class UserService : GenericService<AppUser>, IUserService
         await _userManager.UpdateAsync(userResult.Data);
 
         _logger.LogInformation("Successfully to {action}.", MethodBase.GetCurrentMethod()?.Name);
-        
+
         return new Result<bool>(true);
     }
 
@@ -279,7 +281,6 @@ public class UserService : GenericService<AppUser>, IUserService
         {
             return new Result<List<AppUser>>(false, $"Failed to get all users. Message - {ex.Message}");
         }
-
     }
 
     public async Task<Result<IList<AppUser>>> GetUsersInRoleAsync(string role, string? searchQuery = null)
@@ -288,7 +289,8 @@ public class UserService : GenericService<AppUser>, IUserService
         {
             if (role == null)
             {
-                _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(role));
+                _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name,
+                    nameof(role));
 
                 return new Result<IList<AppUser>>(false, $"{nameof(role)} was null");
             }
