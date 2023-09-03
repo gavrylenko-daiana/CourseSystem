@@ -79,33 +79,35 @@
             @foreach (var teacher in Model)
             {
                 <div class="column">
-                    <div class="ui card cover-card">
-                        <div class="content" style="display: flex; flex-direction: column; justify-content: center;">
-                            <div class="header">
-                                @if (teacher.ProfileImage != null)
+                    <a href="@Url.Action("Detail", "User", new { id = teacher.Id })">
+                        <div class="ui card cover-card">
+                            <div class="content" style="display: flex; flex-direction: column; justify-content: center;">
+                                <div class="header">
+                                    @if (teacher.ProfileImage != null)
+                                    {
+                                        <img src="@teacher.ProfileImage.Url" alt="@teacher.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                    }
+                                    @teacher.FirstName @teacher.LastName
+                                </div>
+                                @if (teacher.IsInvited)
                                 {
-                                    <img src="@teacher.ProfileImage.Url" alt="@teacher.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                    <div style="margin-top: 10px; text-align: center;">
+                                        <span class="ui mini message">Teacher added</span>
+                                    </div>
                                 }
-                                @teacher.FirstName @teacher.LastName
+                                else
+                                {
+                                    <div style="margin-top: 10px; text-align: center;">
+                                        <form asp-action="ConfirmTeacherSelection" asp-controller="Group" method="post">
+                                            <input type="hidden" name="teacherId" value="@teacher.Id"/>
+                                            <input type="hidden" name="groupId" value="@teacher.GroupId"/>
+                                            <button type="submit" class="ui details-button button">Assign teacher to group</button>
+                                        </form>
+                                    </div>
+                                }
                             </div>
-                            @if (teacher.IsInvited)
-                            {
-                                <div style="margin-top: 10px; text-align: center;">
-                                    <span class="ui mini message">Teacher added</span>
-                                </div>
-                            }
-                            else
-                            {
-                                <div style="margin-top: 10px; text-align: center;">
-                                    <form asp-action="ConfirmTeacherSelection" asp-controller="Group" method="post">
-                                        <input type="hidden" name="teacherId" value="@teacher.Id"/>
-                                        <input type="hidden" name="groupId" value="@teacher.GroupId"/>
-                                        <button type="submit" class="ui details-button button">Assign teacher to group</button>
-                                    </form>
-                                </div>
-                            }
                         </div>
-                    </div>
+                    </a>
                 </div>
             }
         }
@@ -148,13 +150,5 @@
         }
     }
 </div>
-
-<script>
-        document.querySelectorAll('.ui.card').forEach(card => {
-            card.addEventListener('click', function () {
-                window.location.href = this.querySelector('.ui.view-profile-button').href;
-            });
-        });
-</script>
 </body>
 </html>

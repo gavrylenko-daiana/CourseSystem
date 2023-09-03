@@ -73,34 +73,29 @@
                 var user = (await UserService.FindByIdAsync(userSelection.Id)).Data;
 
                 <div class="column mt-2">
-                    <div class="ui card cover-card">
-                        <div class="content">
-                            <div class="header" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-                                @if (user.ProfileImage != null)
-                                {
-                                    <img src="@user.ProfileImage.Url" alt="@user.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
-                                }
-                                <div>
-                                    @user.FirstName @user.LastName
+                    <a href="@Url.Action("Detail", "User", new { id = userSelection.Id })">
+                        <div class="ui card cover-card">
+                            <div class="content">
+                                <div class="header" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                                    @if (user.ProfileImage != null)
+                                    {
+                                        <img src="@user.ProfileImage.Url" alt="@user.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                    }
+                                    <div>
+                                        @user.FirstName @user.LastName
+                                    </div>
+                                    <div style="margin-top: 10px; text-align: center;">
+                                        <form asp-action="SendInventationToStudent" asp-controller="Group" method="post">
+                                            <input type="hidden" name="groupId" value="@ViewBag.GroupId"/>
+                                            <input type="hidden" name="studentId" value="@userSelection.Id"/>
+                                            <input type="hidden" name="page" value="@Model.PageNumber"/>
+                                            <button type="submit" class="ui details-button button">Send Invitation</button>
+                                        </form>
+                                    </div>
                                 </div>
-                                <div style="margin-top: 10px; text-align: center;">
-                                    <form asp-action="SendInventationToStudent" asp-controller="Group" method="post">
-                                        <input type="hidden" name="groupId" value="@ViewBag.GroupId"/>
-                                        <input type="hidden" name="studentId" value="@userSelection.Id"/>
-                                        <input type="hidden" name="page" value="@Model.PageNumber"/>
-                                        <button type="submit" class="ui details-button button">Send Invitation</button>
-                                    </form>
-                                </div>
-                                @*<div class="user-button" style="text-align: center;">
-                                    <a href="@Url.Action("SendInventationToStudent", "Group", new { groupId = ViewBag.GroupId, studentId = userSelection.Id})" class="ui teal basic button view-profile-button" style="width: 175px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 10px;">Send Invitation</a>
-                                </div>*@
-                                @* <div> *@
-                                @*     <input type="checkbox" asp-for="@userSelection.IsSelected"/> *@
-                                @* </div> *@
-                                @*<input type="hidden" asp-for="@userSelection.Id"/>*@
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             }
         }
@@ -152,11 +147,3 @@
         }
     }
 </div>
-
-<script>
-    document.querySelectorAll('.ui.card').forEach(card => {
-        card.addEventListener('click', function () {
-            window.location.href = this.querySelector('.ui.view-profile-button').href;
-        });
-    });
-</script>
