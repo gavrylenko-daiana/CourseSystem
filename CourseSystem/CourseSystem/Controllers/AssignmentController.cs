@@ -197,9 +197,7 @@ public class AssignmentController : Controller
             _logger.LogError("Failed to delete assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentId, assignmentResult.Message);
 
-            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
-
-            return RedirectToAction("Index", "Group");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Assignment});
         }
 
         return View(assignmentResult.Data);
@@ -231,9 +229,8 @@ public class AssignmentController : Controller
         {
             _logger.LogError("Failed to get details for assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentId, assignmentResult.Message);
-            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
-
-            return RedirectToAction("Index", "Group");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Assignment});
         }
 
         var assignentDetailsVM = new DetailsAssignmentViewModel();
@@ -283,9 +280,8 @@ public class AssignmentController : Controller
         {
             _logger.LogError("Failed to edit assignment by Id {assignmentId}! Error: {errorMessage}",
                 id, assignmentResult.Message);
-            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
-
-            return RedirectToAction("Details", "Assignment", new { assignmentId = id });
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Assignment});
         }
 
         var assigmentVM = new EditAssignmentViewModel();
