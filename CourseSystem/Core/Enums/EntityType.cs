@@ -6,7 +6,8 @@ public enum EntityType
     Course,
     Assignment,
     AssignmentAnswer,
+    AssignmentFile,
     EducationMaterial,
     Notification,
-    User
+    Activity
 }
