@@ -53,9 +53,7 @@ public class AssignmentAnswerController : Controller
 
         if (!assignmentAnswer.IsSuccessful)
         {
-            TempData.TempDataMessage("Error", assignmentAnswer.Message);
-
-            return RedirectToAction("Index", "Group");
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.AssignmentAnswer});
         }
         
         return View(assignmentAnswer.Data);
@@ -100,9 +98,8 @@ public class AssignmentAnswerController : Controller
         {
             _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentAnswerVM.AssignmentId, assignmentResult.Message);
-            TempData.TempDataMessage("Error", assignmentResult.Message);
-
-            return View(assignmentAnswerVM);
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Assignment});
         }
 
         var currentUserResult = await _userService.GetCurrentUser(User);
@@ -156,9 +153,8 @@ public class AssignmentAnswerController : Controller
         {
             _logger.LogError("Failed to get assignment answer by Id {assignmentAnswerId}! Error: {errorMessage}",
                 assignmentAnswerId, assignmentAnswerResult.Message);
-            TempData.TempDataMessage("Error", $"{assignmentAnswerResult.Data}");
-
-            return RedirectToAction("Index", "Group");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.AssignmentAnswer});
         }
 
         var deleteResult = await _assignmentAnswerService.DeleteAssignmentAnswer(assignmentAnswerResult.Data);
@@ -240,9 +236,8 @@ public class AssignmentAnswerController : Controller
         {
             _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentId, assignmentResult.Message);
-            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
-
-            return RedirectToAction("Index", "Group");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Assignment});
         }
 
         var userAssignment =
@@ -298,9 +293,8 @@ public class AssignmentAnswerController : Controller
         {
             _logger.LogError("Failed to get assignment by Id {assignmentId}! Error: {errorMessage}",
                 assignmentId, assignmentResult.Message);
-            TempData.TempDataMessage("Error", $"{assignmentResult.Data}");
-
-            return RedirectToAction("Index", "Group");
+            
+            return RedirectToAction("MessageForNonexistentEntity", "General", new { entityType = EntityType.Assignment});
         }
 
         var userAssignment = assignmentResult.Data.UserAssignments.FirstOrDefault(a => a.AppUserId == studentId);
