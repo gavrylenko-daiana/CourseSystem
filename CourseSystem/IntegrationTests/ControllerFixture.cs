@@ -86,6 +86,7 @@ namespace IntegrationTests;
         public async Task InitializeAsync()
         {
             var adminPassword = "!!Dragon77";
+            
             Admin = (await CreateUser("q@gmail.com", adminPassword, AppUserRoles.Admin), adminPassword);
         }
 

@@ -118,8 +118,7 @@ public class AccountController : Controller
                     loginViewModel.EmailAddress);
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var callbackUrl =
-                    CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
+                var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = user.Id, code = code });
 
                 if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
                 {
@@ -398,13 +397,12 @@ public class AccountController : Controller
 
             return View(registerViewModel);
         }
-
+ 
         var userResult = await _userService.GetUserByEmailAsync(registerViewModel.Email);
 
         if (userResult.IsSuccessful)
         {
-            _logger.LogWarning(
-                "Failed to register user by email {userEmail}! Error: user with this email already exists: {userId}",
+            _logger.LogWarning("Failed to register user by email {userEmail}! Error: user with this email already exists: {userId}",
                 registerViewModel.Email, userResult.Data.Id);
 
             TempData.TempDataMessage("Error", "This email is already in use");
@@ -447,18 +445,18 @@ public class AccountController : Controller
         newUser.UserName = username;
 
         var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
-
-        await CreateAppUserRoles();
-
-        var imageUserResult = await _profileImageService.SetDefaultProfileImage(newUser);
-
-        if (!imageUserResult.IsSuccessful)
-        {
-            _logger.LogWarning("Failed to set profile image", imageUserResult.Data);
-        }
-
+        
         if (newUserResponse.Succeeded)
         {
+            await CreateAppUserRoles();
+
+            var imageUserResult = await _profileImageService.SetDefaultProfileImage(newUser);
+
+            if (!imageUserResult.IsSuccessful)
+            {
+                _logger.LogWarning("Failed to set profile image", imageUserResult.Data);
+            }
+
             var roleResult = await _userManager.AddToRoleAsync(newUser, registerViewModel.Role.ToString());
 
             if (!roleResult.Succeeded)
@@ -469,8 +467,7 @@ public class AccountController : Controller
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            var callbackUrl =
-                CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
+            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
 
             if (registerViewModel.Role != AppUserRoles.Admin)
             {
@@ -482,8 +479,7 @@ public class AccountController : Controller
             }
             else
             {
-                var emailSentResult =
-                    await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, newUser, callbackUrl);
+                var emailSentResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, newUser, callbackUrl);
 
                 if (!emailSentResult.IsSuccessful)
                 {
@@ -756,8 +752,7 @@ public class AccountController : Controller
             return View(newPasswordViewModel);
         }
 
-        var result =
-            await _userService.UpdatePasswordAsync(newPasswordViewModel.Email, newPasswordViewModel.NewPassword);
+        var result = await _userService.UpdatePasswordAsync(newPasswordViewModel.Email, newPasswordViewModel.NewPassword);
 
         if (!result.IsSuccessful)
         {
@@ -765,6 +760,8 @@ public class AccountController : Controller
                 newPasswordViewModel.Email, result.Message);
 
             TempData.TempDataMessage("Error", "Failed to reset password.");
+            
+            return View(newPasswordViewModel);
         }
 
         return RedirectToAction("Login", "Account");
