@@ -893,8 +893,7 @@ public class AccountController : Controller
 
         currentUserResult.Data.Email = newEmailViewModel.NewEmail;
 
-        var emailResult = await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUserResult.Data,
-                callbackUrl);
+        var emailResult = await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUserResult.Data, callbackUrl);
 
         if (!emailResult.IsSuccessful)
         {

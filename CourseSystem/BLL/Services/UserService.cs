@@ -36,8 +36,7 @@ public class UserService : GenericService<AppUser>, IUserService
     {
         if (currentUser == null)
         {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name,
-                nameof(currentUser));
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
 
             return new Result<AppUser>(false, $"{nameof(currentUser)} does not exist");
         }
@@ -84,21 +83,18 @@ public class UserService : GenericService<AppUser>, IUserService
         return Task.FromResult(user);
     }
 
-    public async Task<Result<bool>> EditUserAsync(ClaimsPrincipal currentUser, AppUser editUserViewModel,
-        IFormFile? newProfileImage = null)
+    public async Task<Result<bool>> EditUserAsync(ClaimsPrincipal currentUser, AppUser editUserViewModel, IFormFile? newProfileImage = null)
     {
         if (editUserViewModel == null)
         {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name,
-                nameof(editUserViewModel));
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(editUserViewModel));
 
             return new Result<bool>(false, $"{nameof(editUserViewModel)} does not exist");
         }
 
         if (currentUser == null)
         {
-            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name,
-                nameof(currentUser));
+            _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(currentUser));
 
             return new Result<bool>(false, $"{nameof(currentUser)} does not exist");
         }
@@ -124,8 +120,7 @@ public class UserService : GenericService<AppUser>, IUserService
 
                 if (!updateImageResult.IsSuccessful)
                 {
-                    return new Result<bool>(false,
-                        $"Failed to update {nameof(updateImageResult.Data)} - Message: {updateImageResult.Message}");
+                    return new Result<bool>(false, $"Failed to update {nameof(updateImageResult.Data)} - Message: {updateImageResult.Message}");
                 }
             }
 
@@ -139,8 +134,7 @@ public class UserService : GenericService<AppUser>, IUserService
         }
     }
 
-    public async Task<Result<bool>> CheckPasswordAsync(ClaimsPrincipal currentUser, string currentPassword,
-        string newPassword)
+    public async Task<Result<bool>> CheckPasswordAsync(ClaimsPrincipal currentUser, string currentPassword, string newPassword)
     {
         var result = await GetCurrentUser(currentUser);
 
@@ -289,8 +283,7 @@ public class UserService : GenericService<AppUser>, IUserService
         {
             if (role == null)
             {
-                _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name,
-                    nameof(role));
+                _logger.LogError("Failed to {action}, {entity} was null!", MethodBase.GetCurrentMethod()?.Name, nameof(role));
 
                 return new Result<IList<AppUser>>(false, $"{nameof(role)} was null");
             }
