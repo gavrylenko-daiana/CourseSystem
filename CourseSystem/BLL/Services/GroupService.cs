@@ -337,9 +337,9 @@ public class GroupService : GenericService<Group>, IGroupService
 
     public async Task<Result<bool>> AddAllAdminsAtGroup(Group group)
     {
-        var userCourses = group.Course.UserCourses;
+        var userCourses = group.Course?.UserCourses;
         
-        if (userCourses.Count != 0)
+        if (userCourses != null && userCourses.Count != 0)
         {
             foreach (var userCourse in userCourses)
             {

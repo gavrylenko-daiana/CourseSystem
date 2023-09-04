@@ -72,7 +72,47 @@ namespace IntegrationTests;
 
             return course;
         }
-        
+
+        public async Task<Group> CreateGroup(Course course, string name, DateTime startDate, DateTime endDate, GroupAccess groupAccess, AppUser appUser)
+        {
+            using var scope = _factory.Services.CreateScope();
+            var assignmentService = scope.ServiceProvider.GetRequiredService<IGroupService>();
+
+            var group = new Group()
+            {
+                CourseId = course.Id,
+                Course = course,
+                Name = name,
+                StartDate = startDate,
+                EndDate = endDate,
+                GroupAccess = groupAccess
+            };
+
+            await assignmentService.CreateGroup(group, appUser);
+
+            return group;
+        }
+
+        public async Task<Assignment> CreateAssignment(Group group, string name, DateTime startDate, DateTime endDate, AssignmentAccess assignmentAccess )
+        {
+            using var scope = _factory.Services.CreateScope();
+            var assignmentService = scope.ServiceProvider.GetRequiredService<IAssignmentService>();
+
+            var assignment = new Assignment()
+            {
+                GroupId = group.Id,
+                Group = group,
+                Name = name,
+                StartDate = startDate,
+                EndDate = endDate,
+                AssignmentAccess = assignmentAccess
+            };
+            
+            await assignmentService.CreateAssignment(assignment);
+
+            return assignment;
+        }
+
         public void Dispose()
         {
             _factory?.Dispose();
