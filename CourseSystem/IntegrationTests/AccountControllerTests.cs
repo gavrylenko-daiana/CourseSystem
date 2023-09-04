@@ -60,8 +60,11 @@ public class AccountControllerTests
     }
     
     [Theory]
-    [InlineData("123")]
-    [InlineData("super1")]
+    [InlineData("password111")]
+    [InlineData("onlylowercase")]
+    [InlineData("123456")]
+    [InlineData("!@#%^&*")]
+    [InlineData(" ")]
     public async Task Register_IncorrectPassword_200Ok(string password)
     {
         using var client = _fixture.CreateClient();
