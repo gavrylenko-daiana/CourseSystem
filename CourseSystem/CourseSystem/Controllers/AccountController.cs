@@ -124,15 +124,13 @@ public class AccountController : Controller
                 {
                     await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
 
-                    TempData.TempDataMessage("Error",
-                        "Your ADMIN account is not verified, we sent email for confirmation again");
+                    TempData.TempDataMessage("Error", "Your ADMIN account is not verified, we sent email for confirmation again");
                 }
                 else
                 {
                     await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
 
-                    TempData.TempDataMessage("Error",
-                        "Admin hasn't verified your email yet, we sent email for confirmation again");
+                    TempData.TempDataMessage("Error", "Admin hasn't verified your email yet, we sent email for confirmation again");
                 }
 
                 return View(loginViewModel);
@@ -211,9 +209,9 @@ public class AccountController : Controller
                 {
                     var registerVM = new RegisterViewModel()
                     {
-                        FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName),
-                        LastName = info.Principal.FindFirstValue(ClaimTypes.Surname),
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                        FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName)!,
+                        LastName = info.Principal.FindFirstValue(ClaimTypes.Surname)!,
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)!
                     };
 
                     return View("ExternalRegistration", registerVM);
@@ -231,18 +229,15 @@ public class AccountController : Controller
 
                         if (await _userManager.IsInRoleAsync(user, AppUserRoles.Admin.ToString()))
                         {
-                            await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, user,
-                                callbackUrl);
+                            await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, user, callbackUrl);
 
-                            TempData.TempDataMessage("Error",
-                                "Your ADMIN account is not verified, we sent email for confirmation again");
+                            TempData.TempDataMessage("Error", "Your ADMIN account is not verified, we sent email for confirmation again");
                         }
                         else
                         {
                             await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByAdmin, user, callbackUrl);
 
-                            TempData.TempDataMessage("Error",
-                                "Admin hasn't verified your email yet, we sent email for confirmation again");
+                            TempData.TempDataMessage("Error", "Admin hasn't verified your email yet, we sent email for confirmation again");
                         }
 
                         return RedirectToAction("Login");
@@ -267,8 +262,7 @@ public class AccountController : Controller
 
         if (userResult.IsSuccessful)
         {
-            _logger.LogWarning(
-                "Failed to register user by email {userEmail}! Error: user with this email already exists: {userId}",
+            _logger.LogWarning("Failed to register user by email {userEmail}! Error: user with this email already exists: {userId}",
                 registerViewModel.Email, userResult.Data.Id);
 
             TempData.TempDataMessage("Error", "This email is already in use");
@@ -324,8 +318,7 @@ public class AccountController : Controller
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-            var callbackUrl =
-                CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
+            var callbackUrl = CreateCallBackUrl(code, "Account", "ConfirmEmail", new { userId = newUser.Id, code = code });
 
             if (registerViewModel.Role != AppUserRoles.Admin)
             {
@@ -337,16 +330,14 @@ public class AccountController : Controller
             }
             else
             {
-                var emailSentResult =
-                    await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, newUser, callbackUrl);
+                var emailSentResult = await _emailService.SendEmailToAppUsers(EmailType.ConfirmAdminRegistration, newUser, callbackUrl);
 
                 if (!emailSentResult.IsSuccessful)
                 {
                     TempData.TempDataMessage("Error", emailSentResult.Message);
                 }
 
-                TempData.TempDataMessage("Error",
-                    "To complete your ADMIN registration, check your email and follow the link provided in the email");
+                TempData.TempDataMessage("Error", "To complete your ADMIN registration, check your email and follow the link provided in the email");
 
                 return RedirectToAction("Register");
             }
@@ -486,8 +477,7 @@ public class AccountController : Controller
                     TempData.TempDataMessage("Error", emailSentResult.Message);
                 }
 
-                TempData.TempDataMessage("Error",
-                    "To complete your ADMIN registration, check your email and follow the link provided in the email");
+                TempData.TempDataMessage("Error", "To complete your ADMIN registration, check your email and follow the link provided in the email");
 
                 return View(registerViewModel);
             }
@@ -578,16 +568,16 @@ public class AccountController : Controller
 
             if (!deleteResult.IsSuccessful)
             {
-                _logger.LogWarning("Failed to delete user with id {userId}! Error: {errorMessage}", userId,
-                    deleteResult.Message);
+                _logger.LogWarning("Failed to delete user with id {userId}! Error: {errorMessage}", 
+                    userId, deleteResult.Message);
             }
 
             await _signInManager.UserManager.DeleteAsync(userResult.Data);
         }
         else
         {
-            _logger.LogWarning("Failed to delete user with id {userId}! Error: {errorMessage}", userId,
-                userResult.Message);
+            _logger.LogWarning("Failed to delete user with id {userId}! Error: {errorMessage}", 
+                userId, userResult.Message);
         }
 
         return View();
@@ -620,8 +610,7 @@ public class AccountController : Controller
 
         if (!userResult.IsSuccessful)
         {
-            _logger.LogWarning(
-                "Failed to send email for password change to unouthorised user by email {userEmail}! Error: {errorMessage}",
+            _logger.LogWarning("Failed to send email for password change to unouthorised user by email {userEmail}! Error: {errorMessage}",
                 forgotPasswordBeforeEnteringViewModel.Email, userResult.Message);
 
             TempData.TempDataMessage("Error", "You wrote an incorrect email. Try again!");
@@ -634,8 +623,7 @@ public class AccountController : Controller
 
         if (!emailCodeResult.IsSuccessful)
         {
-            _logger.LogWarning(
-                "Failed to send email for password change to unouthorised user by email {userEmail}! Error: {errorMessage}",
+            _logger.LogWarning("Failed to send email for password change to unouthorised user by email {userEmail}! Error: {errorMessage}",
                 forgotPasswordBeforeEnteringViewModel.Email, emailCodeResult.Message);
 
             TempData.TempDataMessage("Error", emailCodeResult.Message);
@@ -643,8 +631,7 @@ public class AccountController : Controller
             return View(forgotPasswordBeforeEnteringViewModel);
         }
 
-        return RedirectToAction("CheckEmailCode",
-            new { code = emailCodeResult.Data, email = forgotPasswordBeforeEnteringViewModel.Email });
+        return RedirectToAction("CheckEmailCode", new { code = emailCodeResult.Data, email = forgotPasswordBeforeEnteringViewModel.Email });
     }
 
     [HttpGet]
@@ -672,8 +659,7 @@ public class AccountController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        return RedirectToAction("CheckEmailCode",
-            new { code = emailCodeResult.Data, email = userResult.Data.Email, forgotEntity });
+        return RedirectToAction("CheckEmailCode", new { code = emailCodeResult.Data, email = userResult.Data.Email, forgotEntity });
     }
 
     [HttpGet]
@@ -780,8 +766,7 @@ public class AccountController : Controller
 
         if (userResult.IsSuccessful)
         {
-            _logger.LogWarning(
-                "Failed to register admin by email {userEmail}! Error: user with this email already exists: {userId}",
+            _logger.LogWarning("Failed to register admin by email {userEmail}! Error: user with this email already exists: {userId}",
                 registerAdminViewModel.Email, userResult.Data.Id);
 
             TempData.TempDataMessage("Error", $"This email already exist");
@@ -887,8 +872,7 @@ public class AccountController : Controller
 
         if (userResult.IsSuccessful)
         {
-            _logger.LogWarning(
-                "Failed to reset email for user {userId}! Error: user with email {desirableEmail} already exists: {userWithDesirableEmailId}",
+            _logger.LogWarning("Failed to reset email for user {userId}! Error: user with email {desirableEmail} already exists: {userWithDesirableEmailId}",
                 currentUserResult.Data.Id, newEmailViewModel.NewEmail, userResult.Data.Id);
 
             TempData.TempDataMessage("Error", $"This email already exist");
@@ -909,14 +893,12 @@ public class AccountController : Controller
 
         currentUserResult.Data.Email = newEmailViewModel.NewEmail;
 
-        var emailResult =
-            await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUserResult.Data,
+        var emailResult = await _emailService.SendEmailToAppUsers(EmailType.AccountApproveByUser, currentUserResult.Data,
                 callbackUrl);
 
         if (!emailResult.IsSuccessful)
         {
-            _logger.LogWarning(
-                "Failed to send letter with email change confirmation to email {userEmail} for user {userId}! Error: {errorMessage}",
+            _logger.LogWarning("Failed to send letter with email change confirmation to email {userEmail} for user {userId}! Error: {errorMessage}",
                 newEmailViewModel.NewEmail, userResult.Data.Id, emailResult.Data);
 
             currentUserResult.Data.Email = oldEmail;
