@@ -1,0 +1,36 @@
+﻿@model UserActivity
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Activity</title>
+</head>
+<body>
+    <div class="container activity-details-container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card-activity-custom">
+                <div class="card-header-activity-custom" style="border-radius: 20px;">
+                    <h2>@Model.Name</h2>
+                </div>
+                @if (TempData["Error"] != null)
+                {
+                    <div class="error-message-activity-custom">
+                        <span><b>Sorry!</b> - @TempData["Error"]</span>
+                    </div>
+                }
+                <div class="card-body-activity-custom">
+                    <p class="activity-text-custom">
+                        @Model.Description
+                    </p>
+                    <p class="activity-date-custom">
+                        @Model.Created.ToString("f")
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

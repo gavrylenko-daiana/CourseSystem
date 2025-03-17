@@ -1,0 +1,163 @@
+﻿@using BLL.Interfaces
+@inject IUserService UserService
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - UI </title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/UI.styles.css" asp-append-version="true"/>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&family=Work+Sans:wght@100;200;300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+<body>
+
+<div class="row">
+    <div class="col-md-1">
+        <header>
+            <div class="ui left demo vertical visible inverted sidebar labeled icon menu" style="background-color: #12302a;">
+                <a class="item" asp-controller="Home" asp-action="Index">
+                    <i class="home icon"></i>
+                    Home
+                </a>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <a class="item" asp-controller="Account" asp-action="Login">
+                        <i class="sign-in icon"></i>
+                        LogIn
+                    </a>
+                    <a class="item" asp-controller="Account" asp-action="Register">
+                        <i class="user plus icon"></i>
+                        SignUp
+                    </a>
+                }
+                else
+                {
+                    <a class="item" asp-controller="User" asp-action="Index">
+                        <i class="user icon"></i>
+                        User Profile
+                    </a>
+                    <a class="item" asp-area="" asp-controller="Course" asp-action="Index">
+                        <i class="book icon"></i>
+                        Courses
+                    </a>
+                    <a class="item" asp-area="" asp-controller="Group" asp-action="Index">
+                        <i class="group icon"></i>
+                        Groups
+                    </a>
+                    <a class="item" asp-controller="UserActivity" asp-action="ActivityForMonth">
+                        <i class="chart bar icon"></i>
+                        User Activity
+                    </a>
+                    <a class="item" asp-controller="Assignment" asp-action="ViewAll">
+                        <i class="tasks icon"></i>
+                        Assignments
+                    </a>
+                    <div class="sign-out-custom-position">
+                        <a class="item" asp-controller="Account" asp-action="Logout">
+                            <i class="sign-out icon"></i>
+                            Logout
+                        </a>
+                    </div>
+                }
+            </div>
+        </header>
+    </div>
+    <header class="user-header container-fluid background-color-header" style="position: relative;">
+        @if (User.Identity.IsAuthenticated)
+        {
+            var user = await UserService.GetCurrentUser(User);
+            <div class="ui secondary menu">
+                <div style="margin-left: 120px;">
+                    <a class="navbar-brand text-white item" asp-area="" asp-controller="Home" asp-action="Index">CourseSystem</a>
+                </div>
+                <div class="right menu">
+                    <div class="item">
+                        <div id="notifications-partial-view">
+                            @await Html.PartialAsync("~/Views/Notification/ViewNew.cshtml")
+                        </div>
+                    </div>
+                    <div class="item" style="margin-right: -15px;">
+                        <img src="@user.Data.ProfileImage.Url" alt="Avatar" class="avatar ui mini rounded-circle img-fluid" style="height: 30px; width: 30px;">
+                    </div>
+                    <div class="item">
+                        <a class="text-white" href="@Url.Action("Index", "User")">@user.Data.FirstName @user.Data.LastName</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </header>
+
+    <div style="margin-left: 55px;">
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+
+            <footer id="footer" class="footer-custom">
+                <div style="margin-bottom: -20px;">
+                    <hr style="background-color: #0f3e34; height: 1px; border: none;">
+                </div>
+                <div class="ui grid container">
+                    <div class="eight wide left aligned column" style="margin-top: 10px">
+                        <a class="text-black" style="text-decoration: none;" asp-action="Index" asp-controller="Home">&copy; 2023 - CourseService</a>
+                    </div>
+                    <div class="eight wide right aligned column">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <div class="ui compact text menu right floated float-end">
+                                <a href="https://www.instagram.com/" class="item" target="_blank">
+                                    <i class="instagram icon"></i>
+                                    <span>Instagram</span>
+                                </a>
+                                <a href="https://github.com/gavrylenko-daiana/CourseSystem.git" class="item" target="_blank">
+                                    <i class="github icon"></i>
+                                    <span>Github</span>
+                                </a>
+                                <a href="https://youtu.be/8pIpi1HDEhU?si=JdyYllvMofPqtB7a" class="item" target="_blank">
+                                    <i class="youtube icon"></i>
+                                    <span>Youtube</span>
+                                </a>
+                                <a href="https://t.me/+rGbNDYmIe0IyZTky" class="item" target="_blank">
+                                    <i class="telegram icon"></i>
+                                    <span>Telegram</span>
+                                </a>
+                                <a href="#" class="item">
+                                    <i class="envelope icon"></i>
+                                    <span>Contact</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+<script>
+    $(document).ready(function () {
+        var docHeight = $(window).height();
+        var footerHeight = $('#footer').height();
+        var footerTop = $('#footer').position().top + footerHeight;
+        
+        if (footerTop < docHeight) 
+            $('#footer').css('margin-top', 10 + (docHeight - footerTop) + 'px');
+    });
+</script>
+
+@await RenderSectionAsync("Scripts", false)
+</body>
+</html>

@@ -1,0 +1,184 @@
+@using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using BLL.Interfaces
+@model UI.ViewModels.CourseViewModels.CourseViewModel
+@inject IEducationMaterialService EducationMaterialService
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+            
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
+
+        .user-list {
+            list-style-type: none !important;
+            padding: 0;
+        }
+        
+        .user-item {
+        display: flex;
+                    flex-direction: column;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        
+        /*.user-profile {*/
+        /*    display: flex;*/
+        /*    flex-direction: column;*/
+        /*    margin-bottom: 10px;*/
+        /*    padding: 10px;*/
+        /*}*/
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            margin-right: 10px;
+        }
+        
+        .ui.teal.basic.button {
+            margin-left: auto;
+        }
+        
+        .left-container {
+            float: left;
+            width: 70%; 
+            padding: 0 10px; 
+        }
+        
+        .right-container {
+            float: right;
+            width: 30%; 
+            padding: 0 10px; 
+        }
+        
+        .view-profile-button {
+            width: 100%;
+            text-align: center;
+            white-space: nowrap;
+            margin-top: 10px;   
+        }
+        
+        .user-button {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="ui container mt-4">
+    <div class="ui centered raised card" style="width: 90%;">
+        <div class="content">
+            <div class="header">
+                Course Details
+            </div>
+        </div>
+        <div class="content">
+            <div class="left-container">
+                <h4 class="ui header">@Model.Name</h4>
+
+                @{
+                    var materialsCourse = Model.EducationMaterials.Where(m => m.MaterialAccess is MaterialAccess.Course or MaterialAccess.General).ToList();
+                    var materialIds = string.Join(" ", materialsCourse.Select(m => m.Id));
+                }
+
+                @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                {
+                    <a href="@Url.Action("Create", "Group", new { courseId = Model.Id })" class="ui primary basic button mb-3">Create Group</a>
+                    <a href="@Url.Action("CreateInCourse", "EducationMaterial", new { courseId = Model.Id })" class="ui black basic button mb-3">Upload Education Material</a>
+                }
+
+                <a class="ui black basic button" asp-controller="EducationMaterial" asp-action="IndexMaterials" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
+
+                @if (Model.CurrentGroups != null && Model.CurrentGroups.Any())
+                {
+                    <h5 class="ui header">Groups:</h5>
+                    <div class="ui two stackable cards" style="max-height: 270px; overflow-y: auto;">
+                        @foreach (var group in Model.CurrentGroups)
+                        {
+                            <div class="ui card cover-card">
+                                <div class="content">
+                                    <div class="header">@group.Name</div>
+                                </div>
+                                <div class="extra content ui center aligned">
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="ui details-button button">Details</a>
+                                    @if (Model.CurrentUser.Role != AppUserRoles.Student)
+                                    {
+                                        <div class="ui buttons">
+                                            <a href="@Url.Action("Edit", "Group", new { id = group.Id })" class="ui edit-button button">Edit</a>
+                                            <div class="or"></div>
+                                            <a href="@Url.Action("Delete", "Group", new { id = group.Id })" class="ui delete-button button">Delete</a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="ui warning message">
+                        <p>No groups found for this course.</p>
+                    </div>
+                }
+            </div>
+            <div class="right-container">
+                <div class="ui segment">
+                    @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                    {
+                        <a href="@Url.Action("SelectTeachers", "Course", new { courseId = Model.Id })" class="ui black basic button">Add teachers</a>
+                    }
+
+                    @if (Model.UserCoursesWithoutAdmins != null && Model.UserCoursesWithoutAdmins.Any())
+                    {
+                        <h4 class="ui header">Users:</h4>
+                        <ul class="ui user-list" style="overflow-y: auto; height: 400px; width: 250px">
+                            @foreach (var userCourse in Model.UserCoursesWithoutAdmins)
+                            {
+                                    <li class="user-item" style="display: flex; flex-direction: column; align-items: center;">
+                                        <div class="user-profile" style="display: flex; align-items: center;">
+                                            <div class="user-details" style="display: flex; align-items: center;">
+                                                @if (userCourse.AppUser.ProfileImage != null)
+                                                {
+                                                    <img src="@userCourse.AppUser.ProfileImage.Url" alt="@userCourse.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                                }
+                                            </div>
+                                            <div class="user-button" style="margin-left: auto;">
+                                                <a href="@Url.Action("Detail", "User", new { id = userCourse.AppUser.Id })" class="ui teal basic button view-profile-button" style="width: 175px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    @userCourse.AppUser.FirstName @userCourse.AppUser.LastName - @userCourse.AppUser.Role
+                                                </a>
+                                            </div>
+                                        </div>
+                                        @if (Model.CurrentUser.Role == AppUserRoles.Admin)
+                                        {
+                                            <a href="@Url.Action("DeleteUserFromCourse", "Course", new { courseId = Model.Id, userId = userCourse.AppUser.Id})" class="ui red" style="margin-top: auto;">Delete user</a>
+                                        }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="ui warning message">
+                            <p>User was not found for this course.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

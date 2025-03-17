@@ -1,0 +1,118 @@
+﻿@using UI.ViewModels.AssignmentViewModels
+@using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using BLL.Interfaces
+@model EditAssignmentViewModel
+@inject IGroupService GroupService
+
+@{
+    var group = await GroupService.GetById(Model.GroupId);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Assignment</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+    </style>
+</head>
+<body>
+<div class="ui container" style="margin-top: 20px;">
+    <div class="ui centered card" style="width: 400px;">
+        <div class="content">
+            <div class="header">
+                Edit assignment
+            </div>
+        </div>
+        <div class="content">
+            <form method="post" asp-controller="Assignment" asp-action="Edit" enctype="multipart/form-data" class="ui form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="GroupId" value="@Model.GroupId">
+                <input type="hidden" asp-for="AssignmentFiles" value="@Model.AssignmentFiles">
+
+                <!-- Assignment Details Inputs -->
+                <div class="form-row form-group">
+                    <div class="field">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control">
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control custom-textarea" rows="5"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row form-group">
+                    <div class="field">
+                        <label asp-for="StartDate" class="control-label"></label>
+                        <input asp-for="StartDate" class="form-control" min="@group.Data.StartDate.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddMinutes(-1).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="EndDate" class="control-label"></label>
+                        <input asp-for="EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" max="@group.Data.EndDate.AddMinutes(-1).ToString("yyyy-MM-ddTHH:mm")" type="datetime-local">
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <h6>Assignment files: </h6>
+                
+                @for (int i = 0; i < Model.AssignmentFiles.Count; i++)
+                {
+                    <label>@(i + 1)) @((Model.AssignmentFiles[i].Name.Length > 43) ? $"{Model.AssignmentFiles[i].Name.Substring(0, 40)}..." : Model.AssignmentFiles[i].Name)</label>
+                    <br>
+                }
+
+                <hr/>
+                <h6>Upload new files: </h6>
+                <div class="field">
+                    <label asp-for="NewAddedFiles">Select File:</label>
+                    <input asp-for="NewAddedFiles" type="file" class="form-control">
+                    <span asp-validation-for="NewAddedFiles" class="text-danger"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="field">
+                    <div class="col" style="display: inline-block;">
+                        <input class="ui edit-button button" type="submit" value="Edit"/>
+                    </div>
+                    <div class="col" style="display: inline-block;">
+                        <a href="@Url.Action("Details", "Assignment", new { assignmentId = Model.Id })" class="ui button">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const checkboxes = document.querySelectorAll('.form-check-input');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const value = this.value;
+                const isActive = this.checked;
+                
+                // Update the corresponding input field value
+                document.querySelector(`input[data-url="${value}"]`).value = isActive;
+            });
+        });
+    });
+</script>
+
+<!-- Add Bootstrap JS and other scripts here if needed -->
+<!-- This script is for Bootstrap's JavaScript plugins, including the ones used in the form -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

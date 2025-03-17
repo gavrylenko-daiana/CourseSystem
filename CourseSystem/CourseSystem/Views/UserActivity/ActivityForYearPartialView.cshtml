@@ -1,0 +1,214 @@
+﻿@using BLL.Interfaces;
+@using Core.Helpers;
+@inject IUserService _userService;
+
+@{
+    var currentUserResult = await _userService.GetCurrentUser(User);
+    var activities = currentUserResult.Data.UserActivities;
+
+    var firstDay = DateTime.Now.AddYears(-1);
+
+    while(firstDay.DayOfWeek != DayOfWeek.Monday)
+    {
+        firstDay = firstDay.AddDays(-1);
+    }
+
+    var thisDay = firstDay;
+
+    var Month = new List<string>()
+    {
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+    };
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User activity</title>
+    <!-- Add these lines to your <head> section -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        .activity-table-square{
+        border: 1px solid black;
+        display:block;
+        width: 15px;
+        height: 15px;
+        border-radius: 25%; 
+        }
+
+        .month-link{
+        color: black;
+        font-size: 11px;
+        }
+    
+        .activity-levels {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        }
+
+        .activity-level {
+        display: inline-block;
+        margin: 0 10px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: white;
+        } 
+    
+        .card
+        {
+        padding: 3px;
+        }    
+    </style>
+</head>
+<body>
+@if (TempData["Error"] != null)
+{
+    <div class="col-md-12 alert alert-danger">
+        <span><b>Sorry!</b> - @TempData["Error"]</span>
+    </div>
+}
+    <div class="card">
+        <table>
+            <tr>
+                @{
+                    var monthCounter = thisDay;
+
+                    while (monthCounter < DateTime.Now)
+                    {
+                        var widthCounter = 0;
+                        var thisMonth = monthCounter.Month;
+
+                        while (monthCounter.Month == thisMonth)
+                        {
+                            widthCounter++;
+                            monthCounter = monthCounter.AddDays(7);
+                        }
+
+                        if (widthCounter > 1)
+                        {
+                            <th colspan=@widthCounter>
+                                <a class="month-link" href="@Url.Action("ActivityForMonth", "UserActivity", new { dateTime = monthCounter.AddMonths(-1) })">@Month[thisMonth - 1]</a>
+                            </th>
+                        }
+                    }
+                }
+            </tr>
+            @for (int i = 0; i < 7; i++)
+            {
+                string squareStyle;
+                string titleText = null;
+                <tr>
+                    @{
+                        for (int j = 0; j < 52; j++)
+                        {
+                            var todayActivities = activities.ForDate(thisDay).Data;
+                            if (todayActivities.Count == 0)
+                            {
+                                squareStyle = "background-color:white";
+                                titleText = "No activities";
+                            }
+                            else if (todayActivities.Count == 1)
+                            {
+                                squareStyle = "background-color:#91eda9";
+                                titleText = "1 activity";
+                            }
+                            else if (todayActivities.Count < 3)
+                            {
+                                squareStyle = "background-color:#91eda9";
+                                titleText = $"{todayActivities.Count} activities";
+                            }
+                            else if (todayActivities.Count < 6)
+                            {
+                                squareStyle = "background-color:#32a851";
+                                titleText = $"{todayActivities.Count} activities";
+                            }
+                            else
+                            {
+                                squareStyle = "background-color:#047822";
+                                titleText = $"{todayActivities.Count} activities";
+                            }
+                            <th>
+                                <a class="activity-table-square" data-bs-toggle="tooltip" data-bs-placement="bottom" title="@titleText on @thisDay.ToString("D")" style=@squareStyle href="@Url.Action("ActivityForDay", "UserActivity", new { thisDay })"></a>
+                            </th>
+
+                            thisDay = thisDay.AddDays(7);
+                        }
+
+                        if (thisDay < DateTime.Now)
+                        {
+                            var todayActivities = activities.ForDate(thisDay).Data;
+                            if (todayActivities.Count == 0)
+                            {
+                                squareStyle = "background-color:white";
+                                titleText = "No activities";
+                            }
+                            else if (todayActivities.Count == 1)
+                            {
+                                squareStyle = "background-color:#91eda9";
+                                titleText = "1 activity";
+                            }
+                            else if (todayActivities.Count < 3)
+                            {
+                                squareStyle = "background-color:#91eda9";
+                                titleText = $"{todayActivities.Count} activities";
+                            }
+                            else if (todayActivities.Count < 6)
+                            {
+                                squareStyle = "background-color:#32a851";
+                                titleText = $"{todayActivities.Count} activities";
+                            }
+                            else
+                            {
+                                squareStyle = "background-color:#047822";
+                                titleText = $"{todayActivities.Count} activities";
+                            }
+
+                            <th>
+                                <a class="activity-table-square" data-bs-toggle="tooltip" data-bs-placement="bottom" title="@titleText on @thisDay.ToString("D")" style=@squareStyle href="@Url.Action("ActivityForDay", "UserActivity", new { thisDay })"></a>
+                            </th>
+                        }
+                    }
+                </tr>
+
+                firstDay = firstDay.AddDays(1);
+                thisDay = firstDay;
+            }
+        </table>
+        <div class="activity-levels">
+            <div class="activity-level" style="background-color: #91eda9;">1 activity</div>
+            <div class="activity-level" style="background-color: #32a851;">3-5 activities</div>
+            <div class="activity-level" style="background-color: #047822;">6+ activities</div>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                placement: 'top',
+                container: 'body',
+            });
+        });
+    </script>
+</body>
+</html>

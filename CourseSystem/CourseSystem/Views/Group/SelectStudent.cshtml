@@ -1,0 +1,149 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@using System.Web;
+@using BLL.Interfaces
+@using BLL.Services
+@using X.PagedList.Web.Common;
+@model X.PagedList.IPagedList<UI.ViewModels.UserSelectionViewModel>
+@inject IUserService UserService
+
+<style>
+    body {
+        background-color: #f7f7f7;
+    }
+
+    .cover-card:hover {
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border: #4682B4 1px solid;
+    }
+
+    .ui.container {
+        margin-top: 20px;
+    }
+
+    .add-course-button {
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    #fixedPagination {
+        margin-top: 158px;
+    }
+</style>
+
+<div class="ui container mt-4">
+    <h3 class="ui header">Invite students:</h3>
+    <div style="flex-grow: 1; text-align: center;">
+        <div class="ui search" style="margin-right: 10px;">
+            <form method="get" asp-action="SelectStudent" asp-controller="Group" class="ui form inline">
+                <div class="ui icon input">
+                    <input type="hidden" id="id" name="id" value="@ViewBag.GroupId"/>
+                    <input type="text" name="searchQuery" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;"/>
+                    <button type="submit" style="background: none; border: none; padding: 0;">
+                        <i class="inverted circular search link icon"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <hr class="ui divider">
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui negative message">
+            <i class="close icon"></i>
+            <div class="header">
+                Attention!
+            </div>
+            <p>@TempData["Error"]</p>
+        </div>
+    }
+    <div class="ui stackable three column grid">
+        @if (!Model.Any())
+        {
+            <div class="column">
+                <div class="ui warning message">No students found.</div>
+            </div>
+        }
+        else
+        {
+            foreach (var userSelection in Model)
+            {
+                var user = (await UserService.FindByIdAsync(userSelection.Id)).Data;
+
+                <div class="column mt-2">
+                    <a href="@Url.Action("Detail", "User", new { id = userSelection.Id })">
+                        <div class="ui card cover-card">
+                            <div class="content">
+                                <div class="header" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                                    @if (user.ProfileImage != null)
+                                    {
+                                        <img src="@user.ProfileImage.Url" alt="@user.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 1px;">
+                                    }
+                                    <div>
+                                        @user.FirstName @user.LastName
+                                    </div>
+                                    <div style="margin-top: 10px; text-align: center;">
+                                        <form asp-action="SendInventationToStudent" asp-controller="Group" method="post">
+                                            <input type="hidden" name="groupId" value="@ViewBag.GroupId"/>
+                                            <input type="hidden" name="studentId" value="@userSelection.Id"/>
+                                            <input type="hidden" name="page" value="@Model.PageNumber"/>
+                                            <button type="submit" class="ui details-button button">Send Invitation</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        }
+    </div>
+
+    @* @if (ViewBag.Approved) *@
+    @* { *@
+    @*     <a type="submit" class="btn btn-success mt-2" asp-route-students="@Model" asp-route-groupId="@ViewBag.GroupId" asp-action="ApprovedSelection" asp-controller="Group">Submit</a> *@
+    @* } *@
+    @* else *@
+    @* { *@
+    @*     <a type="submit" class="btn btn-success mt-2" asp-route-students="@Model" asp-route-groupId="@ViewBag.GroupId" asp-action="ConfirmSelection" asp-controller="Group">Submit</a> *@
+    @* } *@
+
+</div>
+
+<div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+    @if (Model.PageCount > 1)
+    {
+        if (Model.Count <= Model.PageSize / 2)
+        {
+            <div id="fixedPagination" class="pagination-container">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                <div>
+                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectStudent", new { page = page, searchQuery = ViewBag.SearchQuery }),
+                        new PagedListRenderOptions
+                        {
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" },
+                            MaximumPageNumbersToDisplay = 3
+                        })
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="pagination-container">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                <div>
+                    @Html.PagedListPager((IPagedList)Model, page => Url.Action("SelectStudent", new { page = page, searchQuery = ViewBag.SearchQuery }),
+                        new PagedListRenderOptions
+                        {
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" },
+                            MaximumPageNumbersToDisplay = 3
+                        })
+                </div>
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,90 @@
+@using UI.ViewModels
+@model ForgotViewModel
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Check Code</title>
+    <style>
+        .forgot-password-body{
+            background-color: #f7f7f7;
+        }
+        .forgot-password-main-container{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 30% !important;
+            position: absolute !important;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin-left: 55px;
+        }
+        .buttons{
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .ui.buttons
+        {
+            margin-top: 20px;
+        }
+    </style>    
+</head>
+<body>
+<div class="forgot-password-body">
+    <div class="ui centered card forgot-password-main-container">
+        <div class="content">
+            <div class="header mt-3">
+                <h3 class="ui center aligned header">
+                    Enter the code came to your email
+                </h3>
+            </div>
+        </div>
+        <div class="content" style="text-align: center; width: 100%">
+            <form method="post" asp-controller="Account" asp-action="CheckEmailCode" >
+                <input type="hidden" asp-for="Email" value="@Model.Email"/>
+                <input type="hidden" asp-for="ForgotEntity" value="@Model.ForgotEntity"/>
+                <input type="hidden" name="code" value="@TempData["Code"]"/>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="EmailCode" class="control-label"></label>
+                    <input asp-for="EmailCode" name="emailCode" class="form-control" placeholder="Enter code" value=""/>
+                    <span asp-validation-for="EmailCode" class="text-danger" style="visibility: hidden;"></span>
+                </div>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <div class="ui buttons">
+                        <input class="ui edit-button button" type="submit" value="Send code" />
+                        <div class="or"></div>
+                        <a class="ui button btn-outline-dark" asp-controller="Account" asp-action="Login">Cancel</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="ui buttons">
+                        <input class="ui edit-button button" type="submit" value="Send code" />
+                        <div class="or"></div>
+                        <a class="ui button btn-outline-dark" asp-controller="User" asp-action="Index">Cancel</a>
+                    </div>
+                }
+            </form>
+             @if (TempData["Error"] != null)
+             {
+                 <div class="col-md-12 alert alert-danger">
+                     <span><b>Sorry!</b> - @TempData["Error"]</span>
+                 </div>
+             }
+             @if (TempData["SuccessMessage"] != null)
+             {
+                 <p class="text-success">@TempData["SuccessMessage"]</p>
+             }           
+        </div>
+    </div>
+</div>
+</body>
+</html>

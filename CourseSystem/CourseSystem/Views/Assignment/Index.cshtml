@@ -1,0 +1,254 @@
+﻿@using UI.ViewModels.AssignmentViewModels
+@using Core.Enums
+@using X.PagedList.Mvc.Core; 
+@using X.PagedList;
+@using System.Web;
+@using X.PagedList.Web.Common;
+@model X.PagedList.IPagedList<AssignmentViewModel>
+ 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no" />
+    <meta name="description"
+          content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI." />
+    <meta name="keywords" content="Semantic-UI, Theme, Design, Template" />
+    <meta name="author" content="PPType" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments</title>
+
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add Font Awesome CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
+
+        .ui.container {
+            margin-top: 20px;
+        }
+
+        .add-course-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .cover-card {
+            height: 270px; 
+        } 
+        
+        #fixedPagination {
+            margin-top: 200px;
+        }
+    </style>
+</head>
+<body>
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui negative message">
+            <p><b>Sorry!</b> - @TempData["Error"]</p>
+        </div>
+    }
+    <div class="ui container">
+        <div style="display: flex; align-items: center;">
+            <h3 class="ui header">Assignments</h3>
+            <div style="flex-grow: 1; text-align: center;">
+                <div class="ui search" style="margin-right: 10px;">
+                    <form method="get" asp-action="Index" asp-controller="Assignment" class="ui form inline">
+                        <div class="ui icon input">
+                            <input type="hidden" id="groupId" name="groupId" value="@ViewBag.GroupId" />
+                            <input type="text" name="currentQueryFilter" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;" />
+                            <button type="submit" style="background: none; border: none; padding: 0;">
+                                <i class="inverted circular search link icon"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>            
+            </div>
+            @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+            {
+                <div class="ui compact menu" style="margin-right: 10px;">
+                    <div class="ui simple dropdown item">
+                        Actions:
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            <div class="item">
+                                <a href="@Url.Action("Create", "Assignment", new { groupId = ViewBag.GroupId })">Create new Assignment</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="ui compact menu" style="margin-right: 10px;">
+                <div class="ui simple dropdown item">
+                    Sort by
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <div class="item">
+                            @if (ViewBag.StartDateParam == SortingParam.StartDate)
+                            {
+                                <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam,
+                                currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter })"><i class="fa fa-arrow-up" aria-hidden="true"></i>  Start date</a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.StartDateParam,
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i>  Start date</a>
+                            }
+                        </div>
+                        <div class="item">
+                            @if (ViewBag.EndDateParam == SortingParam.EndDate)
+                            {
+                                <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam,
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-up" aria-hidden="true"></i> End date</a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.EndDateParam,
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i> End date</a>
+                            }
+                        </div>
+                        <div class="item">
+                            @if (ViewBag.NameSortParam == SortingParam.Name)
+                            {
+                                <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam,
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-up" aria-hidden="true"></i> Name</a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, sortOrder = ViewBag.NameSortParam,
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter= ViewBag.CurrentAccessFilter})"><i class="fa fa-arrow-down" aria-hidden="true"></i> Name</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui compact menu" style="margin-right: 10px;">
+                <div class="ui simple dropdown item">
+                    Filter by status
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+                        {
+                            <div class="item">
+                                <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.Planned.ToString(),
+                                 currentQueryFilter = ViewBag.CurrentQueryFilter})">Planned</a>
+                            </div>
+                        }
+                        <div class="item">
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.InProgress.ToString(),
+                             currentQueryFilter = ViewBag.CurrentQueryFilter})">In progress</a>
+                        </div>
+                        <div class="item">
+                            <a href="@Url.Action("Index", "Assignment", new { groupId = ViewBag.GroupId, currentAccessFilter = AssignmentAccess.Completed.ToString(),
+                             currentQueryFilter = ViewBag.CurrentQueryFilter})">Completed</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>     
+        <hr class="ui divider">
+        <div class="ui stackable three column grid assignments-container">
+            @if (Model.Any())
+            {
+                @foreach (var assignment in Model)
+                {
+                        <div class="column">
+                            <div class="ui card cover-card">
+                                @if (User.IsInRole(AppUserRoles.Teacher.ToString()))
+                                {
+                                    <div class="card-header bg-transparent border-success">
+                                        @assignment.AssignmentAccess.ToString()
+                                    </div>
+                                }
+                           <div class="content">
+                               <h4 class="header">@assignment.Name</h4>
+                               <div class="card-footer text-muted">Start Date: @assignment.StartDate.ToString("dddd, dd MMMM yyyy HH:mm")</div>
+                               <div class="card-footer text-muted">End date: @assignment.EndDate.ToString("dddd, dd MMMM yyyy HH:mm")</div>
+                           </div>
+                                <div class="extra content">
+                                    <a href="@Url.Action("Details", "Assignment", new { assignmentId = assignment.Id })" class="ui details-button button">
+                                        Details
+                                    </a> 
+                                </div>
+                            </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="column">
+                    <div class="ui warning message">No assignments found.</div>
+                </div>
+            }        
+        </div>
+
+        <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+            @if (Model.PageCount > 1)
+            {
+                if (Model.Count <= Model.PageSize / 2)
+                {
+                    <div id="fixedPagination" class="pagination-container">
+                        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                        <div>
+                            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
+                                new PagedListRenderOptions
+                                {
+                                    LiElementClasses = new string[] { "page-item" },
+                                    PageClasses = new string[] { "page-link" },
+                                    MaximumPageNumbersToDisplay = 3
+                                })
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="pagination-container">
+                        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                        <div>
+                            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { groupId = ViewBag.GroupId, page = page, sortOrder =  ViewBag.CurrentSort, currentQueryFilter = ViewBag.CurrentQueryFilter, currentAccessFilter = ViewBag.CurrentAccessFilter }),
+                                new PagedListRenderOptions
+                                {
+                                    LiElementClasses = new string[] { "page-item" },
+                                    PageClasses = new string[] { "page-link" },
+                                    MaximumPageNumbersToDisplay = 3
+                                })
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.ui.dropdown').dropdown();
+        });
+    </script>
+    <script>
+        document.querySelectorAll('.ui.card').forEach(card => {
+            card.addEventListener('click', function () {
+                window.location.href = this.querySelector('.ui.details-button.button').href;
+            });
+        });
+    </script>
+</body>
+</html>
+
+

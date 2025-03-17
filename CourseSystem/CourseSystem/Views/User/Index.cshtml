@@ -1,0 +1,126 @@
+@using Core.Models
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Core.Enums
+@model AppUser
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile Settings</title>
+    <!-- Add Font Awesome CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+
+</head>
+<body class="user-profile-index">
+    <div class="ui container" style="margin-top: 20px;">
+        <div class="ui grid equal-height" style="display: flex; align-items: stretch;">
+            <div class="four wide column">
+                <div class="ui segment with-shadow">
+                    <div class="ui icon header" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                        @if (Model.ProfileImage != null)
+                        {
+                            <div class="image-block">
+                                <img src="@Model.ProfileImage.Url" alt="@Model.ProfileImage.Name" class="ui mini rounded-circle img-fluid" style="max-width: 210px; max-height: 210px; display: inline-block; vertical-align: middle;">
+                            </div>
+                        }
+                        Profile Image
+                    </div>
+                </div>
+            </div>
+            <div class="twelve wide column">
+                <div class="ui segment with-shadow">
+                    <div class="ui right floated small delete-button button">
+                        <a asp-controller="User" asp-action="Delete" class="white-text">
+                            <i class="trash icon"></i>
+                            <span>Delete Account</span>
+                        </a>
+                    </div>
+                    <div class="ui right floated small edit-button button">
+                        <a asp-controller="User" asp-action="Edit" class="white-text">
+                            <i class="edit icon"></i>
+                            <span>Edit Profile</span>
+                        </a>
+                    </div>
+                    <h2 class="ui header">@Model.FirstName @Model.LastName</h2>
+                    <p>
+                        <strong class="grey-text">Email:</strong> @Model.Email
+                    </p>
+
+                    @if (Model.BirthDate.HasValue)
+                    {
+                        <p>
+                            <strong class="grey-text">Birthday:</strong> @Model.BirthDate.Value.ToString("yyyy-MM-dd")
+                        </p>
+                    }
+
+                    @if (Model.University != null)
+                    {
+                        <p>
+                            <strong class="grey-text">University:</strong> @Model.University
+                        </p>
+                    }
+
+                    @if (Model.Telegram != null)
+                    {
+                        <p>
+                            <strong class="grey-text">Telegram:</strong> @Model.Telegram
+                        </p>
+                    }
+
+                    @if (Model.GitHub != null)
+                    {
+                        <p>
+                            <strong class="grey-text">GitHub:</strong> @Model.GitHub
+                        </p>
+                    }
+
+                    <p>
+                        <strong class="grey-text">Role:</strong> @Model.Role
+                    </p>
+
+                    @if (User.IsInRole(AppUserRoles.Admin.ToString()))
+                    {
+                        <div class="ui segment">
+                            <label>Your Functions:</label>
+                            <div class="ui list">
+                                <div class="item">
+                                    <a class="ui details-button button" asp-controller="Account" asp-action="RegisterNewAdmin">Add new Admin</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui container py-2" style="margin-top:20px;">
+        <div class="ui grid">
+            <div class="column">
+                <div class="ui segment with-shadow">
+                    <h3 class="ui header">Activity</h3>
+                    <div class="activity-container">
+                        @await Html.PartialAsync("~/Views/UserActivity/ActivityForYearPartialView.cshtml")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-12 alert alert-danger">
+            <span><b>Sorry!</b> - @TempData["Error"]</span>
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <p class="text-success">@TempData["SuccessMessage"]</p>
+    }
+</body>
+</html>
+
+
+

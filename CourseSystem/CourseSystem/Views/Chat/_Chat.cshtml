@@ -1,0 +1,220 @@
+﻿@using UI.ViewModels
+@using Core.Models
+@using Microsoft.AspNetCore.Identity
+@model AssignmentChatViewModel
+@inject UserManager<AppUser> UserManager
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Course</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .chat-user {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .chat-username {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .chat-content {
+            background-color: #f7f7f7;
+            position: relative;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .chat-text {
+            margin: 0;
+            padding: 5px 10px;
+            background-color: #f7f7f7;
+            border-radius: 10px;
+        }
+
+        .chat-timestamp {
+            font-style: italic;
+            bottom: 5px;
+            right: 8px;
+        }
+
+        .rounded-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+
+        #errorMessage {
+            color: red;
+        }
+
+        #inputForm {
+            margin-bottom: 20px;
+        }
+
+        #message {
+            border-radius: 15px;
+            margin-right: 10px;
+            padding: 6px;
+        }
+
+        #sendBtn {
+            background-color: #5DADE2;
+            color: white;
+            border: none;
+            padding: 6px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+    </style>
+   
+</head>
+<body>
+    <div id="errorMessage"></div>
+
+    <div id="inputForm">
+        @*<input type="text" name="currentQueryFilter" placeholder="Search..." style="border-radius: 15px; margin-right: 10px;" />
+        <button type="submit" style="background: none; border: none; padding: 0;">
+        <i class="inverted circular search link icon"></i>
+        </button>*@
+        <input type="hidden" id="assignmentId" value=@Model.Id />
+        <input type="text" id="message" placeholder="Type message..." style="border-radius: 15px; margin-right: 10px; padding: 6px;" />
+        <input type="button" id="sendBtn" value="Send" disabled="disabled" style="background-color: #5DADE2; color: white; border: none; padding: 6px; border-radius: 5px; cursor: pointer;">
+    </div>
+    <div id="chatroom" style="margin-top: 20px;">
+        @foreach (var message in Model.ChatMessages.OrderByDescending(m => m.Created).ToList())
+        {
+            <div id="name" style="display: flex; align-items: center;">
+                <img src="@message.AppUser.ProfileImage.Url" alt="@message.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px; margin-right: 10px;">
+                <p><b>@message.AppUser.FirstName @message.AppUser.LastName :</b></p>
+            </div>
+            <div id ="text" style="margin-left: 40px; position: relative; padding: 10px; border-radius: 10px; background-color: #f7f7f7;">
+                <p style="margin: 0; padding-bottom: 7px; background-color: #f7f7f7;">@message.Text</p>
+                <i style="position: absolute; bottom: 5px; right: 8px;">@message.Created.ToString("g")</i>
+            </div>
+
+
+            @*<img src="@message.AppUser.ProfileImage.Url" alt="@message.AppUser.ProfileImage.Name" class="rounded-circle img-fluid" style="width: 30px; height: 30px">
+        <p>
+        <b>@message.AppUser.FirstName @message.AppUser.LastName :</b>
+        @message.Text
+        <br />
+        <i>@message.Created.ToString("g")</i>
+        </p>*@
+        }
+    </div>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat.js"></script>
+    <script>
+       
+        const hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chat")
+            .build();
+
+        document.getElementById("sendBtn").addEventListener("click", function () {
+            let message = document.getElementById("message").value;
+            let assignment = document.getElementById("assignmentId").value;
+            hubConnection.invoke("Send", message, assignment)
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+
+            document.getElementById("message").value = null;
+        });
+        hubConnection.on("Receive", function (message, userName, created, imageUrl) {
+            document.getElementById("errorMessage").innerText = null;
+
+            const chatMessageDiv = document.createElement("div");
+            chatMessageDiv.classList.add("chat-message"); 
+
+            const chatUserDiv = document.createElement("div");
+            chatUserDiv.classList.add("chat-user"); 
+
+            const profileImage = document.createElement("img");
+            profileImage.src = imageUrl; 
+            profileImage.alt = "Profile Image";
+            profileImage.classList.add("rounded-circle", "img-fluid"); 
+
+            const userNameElem = document.createElement("div");
+            userNameElem.textContent = `${userName} : `;
+            userNameElem.classList.add("chat-username");
+
+            chatUserDiv.appendChild(profileImage);
+            chatUserDiv.appendChild(userNameElem);
+
+            const chatContentDiv = document.createElement("div");
+            chatContentDiv.classList.add("chat-content"); 
+
+            const chatText = document.createElement("p");
+            chatText.textContent = message;
+            chatText.classList.add("chat-text"); 
+
+            const timestamp = document.createElement("div");
+            timestamp.textContent = created;
+            timestamp.classList.add("chat-timestamp"); 
+
+            chatContentDiv.appendChild(chatText);
+            chatContentDiv.appendChild(timestamp);
+
+            chatMessageDiv.appendChild(chatUserDiv);
+            chatMessageDiv.appendChild(chatContentDiv);
+
+            const chatroom = document.getElementById("chatroom");
+            chatroom.insertBefore(chatMessageDiv, chatroom.firstChild);
+        });
+
+
+        //hubConnection.on("Receive", function (message, userName, created) {
+
+        //    document.getElementById("errorMessage").innerText = null;
+
+        //    const userNameElem = document.createElement("b");
+        //    userNameElem.textContent = `${userName} : `;
+
+        //    const createdElem = document.createElement("i");
+        //    createdElem.innerHTML = `<br/ >${created}`;
+
+        //    const elem = document.createElement("p");
+        //    elem.appendChild(userNameElem);
+        //    elem.appendChild(document.createTextNode(message));
+        //    elem.appendChild(createdElem);
+
+        //    const firstElem = document.getElementById("chatroom").firstChild;
+        //    document.getElementById("chatroom").insertBefore(elem, firstElem);
+        //});
+
+        hubConnection.on("Error", function (message) {
+            document.getElementById("errorMessage").innerText = message;
+        });
+
+        hubConnection.start()
+            .then(function () {
+                document.getElementById("sendBtn").disabled = false;
+
+                let assignment = document.getElementById("assignmentId").value;
+                hubConnection.invoke("AddToAssignmentChat", assignment)
+                    .catch(function (err) {
+                        document.getElementById("errorMessage").innerText = "Something went wrong! Please, try reloading this page.";
+                        document.getElementById("sendBtn").disabled = true;
+                    });
+            })
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+    </script>
+</body>
+</html>
+
+    

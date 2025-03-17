@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<body id="home">
+<div class="home-container" style="margin-top: 20px;">
+    <div class="home-content-row">
+        <div class="home-left-col">
+            <h1 class="home-title">Discover new study opportunities with us</h1>
+            <p class="home-text">
+                “Explore a world of learning opportunities on our inspiring and user-friendly platform.
+                Whether you want to succeed as a student or as a passionate teacher who wants to share knowledge, our platform is designed to meet your needs.”
+            </p>
+            <div class="indicator">
+                <span class="active"></span>
+                <span class="indicator-span"></span>
+                <span class="indicator-span"></span>
+                <span class="indicator-span"></span>
+            </div>
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <form asp-action="Login" asp-controller="Account" method="get">
+                    <button type="submit" class="home-button">
+                        <span >Get Started</span>
+                    </button>
+                </form>
+            }
+
+        </div>
+        <div class="home-right-col">
+            <img src="https://dl.dropboxusercontent.com/scl/fi/x80ly7qhl3kt3vxa2dz0n/Developer-activity-bro.png?rlkey=x64wmm65s3c3gf9eyt245yvbe&dl=0" alt="budda">
+        </div>
+
+    </div>
+    <div class="social-links">
+        <a href="https://uk-ua.facebook.com/">
+            <img src="https://dl.dropboxusercontent.com/scl/fi/uat2x441cl974ks4f1ty7/icons8-facebook-messenger-96.png?rlkey=td935vjhqa0t3cux5ch0rrga7&dl=0" alt="facebook">
+        </a>
+        <a href="https://www.instagram.com/">
+            <img src="https://dl.dropboxusercontent.com/scl/fi/rgq5lezt7gw4ky8j3stf3/icons8-instagram-100.png?rlkey=frh00ma5r1er8lwpih2pgmzau&dl=0" alt="instagram">
+        </a>
+    </div>
+</div>
+</body>

@@ -1,0 +1,55 @@
+@model UI.ViewModels.CourseViewModels.CourseViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Course</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui container" style="margin-top: 20px;">
+        <div class="ui centered card" style="width: 400px;">
+            <div class="content">
+                <div class="header">
+                    Create New Course
+                </div>
+            </div>
+            <div class="content">
+                @using (Html.BeginForm("Create", "Course", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    <div class="ui form">
+                        <div class="field">
+                            <label>@Html.LabelFor(model => model.Name)</label>
+                            @Html.TextBoxFor(model => model.Name, new { @class = "ui input" })
+                        </div>
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="ui negative message">
+                                <p><b>Sorry!</b> - @TempData["Error"]</p>
+                            </div>
+                        }
+                        
+                      <div class="field">
+                          @Html.LabelFor(model => model.UploadImage, htmlAttributes: new { @class = "control-label" })
+                          <div class="ui input">
+                              <input asp-for="UploadImage" type="file" accept="image/*">
+                          </div>
+                          <span asp-validation-for="UploadImage" class="text-danger"></span>
+                      </div>
+
+                        <button type="submit" class="ui create-button button">Create</button>
+                        <a href="@Url.Action("Index", "Course")" class="ui button">Cancel</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>

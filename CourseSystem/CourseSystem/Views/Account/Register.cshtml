@@ -1,0 +1,171 @@
+@using UI.ViewModels
+@using Core.Enums
+@using Core.Models
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<AppUser> UserManager
+
+@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+    var userAdmins = await UserManager.GetUsersInRoleAsync(AppUserRoles.Admin.ToString());
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI."
+    />
+    <meta name="keywords" content="Semantic-UI, Theme, Design, Template" />
+    <meta name="author" content="PPType" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Register</title>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+        type="text/css"
+    />
+    <style type="text/css">
+      body {
+        background-color: #EBF4EC; 
+        -webkit-font-smoothing: antialiased;
+        -moz-font-smoothing: grayscale;
+      }
+
+      body > .ui.grid {
+        height: 100%;
+      }
+
+      .column {
+        max-width: 450px;
+      }
+    </style>    
+</head>
+<body>
+    <div class="ui middle aligned center aligned grid">
+      <div class="column register-customn-position">
+        <h2 class="ui teal center aligned header">
+            <h1 class="text-black">Sign up
+            new account</h1>
+        </h2>
+          <form class="ui large form" asp-action="Register">
+              <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+              <div class="ui stacked segment">
+                  <div class="field">
+                      <label asp-for="FirstName" class="control-label"></label>
+                      <div class="ui left icon input">
+                          <i class="user icon"></i>
+                          <input asp-for="FirstName" class="form-control" placeholder="First Name" type="text">
+                      </div>
+                      <span asp-validation-for="FirstName" class="text-danger"></span>
+                  </div>
+                  <div class="field">
+                      <label asp-for="LastName" class="control-label"></label>
+                      <div class="ui left icon input">
+                          <i class="user icon"></i>
+                          <input asp-for="LastName" class="form-control" placeholder="Last Name" type="text">
+                      </div>
+                      <span asp-validation-for="LastName" class="text-danger"></span>
+                  </div>
+                  <div class="field">
+                      <label asp-for="Email" class="control-label"></label>
+                      <div class="ui left icon input">
+                          <i class="user circle outline icon"></i>
+                          <input asp-for="Email" class="form-control" placeholder="Email" type="text">
+                      </div>
+                      <span asp-validation-for="Email" class="text-danger"></span>
+                  </div>
+                  <div class="field">
+                      <label asp-for="Password" class="control-label"></label>
+                      <div class="ui left icon input">
+                          <i class="lock icon"></i>
+                          <input asp-for="Password" class="form-control" placeholder="Password" type="password">
+                      </div>
+                      <span asp-validation-for="Password" class="text-danger"></span>
+                  </div>
+                  <div class="field">
+                      <label asp-for="ConfirmPassword" class="control-label"></label>
+                      <div class="ui left icon input">
+                          <i class="lock icon"></i>
+                          <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm password" type="password">
+                      </div>
+                      <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                  </div>   
+                  <div class="field">
+                        <label asp-for="Role" class="control-label"></label>
+                        <select asp-for="Role" class="form-control">
+                                @if (userAdmins.Count() != 0)
+                                {
+                                    @foreach (var priorityValue in Enum.GetValues(typeof(AppUserRoles)))
+                                    {                                       
+                                        if ((int)priorityValue != 0)
+                                        {
+                                            <option value="@priorityValue">@priorityValue</option>
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="@AppUserRoles.Admin">@AppUserRoles.Admin</option>
+                                }
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger"></span>
+                  </div>
+                  @if (TempData["Error"] != null)
+                  {
+                      <div class="ui negative message">
+                          <i class="close icon"></i>
+                          <div class="header">
+                              Sorry!
+                          </div>
+                          <p>@TempData["Error"]</p>
+                      </div>
+                  }
+                  @if (ViewData["Error"] != null)
+                  {
+                      <div class="ui negative message">
+                          <i class="close icon"></i>
+                          <div class="header">
+                              Sorry!
+                          </div>
+                          <p>@ViewData["Error"]</p>
+                      </div>
+                  }                  
+                  
+                  <input class="ui fluid large submit button" type="submit" value="Sign up" style="background-color: #1b6054; color:white;"/>
+              </div>
+              <div class="ui error message"></div>
+          </form>
+            <form method="post" asp-action="ExternalLogin">
+                <div>
+                    @foreach (var provider in Model.ExternalLogins)
+                    {
+                        <button type="submit" class="btn btn-outline-success" style="width:100%"
+                                name="provider" value="@provider.Name"
+                                title="Register with your @provider.DisplayName account">
+                            Register with your @provider.DisplayName account
+                        </button>
+                    }
+                </div>
+            </form>
+      </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('.ui.selection.dropdown').dropdown();
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
+</body>
+</html>

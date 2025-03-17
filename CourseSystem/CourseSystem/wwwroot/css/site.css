@@ -1,0 +1,391 @@
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+    /*background-color: #35DE9C !important;*/
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+body {
+    margin-bottom: 60px;
+    background-color: #f7f7f7;
+}
+
+.details-button {
+    background-color: #3CB371 !important;
+    color: white !important;
+}
+
+.edit-button {
+    background-color: #4682B4 !important;
+    color: white !important;
+}
+
+.delete-button {
+    background-color: #B22222 !important;
+    color: white !important;
+}
+
+.create-button {
+    background-color: #2E8B57 !important;
+    color: white !important;
+}
+
+.details-button:hover,
+.edit-button:hover,
+.delete-button:hover,
+.create-button:hover {
+    filter: brightness(85%) !important;
+}
+
+.code-textarea {
+    width: 100%;
+    height: 400px;
+    font-family: monospace;
+    padding: 10px;
+    border: 1px solid #ccc;
+    resize: none;
+}
+
+/*User Interface in Index User*/
+
+.user-profile-index {
+    background-color: #f7f7f7 !important;
+}
+
+.user-profile-index .image-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.user-profile-index .ui.grid.equal-height {
+    display: flex;
+    align-items: stretch;
+}
+
+.user-profile-index .ui.grid.equal-height .column {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-profile-index .ui.grid.equal-height .column > .ui.segment {
+    flex: 1;
+}
+
+.user-profile-index .white-text {
+    color: white;
+}
+
+.user-profile-index .white-text:hover {
+    color: white;
+}
+
+.user-profile-index .grey-text {
+    color: grey;
+}
+
+.page-link {
+    background-color: #1b6054 !important;
+    color: white !important;
+}
+
+.user-profile-index .with-shadow {
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+/*Notification page START*/
+
+.notification-icon {
+    font-size: 24px;
+    color: white;
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    left: 20px;
+    min-width: 20px;
+    padding: 3px 6px;
+    border-radius: 50%;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    text-align: center;
+}
+
+.sign-out-custom-position {
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
+    bottom: 0;
+}
+
+#notifications-menu {
+    max-height: 70vh;
+    overflow: auto;
+}
+
+.unread {
+    font-weight: bold;
+    color: #0066cc;
+}
+
+.body-notification-custom {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.card-notification-custom {
+    border: none;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    border-radius: 20px;
+    background-color: #fff;
+}
+
+.card-notification-custom:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+.card-header-notification-custom {
+    background-color: #1b6054;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+}
+
+.card-body-notification-custom {
+    padding: 20px;
+}
+
+.notification-text-notification-custom {
+    font-size: 18px;
+    line-height: 1.4;
+}
+
+.notification-date-notification-custom {
+    font-size: 14px;
+    color: #777;
+}
+
+.error-message-notification-custom {
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/*Notification page END*/
+
+/*Activity page START*/
+
+.activity-details-container {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-left: 55px;
+}
+
+.body-activity-custom {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.card-activity-custom {
+    border: none;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    border-radius: 20px;
+    background-color: #fff;
+}
+
+.card-activity-custom:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+.card-header-activity-custom {
+    background-color: #1b6054;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+}
+
+.card-body-activity-custom {
+    padding: 20px;
+}
+
+.activity-text-custom {
+    font-size: 18px;
+    line-height: 1.4;
+}
+
+.activity-date-custom {
+    font-size: 14px;
+    color: #777;
+}
+
+.error-message-activity-custom {
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/*Activity page END*/
+
+/*Header bg-color START*/
+
+.background-color-header {
+    /*background-color: #078c61; !important;*/
+    /*background-color: rgba(75, 12, 199, 1);*/
+    /*background-color: #02af78;*/
+    background-color: #12302a;
+}
+
+/*Header bg-color END*/
+
+/*Home page - START*/
+#home {
+    margin: 0;
+    padding: 0;
+}
+
+.home-logo img {
+    width: 30px;
+    cursor: pointer;
+    margin: 25px 0;
+}
+
+.home-content-row {
+    width: 85%;
+    display: flex;
+    align-items: center;
+    margin: auto;
+}
+
+.home-left-col, .home-right-col {
+    /*flex-basis: 50%;*/
+}
+
+.home-title {
+    font-size: 40px;
+    color: #1E1919;
+    letter-spacing: 2px;
+}
+
+.home-text {
+    color: #1E1919;
+    margin: 30px 0;
+    font-size: 14px;
+    line-height: 22px;
+}
+
+.indicator {
+    display: flex;
+}
+
+.indicator-span {
+    width: 5px;
+    height: 5px;
+    border: 1px solid #1E1919;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.active {
+    background: #1E1919;
+}
+
+.home-right-col img {
+    width: 100%;
+}
+
+.social-links {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.social-links img {
+    width: 40px;
+    display: block;
+    margin: 30px 0;
+}
+
+.home-button {
+    padding: 0.1em 0.25em;
+    width: 13em;
+    height: 4.2em;
+    background-color: #212121;
+    border: 0.08em solid #fff;
+    border-radius: 0.3em;
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+.home-button span {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 0.4em;
+    width: 8.25em;
+    height: 2.5em;
+    background-color: #212121;
+    border-radius: 0.2em;
+    font-size: 1.5em;
+    color: #fff;
+    border: 0.08em solid #fff;
+    box-shadow: 0 0.4em 0.1em 0.019em #fff;
+}
+
+.home-button span:hover {
+    transition: all 0.5s;
+    transform: translate(0, 0.4em);
+    box-shadow: 0 0 0 0 #fff;
+}
+
+.home-button span:not(hover) {
+    transition: all 1s;
+}
+
+/*Home page - END*/
+
+.login-customn-position {
+    position: absolute !important;
+    top: 45%;
+    transform: translateY(-50%);
+}
+
+.register-customn-position {
+    position: absolute !important;
+    top: 45%;
+    transform: translateY(-50%);
+}
+
+.external-register-customn-position {
+    position: absolute !important;
+    top: 42%;
+    transform: translateY(-50%);
+}
+
+/*Reset Password page START*/
+.main-container-reset-password {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+}
+
+/*Reset Password page END*/

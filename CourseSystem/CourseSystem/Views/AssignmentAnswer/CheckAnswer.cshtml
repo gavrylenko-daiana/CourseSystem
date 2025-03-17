@@ -1,0 +1,110 @@
+﻿@using UI.ViewModels
+@using Westwind.AspNetCore.Markdown;
+@model CheckAnswerViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no" />
+    <meta name="description"
+          content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI." />
+    <meta name="keywords" content="Semantic-UI, Theme, Design, Template" />
+    <meta name="author" content="PPType" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments</title>
+
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add Font Awesome CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+
+        .cover-card:hover {
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: #4682B4 1px solid;
+        }
+
+        .ui.container {
+            margin-top: 20px;
+        }
+        
+        .ui.form {
+            max-width: 300px; /* Adjust this value to your preference */
+            margin: 0 auto; /* Center the form horizontally */
+        }
+    </style>
+</head>
+<body>
+    @if (TempData["Error"] != null)
+    {
+        <div class="ui negative message">
+            <p><b>Sorry!</b> - @TempData["Error"]</p>
+        </div>
+    }
+    <div class="ui container" style="display: flex; align-items: center;">
+        <div class="ui card" style="width: 100%;">
+            <div class="content">
+                <section>
+                    <div class="ui centered aligned grid"> 
+                        <div class="sixteen wide column mt-3 mb-1 bg-light centered aligned grid">
+                            <h5 class="text-uppercase">@Model.AppUser.FirstName @Model.AppUser.LastName</h5>
+                            <p>@Model.AppUser.Email</p>
+                        </div>
+                    </div>
+                    <div class="ui stackable grid center aligned">
+                        <div class="ten wide column mb-4">
+                            <h5 class="ui header">Answer files:</h5>
+                            <div class="ui three cards">
+                                @if (Model.AssignmentAnswers.Any())
+                                {
+                                    @foreach (var answer in Model.AssignmentAnswers)
+                                    {
+                                        <div class="ui card">
+                                            <div class="content">
+                                                <div class="header">
+                                                    <a class="" href="@Url.Action("Index", "AssignmentAnswer", new { fileId = answer.Id })">@answer.Name</a>
+                                                </div>
+                                                <div class="meta">
+                                                    <p>Submission time: @answer.CreationTime.ToString("dddd, dd MMMM yyyy HH:mm")</p>
+                                                </div>
+                                                @if (answer.Text != null)
+                                                {
+                                                    <div class="description">
+                                                        <h6>Answer description: </h6>
+                                                        <div>@Markdown.ParseHtmlString(answer.Text)</div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <form method="post" asp-controller="AssignmentAnswer" asp-action="ChangeGrade" class="ui form centered aligned grid">
+                    <div class="field">
+                        <label asp-for="Grade">Grade</label>
+                        <input asp-for="Grade" type="text">
+                        <span asp-validation-for="Grade" class="text-danger"></span>
+                        <button class="ui primary small button" type="submit" style="margin-top:10px;">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>

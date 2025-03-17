@@ -1,0 +1,119 @@
+@using Core.Models;
+@using System.Web
+@using System.Text
+@model AssignmentAnswer
+
+@{
+    var fileExtension = Model.FileExtension.ToLower();
+    var supportedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".heic" };
+    var supportedTextExtensions = new[] { ".html", ".js", ".css", ".txt", ".cs", ".cpp" };
+    var supportedVideoExtensions = new[] { ".mp4", ".avi", ".mkv", ".mov" };
+    var supportedPdfExtensions = new[] { ".pdf" };
+    var supportedWordExtensions = new[] { ".doc", ".docx" };
+    var supportedArchiveExtensions = new[] { ".zip", ".rar" };
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        .ui.fluid.video {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui container" style="margin-top: 20px;">
+        <h3 class="ui dividing centered header">File Details: @Model.Name</h3>
+
+        @if (supportedImageExtensions.Contains(fileExtension))
+        {
+            <div class="ui centered segment">
+                <img src="@Model.Url" alt="Image" class="ui centered image">
+            </div>
+        }
+        else if (supportedVideoExtensions.Contains(fileExtension))
+        {
+            <div class="ui centered segment">
+                <video class="ui fluid video" controls>
+                    <source src="@Model.Url" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        }
+        else if (supportedPdfExtensions.Contains(fileExtension))
+        {
+            var urlPdf = Model.Url.Replace("dl=0", "raw=1").Replace("dl.dropboxusercontent.com", "www.dropbox.com");
+
+            <div class="ui embed">
+                <object data="@urlPdf" type="application/pdf" width="100%" height="600px">
+                    <p>Your browser does not support displaying PDF files. You can <a href="@urlPdf">download the file here</a>.</p>
+                </object>
+            </div>
+        }
+        else if (supportedWordExtensions.Contains(fileExtension))
+        {
+            <div class="ui embed">
+                <iframe src="https://view.officeapps.live.com/op/view.aspx?src=@Model.Url" style="width: 100%; height: 600px;"></iframe>
+            </div>
+        }
+        else if (supportedArchiveExtensions.Contains(fileExtension))
+        {
+            <div class="ui centered card">
+                <div class="content">
+                    <p>This is an archive file. You can <a href="@Model.Url">download the file here</a>.</p>
+                </div>
+            </div>
+        }
+        else if (supportedTextExtensions.Contains(fileExtension))
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await httpClient.GetAsync(Model.Url);
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+
+                    <div class="ui segment">
+                        <pre>
+                        <code class="language-@fileExtension">
+                                @Html.Raw(HttpUtility.HtmlEncode(content))
+                                    </code>
+                                </pre>
+                    </div>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+                    <script>
+                        hljs.initHighlightingOnLoad();
+                    </script>
+                }
+                catch (HttpRequestException ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+        }
+        else
+        {
+            <div class="ui centered card">
+                <div class="content">
+                    <p>You can <a href="@Model.Url">download the file here</a>.</p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="ui negative message">
+                <p><b>Sorry!</b> - @TempData["Error"]</p>
+            </div>
+        }
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.7/pdfobject.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+</body>
+</html>

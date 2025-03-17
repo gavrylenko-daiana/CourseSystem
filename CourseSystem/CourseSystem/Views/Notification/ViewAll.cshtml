@@ -1,0 +1,213 @@
+﻿@using BLL.Interfaces;
+@using Core.Helpers;
+@inject IUserService userService;
+@using Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@using X.PagedList.Web.Common
+@model X.PagedList.IPagedList<Notification>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User notifications</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css"/>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js">
+    </script>
+    <style>
+        .ui.container {
+            margin-top: 20px;
+        }
+        
+        #fixedPagination {
+            margin-top: 139px;
+        }
+    </style>
+</head>
+<body>
+@if (TempData["Error"] != null)
+{
+    <div class="ui negative message">
+        <p><b>Sorry!</b> - @TempData["Error"]</p>
+    </div>
+}
+<div class="ui container">
+    <div style="display: flex; align-items: center;">
+        <h3 class="ui header">Your notifications</h3>
+    </div>
+    <div style="margin-top: 10px;">
+        <div class="ui compact menu" style="margin-right: 10px;">
+            <div class="ui simple dropdown item">
+                Sort by
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item">
+                        @if (ViewBag.SortOrder == SortingParam.Created)
+                        {
+                            <a class="text-black" href="@Url.Action("ViewAll", "Notification", new { sortOrder = SortingParam.CreatedDesc, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam })"><i class="fa fa-arrow-down" aria-hidden="true"></i> Recent</a>
+                        }
+                        else
+                        {
+                            <a class="text-black" href="@Url.Action("ViewAll", "Notification", new { sortOrder = SortingParam.Created, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam })"><i class="fa fa-arrow-up" aria-hidden="true"></i> Recent</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ui compact menu" style="margin-right: 10px;">
+            <div class="ui simple dropdown item">
+                Find for: @ViewBag.FindForParam
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <a class="item" href="@Url.Action("ViewAll", "Notification", new { sortOrder = ViewBag.SortOrder, findForFilter = FilterParam.Course })">Course</a>
+                    <a class="item" href="@Url.Action("ViewAll", "Notification", new { sortOrder = ViewBag.SortOrder, findForFilter = FilterParam.Group })">Group</a>
+                    <a class="item" href="@Url.Action("ViewAll", "Notification", new { sortOrder = ViewBag.SortOrder, findForFilter = FilterParam.Assignment })">Assignment</a>
+                </div>
+            </div>
+        </div>
+        @if (ViewBag.FindForParam == FilterParam.Course)
+        {
+            <div class="ui search selection dropdown" style="margin-right: 10px;">
+                <input type="hidden" name="courseId">
+                <i class="dropdown icon"></i>
+                <div class="default text">Select Course</div>
+                <div class="menu">
+                    @{
+                        var currentUserResult = await userService.GetCurrentUser(User);
+
+                        if (currentUserResult.IsSuccessful)
+                        {
+                            foreach (var course in currentUserResult.Data.UserCourses.Select(uc => uc.Course))
+                            {
+                                <a class="item" href="@Url.Action("ViewAll", "Notification", new { findForId = course.Id, findForFilter = FilterParam.Course, currentAccessFilter = ViewBag.CurrentAccessFilter, sortOrder = ViewBag.SortOrder })">@course.Name</a>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        }
+        else if (ViewBag.FindForParam == FilterParam.Group)
+        {
+            <div class="ui search selection dropdown" style="margin-right: 10px;">
+                <input type="hidden" name="courseId">
+                <i class="dropdown icon"></i>
+                <div class="default text">Select Group</div>
+                <div class="menu">
+                    @{
+                        var currentUserResult = await userService.GetCurrentUser(User);
+
+                        if (currentUserResult.IsSuccessful)
+                        {
+                            foreach (var group in currentUserResult.Data.UserGroups.Select(uc => uc.Group))
+                            {
+                                <a class="item" href="@Url.Action("ViewAll", "Notification", new { findForId = group.Id, findForFilter = FilterParam.Group, currentAccessFilter = ViewBag.CurrentAccessFilter, sortOrder = ViewBag.SortOrder })">@group.Name</a>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        }
+        else if (ViewBag.FindForParam == FilterParam.Assignment)
+        {
+            <div class="ui search selection dropdown" style="margin-right: 10px;">
+                <input type="hidden" name="courseId">
+                <i class="dropdown icon"></i>
+                <div class="default text">Select Assignment</div>
+                <div class="menu">
+                    @{
+                        var currentUserResult = await userService.GetCurrentUser(User);
+
+                        if (currentUserResult.IsSuccessful)
+                        {
+                            foreach (var assignment in currentUserResult.Data.UserGroups.Select(uc => uc.Group).SelectMany(g => g.Assignments))
+                            {
+                                <a class="item" href="@Url.Action("ViewAll", "Notification", new { findForId = assignment.Id, findForFilter = FilterParam.Assignment, currentAccessFilter = ViewBag.CurrentAccessFilter, sortOrder = ViewBag.SortOrder })">@assignment.Name</a>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>
+    <hr class="ui divider">
+    <div class="card-body mt-2">
+        <table class="table table-striped">
+            <thead style="background-color: #1b6054; color: #fff;">
+            <tr>
+                <th>Notification</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var notification in Model)
+            {
+                <tr>
+                    <td>
+                        @if (!notification.IsRead)
+                        {
+                            <a href="@Url.Action("NotificationDetails", "Notification", new { notification.Id })" class="notification-link unread text-decoration-underline">@notification.Name</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("NotificationDetails", "Notification", new { notification.Id })" class="notification-link text-black">@notification.Name</a>
+                        }
+                    </td>
+                    <td>@notification.Created.ToString("g")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <br/>
+    <div class="ui container add-course-button" style="display: flex; justify-content: center; align-items: center;">
+        @if (Model.PageCount > 1)
+        {
+            if (Model.Count < Model.PageSize)
+            {
+                <div id="fixedPagination" class="pagination-container">
+                    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                    <div>
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new { page = page, sortOrder = ViewBag.SortOrder, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam }),
+                            new PagedListRenderOptions
+                            {
+                                LiElementClasses = new string[] { "page-item" },
+                                PageClasses = new string[] { "page-link" },
+                                MaximumPageNumbersToDisplay = 3
+                            })
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="pagination-container">
+                    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                    <div>
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("ViewAll", new { page = page, sortOrder = ViewBag.SortOrder, findForId = ViewBag.FindForId, findForFilter = ViewBag.FindForParam }),
+                            new PagedListRenderOptions
+                            {
+                                LiElementClasses = new string[] { "page-item" },
+                                PageClasses = new string[] { "page-link" },
+                                MaximumPageNumbersToDisplay = 3
+                            })
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+<script>
+        $('.ui.dropdown').dropdown();
+    </script>
+</body>
+</html>

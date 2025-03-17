@@ -1,0 +1,106 @@
+@using UI.ViewModels
+@model EditUserViewModel
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+</head>
+<body>
+<div class="ui container" style="margin-top: 20px;">
+    <div class="ui centered card" style="width: 700px;">
+        <div class="content">
+            <div class="header">
+                User Profile Settings
+            </div>
+        </div>
+        @if (TempData["Error"] != null)
+        {
+            <div class="ui container">
+                <div class="ui negative message">
+                    <span>@TempData["Error"]</span>
+                </div>
+            </div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <p class="text-success">@TempData["SuccessMessage"]</p>
+        }
+        <div class="content ui center aligned segment">
+            @if (@Model.ProfileImage != null)
+            {
+                <div class="ui centered rounded image" style="margin-top: 10px;">
+                    <img src="@Model.ProfileImage.Url" alt="@Model.ProfileImage.Name" class="ui rounded image" style="width: 200px; height: 200px;">
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <a class="ui small basic red button" href="@Url.Action("DeleteProfileImage", "User")">
+                        <i class="trash icon"></i> Delete Icon
+                    </a>
+                </div>
+            }
+        </div>    
+        
+        <div class="content">
+            <form method="post" asp-controller="User" asp-action="Edit" enctype="multipart/form-data">
+                <input type="hidden" asp-for="Email" value="@Model.Email" />
+                <div class="form-group">
+                    <label asp-for="FirstName" class="control-label"></label>
+                    <input asp-for="FirstName" class="form-control" placeholder="FirstName">
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="LastName" class="control-label"></label>
+                    <input asp-for="LastName" class="form-control" placeholder="LastName">
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="BirthDate" class="control-label"></label>
+                    <input asp-for="BirthDate" class="form-control" placeholder="BirthDate" type="date" min="@DateTime.Now.AddYears(-80).ToString("yyyy-MM-dd")" max="@DateTime.Now.AddYears(-6).ToString("yyyy-MM-dd")">
+                    <span asp-validation-for="BirthDate" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="University" class="control-label"></label>
+                    <input asp-for="University" class="form-control" placeholder="University">
+                    <span asp-validation-for="University" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Telegram" class="control-label"></label>
+                    <input asp-for="Telegram" class="form-control" placeholder="Telegram">
+                    <span asp-validation-for="Telegram" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="GitHub" class="control-label"></label>
+                    <input asp-for="GitHub" class="form-control" placeholder="GitHub">
+                    <span asp-validation-for="GitHub" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="NewProfileImage" class="control-label"></label>
+                    <input asp-for="NewProfileImage" type="file" accept="image/*" class="form-control">
+                    <span asp-validation-for="NewProfileImage" class="text-danger"></span>
+                </div>
+
+                <div class="py-2">
+                    <div class="form-group">
+                        <div class="py-2">
+                            <button type="submit" class="ui edit-button button">Edit</button>
+                            <a asp-controller="User" asp-action="Index" class="ui button">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="ui message">Forgot password?<a asp-controller="User" asp-action="EditPassword"> Change password</a></div>
+            <div class="ui message">Update mail?<a asp-controller="User" asp-action="EditEmail"> Change mail</a></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
