@@ -78,9 +78,13 @@
 
                     @{
                         var materialsGeneral = await EducationMaterialService.GetAllMaterialByAccessAsync(MaterialAccess.General, SortingParam.UploadTimeDesc);
-                        var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
+                        
+                        if (materialsGeneral.Data is not null)
+                        {
+                            var materialIds = string.Join(" ", materialsGeneral.Data.Select(m => m.Id));
 
-                        <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
+                            <a asp-action="IndexMaterials" asp-controller="EducationMaterial" asp-route-materialIds="@materialIds" asp-route-sortOrder="UploadTimeDesc">Education Materials</a>
+                        }
                     }
                 </div>
             </div>
